@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { pool } from '../../lib/db';
 
 interface Song {
@@ -5,6 +6,7 @@ interface Song {
   title: string;
   is_segued: boolean;
   performance_order: number;
+  notes?: string | null;
 }
 
 interface Set {
@@ -57,6 +59,7 @@ export default async function ShowsPage() {
     SELECT 
       sets.id as set_id, sets.show_id, sets.set_order,
       performances.id as performance_id, performances.song_id, performances.performance_order, performances.is_segued,
+      performances.notes as notes,
       songs.title as song_title
     FROM sets
     LEFT JOIN performances ON performances.set_id = sets.id
@@ -81,12 +84,14 @@ export default async function ShowsPage() {
       };
       setsByShow[row.show_id].push(set);
     }
+    // When building set.songs, include notes from row.notes if available
     if (row.performance_id && row.song_title) {
       set.songs.push({
         id: row.performance_id,
         title: row.song_title,
         is_segued: row.is_segued,
         performance_order: row.performance_order,
+        notes: row.notes || null,
       });
     }
   });
@@ -113,7 +118,9 @@ export default async function ShowsPage() {
         {shows.map((show) => (
           <div key={show.id} className="border p-4 rounded">
             <div className="font-semibold">
-              {show.month && show.day ? `${show.month}/${show.day}/` : show.month ? `${show.month}/` : ''}{show.year}
+              <Link href={`/shows/${show.id}`} className="underline hover:text-blue-700">
+                {show.month && show.day ? `${show.month}/${show.day}/` : show.month ? `${show.month}/` : ''}{show.year}
+              </Link>
             </div>
             <div className="text-gray-600">
               {show.venue_name} - {show.city}{show.state_province ? `, ${show.state_province}` : ''}
@@ -128,7 +135,7 @@ export default async function ShowsPage() {
                     <span className="font-bold">{`Set ${set.set_order}`}: </span>
                     {set.songs.map((song, idx) => (
                       <span key={song.id}>
-                        {song.title}
+                        {song.title}{song.notes ? '*' : ''}
                         {idx < set.songs.length - 1 ? (song.is_segued ? ' > ' : ', ') : ''}
                       </span>
                     ))}
