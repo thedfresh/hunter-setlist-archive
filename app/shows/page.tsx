@@ -113,7 +113,7 @@ export default async function ShowsPage() {
 
   return (
     <main className="container mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-4">Shows</h1>
+      <h1 className="text-3xl font-bold mb-4">Robert Hunter Setlists</h1>
       <div className="space-y-6">
         {shows.map((show) => (
           <div key={show.id} className="border p-4 rounded">
