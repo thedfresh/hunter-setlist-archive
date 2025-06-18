@@ -20,4 +20,4 @@ jobs:
           git pull origin main
           npm install --omit=dev
           npm run build
-          pm2 restart hunter-archive
+          pm2 reload hunter-archive || pm2 start npm --name "hunter-archive" -- start
