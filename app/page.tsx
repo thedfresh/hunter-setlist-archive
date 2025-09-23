@@ -6,7 +6,7 @@ export default function Home() {
           Hunter Setlist Archive
         </h1>
         <p className="text-center text-lg">
-          Robert Hunter performance database - v2.0 rebuild in progress
+          Robert Hunter performance database - v2.0 rebuild in progress (new updates coming soon!)
         </p>
       </div>
     </main>
