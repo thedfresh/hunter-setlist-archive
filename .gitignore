@@ -45,3 +45,4 @@ next-env.d.ts
 
 # misc
 CONTEXT.md
+/app/generated/prisma
