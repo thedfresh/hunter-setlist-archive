@@ -72,62 +72,115 @@ export default function EventsAdminPage() {
           <div className="text-center py-8 text-gray-500">No events found.</div>
         ) : (
           <div className="space-y-8">
-            {filtered.map((e) => (
-              <div key={e.id} className="border-b pb-6 mb-6">
-                <div className="flex items-center gap-6 mb-2">
-                  <div className="font-semibold text-lg">{e.displayDate || `${e.year}-${e.month || ''}-${e.day || ''}`}</div>
-                  <div className="text-gray-700">
-                    {e.venue ? (
-                      <span>
-                        {e.venue.name}
-                        {e.venue.city ? `, ${e.venue.city}` : ""}
-                        {e.venue.stateProvince ? `, ${e.venue.stateProvince}` : ""}
-                        {e.venue.country ? `, ${e.venue.country}` : ""}
-                      </span>
-                    ) : "—"}
+            {filtered.map((e) => {
+              // Collect unique guests for footnotes
+              const guestMap = new Map(); // key: "name|instrument", value: {name, instrument, idx}
+              let guestSeq = 1;
+              // For each set/performance, collect guests
+              e.sets?.forEach((set: any) => {
+                set.performances?.forEach((perf: any) => {
+                  perf.performanceMusicians?.forEach((pm: any) => {
+                    if (pm.musician && pm.instrument) {
+                      const key = `${pm.musician.name}|${pm.instrument.name}`;
+                      if (!guestMap.has(key)) {
+                        guestMap.set(key, { name: pm.musician.name, instrument: pm.instrument.name, idx: guestSeq });
+                        guestSeq++;
+                      }
+                    }
+                  });
+                });
+              });
+              // Helper to get guest footnote indices for a performance
+              function getGuestIndices(perf: any) {
+                const indices: number[] = [];
+                perf.performanceMusicians?.forEach((pm: any) => {
+                  if (pm.musician && pm.instrument) {
+                    const key = `${pm.musician.name}|${pm.instrument.name}`;
+                    if (guestMap.has(key)) {
+                      indices.push(guestMap.get(key).idx);
+                    }
+                  }
+                });
+                // Only unique indices per performance
+                return Array.from(new Set(indices));
+              }
+              return (
+                <div key={e.id} className="border-b pb-6 mb-6">
+                  <div className="flex items-center gap-6 mb-2">
+                    <div className="font-semibold text-lg">{e.displayDate || `${e.year}-${e.month || ''}-${e.day || ''}`}</div>
+                    <div className="text-gray-700">
+                      {e.venue ? (
+                        <span>
+                          {e.venue.name}
+                          {e.venue.city ? `, ${e.venue.city}` : ""}
+                          {e.venue.stateProvince ? `, ${e.venue.stateProvince}` : ""}
+                          {e.venue.country ? `, ${e.venue.country}` : ""}
+                        </span>
+                      ) : "—"}
+                    </div>
+                    <Link href={`/admin/events/${e.id}`}>
+                      <button className="bg-blue-600 text-white font-semibold py-1 px-4 rounded-md shadow hover:bg-blue-700 transition">Edit</button>
+                    </Link>
                   </div>
-                  <Link href={`/admin/events/${e.id}`}>
-                    <button className="bg-blue-600 text-white font-semibold py-1 px-4 rounded-md shadow hover:bg-blue-700 transition">Edit</button>
-                  </Link>
+                  {/* Sets and Performances */}
+                  {e.sets && e.sets.length > 0 && (
+                    <div className="pl-4">
+                      {e.sets.sort((a: any, b: any) => a.position - b.position).map((set: any) => (
+                        <div key={set.id} className="mb-2">
+                          <span className="font-bold mr-2">{set.setType?.displayName || set.setType?.name || "Set"}:</span>
+                          {set.performances && set.performances.length > 0 ? (
+                            set.performances
+                              .sort((a: any, b: any) => a.performanceOrder - b.performanceOrder)
+                              .map((perf: any, idx: number) => {
+                                const isUncertain = perf.isUncertain;
+                                const songLink = `/admin/songs/${perf.song?.id}`;
+                                let display = (
+                                  <Link href={songLink} className={isUncertain ? "text-gray-400" : "text-blue-700 hover:underline"}>
+                                    {perf.song?.title || "[Untitled]"}
+                                  </Link>
+                                );
+                                // Truncation/segue notation
+                                if (perf.isTruncatedStart) display = <><span className="text-gray-500">//</span> {display}</>;
+                                if (perf.isTruncatedEnd) display = <>{display} <span className="text-gray-500">//</span></>;
+                                if (perf.seguesInto) {
+                                  const arrowClass = isUncertain ? "text-gray-400" : "text-blue-700";
+                                  display = <>{display} <span className={arrowClass}>&gt;</span></>;
+                                }
+                                // Guest footnote indicators
+                                const guestIndices = getGuestIndices(perf);
+                                // Add comma if not seguesInto, not truncated end, and not last song
+                                const isLast = idx === set.performances.length - 1;
+                                const needsComma = !perf.seguesInto && !perf.isTruncatedEnd && !isLast;
+                                return (
+                                  <span key={perf.id} className="mr-2">
+                                    {display}
+                                    {guestIndices.length > 0 && guestIndices.map(i => (
+                                      <sup key={i} style={{ fontSize: "0.75em", top: "-0.5em", position: "relative" }}>[{i}]</sup>
+                                    ))}
+                                    {needsComma && ","}
+                                  </span>
+                                );
+                              })
+                          ) : (
+                            <span className="text-gray-400 italic">No performances</span>
+                          )}
+                        </div>
+                      ))}
+                      {/* Guest footnotes below all sets */}
+                      {guestMap.size > 0 && (
+                        <div className="mt-4 text-sm text-gray-700">
+                          {Array.from(guestMap.values()).map(g => (
+                            <div key={g.idx} className="mb-1">
+                              <span className="font-semibold">[{g.idx}]</span> {g.name} on {g.instrument}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
-                {/* Sets and Performances */}
-                {e.sets && e.sets.length > 0 && (
-                  <div className="pl-4">
-                    {e.sets.sort((a: any, b: any) => a.position - b.position).map((set: any) => (
-                      <div key={set.id} className="mb-2">
-                        <span className="font-bold mr-2">{set.setType?.displayName || set.setType?.name || "Set"}:</span>
-                        {set.performances && set.performances.length > 0 ? (
-                          set.performances
-                            .sort((a: any, b: any) => a.performanceOrder - b.performanceOrder)
-                            .map((perf: any, idx: number) => {
-                              const isUncertain = perf.isUncertain;
-                              const songLink = `/admin/songs/${perf.song?.id}`;
-                              let display = (
-                                <Link href={songLink} className={isUncertain ? "text-gray-400" : "text-blue-700 hover:underline"}>
-                                  {perf.song?.title || "[Untitled]"}
-                                </Link>
-                              );
-                              // Truncation/segue notation
-                              if (perf.isTruncatedStart) display = <><span className="text-gray-500">//</span> {display}</>;
-                              if (perf.isTruncatedEnd) display = <>{display} <span className="text-gray-500">//</span></>;
-                              if (perf.seguesInto) {
-                                const arrowClass = isUncertain ? "text-gray-400" : "text-blue-700";
-                                display = <>{display} <span className={arrowClass}>&gt;</span></>;
-                              }
-                              // Add comma if not seguesInto, not truncated end, and not last song
-                              const isLast = idx === set.performances.length - 1;
-                              const needsComma = !perf.seguesInto && !perf.isTruncatedEnd && !isLast;
-                              return <span key={perf.id} className="mr-2">{display}{needsComma && ","}</span>;
-                            })
-                        ) : (
-                          <span className="text-gray-400 italic">No performances</span>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
