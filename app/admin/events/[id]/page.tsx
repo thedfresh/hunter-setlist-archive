@@ -1,4 +1,501 @@
 "use client";
+// --- Performance Management Components ---
+function PerformanceForm({ setId, songs, musicians, instruments, performances, editingPerformance, onClose, onSaved }: any) {
+  const [form, setForm] = useState({
+    songId: editingPerformance?.song?.id || "",
+    newSongTitle: "",
+    performanceOrder:
+      editingPerformance?.performanceOrder ||
+      (performances.length > 0
+        ? Math.max(...performances.map((p: any) => p.performanceOrder)) + 1
+        : 1),
+    seguesInto: editingPerformance?.seguesInto || false,
+    isTruncatedStart: editingPerformance?.isTruncatedStart || false,
+    isTruncatedEnd: editingPerformance?.isTruncatedEnd || false,
+    hasCuts: editingPerformance?.hasCuts || false,
+    isPartial: editingPerformance?.isPartial || false,
+    isUncertain: editingPerformance?.isUncertain || false,
+    notes: editingPerformance?.notes || "",
+    guestMusicians:
+      editingPerformance?.performanceMusicians?.map((pm: any) => ({
+        musicianId: pm.musician.id,
+        instrumentId: pm.instrument?.id || "",
+      })) || [],
+  });
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [submitting, setSubmitting] = useState(false);
+  const [songSearch, setSongSearch] = useState("");
+  const filteredSongs = songs.filter((s: any) =>
+    s.title.toLowerCase().includes(songSearch.toLowerCase())
+  );
+
+  function validate() {
+    const newErrors: { [key: string]: string } = {};
+    if (!form.songId && !form.newSongTitle)
+      newErrors.songId = "Select a song or enter a new title.";
+    return newErrors;
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    const newErrors = validate();
+    if (Object.keys(newErrors).length) {
+      setErrors(newErrors);
+      return;
+    }
+    setSubmitting(true);
+    let songId = form.songId;
+    if (!songId && form.newSongTitle) {
+      // Create new song
+      const res = await fetch("/api/songs", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title: form.newSongTitle }),
+      });
+      const data = await res.json();
+      if (res.ok && data.song) {
+        songId = data.song.id;
+      } else {
+        setErrors({ songId: "Failed to create song." });
+        setSubmitting(false);
+        return;
+      }
+    }
+    const payload = {
+      songId: Number(songId),
+      performanceOrder: Number(form.performanceOrder),
+      seguesInto: !!form.seguesInto,
+      isTruncatedStart: !!form.isTruncatedStart,
+      isTruncatedEnd: !!form.isTruncatedEnd,
+      hasCuts: !!form.hasCuts,
+      isPartial: !!form.isPartial,
+      isUncertain: !!form.isUncertain,
+      notes: form.notes,
+      guestMusicians: form.guestMusicians,
+    };
+    let res;
+    if (editingPerformance) {
+      res = await fetch(`/api/sets/${setId}/performances/${editingPerformance.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+    } else {
+      res = await fetch(`/api/sets/${setId}/performances`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+    }
+    if (res.ok) {
+      onSaved();
+    } else {
+      setErrors({ form: "Failed to save performance." });
+    }
+    setSubmitting(false);
+  }
+
+  function handleGuestMusicianChange(idx: number, field: string, value: any) {
+    setForm((f) => ({
+      ...f,
+      guestMusicians: f.guestMusicians.map((gm: { musicianId: string; instrumentId: string }, i: number) =>
+        i === idx ? { ...gm, [field]: value } : gm
+      ),
+    }));
+  }
+
+  function addGuestMusician() {
+    setForm((f) => ({
+      ...f,
+      guestMusicians: [...f.guestMusicians, { musicianId: "", instrumentId: "" }],
+    }));
+  }
+
+  function removeGuestMusician(idx: number) {
+    setForm((f) => ({
+      ...f,
+      guestMusicians: f.guestMusicians.filter((_: { musicianId: string; instrumentId: string }, i: number) => i !== idx),
+    }));
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+  <div className="bg-white rounded-xl shadow-lg p-8 max-w-5xl w-full mx-auto">
+        <h3 className="text-lg font-bold mb-4">
+          {editingPerformance ? "Edit Performance" : "Add Performance"}
+        </h3>
+        <form className="space-y-4" onSubmit={handleSubmit}>
+          {/* Song selection */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Song<span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              placeholder="Search song..."
+              value={songSearch}
+              onChange={(e) => setSongSearch(e.target.value)}
+              className="w-full border rounded-md px-3 py-2 mb-2"
+            />
+            <select
+              name="songId"
+              value={form.songId}
+              onChange={(e) => setForm((f) => ({ ...f, songId: e.target.value, newSongTitle: "" }))}
+              className={`w-full border rounded-md px-3 py-2 ${errors.songId ? "border-red-500" : "border-gray-300"}`}
+            >
+              <option value="">Select song</option>
+              {filteredSongs.map((s: any) => (
+                <option key={s.id} value={s.id}>
+                  {s.title}
+                </option>
+              ))}
+            </select>
+            <div className="mt-2">
+              <input
+                type="text"
+                placeholder="Or enter new song title"
+                value={form.newSongTitle}
+                onChange={(e) => setForm((f) => ({ ...f, newSongTitle: e.target.value, songId: "" }))}
+                className="w-full border rounded-md px-3 py-2"
+              />
+            </div>
+            {errors.songId && <p className="text-red-500 text-xs mt-1">{errors.songId}</p>}
+          </div>
+          {/* Performance order */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Order<span className="text-red-500">*</span>
+            </label>
+            <input
+              type="number"
+              name="performanceOrder"
+              value={form.performanceOrder}
+              min={1}
+              onChange={(e) => setForm((f) => ({ ...f, performanceOrder: e.target.value }))}
+              className="w-full border rounded-md px-3 py-2"
+              required
+            />
+          </div>
+          {/* Musical notation checkboxes */}
+          <div className="flex flex-wrap gap-4">
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={form.seguesInto}
+                onChange={(e) => setForm((f) => ({ ...f, seguesInto: e.target.checked }))}
+                className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+              />
+              <span className="text-sm text-gray-700">Segues Into</span>
+            </label>
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={form.isTruncatedStart}
+                onChange={(e) => setForm((f) => ({ ...f, isTruncatedStart: e.target.checked }))}
+                className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+              />
+              <span className="text-sm text-gray-700">Truncated Start</span>
+            </label>
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={form.isTruncatedEnd}
+                onChange={(e) => setForm((f) => ({ ...f, isTruncatedEnd: e.target.checked }))}
+                className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+              />
+              <span className="text-sm text-gray-700">Truncated End</span>
+            </label>
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={form.hasCuts}
+                onChange={(e) => setForm((f) => ({ ...f, hasCuts: e.target.checked }))}
+                className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+              />
+              <span className="text-sm text-gray-700">Has Cuts</span>
+            </label>
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={form.isPartial}
+                onChange={(e) => setForm((f) => ({ ...f, isPartial: e.target.checked }))}
+                className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+              />
+              <span className="text-sm text-gray-700">Partial</span>
+            </label>
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={form.isUncertain}
+                onChange={(e) => setForm((f) => ({ ...f, isUncertain: e.target.checked }))}
+                className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+              />
+              <span className="text-sm text-gray-700">Uncertain</span>
+            </label>
+          </div>
+          {/* Guest musicians */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Guest Musicians
+            </label>
+            {form.guestMusicians.map((gm: { musicianId: string; instrumentId: string }, idx: number) => (
+              <div key={idx} className="flex gap-2 mb-2">
+                <select
+                  value={gm.musicianId}
+                  onChange={(e) => handleGuestMusicianChange(idx, "musicianId", e.target.value)}
+                  className="border rounded-md px-2 py-1"
+                >
+                  <option value="">Musician</option>
+                  {musicians.map((m: any) => (
+                    <option key={m.id} value={m.id}>
+                      {m.name}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  value={gm.instrumentId}
+                  onChange={(e) => handleGuestMusicianChange(idx, "instrumentId", e.target.value)}
+                  className="border rounded-md px-2 py-1"
+                >
+                  <option value="">Instrument</option>
+                  {instruments.map((i: any) => (
+                    <option key={i.id} value={i.id}>
+                      {i.name}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  className="text-red-600 px-2"
+                  onClick={() => removeGuestMusician(idx)}
+                >
+                  Remove
+                </button>
+              </div>
+            ))}
+            <button
+              type="button"
+              className="bg-gray-200 text-gray-800 px-3 py-1 rounded shadow hover:bg-gray-300"
+              onClick={addGuestMusician}
+            >
+              Add Guest
+            </button>
+          </div>
+          {/* Notes */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Notes
+            </label>
+            <textarea
+              name="notes"
+              value={form.notes}
+              onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))}
+              className="w-full border rounded-md px-3 py-2"
+              rows={2}
+            />
+          </div>
+          {errors.form && <p className="text-red-500 text-xs mt-1">{errors.form}</p>}
+          <div className="flex gap-2 mt-4">
+            <button
+              type="submit"
+              className="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700"
+              disabled={submitting}
+            >
+              {submitting ? "Saving..." : "Save"}
+            </button>
+            <button
+              type="button"
+              className="bg-gray-200 text-gray-800 px-4 py-2 rounded shadow hover:bg-gray-300"
+              onClick={onClose}
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+function SetPerformancesSection({ set, songs, musicians, instruments, onPerformancesChanged }: any) {
+  const [performances, setPerformances] = useState<Performance[]>([]);
+  const [showPerformanceForm, setShowPerformanceForm] = useState(false);
+  const [editingPerformance, setEditingPerformance] = useState<Performance | null>(null);
+
+  useEffect(() => {
+    async function fetchPerformances() {
+      const res = await fetch(`/api/sets/${set.id}/performances`);
+      const data = await res.json();
+      setPerformances(data.performances || []);
+    }
+    fetchPerformances();
+  }, [set.id, showPerformanceForm]);
+
+  async function handleReorder(performanceId: number, direction: "up" | "down") {
+    const idx = performances.findIndex((p) => p.id === performanceId);
+    if (idx === -1) return;
+    const targetIdx = direction === "up" ? idx - 1 : idx + 1;
+    if (targetIdx < 0 || targetIdx >= performances.length) return;
+    const updated = [...performances];
+    // Swap orders
+    const tempOrder = updated[idx].performanceOrder;
+    updated[idx].performanceOrder = updated[targetIdx].performanceOrder;
+    updated[targetIdx].performanceOrder = tempOrder;
+    // Update both in backend
+    await Promise.all([
+      fetch(`/api/sets/${set.id}/performances/${updated[idx].id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updated[idx]),
+      }),
+      fetch(`/api/sets/${set.id}/performances/${updated[targetIdx].id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updated[targetIdx]),
+      }),
+    ]);
+    setPerformances([...updated]);
+    if (onPerformancesChanged) onPerformancesChanged();
+  }
+
+  async function handleDelete(performanceId: number) {
+    if (!confirm("Delete this performance?")) return;
+    await fetch(`/api/sets/${set.id}/performances/${performanceId}`, {
+      method: "DELETE",
+    });
+    setPerformances(performances.filter((p) => p.id !== performanceId));
+    if (onPerformancesChanged) onPerformancesChanged();
+  }
+
+  return (
+    <div className="mb-8">
+      <h3 className="text-lg font-semibold mb-2">Performances</h3>
+      <table className="w-full text-left border-collapse mb-4">
+        <thead>
+          <tr className="bg-gray-100">
+            <th className="py-2 px-4 font-semibold">Order</th>
+            <th className="py-2 px-4 font-semibold">Song</th>
+            <th className="py-2 px-4 font-semibold">Notation</th>
+            <th className="py-2 px-4 font-semibold">Guest Musicians</th>
+            <th className="py-2 px-4 font-semibold">Notes</th>
+            <th className="py-2 px-4 font-semibold">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {performances
+            .sort((a, b) => a.performanceOrder - b.performanceOrder)
+            .map((p, idx) => (
+              <tr key={p.id} className="border-b">
+                <td className="py-2 px-4 flex gap-2 items-center">
+                  {p.performanceOrder}
+                  <button
+                    className="text-blue-600 px-1"
+                    disabled={idx === 0}
+                    onClick={() => handleReorder(p.id, "up")}
+                  >
+                    ↑
+                  </button>
+                  <button
+                    className="text-blue-600 px-1"
+                    disabled={idx === performances.length - 1}
+                    onClick={() => handleReorder(p.id, "down")}
+                  >
+                    ↓
+                  </button>
+                </td>
+                <td className="py-2 px-4">{p.song.title}</td>
+                <td className="py-2 px-4">
+                  <div className="flex gap-2">
+                    {p.isUncertain && (
+                      <span className="bg-yellow-200 text-yellow-900 px-2 py-1 rounded text-xs font-semibold" title="Uncertain">Uncertain</span>
+                    )}
+                    {p.seguesInto && (
+                      <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">
+                        Segue
+                      </span>
+                    )}
+                    {p.isTruncatedStart && (
+                      <span className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs">
+                        Trunc. Start
+                      </span>
+                    )}
+                    {p.isTruncatedEnd && (
+                      <span className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs">
+                        Trunc. End
+                      </span>
+                    )}
+                    {p.hasCuts && (
+                      <span className="bg-red-100 text-red-800 px-2 py-1 rounded text-xs">
+                        Cuts
+                      </span>
+                    )}
+                    {p.isPartial && (
+                      <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded text-xs">
+                        Partial
+                      </span>
+                    )}
+                  </div>
+                </td>
+                <td className="py-2 px-4">
+                  {p.performanceMusicians.length > 0 ? (
+                    <ul className="list-disc ml-4">
+                      {p.performanceMusicians.map((pm) => (
+                        <li key={pm.id}>
+                          {pm.musician.name}
+                          {pm.instrument ? ` (${pm.instrument.name})` : ""}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <span className="text-gray-400 italic">—</span>
+                  )}
+                </td>
+                <td className="py-2 px-4">{p.notes || <span className="text-gray-400 italic">—</span>}</td>
+                <td className="py-2 px-4">
+                  <button
+                    className="bg-gray-200 text-gray-800 font-semibold py-1 px-3 rounded-md shadow hover:bg-gray-300 transition mr-2"
+                    onClick={() => {
+                      setEditingPerformance(p);
+                      setShowPerformanceForm(true);
+                    }}
+                  >
+                    Edit
+                  </button>
+                  <button
+                    className="bg-red-600 text-white font-semibold py-1 px-3 rounded-md shadow hover:bg-red-700 transition"
+                    onClick={() => handleDelete(p.id)}
+                  >
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            ))}
+        </tbody>
+      </table>
+      <button
+        className="bg-blue-600 text-white font-semibold py-2 px-4 rounded-md shadow hover:bg-blue-700 transition"
+        onClick={() => {
+          setEditingPerformance(null);
+          setShowPerformanceForm(true);
+        }}
+      >
+        Add Performance
+      </button>
+      {showPerformanceForm && (
+        <PerformanceForm
+          setId={set.id}
+          songs={songs}
+          musicians={musicians}
+          instruments={instruments}
+          performances={performances}
+          editingPerformance={editingPerformance}
+          onClose={() => setShowPerformanceForm(false)}
+          onSaved={() => setShowPerformanceForm(false)}
+        />
+      )}
+    </div>
+  );
+}
 import React, { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
@@ -8,6 +505,24 @@ type Set = {
   position: number;
   notes?: string;
   setType: { id: number; name: string; displayName: string };
+};
+
+type Performance = {
+  id: number;
+  performanceOrder: number;
+  song: { id: number; title: string };
+  seguesInto: boolean;
+  isTruncatedStart: boolean;
+  isTruncatedEnd: boolean;
+  hasCuts: boolean;
+  isPartial: boolean;
+  isUncertain: boolean;
+  notes?: string;
+  performanceMusicians: {
+    id: number;
+    musician: { id: number; name: string };
+    instrument: { id: number; name: string } | null;
+  }[];
 };
 
 function SetForm({ eventId, setTypes, sets, editingSet, onClose, onSaved }: any) {
@@ -145,6 +660,11 @@ type Event = {
 
 
 export default function EventEditPage() {
+  // Performance management state
+  const [songs, setSongs] = useState<any[]>([]);
+  const [musicians, setMusicians] = useState<any[]>([]);
+  const [instruments, setInstruments] = useState<any[]>([]);
+
   const router = useRouter();
   const params = useParams();
   const id = params.id as string;
@@ -177,6 +697,21 @@ export default function EventEditPage() {
   const [editingSet, setEditingSet] = useState<Set | null>(null);
 
   useEffect(() => {
+    // Fetch songs, musicians, instruments for performance forms
+    async function fetchSongMusicianInstrumentData() {
+      const [songsRes, musiciansRes, instrumentsRes] = await Promise.all([
+        fetch("/api/songs"),
+        fetch("/api/musicians"),
+        fetch("/api/instruments"),
+      ]);
+      const songsData = await songsRes.json();
+      const musiciansData = await musiciansRes.json();
+      const instrumentsData = await instrumentsRes.json();
+      setSongs(songsData.songs || []);
+      setMusicians(musiciansData.musicians || []);
+      setInstruments(instrumentsData.instruments || []);
+    }
+    fetchSongMusicianInstrumentData();
     async function fetchEvent() {
       try {
         const [res, allRes] = await Promise.all([
@@ -310,7 +845,7 @@ export default function EventEditPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <div className="max-w-lg w-full bg-white rounded-xl shadow-lg p-8">
+      <div className="max-w-5xl w-full bg-white rounded-xl shadow-lg p-8 mx-auto">
         <h1 className="text-2xl font-bold mb-6 text-gray-800">Edit Event</h1>
         <div className="mb-4 flex justify-between items-center">
           <Link href="/admin/events" className="text-blue-600 hover:underline font-semibold">Back to Events</Link>
@@ -466,33 +1001,47 @@ export default function EventEditPage() {
           </thead>
           <tbody>
             {sets.sort((a, b) => a.position - b.position).map(set => (
-              <tr key={set.id} className="border-b">
-                <td className="py-2 px-4">{set.setType.displayName}</td>
-                <td className="py-2 px-4">{set.position}</td>
-                <td className="py-2 px-4">{set.notes || <span className="text-gray-400 italic">—</span>}</td>
-                <td className="py-2 px-4">
-                  <button
-                    className="bg-gray-200 text-gray-800 font-semibold py-1 px-3 rounded-md shadow hover:bg-gray-300 transition mr-2"
-                    onClick={() => { setEditingSet(set); setShowSetForm(true); }}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    className="bg-red-600 text-white font-semibold py-1 px-3 rounded-md shadow hover:bg-red-700 transition"
-                    onClick={async () => {
-                      if (confirm("Delete this set?")) {
-                        await fetch(`/api/events/${id}/sets/${set.id}`, { method: "DELETE" });
-                        setSets(sets.filter(s => s.id !== set.id));
-                      }
-                    }}
-                  >
-                    Delete
-                  </button>
-                </td>
-              </tr>
+              <React.Fragment key={set.id}>
+                <tr className="border-b">
+                  <td className="py-2 px-4">{set.setType.displayName}</td>
+                  <td className="py-2 px-4">{set.position}</td>
+                  <td className="py-2 px-4">{set.notes || <span className="text-gray-400 italic">—</span>}</td>
+                  <td className="py-2 px-4">
+                    <button
+                      className="bg-gray-200 text-gray-800 font-semibold py-1 px-3 rounded-md shadow hover:bg-gray-300 transition mr-2"
+                      onClick={() => { setEditingSet(set); setShowSetForm(true); }}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      className="bg-red-600 text-white font-semibold py-1 px-3 rounded-md shadow hover:bg-red-700 transition"
+                      onClick={async () => {
+                        if (confirm("Delete this set?")) {
+                          await fetch(`/api/events/${id}/sets/${set.id}`, { method: "DELETE" });
+                          setSets(sets.filter(s => s.id !== set.id));
+                        }
+                      }}
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+                <tr>
+                  <td colSpan={4} className="bg-gray-50 px-4 py-2">
+                    <SetPerformancesSection
+                      set={set}
+                      songs={songs}
+                      musicians={musicians}
+                      instruments={instruments}
+                      onPerformancesChanged={() => {}}
+                    />
+                  </td>
+                </tr>
+              </React.Fragment>
             ))}
-          </tbody>
-        </table>
+           </tbody>
+         </table>
+         {/* Performance management for each set (removed duplicate) */}
         {showSetForm && (
           <SetForm
             eventId={id}
@@ -511,7 +1060,9 @@ export default function EventEditPage() {
           Delete Event
         </button>
         {deleteError && <p className="text-red-500 text-sm mt-2">{deleteError}</p>}
-        <p className="mt-6 text-gray-500 text-xs">Created: {new Date(event.createdAt).toLocaleString()}</p>
+        {event && (
+          <p className="mt-6 text-gray-500 text-xs">Created: {new Date(event.createdAt).toLocaleString()}</p>
+        )}
       </div>
     </div>
   );

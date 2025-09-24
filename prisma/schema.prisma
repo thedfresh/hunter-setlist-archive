@@ -62,7 +62,7 @@ model Musician {
   name        String
   isUncertain Boolean  @default(false) @map("is_uncertain")
   createdAt   DateTime @default(now()) @map("created_at")
-  
+  performanceVocals    Performance[] @relation("PerformanceLeadVocals")
   eventMusicians       EventMusician[]
   performanceMusicians PerformanceMusician[]
   defaultInstruments   MusicianDefaultInstrument[]
@@ -260,6 +260,9 @@ model Performance {
   hunterVocal        Boolean? @map("hunter_vocal")
   hunterGuitar       Boolean? @map("hunter_guitar")
   hunterHarmonica    Boolean? @map("hunter_harmonica")
+  isUncertain        Boolean  @default(false) @map("is_uncertain")
+  leadVocalsId       Int?     @map("lead_vocals_id")
+  leadVocals         Musician? @relation("PerformanceLeadVocals", fields: [leadVocalsId], references: [id])
   notes              String?
   createdAt          DateTime @default(now()) @map("created_at")
   

@@ -6,9 +6,9 @@ const prisma = new PrismaClient();
 import type { NextRequest } from 'next/server';
 type Params = { id: string };
 
-export async function GET(req: NextRequest, { params }: { params: Params }) {
+export async function GET(req: NextRequest, context: { params: { id: string } }) {
   try {
-    const id = Number(params.id);
+  const id = Number(context.params.id);
     if (!id) return NextResponse.json({ error: 'Invalid event id.' }, { status: 400 });
     const event = await prisma.event.findUnique({ where: { id } });
     if (!event) return NextResponse.json({ error: 'Event not found.' }, { status: 404 });
@@ -19,8 +19,9 @@ export async function GET(req: NextRequest, { params }: { params: Params }) {
   }
 }
 
-export async function PUT(req: NextRequest, { params }: { params: Params }) {
+export async function PUT(req: NextRequest, context: { params: Params }) {
   try {
+  const params = await context.params;
     const id = Number(params.id);
     const data = await req.json();
     if (!id || !data.year || isNaN(Number(data.year))) {

@@ -29,8 +29,31 @@ export async function GET() {
       const bands = await prisma.band.findMany({ orderBy: { name: 'asc' } });
       return NextResponse.json({ bands });
     }
-    // Default: return events
-    const events = await prisma.event.findMany({ orderBy: { year: 'desc' } });
+    // Default: return events with sets, setTypes, performances, and songs
+    const events = await prisma.event.findMany({
+      orderBy: { year: 'desc' },
+      include: {
+        venue: true,
+        sets: {
+          include: {
+            setType: true,
+            performances: {
+              include: {
+                song: true,
+                performanceMusicians: {
+                  include: {
+                    musician: true,
+                    instrument: true,
+                  },
+                },
+              },
+              orderBy: { performanceOrder: 'asc' },
+            },
+          },
+          orderBy: { position: 'asc' },
+        },
+      },
+    });
     return NextResponse.json({ events });
   } catch (error) {
     console.error('GET /api/events error:', error);
