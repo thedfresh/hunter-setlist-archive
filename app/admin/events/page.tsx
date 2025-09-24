@@ -41,16 +41,27 @@ export default function EventsAdminPage() {
     fetchEvents();
   }, []);
 
-  const filtered = events.filter((e: Event) =>
-    (e.displayDate || `${e.year}-${e.month || ''}-${e.day || ''}`).toLowerCase().includes(search.toLowerCase())
-  );
+  const filtered = events
+    .slice()
+    .sort((a: any, b: any) => {
+      // Sort by year, then month, then day
+      const ay = Number(a.year), by = Number(b.year);
+      if (ay !== by) return ay - by;
+      const am = Number(a.month || 0), bm = Number(b.month || 0);
+      if (am !== bm) return am - bm;
+      const ad = Number(a.day || 0), bd = Number(b.day || 0);
+      return ad - bd;
+    })
+    .filter((e: Event) =>
+      (e.displayDate || `${e.year}-${e.month || ''}-${e.day || ''}`).toLowerCase().includes(search.toLowerCase())
+    );
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="mb-4 text-center">
         <Link href="/admin" className="text-blue-600 hover:underline font-semibold">Home</Link>
       </div>
-      <div className="max-w-3xl mx-auto bg-white rounded-xl shadow-lg p-8">
+  <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-8">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold text-gray-800">Events</h1>
           <Link href="/admin/events/new">
@@ -107,7 +118,7 @@ export default function EventsAdminPage() {
               return (
                 <div key={e.id} className="border-b pb-6 mb-6">
                   <div className="flex items-center gap-6 mb-2">
-                    <div className="font-semibold text-lg">{e.displayDate || `${e.year}-${e.month || ''}-${e.day || ''}`}</div>
+                    <div className="font-semibold text-lg">{e.displayDate || `${e.year}-${String(e.month || '').padStart(2, '0')}-${String(e.day || '').padStart(2, '0')}`}</div>
                     <div className="text-gray-700">
                       {e.venue ? (
                         <span>
@@ -118,9 +129,11 @@ export default function EventsAdminPage() {
                         </span>
                       ) : "—"}
                     </div>
-                    <Link href={`/admin/events/${e.id}`}>
-                      <button className="bg-blue-600 text-white font-semibold py-1 px-4 rounded-md shadow hover:bg-blue-700 transition">Edit</button>
-                    </Link>
+                    <div className="flex-1 flex justify-end">
+                      <Link href={`/admin/events/${e.id}`}>
+                        <button className="bg-blue-600 text-white font-semibold py-0.5 px-2 rounded shadow hover:bg-blue-700 transition text-sm">Edit</button>
+                      </Link>
+                    </div>
                   </div>
                   {/* Sets and Performances */}
                   {e.sets && e.sets.length > 0 && (
