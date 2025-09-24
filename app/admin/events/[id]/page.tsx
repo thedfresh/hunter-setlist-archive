@@ -130,13 +130,6 @@ function PerformanceForm({ setId, songs, musicians, instruments, performances, e
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Song<span className="text-red-500">*</span>
             </label>
-            <input
-              type="text"
-              placeholder="Search song..."
-              value={songSearch}
-              onChange={(e) => setSongSearch(e.target.value)}
-              className="w-full border rounded-md px-3 py-2 mb-2"
-            />
             <select
               name="songId"
               value={form.songId}
