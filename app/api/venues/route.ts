@@ -1,0 +1,34 @@
+export async function GET() {
+  try {
+    const venues = await prisma.venue.findMany({ orderBy: { name: 'asc' } });
+    return NextResponse.json({ venues });
+  } catch (error) {
+    return NextResponse.json({ error: 'Failed to fetch venues.' }, { status: 500 });
+  }
+}
+import { NextResponse } from 'next/server';
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
+
+export async function POST(req: Request) {
+  try {
+    const data = await req.json();
+    // Basic validation
+    if (!data.name || typeof data.name !== 'string') {
+      return NextResponse.json({ error: 'Venue name is required.' }, { status: 400 });
+    }
+    const venue = await prisma.venue.create({
+      data: {
+        name: data.name,
+        city: data.city || null,
+        stateProvince: data.stateProvince || null,
+        country: data.country || null,
+        isUncertain: !!data.isUncertain,
+      },
+    });
+    return NextResponse.json({ venue }, { status: 201 });
+  } catch (error) {
+    return NextResponse.json({ error: 'Failed to create venue.' }, { status: 500 });
+  }
+}

@@ -65,6 +65,7 @@ model Musician {
   
   eventMusicians       EventMusician[]
   performanceMusicians PerformanceMusician[]
+  defaultInstruments   MusicianDefaultInstrument[]
   songsLeadVocals      Song[]         @relation("LeadVocals")
   
   @@map("musicians")
@@ -78,6 +79,7 @@ model Instrument {
   
   eventMusicians       EventMusician[]
   performanceMusicians PerformanceMusician[]
+  musicianDefaults     MusicianDefaultInstrument[]
   
   @@map("instruments")
 }
@@ -383,4 +385,17 @@ model ShowDialog {
   set   Set?   @relation(fields: [setId], references: [id])
   
   @@map("show_dialog")
+}
+
+model MusicianDefaultInstrument {
+  id           Int        @id @default(autoincrement())
+  musicianId   Int        @map("musician_id")
+  instrumentId Int        @map("instrument_id")
+  createdAt    DateTime   @default(now()) @map("created_at")
+  
+  musician   Musician   @relation(fields: [musicianId], references: [id], onDelete: Cascade)
+  instrument Instrument @relation(fields: [instrumentId], references: [id])
+  
+  @@unique([musicianId, instrumentId])
+  @@map("musician_default_instruments")
 }
