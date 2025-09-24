@@ -5,6 +5,31 @@ const prisma = new PrismaClient();
 
 export async function GET() {
   try {
+    // Check for ?types=... query param
+    const url = new URL('http://localhost' + (typeof window === 'undefined' ? '' : window.location.pathname));
+    // In Next.js API routes, use req.url if available
+    let typesParam = '';
+    if (typeof window === 'undefined') {
+      // @ts-ignore
+      if (typeof arguments[0]?.url === 'string') {
+        const reqUrl = arguments[0].url;
+        const searchParams = new URL(reqUrl, 'http://localhost').searchParams;
+        typesParam = searchParams.get('types') || '';
+      }
+    }
+    if (typesParam === 'eventTypes') {
+      const eventTypes = await prisma.eventType.findMany({ orderBy: { name: 'asc' } });
+      return NextResponse.json({ eventTypes });
+    }
+    if (typesParam === 'contentTypes') {
+      const contentTypes = await prisma.contentType.findMany({ orderBy: { name: 'asc' } });
+      return NextResponse.json({ contentTypes });
+    }
+    if (typesParam === 'bands') {
+      const bands = await prisma.band.findMany({ orderBy: { name: 'asc' } });
+      return NextResponse.json({ bands });
+    }
+    // Default: return events
     const events = await prisma.event.findMany({ orderBy: { year: 'desc' } });
     return NextResponse.json({ events });
   } catch (error) {

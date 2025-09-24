@@ -204,6 +204,7 @@ model Song {
   musicBy        String?  @map("music_by")
   leadVocalsId   Int?     @map("lead_vocals_id")
   isUncertain    Boolean  @default(false) @map("is_uncertain")
+  inBoxOfRain    Boolean  @default(false) @map("in_box_of_rain")
   notes          String?
   createdAt      DateTime @default(now()) @map("created_at")
   updatedAt      DateTime @default(now()) @updatedAt @map("updated_at")
@@ -398,4 +399,30 @@ model MusicianDefaultInstrument {
   
   @@unique([musicianId, instrumentId])
   @@map("musician_default_instruments")
+}
+
+model ExternalLink {
+  id          Int      @id @default(autoincrement())
+  url         String
+  title       String?
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  
+  linkAssociations LinkAssociation[]
+  
+  @@map("external_links")
+}
+
+model LinkAssociation {
+  id          Int      @id @default(autoincrement())
+  linkId      Int      @map("link_id")
+  entityType  String   @map("entity_type") // 'song', 'venue', 'recording', 'event'
+  entityId    Int      @map("entity_id")   // ID of the linked entity
+  linkType    String   @map("link_type")   // 'lyrics', 'chords', 'video', 'website'
+  isPublic    Boolean  @default(true) @map("is_public")
+  createdAt   DateTime @default(now()) @map("created_at")
+  
+  link ExternalLink @relation(fields: [linkId], references: [id])
+  
+  @@map("link_associations")
 }
