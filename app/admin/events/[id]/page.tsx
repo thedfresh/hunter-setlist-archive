@@ -368,9 +368,8 @@ function SetPerformancesSection({ set, songs, musicians, instruments, onPerforma
   }
 
   return (
-    <div className="mb-8">
-      <h3 className="text-lg font-semibold mb-2">Performances</h3>
-      <table className="w-full text-left border-collapse mb-4">
+    <div className="mb-8 text-sm">
+      <table className="w-full text-left border-collapse mb-4 text-sm">
         <thead>
           <tr className="bg-gray-100">
             <th className="py-2 px-4 font-semibold">Order</th>
@@ -903,6 +902,50 @@ export default function EventEditPage() {
               />
             </div>
           </div>
+          <div className="flex gap-4">
+            <div className="w-1/3">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Event Type</label>
+              <select
+                name="eventTypeId"
+                value={form.eventTypeId}
+                onChange={e => setForm(f => ({ ...f, eventTypeId: e.target.value }))}
+                className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
+              >
+                <option value="">Select type</option>
+                {eventTypes.map(t => (
+                  <option key={t.id} value={t.id}>{t.name}</option>
+                ))}
+              </select>
+            </div>
+            <div className="w-1/3">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Content Type</label>
+              <select
+                name="contentTypeId"
+                value={form.contentTypeId}
+                onChange={e => setForm(f => ({ ...f, contentTypeId: e.target.value }))}
+                className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
+              >
+                <option value="">Select content</option>
+                {contentTypes.map(t => (
+                  <option key={t.id} value={t.id}>{t.name}</option>
+                ))}
+              </select>
+            </div>
+            <div className="w-1/3">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Primary Band</label>
+              <select
+                name="primaryBandId"
+                value={form.primaryBandId}
+                onChange={e => setForm(f => ({ ...f, primaryBandId: e.target.value }))}
+                className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
+              >
+                <option value="">Select band</option>
+                {bands.map(b => (
+                  <option key={b.id} value={b.id}>{b.name}</option>
+                ))}
+              </select>
+            </div>
+          </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Venue</label>
             <select
@@ -918,48 +961,6 @@ export default function EventEditPage() {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Event Type</label>
-            <select
-              name="eventTypeId"
-              value={form.eventTypeId}
-              onChange={e => setForm(f => ({ ...f, eventTypeId: e.target.value }))}
-              className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
-            >
-              <option value="">Select type</option>
-              {eventTypes.map(t => (
-                <option key={t.id} value={t.id}>{t.name}</option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Content Type</label>
-            <select
-              name="contentTypeId"
-              value={form.contentTypeId}
-              onChange={e => setForm(f => ({ ...f, contentTypeId: e.target.value }))}
-              className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
-            >
-              <option value="">Select content</option>
-              {contentTypes.map(t => (
-                <option key={t.id} value={t.id}>{t.name}</option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Primary Band</label>
-            <select
-              name="primaryBandId"
-              value={form.primaryBandId}
-              onChange={e => setForm(f => ({ ...f, primaryBandId: e.target.value }))}
-              className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
-            >
-              <option value="">Select band</option>
-              {bands.map(b => (
-                <option key={b.id} value={b.id}>{b.name}</option>
-              ))}
-            </select>
-          </div>
-          <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
             <textarea
               name="notes"
@@ -971,13 +972,15 @@ export default function EventEditPage() {
             />
           </div>
           {success && <p className="text-green-600 text-sm mb-2">Event updated successfully!</p>}
-          <button
-            type="submit"
-            className="w-full bg-blue-600 text-white font-semibold py-2 rounded-md shadow hover:bg-blue-700 transition disabled:opacity-50"
-            disabled={submitting}
-          >
-            {submitting ? "Saving..." : "Save Changes"}
-          </button>
+          <div className="flex justify-end">
+            <button
+              type="submit"
+              className="bg-blue-600 text-white font-semibold px-4 py-2 rounded-md shadow hover:bg-blue-700 transition disabled:opacity-50"
+              disabled={submitting}
+            >
+              {submitting ? "Saving..." : "Save Changes"}
+            </button>
+          </div>
         </form>
         <hr className="my-8" />
         {/* Sets Section */}
@@ -1008,13 +1011,13 @@ export default function EventEditPage() {
                   <td className="py-2 px-4">{set.notes || <span className="text-gray-400 italic">—</span>}</td>
                   <td className="py-2 px-4">
                     <button
-                      className="bg-gray-200 text-gray-800 font-semibold py-1 px-3 rounded-md shadow hover:bg-gray-300 transition mr-2"
+                      className="bg-gray-200 text-gray-800 font-semibold py-0.5 px-2 rounded shadow hover:bg-gray-300 transition mr-2 text-sm"
                       onClick={() => { setEditingSet(set); setShowSetForm(true); }}
                     >
                       Edit
                     </button>
                     <button
-                      className="bg-red-600 text-white font-semibold py-1 px-3 rounded-md shadow hover:bg-red-700 transition"
+                      className="bg-red-600 text-white font-semibold py-0.5 px-2 rounded shadow hover:bg-red-700 transition text-sm"
                       onClick={async () => {
                         if (confirm("Delete this set?")) {
                           await fetch(`/api/events/${id}/sets/${set.id}`, { method: "DELETE" });
