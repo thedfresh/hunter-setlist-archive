@@ -32,8 +32,9 @@ const RecordingsSection: React.FC<Props> = ({ eventId }) => {
   const [links, setLinks] = useState<any[]>([]);
   const [linksLoading, setLinksLoading] = useState(false);
   const [linksError, setLinksError] = useState<string | null>(null);
-  // Add Link form state
+  // Add/Edit Link form state
   const [showAddLink, setShowAddLink] = useState(false);
+  const [editingLinkId, setEditingLinkId] = useState<number | null>(null);
   const [linkForm, setLinkForm] = useState({
     url: "",
     title: "",
@@ -267,7 +268,7 @@ const RecordingsSection: React.FC<Props> = ({ eventId }) => {
                     </tr>
                   </thead>
                   <tbody>
-                    {links.map(link => (
+                    {links.map(link => [
                       <tr key={link.id} className="border-b">
                         <td className="py-1 px-2">
                           <a href={link.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">{link.url}</a>
@@ -275,8 +276,168 @@ const RecordingsSection: React.FC<Props> = ({ eventId }) => {
                         <td className="py-1 px-2">{link.title || ""}</td>
                         <td className="py-1 px-2">{link.linkType || ""}</td>
                         <td className="py-1 px-2">{link.isActive ? "Yes" : "No"}</td>
-                      </tr>
-                    ))}
+                        <td className="py-1 px-2">
+                          <div className="flex gap-1 items-center">
+                            <button
+                              className="bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded hover:bg-blue-200 border border-blue-200 mr-1"
+                              type="button"
+                              onClick={() => {
+                                setEditingLinkId(link.id);
+                                setLinkForm({
+                                  url: link.url,
+                                  title: link.title || "",
+                                  description: link.description || "",
+                                  linkType: link.linkType || "",
+                                  isActive: !!link.isActive,
+                                });
+                                setLinkError(null);
+                              }}
+                            >Edit</button>
+                            <button
+                              className="bg-red-100 text-red-600 text-xs px-2 py-0.5 rounded hover:bg-red-200 border border-red-200"
+                              type="button"
+                              onClick={async () => {
+                                if (!confirm("Delete this link?")) return;
+                                setLinksLoading(true);
+                                setLinksError(null);
+                                await fetch(`/api/recordings/${editing.id}/links/${link.id}`, {
+                                  method: "DELETE"
+                                });
+                                fetch(`/api/recordings/${editing.id}/links`)
+                                  .then(r => r.json())
+                                  .then(data => {
+                                    setLinks(data.links || []);
+                                    setLinksLoading(false);
+                                  })
+                                  .catch(err => {
+                                    setLinksError("Failed to load links.");
+                                    setLinksLoading(false);
+                                  });
+                              }}
+                            >Delete</button>
+                          </div>
+                        </td>
+                      </tr>,
+                      editingLinkId === link.id && (
+                        <tr key={`edit-${link.id}`}>
+                          <td colSpan={5} className="bg-gray-50 p-2">
+                            <form
+                              className="space-y-2"
+                              onSubmit={async e => {
+                                e.preventDefault();
+                                setLinkError(null);
+                                if (!linkForm.url.trim()) {
+                                  setLinkError("URL is required.");
+                                  return;
+                                }
+                                setLinkSubmitting(true);
+                                const res = await fetch(`/api/recordings/${editing.id}/links/${link.id}`, {
+                                  method: "PUT",
+                                  headers: { "Content-Type": "application/json" },
+                                  body: JSON.stringify({
+                                    url: linkForm.url,
+                                    title: linkForm.title,
+                                    description: linkForm.description,
+                                    linkType: linkForm.linkType,
+                                    isActive: linkForm.isActive,
+                                  }),
+                                });
+                                if (res.ok) {
+                                  setEditingLinkId(null);
+                                  setLinkForm({ url: "", title: "", description: "", linkType: "", isActive: true });
+                                  setLinkSubmitting(false);
+                                  setLinksLoading(true);
+                                  setLinksError(null);
+                                  fetch(`/api/recordings/${editing.id}/links`)
+                                    .then(r => r.json())
+                                    .then(data => {
+                                      setLinks(data.links || []);
+                                      setLinksLoading(false);
+                                    })
+                                    .catch(err => {
+                                      setLinksError("Failed to load links.");
+                                      setLinksLoading(false);
+                                    });
+                                } else {
+                                  setLinkError("Failed to update link.");
+                                  setLinkSubmitting(false);
+                                }
+                              }}
+                            >
+                              <div className="flex gap-4">
+                                <div className="w-1/3">
+                                  <label className="block text-sm font-medium mb-1">URL<span className="text-red-500">*</span></label>
+                                  <input
+                                    type="url"
+                                    value={linkForm.url}
+                                    onChange={e => setLinkForm(f => ({ ...f, url: e.target.value }))}
+                                    className="w-full border rounded px-2 py-1"
+                                    required
+                                  />
+                                </div>
+                                <div className="w-1/3">
+                                  <label className="block text-sm font-medium mb-1">Title</label>
+                                  <input
+                                    type="text"
+                                    value={linkForm.title}
+                                    onChange={e => setLinkForm(f => ({ ...f, title: e.target.value }))}
+                                    className="w-full border rounded px-2 py-1"
+                                  />
+                                </div>
+                                <div className="w-1/3">
+                                  <label className="block text-sm font-medium mb-1">Type</label>
+                                  <input
+                                    type="text"
+                                    value={linkForm.linkType}
+                                    onChange={e => setLinkForm(f => ({ ...f, linkType: e.target.value }))}
+                                    className="w-full border rounded px-2 py-1"
+                                  />
+                                </div>
+                              </div>
+                              <div className="flex gap-4 items-center">
+                                <div className="w-2/3">
+                                  <label className="block text-sm font-medium mb-1">Description</label>
+                                  <textarea
+                                    value={linkForm.description}
+                                    onChange={e => setLinkForm(f => ({ ...f, description: e.target.value }))}
+                                    className="w-full border rounded px-2 py-1"
+                                    rows={2}
+                                  />
+                                </div>
+                                <div className="w-1/3 flex items-center mt-6">
+                                  <input
+                                    type="checkbox"
+                                    checked={linkForm.isActive}
+                                    onChange={e => setLinkForm(f => ({ ...f, isActive: e.target.checked }))}
+                                    className="mr-2"
+                                    id="isActiveEdit"
+                                  />
+                                  <label htmlFor="isActiveEdit" className="text-sm">Active</label>
+                                </div>
+                              </div>
+                              {linkError && <p className="text-red-500 text-sm mt-2">{linkError}</p>}
+                              <div className="flex gap-2 justify-end mt-2">
+                                <button
+                                  type="button"
+                                  className="bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded hover:bg-blue-200 border border-blue-200 mr-1"
+                                  onClick={() => {
+                                    setEditingLinkId(null);
+                                    setLinkError(null);
+                                    setLinkForm({ url: "", title: "", description: "", linkType: "", isActive: true });
+                                  }}
+                                  disabled={linkSubmitting}
+                                >Cancel</button>
+                                <button
+                                  type="submit"
+                                  className="bg-green-600 text-white text-xs px-2 py-0.5 rounded hover:bg-green-700 border border-green-200"
+                                  disabled={linkSubmitting}
+                                >{linkSubmitting ? "Saving..." : "Save"}</button>
+                              </div>
+                            </form>
+                          </td>
+                        </tr>
+                      )
+                    ])}
                   </tbody>
                 </table>
               )}
