@@ -1,43 +1,78 @@
 # Copilot Context — Hunter Setlist Archive
 
-## Project Goals
-- Build Robert Hunter setlist archive with full CRUD admin interface and public search/browse.
-- Capture events, sets, performances, musicians, venues, recordings, notes, tags.
-- Support uncertainty (`true|false|null`) and partial dates.
-- Parsing pipeline (Node.js + local LLM) is **separate**; admin UI only handles clean structured data.
+# Copilot Instructions - Hunter Archive
 
-## Tech Stack
-- Next.js App Router (`app/`) with TypeScript
-- Prisma ORM with PostgreSQL database
-- API routes for CRUD operations (`/app/api/`)
-- Zod for validation
-- Tailwind CSS for styling
+## Component Rules
+- Maximum 500 lines per component
+- Extract components when approaching 400 lines  
+- Create separate components for create vs edit workflows
+- Use lib/types.ts for shared type definitions
 
-## Coding Standards
-- TypeScript strict mode
-- Prisma for all database operations
-- Zod validation on all forms
-- API routes follow RESTful patterns
-- All forms use proper error handling and validation
+## Code Patterns
+- Admin routes: /admin/{entity} (list), /admin/{entity}/new (create), /admin/{entity}/[id] (edit)
+- API routes: /api/{entity} (GET list, POST create), /api/{entity}/[id] (GET single, PUT update, DELETE)
+- Use Prisma for all database operations
+- Use manual form validation with error state objects
+- Three-state booleans: true/false/null for uncertain data
+- Tailwind CSS for all styling
 
-## UI Patterns
-- Page routes: `/admin/{entity}` → list; `/new`, `/[id]` view
-- API routes: `/api/{entity}` → GET (list), POST (create), PUT (update), DELETE
-- Tri-state inputs for uncertain booleans (true/false/null)
-- Default sorts: musicians/venues alphabetically, events chronologically desc
-- Consistent Tailwind styling across all admin pages
+## Database Schema Key Points
+- Events contain Sets contain Performances (hierarchy)
+- Hunter participation: hunterVocal, hunterGuitar, hunterHarmonica (per performance)
+- Notes fields: direct TEXT fields on each entity (not polymorphic)
+- Flexible dates: year/month/day can be null, displayDate for human display
 
-## Database Schema
-- See `prisma/schema.prisma` for complete model definitions
-- Key relationships: Events → Sets → Performances
-- Multi-level musician tracking (event-level and performance-level)
-- Three-state logic for uncertain data throughout
+## Proven Working Patterns
+- EventContributorsEditor: for editing existing events
+- EventContributorsInput: for event creation (no eventId, local state only)
+- PerformanceForm: extracted modal component for performance creation/editing
+- SetPerformancesSection: manages performances within a set
+- Embedded creation: AddVenueModal, AddSongForm for workflow improvements
 
-## Examples
-- Musicians CRUD interface is the canonical pattern with relationship management
-- Copy this pattern for new entities: list page, create page, edit page, API routes
+## Form Validation Pattern
+```javascript
+function validate() {
+  const newErrors = {};
+  if (!form.requiredField) newErrors.requiredField = "Error message";
+  return newErrors;
+}
+```
 
-## Anti-Goals
-- Don't design parsing pipeline here
-- Don't bypass Prisma ORM
-- Don't skip validation with Zod
+## API Response Pattern  
+```javascript
+if (res.ok) {
+  const data = await res.json();
+  // handle success
+} else {
+  setErrors({ form: "Operation failed" });
+}
+```
+
+## Component Props Patterns
+
+### Editing Components (entity exists)
+```typescript
+function EditComponent({ 
+  entityId, 
+  editingEntity, 
+  onClose, 
+  onSaved 
+}: any) {
+  // entityId: required for API calls
+  // editingEntity: object when editing, null when creating
+  // onClose: required callback
+  // onSaved: required callback
+}
+```
+
+### Creation Components (entity doesn't exist yet)
+```typescript
+interface Props {
+  onDataChange?: (data: EntityType[]) => void;
+}
+const CreateComponent: React.FC<Props> = ({ onDataChange }) => {
+  // No entityId - entity doesn't exist yet
+  // Optional callback - parent may not need to track changes
+  // Manages local state, calls API for lookups only
+}
+```
