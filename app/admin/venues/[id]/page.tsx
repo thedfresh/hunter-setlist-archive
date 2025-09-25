@@ -6,6 +6,7 @@ import Link from "next/link";
 type Venue = {
   id: number;
   name: string;
+  context?: string;
   city?: string;
   stateProvince?: string;
   country?: string;
@@ -20,6 +21,7 @@ export default function VenueEditPage() {
   const [venue, setVenue] = useState<Venue | null>(null);
   const [form, setForm] = useState({
     name: "",
+    context: "",
     city: "",
     stateProvince: "",
     country: "",
@@ -40,6 +42,7 @@ export default function VenueEditPage() {
           setVenue(data.venue);
           setForm({
             name: data.venue.name,
+            context: data.venue.context || "",
             city: data.venue.city || "",
             stateProvince: data.venue.stateProvince || "",
             country: data.venue.country || "",
@@ -129,6 +132,18 @@ export default function VenueEditPage() {
               name="name"
               value={form.name}
               onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
+              className={`w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${error ? "border-red-500" : "border-gray-300"}`}
+              required
+            />
+            {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Context</label>
+            <input
+              type="text"
+              name="context"
+              value={form.context}
+              onChange={e => setForm(f => ({ ...f, context: e.target.value }))}
               className={`w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${error ? "border-red-500" : "border-gray-300"}`}
               required
             />

@@ -21,6 +21,7 @@ export async function POST(req: Request) {
     const venue = await prisma.venue.create({
       data: {
         name: data.name,
+        context: data.context || null,
         city: data.city || null,
         stateProvince: data.stateProvince || null,
         country: data.country || null,

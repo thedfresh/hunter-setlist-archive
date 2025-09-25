@@ -31,7 +31,7 @@ export default function EventEditPage() {
     notes: "",
     isUncertain: false,
   });
-  const [venues, setVenues] = useState<{ id: number; name: string }[]>([]);
+  const [venues, setVenues] = useState<{ id: number; name: string, context?: string, city?: string, stateProvince?: string, country?: string }[]>([]);
   const [eventTypes, setEventTypes] = useState<{ id: number; name: string }[]>([]);
   const [contentTypes, setContentTypes] = useState<{ id: number; name: string }[]>([]);
   const [bands, setBands] = useState<{ id: number; name: string }[]>([]);
@@ -319,7 +319,7 @@ export default function EventEditPage() {
             >
               <option value="">Select venue</option>
               {venues.map(v => (
-                <option key={v.id} value={v.id}>{v.name}</option>
+                <option key={v.id} value={v.id}>{v.name}{v.context ? ` (${v.context})` : ""}{v.city ? `, ${v.city}` : ""}{v.stateProvince ? `, ${v.stateProvince}` : ""}{v.country ? `, ${v.country}` : ""}</option>
               ))}
             </select>
           </div>

@@ -5,6 +5,7 @@ import Link from "next/link";
 type Venue = {
   id: number;
   name: string;
+  context?: string;
   city?: string;
   stateProvince?: string;
   country?: string;
@@ -38,7 +39,8 @@ export default function VenuesAdminPage() {
   }, []);
 
   const filtered = venues.filter((v: Venue) =>
-    v.name.toLowerCase().includes(search.toLowerCase())
+    v.name.toLowerCase().includes(search.toLowerCase()) ||
+    (v.context && v.context.toLowerCase().includes(search.toLowerCase()))
   );
 
   return (
@@ -73,22 +75,23 @@ export default function VenuesAdminPage() {
                 <th className="py-2 px-4 font-semibold">Name</th>
                 <th className="py-2 px-4 font-semibold">Location</th>
                 <th className="py-2 px-4 font-semibold">Uncertain?</th>
-                <th className="py-2 px-4 font-semibold">Created</th>
                 <th className="py-2 px-4 font-semibold">Actions</th>
               </tr>
             </thead>
             <tbody>
               {filtered.map((v) => (
                 <tr key={v.id} className="border-b">
-                  <td className="py-2 px-4">{v.name}</td>
+                  <td className="py-2 px-4">
+                    {v.name}
+                    {v.context ? `, ${v.context}` : ""}
+                  </td>
                   <td className="py-2 px-4">
                     {[v.city, v.stateProvince, v.country].filter(Boolean).join(", ")}
                   </td>
                   <td className="py-2 px-4">{v.isUncertain ? "Yes" : "No"}</td>
-                  <td className="py-2 px-4">{new Date(v.createdAt).toLocaleDateString()}</td>
                   <td className="py-2 px-4">
                     <Link href={`/admin/venues/${v.id}`}>
-                      <button className="bg-gray-200 text-gray-800 font-semibold py-1 px-3 rounded-md shadow hover:bg-gray-300 transition">View/Edit</button>
+                      <button className="bg-gray-200 text-gray-800 font-semibold py-1 px-3 rounded-md shadow hover:bg-gray-300 transition">Edit</button>
                     </Link>
                   </td>
                 </tr>

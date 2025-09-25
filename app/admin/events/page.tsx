@@ -124,6 +124,7 @@ export default function EventsAdminPage() {
                       {e.venue ? (
                         <span>
                           {e.venue.name}
+                          {e.venue.context ? ` (${e.venue.context})` : ""}
                           {e.venue.city ? `, ${e.venue.city}` : ""}
                           {e.venue.stateProvince ? `, ${e.venue.stateProvince}` : ""}
                           {e.venue.country ? `, ${e.venue.country}` : ""}

@@ -31,6 +31,7 @@ export async function PUT(req: NextRequest, { params }: { params: Params }) {
       where: { id },
       data: {
         name: data.name,
+        context: data.context || null,
         city: data.city || null,
         stateProvince: data.stateProvince || null,
         country: data.country || null,
