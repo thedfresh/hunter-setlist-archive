@@ -2,69 +2,76 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
-// Types for dropdowns
-const EVENT_TYPES = [
-  { value: 'public', label: 'Public Show' },
-  { value: 'studio', label: 'Studio' },
-  { value: 'spurious', label: 'Spurious' },
-];
-const CONTENT_TYPES = [
-  { value: 'musical', label: 'Musical' },
-  { value: 'interview', label: 'Interview' },
-  { value: 'poetry', label: 'Poetry Reading' },
-];
-const BANDS = [
-  { value: 'solo', label: 'Solo' },
-  { value: 'dinosaurs', label: 'Dinosaurs' },
-  { value: 'comfort', label: 'Comfort' },
-  { value: 'roadhog', label: 'Roadhog' },
-  // Add more bands as needed
-];
+// ...existing code...
 
 export default function NewEventPage() {
   const [venues, setVenues] = useState<{ id: string; name: string }[]>([]);
+  const [eventTypes, setEventTypes] = useState<{ id: string; name: string }[]>([]);
+  const [contentTypes, setContentTypes] = useState<{ id: string; name: string }[]>([]);
+  const [bands, setBands] = useState<{ id: string; name: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    async function fetchVenues() {
+    async function fetchDropdowns() {
       try {
-        const res = await fetch('/api/venues');
-        const data = await res.json();
-        if (res.ok && data.venues) {
-          setVenues(data.venues);
-        } else {
-          setError('Failed to load venues');
-        }
-      } catch {
-        setError('Failed to load venues');
+        const [venuesRes, eventTypesRes, contentTypesRes, bandsRes] = await Promise.all([
+          fetch('/api/venues'),
+          fetch('/api/events?types=eventTypes'),
+          fetch('/api/events?types=contentTypes'),
+          fetch('/api/events?types=bands'),
+        ]);
+        const venuesData = await venuesRes.json();
+        const eventTypesData = await eventTypesRes.json();
+        const contentTypesData = await contentTypesRes.json();
+        const bandsData = await bandsRes.json();
+        if (venuesRes.ok && venuesData.venues) setVenues(venuesData.venues);
+        else throw new Error('Failed to load venues');
+        if (eventTypesRes.ok && eventTypesData.eventTypes) setEventTypes(eventTypesData.eventTypes);
+        else throw new Error('Failed to load event types');
+        if (contentTypesRes.ok && contentTypesData.contentTypes) setContentTypes(contentTypesData.contentTypes);
+        else throw new Error('Failed to load content types');
+        if (bandsRes.ok && bandsData.bands) setBands(bandsData.bands);
+        else throw new Error('Failed to load bands');
+      } catch (err: any) {
+        setError(err.message || 'Failed to load dropdowns');
       } finally {
         setLoading(false);
       }
     }
-    fetchVenues();
+    fetchDropdowns();
   }, []);
 
   if (loading) {
-    return <div className="p-8 text-center">Loading venues...</div>;
+    return <div className="p-8 text-center">Loading...</div>;
   }
   if (error) {
     return <div className="p-8 text-center text-red-500">{error}</div>;
   }
-  return <EventForm venues={venues} />;
+  return <EventForm venues={venues} eventTypes={eventTypes} contentTypes={contentTypes} bands={bands} />;
 }
 
-function EventForm({ venues }: { venues: { id: string; name: string }[] }) {
+function EventForm({ venues, eventTypes, contentTypes, bands }: {
+  venues: { id: string; name: string }[],
+  eventTypes: { id: string; name: string }[],
+  contentTypes: { id: string; name: string }[],
+  bands: { id: string; name: string }[],
+}) {
   const router = useRouter();
+  // Find default IDs for dropdowns
+  const defaultEventTypeId = eventTypes.find(t => t.name.toLowerCase() === 'public show')?.id || (eventTypes[0]?.id ?? '');
+  const defaultContentTypeId = contentTypes.find(t => t.name.toLowerCase() === 'musical')?.id || (contentTypes[0]?.id ?? '');
+  const defaultBandId = bands.find(b => b.name.toLowerCase() === 'robert hunter')?.id || (bands[0]?.id ?? '');
+
   const [form, setForm] = useState({
     year: '',
     month: '',
     day: '',
     displayDate: '',
     venueId: '',
-    eventType: '',
-    contentType: '',
-    band: '',
+    eventTypeId: defaultEventTypeId,
+    contentTypeId: defaultContentTypeId,
+    primaryBandId: defaultBandId,
     notes: '',
   });
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
@@ -95,7 +102,12 @@ function EventForm({ venues }: { venues: { id: string; name: string }[] }) {
         body: JSON.stringify(form),
       });
       if (res.ok) {
-  router.push('/admin/events/success');
+        const data = await res.json();
+        if (data.event && data.event.id) {
+          router.push(`/admin/events/${data.event.id}`);
+        } else {
+          router.push('/admin/events/success');
+        }
       } else {
         setErrors({ form: 'Failed to create event.' });
       }
@@ -111,56 +123,55 @@ function EventForm({ venues }: { venues: { id: string; name: string }[] }) {
       <div className="max-w-xl w-full bg-white rounded-xl shadow-lg p-8">
         <h1 className="text-2xl font-bold mb-6 text-gray-800">Create New Event</h1>
         <form className="space-y-6" onSubmit={handleSubmit}>
-          {/* Year */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Year<span className="text-red-500">*</span></label>
-            <input
-              type="number"
-              name="year"
-              value={form.year}
-              onChange={e => setForm(f => ({ ...f, year: e.target.value }))}
-              className={`w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.year ? 'border-red-500' : 'border-gray-300'}`}
-              required
-            />
-            {errors.year && <p className="text-red-500 text-xs mt-1">{errors.year}</p>}
-          </div>
-          {/* Month */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Month</label>
-            <input
-              type="number"
-              name="month"
-              value={form.month}
-              onChange={e => setForm(f => ({ ...f, month: e.target.value }))}
-              className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
-              min={1}
-              max={12}
-            />
-          </div>
-          {/* Day */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Day</label>
-            <input
-              type="number"
-              name="day"
-              value={form.day}
-              onChange={e => setForm(f => ({ ...f, day: e.target.value }))}
-              className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
-              min={1}
-              max={31}
-            />
-          </div>
-          {/* Display Date */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Display Date</label>
-            <input
-              type="text"
-              name="displayDate"
-              value={form.displayDate}
-              onChange={e => setForm(f => ({ ...f, displayDate: e.target.value }))}
-              className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
-              placeholder="e.g. July 4, 1985"
-            />
+          {/* Date Row: Year, Month, Day, Display Date */}
+          <div className="flex flex-wrap gap-4 items-end">
+            <div className="flex-1 min-w-[80px] max-w-[120px]">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Year<span className="text-red-500">*</span></label>
+              <input
+                type="number"
+                name="year"
+                value={form.year}
+                onChange={e => setForm(f => ({ ...f, year: e.target.value }))}
+                className={`w-full border rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.year ? 'border-red-500' : 'border-gray-300'}`}
+                required
+              />
+              {errors.year && <p className="text-red-500 text-xs mt-1">{errors.year}</p>}
+            </div>
+            <div className="flex-1 min-w-[60px] max-w-[90px]">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Month</label>
+              <input
+                type="number"
+                name="month"
+                value={form.month}
+                onChange={e => setForm(f => ({ ...f, month: e.target.value }))}
+                className="w-full border rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
+                min={1}
+                max={12}
+              />
+            </div>
+            <div className="flex-1 min-w-[60px] max-w-[90px]">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Day</label>
+              <input
+                type="number"
+                name="day"
+                value={form.day}
+                onChange={e => setForm(f => ({ ...f, day: e.target.value }))}
+                className="w-full border rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
+                min={1}
+                max={31}
+              />
+            </div>
+            <div className="flex-1 min-w-[120px] max-w-[180px]">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Display Date</label>
+              <input
+                type="text"
+                name="displayDate"
+                value={form.displayDate}
+                onChange={e => setForm(f => ({ ...f, displayDate: e.target.value }))}
+                className="w-full border rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
+                placeholder="e.g. July 4, 1985"
+              />
+            </div>
           </div>
           {/* Venue Dropdown */}
           <div>
@@ -177,50 +188,50 @@ function EventForm({ venues }: { venues: { id: string; name: string }[] }) {
               ))}
             </select>
           </div>
-          {/* Event Type Dropdown */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Event Type</label>
-            <select
-              name="eventType"
-              value={form.eventType}
-              onChange={e => setForm(f => ({ ...f, eventType: e.target.value }))}
-              className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
-            >
-              <option value="">Select type</option>
-              {EVENT_TYPES.map(t => (
-                <option key={t.value} value={t.value}>{t.label}</option>
-              ))}
-            </select>
-          </div>
-          {/* Content Type Dropdown */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Content Type</label>
-            <select
-              name="contentType"
-              value={form.contentType}
-              onChange={e => setForm(f => ({ ...f, contentType: e.target.value }))}
-              className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
-            >
-              <option value="">Select content</option>
-              {CONTENT_TYPES.map(t => (
-                <option key={t.value} value={t.value}>{t.label}</option>
-              ))}
-            </select>
-          </div>
-          {/* Band Dropdown */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Band</label>
-            <select
-              name="band"
-              value={form.band}
-              onChange={e => setForm(f => ({ ...f, band: e.target.value }))}
-              className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
-            >
-              <option value="">Select band</option>
-              {BANDS.map(b => (
-                <option key={b.value} value={b.value}>{b.label}</option>
-              ))}
-            </select>
+          {/* Event Type, Content Type, Band Row */}
+          <div className="flex flex-wrap gap-4 items-end">
+            <div className="flex-1 min-w-[120px] max-w-[180px]">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Event Type</label>
+              <select
+                name="eventTypeId"
+                value={form.eventTypeId}
+                onChange={e => setForm(f => ({ ...f, eventTypeId: e.target.value }))}
+                className="w-full border rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
+              >
+                <option value="">Select type</option>
+                {eventTypes.map(t => (
+                  <option key={t.id} value={t.id}>{t.name}</option>
+                ))}
+              </select>
+            </div>
+            <div className="flex-1 min-w-[120px] max-w-[180px]">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Content Type</label>
+              <select
+                name="contentTypeId"
+                value={form.contentTypeId}
+                onChange={e => setForm(f => ({ ...f, contentTypeId: e.target.value }))}
+                className="w-full border rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
+              >
+                <option value="">Select content</option>
+                {contentTypes.map(t => (
+                  <option key={t.id} value={t.id}>{t.name}</option>
+                ))}
+              </select>
+            </div>
+            <div className="flex-1 min-w-[120px] max-w-[180px]">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Band</label>
+              <select
+                name="primaryBandId"
+                value={form.primaryBandId}
+                onChange={e => setForm(f => ({ ...f, primaryBandId: e.target.value }))}
+                className="w-full border rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
+              >
+                <option value="">Select band</option>
+                {bands.map(b => (
+                  <option key={b.id} value={b.id}>{b.name}</option>
+                ))}
+              </select>
+            </div>
           </div>
           {/* Notes */}
           <div>
