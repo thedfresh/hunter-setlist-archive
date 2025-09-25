@@ -1,73 +1,89 @@
 # Hunter Setlist Archive
 
-A modern Next.js application for browsing and searching Robert Hunter's complete performance history.
+A modern Next.js application for archiving and searching Robert Hunter's complete performance history, featuring comprehensive admin interfaces and detailed show documentation.
 
-## Project Status: Complete Reset & Rebuild
+## Project Status: Active Development
 
-**Current Phase:** Fresh rebuild with v2.0 database schema  
-**Last Reset:** September 22, 2025  
-**Database:** PostgreSQL with complete v2.0 schema implemented  
+**Current Phase:** Complete admin interface with advanced features  
+**Database:** PostgreSQL with comprehensive schema  
+**Admin System:** Full CRUD interfaces for all entities
 
-This project migrates a 20-year-old static HTML Robert Hunter setlist website to a modern, searchable database-driven application.
+This project modernizes a 20-year-old static HTML Robert Hunter setlist website into a searchable, database-driven archive with sophisticated data management capabilities.
 
-## Database Schema v2.0
+## Features
 
-The database has been completely reset and rebuilt with a comprehensive v2.0 schema featuring:
+### Admin Interface
+- **Complete event management** with sets, performances, and musical notation
+- **Musician tracking** with instrument assignments and guest appearances
+- **Venue and song management** with uncertainty tracking
+- **Contributor attribution** for recordings and data sources
+- **Links system** for external resources (lyrics, videos, recordings)
+- **Embedded creation workflows** for efficient data entry
 
-- **Events table**: Complete show tracking with flexible date handling
-- **Multi-level musician tracking**: Event-level and performance-level guest musicians
-- **Hunter participation tracking**: Detailed vocals/guitar/harmonica participation per song
-- **Recording information**: Multiple recordings per event with contributor tracking
-- **Flexible annotation system**: Reusable footnotes linked to events/sets/performances
-- **Three-state logic**: true/false/null throughout for uncertain data
+### Data Model
+- **Events → Sets → Performances** hierarchical structure
+- **Multi-level guest tracking** (event-level and performance-level musicians)
+- **Hunter participation tracking** (vocals/guitar/harmonica per song)
+- **Three-state logic** (true/false/null) for uncertain historical data
+- **Flexible date handling** supporting partial dates and display formatting
+- **Recording documentation** with technical details and contributor attribution
 
 ## Tech Stack
 
-- **Frontend:** Next.js 15 with TypeScript
-- **Database:** PostgreSQL with Prisma ORM (to be configured)
-- **Styling:** Tailwind CSS
-- **Hosting:** DigitalOcean droplet with automated deployment
-- **Deployment:** GitHub Actions → PM2 restart
+- **Frontend:** Next.js 15 with TypeScript and Tailwind CSS
+- **Database:** PostgreSQL with Prisma ORM
+- **Admin UI:** Complete CRUD interfaces with component-based architecture
+- **Hosting:** DigitalOcean with automated GitHub Actions deployment
+- **Process Management:** PM2 with automatic restarts
 
-## Infrastructure
-
-- **Production:** https://stillunsung.com (https://darkstarcrashes.com redirects)
-- **Server:** Ubuntu 24.10, 1GB RAM, SSL with Let's Encrypt
-- **Database:** PostgreSQL with v2.0 schema
-- **Local Development:** Separate PostgreSQL database
-
-## Development Setup
+## Quick Start
 
 ```bash
-# Install dependencies
+# Clone and install
+git clone [repository]
 npm install
 
-# Set up local database connection
-# Update .env with your local PostgreSQL connection
+# Set up local database
+# Configure .env with PostgreSQL connection
+
+# Apply database schema
+npx prisma db push
+npx prisma generate
 
 # Start development server
 npm run dev
+
+# Open Prisma Studio (optional)
+npx prisma studio
 ```
+
+## Architecture
+
+- **Admin Routes:** `/admin/{entity}` for data management
+- **API Routes:** `/api/{entity}` for RESTful operations
+- **Components:** Modular design with size limits for maintainability
+- **Database:** Direct foreign key relationships for simplicity
 
 ## Deployment
 
-Automatic deployment via GitHub Actions:
-- Push to `main` branch triggers build and deployment
-- PM2 handles process management on production server
-- Environment variables managed via `.env.production` on server
+Automatic deployment pipeline:
+- Push to `main` branch triggers GitHub Actions
+- Automated build and deployment to production
+- PM2 handles process management and restarts
 
-## Next Steps
+## Production
 
-1. Configure Prisma with v2.0 schema
-2. Build basic Next.js app structure
-3. Implement data import pipeline
-4. Create admin interface for data management
-5. Build public search and browse interface
+- **Live Site:** https://stillunsung.com
+- **Redirect:** https://darkstarcrashes.com → https://stillunsung.com
+- **Infrastructure:** Ubuntu server with SSL (Let's Encrypt)
 
-## Database Reset
+## Development Notes
 
-The complete v2.0 database schema is available in `scripts/reset-database.sql` and can be applied to fresh PostgreSQL instances.
+- Database not managed by migrations - use `npx prisma db push`
+- Component size limit: 500 lines (extract when approaching 400)
+- Three-state boolean logic throughout schema for uncertain data
+- Manual form validation with error state objects
 
 ---
 
-*This is a complete rebuild of the legacy Hunter Archive with modern tooling and comprehensive data modeling.*
+*A comprehensive digital archive preserving Robert Hunter's musical legacy through detailed performance documentation and modern search capabilities.*
