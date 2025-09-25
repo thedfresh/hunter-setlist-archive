@@ -5,6 +5,8 @@ import Link from "next/link";
 type Contributor = {
   id: number;
   name: string;
+  email?: string;
+  notes?: string;
   createdAt: string;
 };
 
@@ -55,6 +57,8 @@ export default function ContributorsPage() {
             <thead>
               <tr className="bg-gray-100">
                 <th className="py-2 px-4 font-semibold">Name</th>
+                <th className="py-2 px-4 font-semibold">Email</th>
+                <th className="py-2 px-4 font-semibold">Notes</th>
                 <th className="py-2 px-4 font-semibold">Created</th>
                 <th className="py-2 px-4 font-semibold">Actions</th>
               </tr>
@@ -63,6 +67,8 @@ export default function ContributorsPage() {
               {contributors.map((c) => (
                 <tr key={c.id} className="border-b">
                   <td className="py-2 px-4">{c.name}</td>
+                  <td className="py-2 px-4">{c.email || <span className="text-gray-400 italic">—</span>}</td>
+                  <td className="py-2 px-4">{c.notes || <span className="text-gray-400 italic">—</span>}</td>
                   <td className="py-2 px-4">{new Date(c.createdAt).toLocaleDateString()}</td>
                   <td className="py-2 px-4">
                     <Link href={`/admin/contributors/${c.id}`}>
