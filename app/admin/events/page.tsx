@@ -145,7 +145,7 @@ export default function EventsAdminPage() {
                             set.performances
                               .sort((a: any, b: any) => a.performanceOrder - b.performanceOrder)
                               .map((perf: any, idx: number) => {
-                                const isUncertain = perf.isUncertain;
+                                const isUncertain = perf.isUncertain || set.isUncertain;
                                 const songLink = `/admin/songs/${perf.song?.id}`;
                                 let display = (
                                   <Link href={songLink} className={isUncertain ? "text-gray-400" : "text-blue-700 hover:underline"}>

@@ -29,6 +29,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
       setTypeId: data.setTypeId,
       position: data.position,
       notes: data.notes,
+      isUncertain: data.isUncertain ?? false,
     },
   });
   return NextResponse.json({ set }, { status: 201 });

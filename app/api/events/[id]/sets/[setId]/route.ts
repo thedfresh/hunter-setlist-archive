@@ -20,6 +20,7 @@ export async function PUT(req: Request, { params }: { params: { id: string; setI
       setTypeId: data.setTypeId,
       position: data.position,
       notes: data.notes,
+      isUncertain: data.isUncertain ?? false,
     },
   });
   return NextResponse.json({ set });

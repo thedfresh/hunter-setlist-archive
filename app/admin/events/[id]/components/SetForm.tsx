@@ -15,6 +15,7 @@ const SetForm: React.FC<SetFormProps> = ({ eventId, setTypes, sets, editingSet, 
     setTypeId: editingSet?.setTypeId || "",
     position: editingSet?.position || (sets.length + 1),
     notes: editingSet?.notes || "",
+    isUncertain: editingSet?.isUncertain || false,
   });
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [submitting, setSubmitting] = useState(false);
@@ -47,6 +48,7 @@ const SetForm: React.FC<SetFormProps> = ({ eventId, setTypes, sets, editingSet, 
       setTypeId: Number(form.setTypeId),
       position: Number(form.position),
       notes: form.notes,
+      isUncertain: form.isUncertain,
     };
     let res;
     if (editingSet) {
@@ -113,6 +115,17 @@ const SetForm: React.FC<SetFormProps> = ({ eventId, setTypes, sets, editingSet, 
               className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
               rows={2}
             />
+          </div>
+          <div>
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={form.isUncertain}
+                onChange={e => setForm(f => ({ ...f, isUncertain: e.target.checked }))}
+                className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+              />
+              <span className="text-sm text-gray-700">Uncertain</span>
+            </label>
           </div>
           {errors.form && <p className="text-red-500 text-xs mt-1">{errors.form}</p>}
           <div className="flex gap-2 mt-4">

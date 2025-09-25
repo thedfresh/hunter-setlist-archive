@@ -35,5 +35,6 @@ export type Set = {
   setTypeId: number;
   position: number;
   notes?: string;
+  isUncertain?: boolean;
   setType: { id: number; name: string; displayName: string };
 };
