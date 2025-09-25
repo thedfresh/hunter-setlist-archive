@@ -17,8 +17,6 @@ import AddVenueModal from './components/AddVenueModal';
 import { useRouter } from 'next/navigation';
 import Link from "next/link";
 
-// ...existing code...
-
 export default function NewEventPage() {
   const [venues, setVenues] = useState<{ id: string; name: string; city?: string; state?: string }[]>([]);
   const [isVenueModalOpen, setIsVenueModalOpen] = useState(false);

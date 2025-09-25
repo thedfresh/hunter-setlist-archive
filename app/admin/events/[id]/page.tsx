@@ -5,6 +5,7 @@ import { Event, Set } from '@/lib/types';
 import SetPerformancesSection from "./components/SetPerformancesSection";
 import SetForm from './components/SetForm';
 import Link from "next/link";
+import EventContributorsSection from "../../components/EventContributorsSection";
 
 export default function EventEditPage() {
   // Performance management state
@@ -343,6 +344,10 @@ export default function EventEditPage() {
             </button>
           </div>
         </form>
+        {/* Contributors Section */}
+        {event.id && (
+          <EventContributorsSection eventId={event.id} />
+        )}
         <hr className="my-8" />
         {/* Sets Section */}
         <h2 className="text-xl font-bold mb-4 text-gray-800">Sets</h2>
