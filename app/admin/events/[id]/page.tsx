@@ -434,7 +434,7 @@ export default function EventEditPage() {
          </table>
         {/* ShowDialog Section */}
         {event && (
-          <ShowDialogSection eventId={event.id} performances={performances} />
+          <ShowDialogSection eventId={event.id} />
         )}
          {/* Performance management for each set (removed duplicate) */}
         {showSetForm && (

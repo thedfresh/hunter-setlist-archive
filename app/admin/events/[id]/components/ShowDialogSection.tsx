@@ -3,8 +3,9 @@ import { useRouter } from "next/navigation";
 
 interface Performance {
   id: number;
-  order: number;
-  song: { id: number; name: string };
+  order?: number;
+  performanceOrder?: number;
+  song: { id: number; title: string };
   set: { id: number; position: number };
 }
 
@@ -19,11 +20,11 @@ interface ShowDialog {
 
 interface Props {
   eventId: number;
-  performances: Performance[];
 }
 
-const ShowDialogSection: React.FC<Props> = ({ eventId, performances }) => {
+const ShowDialogSection: React.FC<Props> = ({ eventId }) => {
   const [dialogs, setDialogs] = useState<ShowDialog[]>([]);
+  const [performances, setPerformances] = useState<Performance[]>([]);
   const [loading, setLoading] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editData, setEditData] = useState<Partial<ShowDialog>>({});
@@ -33,15 +34,16 @@ const ShowDialogSection: React.FC<Props> = ({ eventId, performances }) => {
   const router = useRouter();
 
   useEffect(() => {
-    fetchDialogs();
+    fetchDialogAndPerformances();
   }, [eventId]);
 
-  async function fetchDialogs() {
+  async function fetchDialogAndPerformances() {
     setLoading(true);
     const res = await fetch(`/api/events/${eventId}/dialog`);
     if (res.ok) {
       const data = await res.json();
-      setDialogs(data);
+      setDialogs(data.dialogs);
+      setPerformances(data.performances);
     } else {
       setErrors({ form: "Failed to load dialog" });
     }
@@ -85,7 +87,7 @@ const ShowDialogSection: React.FC<Props> = ({ eventId, performances }) => {
     if (res.ok) {
       setAddData({});
       setAdding(false);
-      fetchDialogs();
+      fetchDialogAndPerformances();
       setErrors({});
     } else {
       setErrors({ form: "Failed to add dialog" });
@@ -112,7 +114,7 @@ const ShowDialogSection: React.FC<Props> = ({ eventId, performances }) => {
     if (res.ok) {
       setEditingId(null);
       setEditData({});
-      fetchDialogs();
+      fetchDialogAndPerformances();
       setErrors({});
     } else {
       setErrors({ form: "Failed to update dialog" });
@@ -125,7 +127,7 @@ const ShowDialogSection: React.FC<Props> = ({ eventId, performances }) => {
     setLoading(true);
     const res = await fetch(`/api/events/${eventId}/dialog/${id}`, { method: "DELETE" });
     if (res.ok) {
-      fetchDialogs();
+      fetchDialogAndPerformances();
       setErrors({});
     } else {
       setErrors({ form: "Failed to delete dialog" });
@@ -137,9 +139,19 @@ const ShowDialogSection: React.FC<Props> = ({ eventId, performances }) => {
   return (
     <section className="mt-8">
       <h2 className="text-xl font-bold mb-4">Show Dialog</h2>
-      {dialogs.map((dialog) => (
+      {[...dialogs]
+        .sort((a, b) => {
+          const setA = a.performance.set?.position ?? 0;
+          const setB = b.performance.set?.position ?? 0;
+          if (setA !== setB) return setA - setB;
+          const orderA = a.performance.performanceOrder ?? a.performance.order ?? 0;
+          const orderB = b.performance.performanceOrder ?? b.performance.order ?? 0;
+          return orderA - orderB;
+        })
+        .map((dialog) => (
         <div key={dialog.id} className="bg-white rounded shadow p-4 mb-4">
           <div className="flex items-center gap-2 mb-2">
+            <div className="flex-1 flex gap-2">
             <select
               disabled={editingId !== dialog.id}
               value={String(editingId === dialog.id ? editData.isBeforeSong ?? dialog.isBeforeSong ?? false : dialog.isBeforeSong ?? false)}
@@ -159,38 +171,65 @@ const ShowDialogSection: React.FC<Props> = ({ eventId, performances }) => {
               }
               className="border rounded px-2 py-1"
             >
-              {groupedPerformances().map((group) => (
-                <optgroup key={group.position} label={`Set ${group.position}`}>
-                  {group.songs.map((p) => (
+              {performances.length === 0 ? (
+                <option value="">No performances</option>
+              ) : (
+                performances
+                  .sort((a, b) => (a.set?.position ?? 0) - (b.set?.position ?? 0) || ((a.performanceOrder ?? a.order ?? 0) - (b.performanceOrder ?? b.order ?? 0)))
+                  .map((p) => (
                     <option key={p.id} value={p.id}>
-                      {p.song.name}
+                      {`Set ${p.set?.position ?? "?"}: ${p.song?.title ?? "(No song)"}`}
                     </option>
-                  ))}
-                </optgroup>
-              ))}
+                  ))
+              )}
             </select>
-            <label className="flex items-center gap-1">
-              <input
-                type="checkbox"
-                disabled={editingId !== dialog.id}
-                checked={editingId === dialog.id ? editData.isVerbatim ?? dialog.isVerbatim ?? false : dialog.isVerbatim ?? false}
-                onChange={(e) =>
-                  editingId === dialog.id && setEditData({ ...editData, isVerbatim: e.target.checked })
-                }
-              />
-              Verbatim
-            </label>
-            {editingId === dialog.id ? (
-              <>
-                <button className="btn btn-primary" onClick={() => handleEdit(dialog.id)} disabled={loading}>Save</button>
-                <button className="btn btn-secondary" onClick={() => { setEditingId(null); setEditData({}); }}>Cancel</button>
-              </>
-            ) : (
-              <>
-                <button className="btn btn-secondary" onClick={() => { setEditingId(dialog.id); setEditData(dialog); }}>Edit</button>
-                <button className="btn btn-danger" onClick={() => handleDelete(dialog.id)} disabled={loading}>Delete</button>
-              </>
-            )}
+            </div>
+            <div className="flex gap-2 ml-auto">
+              <label className="flex items-center gap-1 mr-2">
+                <input
+                  type="checkbox"
+                  disabled={editingId !== dialog.id}
+                  checked={editingId === dialog.id ? editData.isVerbatim ?? dialog.isVerbatim ?? false : dialog.isVerbatim ?? false}
+                  onChange={(e) =>
+                    editingId === dialog.id && setEditData({ ...editData, isVerbatim: e.target.checked })
+                  }
+                />
+                Verbatim
+              </label>
+              {editingId === dialog.id ? (
+                <>
+                  <button
+                    className="bg-blue-100 text-blue-800 font-semibold py-0.5 px-2 rounded shadow hover:bg-blue-200 transition text-sm"
+                    onClick={() => handleEdit(dialog.id)}
+                    disabled={loading}
+                  >
+                    Save
+                  </button>
+                  <button
+                    className="bg-gray-200 text-gray-800 font-semibold py-0.5 px-2 rounded shadow hover:bg-gray-300 transition text-sm"
+                    onClick={() => { setEditingId(null); setEditData({}); }}
+                  >
+                    Cancel
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    className="bg-blue-100 text-blue-800 font-semibold py-0.5 px-2 rounded shadow hover:bg-blue-200 transition text-sm"
+                    onClick={() => { setEditingId(dialog.id); setEditData(dialog); }}
+                  >
+                    Edit
+                  </button>
+                  <button
+                    className="bg-red-100 text-red-800 font-semibold py-0.5 px-2 rounded shadow hover:bg-red-200 transition text-sm"
+                    onClick={() => handleDelete(dialog.id)}
+                    disabled={loading}
+                  >
+                    Delete
+                  </button>
+                </>
+              )}
+            </div>
           </div>
           <div>
             {editingId === dialog.id ? (
@@ -230,7 +269,7 @@ const ShowDialogSection: React.FC<Props> = ({ eventId, performances }) => {
                 <optgroup key={group.position} label={`Set ${group.position}`}>
                   {group.songs.map((p) => (
                     <option key={p.id} value={p.id}>
-                      {p.song.name}
+                      {p.song.title}
                     </option>
                   ))}
                 </optgroup>
@@ -260,7 +299,13 @@ const ShowDialogSection: React.FC<Props> = ({ eventId, performances }) => {
           </div>
         </div>
       ) : (
-        <button className="btn btn-primary" onClick={() => setAdding(true)} disabled={loading}>Add Dialog</button>
+        <button
+        className="bg-blue-600 text-white font-semibold py-2 px-4 rounded-md shadow hover:bg-blue-700 transition"
+          onClick={() => setAdding(true)}
+          disabled={loading}
+        >
+          Add Dialog
+        </button>
       )}
       {errors.form && <div className="text-red-500 mt-2">{errors.form}</div>}
     </section>
