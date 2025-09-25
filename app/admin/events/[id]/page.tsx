@@ -6,6 +6,7 @@ import SetPerformancesSection from "./components/SetPerformancesSection";
 import SetForm from './components/SetForm';
 import Link from "next/link";
 import EventContributorsSection from "./components/EventContributorsEditor";
+import ShowDialogSection from "./components/ShowDialogSection";
 import RecordingsSection from "./components/RecordingsSection";
 
 export default function EventEditPage() {
@@ -13,6 +14,8 @@ export default function EventEditPage() {
   const [songs, setSongs] = useState<any[]>([]);
   const [musicians, setMusicians] = useState<any[]>([]);
   const [instruments, setInstruments] = useState<any[]>([]);
+  // Dialog performances for dropdowns
+  const [performances, setPerformances] = useState<any[]>([]);
 
   const router = useRouter();
   const params = useParams();
@@ -47,6 +50,20 @@ export default function EventEditPage() {
   const [editingSet, setEditingSet] = useState<Set | null>(null);
 
   useEffect(() => {
+    // Fetch performances for dialog dropdowns
+    async function fetchPerformances() {
+      const res = await fetch(`/api/events/${id}/dialog`);
+      if (res.ok) {
+        const dialogs = await res.json();
+        // Extract performances from dialog, or fetch separately if needed
+        const perfMap: { [id: number]: any } = {};
+        dialogs.forEach((d: any) => {
+          if (d.performance) perfMap[d.performance.id] = d.performance;
+        });
+        setPerformances(Object.values(perfMap));
+      }
+    }
+    fetchPerformances();
     // Fetch songs, musicians, instruments for performance forms
     async function fetchSongMusicianInstrumentData() {
       const [songsRes, musiciansRes, instrumentsRes] = await Promise.all([
@@ -415,6 +432,10 @@ export default function EventEditPage() {
             ))}
            </tbody>
          </table>
+        {/* ShowDialog Section */}
+        {event && (
+          <ShowDialogSection eventId={event.id} performances={performances} />
+        )}
          {/* Performance management for each set (removed duplicate) */}
         {showSetForm && (
           <SetForm
