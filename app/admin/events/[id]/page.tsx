@@ -27,6 +27,7 @@ export default function EventEditPage() {
     contentTypeId: "",
     primaryBandId: "",
     notes: "",
+    isUncertain: false,
   });
   const [venues, setVenues] = useState<{ id: number; name: string }[]>([]);
   const [eventTypes, setEventTypes] = useState<{ id: number; name: string }[]>([]);
@@ -79,6 +80,7 @@ export default function EventEditPage() {
             contentTypeId: String(data.event.contentTypeId || ""),
             primaryBandId: String(data.event.primaryBandId || ""),
             notes: data.event.notes || "",
+            isUncertain: !!data.event.isUncertain,
           });
         } else {
           setError("Event not found.");
@@ -206,6 +208,17 @@ export default function EventEditPage() {
           </div>
         </div>
         <form className="space-y-6" onSubmit={handleSubmit}>
+          {/* isUncertain Checkbox */}
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              name="isUncertain"
+              checked={form.isUncertain}
+              onChange={e => setForm(f => ({ ...f, isUncertain: e.target.checked }))}
+              className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+            />
+            <label className="text-sm text-gray-700">Event date is uncertain</label>
+          </div>
           <div className="flex gap-4">
             <div className="w-1/6">
               <label className="block text-sm font-medium text-gray-700 mb-1">Year<span className="text-red-500">*</span></label>

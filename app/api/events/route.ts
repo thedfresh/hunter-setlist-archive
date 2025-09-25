@@ -80,6 +80,7 @@ export async function POST(req: Request) {
         contentTypeId: data.contentTypeId ? Number(data.contentTypeId) : null,
         primaryBandId: data.primaryBandId ? Number(data.primaryBandId) : null,
         notes: data.notes || null,
+        isUncertain: !!data.isUncertain,
         // Add other fields as needed, e.g. dateUncertain, venueUncertain, etc.
       },
     });

@@ -39,6 +39,7 @@ export async function PUT(req: NextRequest, context: { params: Params }) {
         contentTypeId: data.contentTypeId ? Number(data.contentTypeId) : null,
         primaryBandId: data.primaryBandId ? Number(data.primaryBandId) : null,
         notes: data.notes || null,
+        isUncertain: !!data.isUncertain,
       },
     });
     return NextResponse.json({ event });

@@ -115,11 +115,12 @@ export default function EventsAdminPage() {
                 // Only unique indices per performance
                 return Array.from(new Set(indices));
               }
+              const eventTextClass = e.isUncertain ? "text-gray-500" : "";
               return (
-                <div key={e.id} className="border-b pb-6 mb-6">
+                <div key={e.id} className={`border-b pb-6 mb-6 ${eventTextClass}`}>
                   <div className="flex items-center gap-6 mb-2">
-                    <div className="font-semibold text-lg">{e.displayDate || `${e.year}-${String(e.month || '').padStart(2, '0')}-${String(e.day || '').padStart(2, '0')}`}</div>
-                    <div className="text-gray-700">
+                    <div className={`font-semibold text-lg ${eventTextClass}`}>{e.displayDate || `${e.year}-${String(e.month || '').padStart(2, '0')}-${String(e.day || '').padStart(2, '0')}`}</div>
+                    <div className={e.isUncertain ? "text-gray-500" : "text-gray-700"}>
                       {e.venue ? (
                         <span>
                           {e.venue.name}
@@ -140,15 +141,15 @@ export default function EventsAdminPage() {
                     <div className="pl-4">
                       {e.sets.sort((a: any, b: any) => a.position - b.position).map((set: any) => (
                         <div key={set.id} className="mb-2">
-                          <span className="font-bold mr-2">{set.setType?.displayName || set.setType?.name || "Set"}:</span>
+                          <span className={`font-bold mr-2 ${eventTextClass}`}>{set.setType?.displayName || set.setType?.name || "Set"}:</span>
                           {set.performances && set.performances.length > 0 ? (
                             set.performances
                               .sort((a: any, b: any) => a.performanceOrder - b.performanceOrder)
                               .map((perf: any, idx: number) => {
-                                const isUncertain = perf.isUncertain || set.isUncertain;
+                                const isUncertain = perf.isUncertain || set.isUncertain || e.isUncertain;
                                 const songLink = `/admin/songs/${perf.song?.id}`;
                                 let display = (
-                                  <Link href={songLink} className={isUncertain ? "text-gray-400" : "text-blue-700 hover:underline"}>
+                                  <Link href={songLink} className={isUncertain ? "text-gray-500" : "text-blue-700 hover:underline"}>
                                     {perf.song?.title || "[Untitled]"}
                                   </Link>
                                 );
@@ -156,7 +157,7 @@ export default function EventsAdminPage() {
                                 if (perf.isTruncatedStart) display = <><span className="text-gray-500">//</span> {display}</>;
                                 if (perf.isTruncatedEnd) display = <>{display} <span className="text-gray-500">//</span></>;
                                 if (perf.seguesInto) {
-                                  const arrowClass = isUncertain ? "text-gray-400" : "text-blue-700";
+                                  const arrowClass = isUncertain ? "text-gray-500" : "text-blue-700";
                                   display = <>{display} <span className={arrowClass}>&gt;</span></>;
                                 }
                                 // Guest footnote indicators
@@ -165,7 +166,7 @@ export default function EventsAdminPage() {
                                 const isLast = idx === set.performances.length - 1;
                                 const needsComma = !perf.seguesInto && !perf.isTruncatedEnd && !isLast;
                                 return (
-                                  <span key={perf.id} className="mr-2">
+                                  <span key={perf.id} className={`mr-2 ${eventTextClass}`}>
                                     {display}
                                     {guestIndices.length > 0 && guestIndices.map(i => (
                                       <sup key={i} style={{ fontSize: "0.75em", top: "-0.5em", position: "relative" }}>[{i}]</sup>
@@ -175,13 +176,13 @@ export default function EventsAdminPage() {
                                 );
                               })
                           ) : (
-                            <span className="text-gray-400 italic">No performances</span>
+                            <span className="text-gray-500 italic">No performances</span>
                           )}
                         </div>
                       ))}
                       {/* Guest footnotes below all sets */}
                       {guestMap.size > 0 && (
-                        <div className="mt-4 text-sm text-gray-700">
+                        <div className={`mt-4 text-sm ${eventTextClass}`}>
                           {Array.from(guestMap.values()).map(g => (
                             <div key={g.idx} className="mb-1">
                               <span className="font-semibold">[{g.idx}]</span> {g.name} on {g.instrument}

@@ -1,16 +1,46 @@
+// Form state type for Create New Event
+type FormState = {
+  year: string;
+  month: string;
+  day: string;
+  displayDate: string;
+  venueId: string;
+  eventTypeId: string;
+  contentTypeId: string;
+  primaryBandId: string;
+  notes: string;
+  isUncertain: boolean;
+};
 "use client";
 import React, { useState, useEffect } from 'react';
+import AddVenueModal from './components/AddVenueModal';
 import { useRouter } from 'next/navigation';
+import Link from "next/link";
 
 // ...existing code...
 
 export default function NewEventPage() {
-  const [venues, setVenues] = useState<{ id: string; name: string }[]>([]);
+  const [venues, setVenues] = useState<{ id: string; name: string; city?: string; state?: string }[]>([]);
+  const [isVenueModalOpen, setIsVenueModalOpen] = useState(false);
   const [eventTypes, setEventTypes] = useState<{ id: string; name: string }[]>([]);
   const [contentTypes, setContentTypes] = useState<{ id: string; name: string }[]>([]);
   const [bands, setBands] = useState<{ id: string; name: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Form state lifted to parent
+  const [form, setForm] = useState<FormState>({
+    year: '',
+    month: '',
+    day: '',
+    displayDate: '',
+    venueId: '',
+    eventTypeId: '',
+    contentTypeId: '',
+    primaryBandId: '',
+    notes: '',
+    isUncertain: false,
+  });
 
   useEffect(() => {
     async function fetchDropdowns() {
@@ -33,6 +63,14 @@ export default function NewEventPage() {
         else throw new Error('Failed to load content types');
         if (bandsRes.ok && bandsData.bands) setBands(bandsData.bands);
         else throw new Error('Failed to load bands');
+
+        // Set default values for dropdowns after fetch
+        setForm(f => ({
+          ...f,
+          eventTypeId: eventTypesData.eventTypes?.find((t: any) => t.name.toLowerCase() === 'public show')?.id || (eventTypesData.eventTypes?.[0]?.id ?? ''),
+          contentTypeId: contentTypesData.contentTypes?.find((t: any) => t.name.toLowerCase() === 'musical')?.id || (contentTypesData.contentTypes?.[0]?.id ?? ''),
+          primaryBandId: bandsData.bands?.find((b: any) => b.name.toLowerCase() === 'robert hunter')?.id || (bandsData.bands?.[0]?.id ?? ''),
+        }));
       } catch (err: any) {
         setError(err.message || 'Failed to load dropdowns');
       } finally {
@@ -48,32 +86,51 @@ export default function NewEventPage() {
   if (error) {
     return <div className="p-8 text-center text-red-500">{error}</div>;
   }
-  return <EventForm venues={venues} eventTypes={eventTypes} contentTypes={contentTypes} bands={bands} />;
+  return (
+    <>
+      <EventForm
+        venues={venues}
+        eventTypes={eventTypes}
+        contentTypes={contentTypes}
+        bands={bands}
+        onAddVenue={() => setIsVenueModalOpen(true)}
+        form={form}
+        setForm={setForm}
+      />
+      <AddVenueModal
+        isOpen={isVenueModalOpen}
+        onClose={() => setIsVenueModalOpen(false)}
+        onVenueCreated={venue => {
+          const newVenue = {
+            id: String(venue.id),
+            name: venue.name,
+            city: venue.city || '',
+            stateProvince: venue.stateProvince || ''
+          };
+          setVenues(vs => {
+            const updated = [...vs, newVenue].sort((a, b) => a.name.localeCompare(b.name));
+            return updated;
+          });
+          setForm(f => ({ ...f, venueId: newVenue.id }));
+          setIsVenueModalOpen(false);
+        }}
+      />
+    </>
+  );
 }
 
-function EventForm({ venues, eventTypes, contentTypes, bands }: {
-  venues: { id: string; name: string }[],
+interface EventFormProps {
+  venues: { id: string; name: string; city?: string; stateProvince?: string }[],
   eventTypes: { id: string; name: string }[],
   contentTypes: { id: string; name: string }[],
   bands: { id: string; name: string }[],
-}) {
-  const router = useRouter();
-  // Find default IDs for dropdowns
-  const defaultEventTypeId = eventTypes.find(t => t.name.toLowerCase() === 'public show')?.id || (eventTypes[0]?.id ?? '');
-  const defaultContentTypeId = contentTypes.find(t => t.name.toLowerCase() === 'musical')?.id || (contentTypes[0]?.id ?? '');
-  const defaultBandId = bands.find(b => b.name.toLowerCase() === 'robert hunter')?.id || (bands[0]?.id ?? '');
+  onAddVenue: () => void,
+  form: FormState,
+  setForm: React.Dispatch<React.SetStateAction<FormState>>,
+}
 
-  const [form, setForm] = useState({
-    year: '',
-    month: '',
-    day: '',
-    displayDate: '',
-    venueId: '',
-    eventTypeId: defaultEventTypeId,
-    contentTypeId: defaultContentTypeId,
-    primaryBandId: defaultBandId,
-    notes: '',
-  });
+function EventForm({ venues, eventTypes, contentTypes, bands, onAddVenue, form, setForm }: EventFormProps) {
+  const router = useRouter();
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [submitting, setSubmitting] = useState(false);
 
@@ -121,6 +178,9 @@ function EventForm({ venues, eventTypes, contentTypes, bands }: {
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <div className="max-w-xl w-full bg-white rounded-xl shadow-lg p-8">
+        <div className="mb-4">
+          <Link href="/admin/events" className="text-blue-600 hover:underline font-semibold">Back to Events</Link>
+        </div>
         <h1 className="text-2xl font-bold mb-6 text-gray-800">Create New Event</h1>
         <form className="space-y-6" onSubmit={handleSubmit}>
           {/* Date Row: Year, Month, Day, Display Date */}
@@ -173,20 +233,33 @@ function EventForm({ venues, eventTypes, contentTypes, bands }: {
               />
             </div>
           </div>
-          {/* Venue Dropdown */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Venue</label>
-            <select
-              name="venueId"
-              value={form.venueId}
-              onChange={e => setForm(f => ({ ...f, venueId: e.target.value }))}
-              className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
+          {/* Venue Dropdown + Add Venue Button */}
+          <div className="flex items-end gap-2">
+            <div className="flex-1">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Venue</label>
+              <select
+                name="venueId"
+                value={form.venueId}
+                onChange={e => setForm(f => ({ ...f, venueId: e.target.value }))}
+                className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
+              >
+                <option value="">Select venue</option>
+                {venues.map(v => (
+                  <option key={v.id} value={v.id}>
+                    {v.name}
+                    {v.city ? ` (${v.city}` : ''}
+                    {v.stateProvince ? `${v.city ? ', ' : ' ('}${v.stateProvince})` : v.city ? ')' : ''}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <button
+              type="button"
+              className="px-3 py-2 rounded-md bg-blue-100 text-blue-700 font-medium border border-blue-300 hover:bg-blue-200 transition"
+              onClick={onAddVenue}
             >
-              <option value="">Select venue</option>
-              {venues.map(v => (
-                <option key={v.id} value={v.id}>{v.name}</option>
-              ))}
-            </select>
+              Add Venue
+            </button>
           </div>
           {/* Event Type, Content Type, Band Row */}
           <div className="flex flex-wrap gap-4 items-end">
@@ -232,6 +305,17 @@ function EventForm({ venues, eventTypes, contentTypes, bands }: {
                 ))}
               </select>
             </div>
+          </div>
+          {/* isUncertain Checkbox */}
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              name="isUncertain"
+              checked={form.isUncertain}
+              onChange={e => setForm(f => ({ ...f, isUncertain: e.target.checked }))}
+              className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+            />
+            <label className="text-sm text-gray-700">Event date is uncertain</label>
           </div>
           {/* Notes */}
           <div>
