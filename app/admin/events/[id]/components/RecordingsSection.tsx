@@ -28,6 +28,21 @@ const RecordingsSection: React.FC<Props> = ({ eventId }) => {
   });
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  // Links state for editing recording
+  const [links, setLinks] = useState<any[]>([]);
+  const [linksLoading, setLinksLoading] = useState(false);
+  const [linksError, setLinksError] = useState<string | null>(null);
+  // Add Link form state
+  const [showAddLink, setShowAddLink] = useState(false);
+  const [linkForm, setLinkForm] = useState({
+    url: "",
+    title: "",
+    description: "",
+    linkType: "",
+    isActive: true,
+  });
+  const [linkSubmitting, setLinkSubmitting] = useState(false);
+  const [linkError, setLinkError] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchAll() {
@@ -64,6 +79,20 @@ const RecordingsSection: React.FC<Props> = ({ eventId }) => {
       notes: rec.notes,
     });
     setShowForm(true);
+    // Fetch links for this recording
+    setLinks([]);
+    setLinksError(null);
+    setLinksLoading(true);
+    fetch(`/api/recordings/${rec.id}/links`)
+      .then(res => res.json())
+      .then(data => {
+        setLinks(data.links || []);
+        setLinksLoading(false);
+      })
+      .catch(err => {
+        setLinksError("Failed to load links.");
+        setLinksLoading(false);
+      });
   }
 
   function handleAdd() {
@@ -118,12 +147,12 @@ const RecordingsSection: React.FC<Props> = ({ eventId }) => {
           </tr>
         </thead>
         <tbody>
-            {recordings.map(rec => (
-              <tr key={rec.id} className="border-b">
-                <td className="py-2 px-4">{rec.type?.name || ""}</td>
-                <td className="py-2 px-4">{rec.sourceInfo}</td>
-                <td className="py-2 px-4">{rec.contributor?.name || ""}</td>
-                <td className="py-2 px-4">
+          {recordings.map(rec => (
+            <tr key={rec.id} className="border-b">
+              <td className="py-2 px-4">{rec.type?.name || ""}</td>
+              <td className="py-2 px-4">{rec.sourceInfo}</td>
+              <td className="py-2 px-4">{rec.contributor?.name || ""}</td>
+              <td className="py-2 px-4">
                 <button
                   className="bg-gray-200 text-gray-800 font-semibold py-0.5 px-2 rounded hover:bg-gray-300 mr-2 text-sm"
                   onClick={() => handleEdit(rec)}
@@ -142,78 +171,246 @@ const RecordingsSection: React.FC<Props> = ({ eventId }) => {
         onClick={handleAdd}
       >Add Recording</button>
       {showForm && (
-        <form className="space-y-4 bg-gray-50 p-4 rounded shadow" onSubmit={handleSave}>
-          <div className="flex gap-4">
-            <div className="w-1/3">
-              <label className="block text-sm font-medium mb-1">Type</label>
-              <select
-                value={form.typeId}
-                onChange={e => setForm(f => ({ ...f, typeId: e.target.value }))}
-                className="w-full border rounded px-2 py-1"
-                required
-                disabled={recordingTypes.length === 0}
-              >
-                <option value="">{recordingTypes.length === 0 ? "No types found" : "Select type"}</option>
-                {recordingTypes.length > 0 && recordingTypes.map(t => (
-                  <option key={t.id} value={t.id}>
-                    {t.name}
-                    {t.sourceType ? ` (${t.sourceType})` : ""}
-                  </option>
-                ))}
-              </select>
-              {recordingTypes.length === 0 && (
-                <p className="text-red-500 text-xs mt-1">No recording types found. Please add types in the database.</p>
-              )}
+        <>
+          <form className="space-y-4 bg-gray-50 p-4 rounded shadow" onSubmit={handleSave}>
+            <div className="flex gap-4">
+              <div className="w-1/3">
+                <label className="block text-sm font-medium mb-1">Type</label>
+                <select
+                  value={form.typeId}
+                  onChange={e => setForm(f => ({ ...f, typeId: e.target.value }))}
+                  className="w-full border rounded px-2 py-1"
+                  required
+                  disabled={recordingTypes.length === 0}
+                >
+                  <option value="">{recordingTypes.length === 0 ? "No types found" : "Select type"}</option>
+                  {recordingTypes.length > 0 && recordingTypes.map(t => (
+                    <option key={t.id} value={t.id}>
+                      {t.name}
+                      {t.sourceType ? ` (${t.sourceType})` : ""}
+                    </option>
+                  ))}
+                </select>
+                {recordingTypes.length === 0 && (
+                  <p className="text-red-500 text-xs mt-1">No recording types found. Please add types in the database.</p>
+                )}
+              </div>
+              <div className="w-1/3">
+                <label className="block text-sm font-medium mb-1">Source Info</label>
+                <input
+                  type="text"
+                  value={form.sourceInfo}
+                  onChange={e => setForm(f => ({ ...f, sourceInfo: e.target.value }))}
+                  className="w-full border rounded px-2 py-1"
+                  required
+                />
+              </div>
+              <div className="w-1/3">
+                <label className="block text-sm font-medium mb-1">Contributor</label>
+                <select
+                  value={form.contributorId}
+                  onChange={e => setForm(f => ({ ...f, contributorId: e.target.value }))}
+                  className="w-full border rounded px-2 py-1"
+                  required
+                >
+                  <option value="">Select contributor</option>
+                  {contributors.map(c => (
+                    <option key={c.id} value={c.id}>{c.name}</option>
+                  ))}
+                </select>
+              </div>
             </div>
-            <div className="w-1/3">
-              <label className="block text-sm font-medium mb-1">Source Info</label>
-              <input
-                type="text"
-                value={form.sourceInfo}
-                onChange={e => setForm(f => ({ ...f, sourceInfo: e.target.value }))}
+            <div>
+              <label className="block text-sm font-medium mb-1">Notes</label>
+              <textarea
+                value={form.notes}
+                onChange={e => setForm(f => ({ ...f, notes: e.target.value }))}
                 className="w-full border rounded px-2 py-1"
-                required
+                rows={2}
               />
             </div>
-            <div className="w-1/3">
-              <label className="block text-sm font-medium mb-1">Contributor</label>
-              <select
-                value={form.contributorId}
-                onChange={e => setForm(f => ({ ...f, contributorId: e.target.value }))}
-                className="w-full border rounded px-2 py-1"
-                required
-              >
-                <option value="">Select contributor</option>
-                {contributors.map(c => (
-                  <option key={c.id} value={c.id}>{c.name}</option>
-                ))}
-              </select>
+            {error && <p className="text-red-500 text-sm">{error}</p>}
+            <div className="flex gap-2 justify-end">
+              <button
+                type="button"
+                className="bg-gray-300 text-gray-800 px-4 py-2 rounded"
+                onClick={() => setShowForm(false)}
+                disabled={submitting}
+              >Cancel</button>
+              <button
+                type="submit"
+                className="bg-blue-600 text-white px-4 py-2 rounded"
+                disabled={submitting}
+              >{submitting ? "Saving..." : "Save"}</button>
             </div>
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Notes</label>
-            <textarea
-              value={form.notes}
-              onChange={e => setForm(f => ({ ...f, notes: e.target.value }))}
-              className="w-full border rounded px-2 py-1"
-              rows={2}
-            />
-          </div>
-          {error && <p className="text-red-500 text-sm">{error}</p>}
-          <div className="flex gap-2 justify-end">
-            <button
-              type="button"
-              className="bg-gray-300 text-gray-800 px-4 py-2 rounded"
-              onClick={() => setShowForm(false)}
-              disabled={submitting}
-            >Cancel</button>
-            <button
-              type="submit"
-              className="bg-blue-600 text-white px-4 py-2 rounded"
-              disabled={submitting}
-            >{submitting ? "Saving..." : "Save"}</button>
-          </div>
-        </form>
+          </form>
+          {/* Links display section (outside form) */}
+          {editing && (
+            <div className="mt-6">
+              <h3 className="text-lg font-semibold mb-2">Links</h3>
+              {linksLoading ? (
+                <p className="text-gray-500">Loading links...</p>
+              ) : linksError ? (
+                <p className="text-red-500">{linksError}</p>
+              ) : links.length === 0 ? (
+                <p className="text-gray-500">No links</p>
+              ) : (
+                <table className="w-full text-left border-collapse mb-2">
+                  <thead>
+                    <tr className="bg-gray-50">
+                      <th className="py-1 px-2 font-semibold">URL</th>
+                      <th className="py-1 px-2 font-semibold">Title</th>
+                      <th className="py-1 px-2 font-semibold">Type</th>
+                      <th className="py-1 px-2 font-semibold">Active</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {links.map(link => (
+                      <tr key={link.id} className="border-b">
+                        <td className="py-1 px-2">
+                          <a href={link.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">{link.url}</a>
+                        </td>
+                        <td className="py-1 px-2">{link.title || ""}</td>
+                        <td className="py-1 px-2">{link.linkType || ""}</td>
+                        <td className="py-1 px-2">{link.isActive ? "Yes" : "No"}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+              {/* Add Link button and form */}
+              <div className="mt-4">
+                {!showAddLink ? (
+                  <button
+                    type="button"
+                    className="bg-green-600 text-white font-semibold px-4 py-2 rounded shadow hover:bg-green-700"
+                    onClick={() => {
+                      setShowAddLink(true);
+                      setLinkError(null);
+                    }}
+                  >Add Link</button>
+                ) : (
+                  <form
+                    className="bg-white border rounded p-4 mt-2 space-y-3"
+                    onSubmit={async e => {
+                      e.preventDefault();
+                      setLinkError(null);
+                      if (!linkForm.url.trim()) {
+                        setLinkError("URL is required.");
+                        return;
+                      }
+                      setLinkSubmitting(true);
+                      const res = await fetch(`/api/recordings/${editing.id}/links`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                          url: linkForm.url,
+                          title: linkForm.title,
+                          description: linkForm.description,
+                          linkType: linkForm.linkType,
+                          isActive: linkForm.isActive,
+                        }),
+                      });
+                      if (res.ok) {
+                        // Refresh links
+                        setLinkForm({ url: "", title: "", description: "", linkType: "", isActive: true });
+                        setShowAddLink(false);
+                        setLinkSubmitting(false);
+                        setLinksLoading(true);
+                        setLinksError(null);
+                        fetch(`/api/recordings/${editing.id}/links`)
+                          .then(r => r.json())
+                          .then(data => {
+                            setLinks(data.links || []);
+                            setLinksLoading(false);
+                          })
+                          .catch(err => {
+                            setLinksError("Failed to load links.");
+                            setLinksLoading(false);
+                          });
+                      } else {
+                        setLinkError("Failed to add link.");
+                        setLinkSubmitting(false);
+                      }
+                    }}
+                  >
+                    <div className="flex gap-4">
+                      <div className="w-1/3">
+                        <label className="block text-sm font-medium mb-1">URL<span className="text-red-500">*</span></label>
+                        <input
+                          type="url"
+                          value={linkForm.url}
+                          onChange={e => setLinkForm(f => ({ ...f, url: e.target.value }))}
+                          className="w-full border rounded px-2 py-1"
+                          required
+                        />
+                      </div>
+                      <div className="w-1/3">
+                        <label className="block text-sm font-medium mb-1">Title</label>
+                        <input
+                          type="text"
+                          value={linkForm.title}
+                          onChange={e => setLinkForm(f => ({ ...f, title: e.target.value }))}
+                          className="w-full border rounded px-2 py-1"
+                        />
+                      </div>
+                      <div className="w-1/3">
+                        <label className="block text-sm font-medium mb-1">Type</label>
+                        <input
+                          type="text"
+                          value={linkForm.linkType}
+                          onChange={e => setLinkForm(f => ({ ...f, linkType: e.target.value }))}
+                          className="w-full border rounded px-2 py-1"
+                        />
+                      </div>
+                    </div>
+                    <div className="flex gap-4 items-center">
+                      <div className="w-2/3">
+                        <label className="block text-sm font-medium mb-1">Description</label>
+                        <textarea
+                          value={linkForm.description}
+                          onChange={e => setLinkForm(f => ({ ...f, description: e.target.value }))}
+                          className="w-full border rounded px-2 py-1"
+                          rows={2}
+                        />
+                      </div>
+                      <div className="w-1/3 flex items-center mt-6">
+                        <input
+                          type="checkbox"
+                          checked={linkForm.isActive}
+                          onChange={e => setLinkForm(f => ({ ...f, isActive: e.target.checked }))}
+                          className="mr-2"
+                          id="isActive"
+                        />
+                        <label htmlFor="isActive" className="text-sm">Active</label>
+                      </div>
+                    </div>
+                    {linkError && <p className="text-red-500 text-sm mt-2">{linkError}</p>}
+                    <div className="flex gap-2 justify-end mt-2">
+                      <button
+                        type="button"
+                        className="bg-gray-300 text-gray-800 px-4 py-2 rounded"
+                        onClick={() => {
+                          setShowAddLink(false);
+                          setLinkError(null);
+                          setLinkForm({ url: "", title: "", description: "", linkType: "", isActive: true });
+                        }}
+                        disabled={linkSubmitting}
+                      >Cancel</button>
+                      <button
+                        type="submit"
+                        className="bg-green-600 text-white px-4 py-2 rounded"
+                        disabled={linkSubmitting}
+                      >{linkSubmitting ? "Saving..." : "Save"}</button>
+                    </div>
+                  </form>
+                )}
+              </div>
+              {/* End Add Link button and form */}
+            </div>
+          )}
+          {/* End links section */}
+        </>
       )}
     </div>
   );

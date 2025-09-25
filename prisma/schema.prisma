@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,16 +7,13 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Core Entity Tables
-
 model EventType {
-  id               Int     @id @default(autoincrement())
-  name             String
-  includeInStats   Boolean @default(true) @map("include_in_stats")
-  createdAt        DateTime @default(now()) @map("created_at")
-  
-  events           Event[]
-  
+  id             Int      @id @default(autoincrement())
+  name           String
+  includeInStats Boolean  @default(true) @map("include_in_stats")
+  createdAt      DateTime @default(now()) @map("created_at")
+  events         Event[]
+
   @@map("event_types")
 }
 
@@ -27,20 +21,18 @@ model ContentType {
   id        Int      @id @default(autoincrement())
   name      String
   createdAt DateTime @default(now()) @map("created_at")
-  
   events    Event[]
-  
+
   @@map("content_types")
 }
 
 model Band {
   id        Int      @id @default(autoincrement())
   name      String
-  notes     String?
   createdAt DateTime @default(now()) @map("created_at")
-  
+  notes     String?
   events    Event[]  @relation("PrimaryBand")
-  
+
   @@map("bands")
 }
 
@@ -50,10 +42,9 @@ model Venue {
   city          String?
   stateProvince String?  @map("state_province")
   country       String?
-  notes         String?
   isUncertain   Boolean  @default(false) @map("is_uncertain")
   createdAt     DateTime @default(now()) @map("created_at")
-  
+  notes         String?
   events        Event[]
   links         Link[]
 
@@ -61,88 +52,80 @@ model Venue {
 }
 
 model Musician {
-  id          Int      @id @default(autoincrement())
-  name        String
-  isUncertain Boolean  @default(false) @map("is_uncertain")
-  createdAt   DateTime @default(now()) @map("created_at")
-  performanceVocals    Performance[] @relation("PerformanceLeadVocals")
+  id                   Int                         @id @default(autoincrement())
+  name                 String
+  isUncertain          Boolean                     @default(false) @map("is_uncertain")
+  createdAt            DateTime                    @default(now()) @map("created_at")
   eventMusicians       EventMusician[]
-  performanceMusicians PerformanceMusician[]
   defaultInstruments   MusicianDefaultInstrument[]
-  songsLeadVocals      Song[]         @relation("LeadVocals")
-  
+  performanceMusicians PerformanceMusician[]
+  performanceVocals    Performance[]               @relation("PerformanceLeadVocals")
+  songsLeadVocals      Song[]                      @relation("LeadVocals")
+
   @@map("musicians")
 }
 
 model Instrument {
-  id          Int      @id @default(autoincrement())
-  name        String
-  displayName String   @map("display_name")
-  createdAt   DateTime @default(now()) @map("created_at")
-  
+  id                   Int                         @id @default(autoincrement())
+  name                 String
+  displayName          String                      @map("display_name")
+  createdAt            DateTime                    @default(now()) @map("created_at")
   eventMusicians       EventMusician[]
-  performanceMusicians PerformanceMusician[]
   musicianDefaults     MusicianDefaultInstrument[]
-  
+  performanceMusicians PerformanceMusician[]
+
   @@map("instruments")
 }
 
-// Event Structure
-
 model Event {
-  id                            Int      @id @default(autoincrement())
-  year                          Int?
-  month                         Int?
-  day                           Int?
-  displayDate                   String?  @map("display_date")
-  dateUncertain                 Boolean  @default(false) @map("date_uncertain")
-  venueId                       Int?     @map("venue_id")
-  venueUncertain                Boolean  @default(false) @map("venue_uncertain")
-  eventTypeId                   Int?     @map("event_type_id")
-  contentTypeId                 Int?     @map("content_type_id")
-  primaryBandId                 Int?     @map("primary_band_id")
-  hunterParticipationUncertain  Boolean  @default(false) @map("hunter_participation_uncertain")
-  billing                       String?
-  isSpurious                    Boolean  @default(false) @map("is_spurious")
-  notes                         String?
-  isUncertain                   Boolean  @default(false) @map("is_uncertain")
-  includeInStats                Boolean  @default(true)  @map("include_in_stats")
-  verified                      Boolean  @default(false)
-  createdAt                     DateTime @default(now()) @map("created_at")
-  updatedAt                     DateTime @default(now()) @updatedAt @map("updated_at")
-  
-  venue        Venue?       @relation(fields: [venueId], references: [id])
-  eventType    EventType?   @relation(fields: [eventTypeId], references: [id])
-  contentType  ContentType? @relation(fields: [contentTypeId], references: [id])
-  primaryBand  Band?        @relation("PrimaryBand", fields: [primaryBandId], references: [id])
-  
-  sets               Set[]
-  eventMusicians     EventMusician[]
-  recordings         Recording[]
-  eventContributors  EventContributor[]
-  noteLinks          NoteLink[]
-  showDialog         ShowDialog[]
-  links              Link[]
-  
+  id                           Int                @id @default(autoincrement())
+  year                         Int?
+  month                        Int?
+  day                          Int?
+  displayDate                  String?            @map("display_date")
+  dateUncertain                Boolean            @default(false) @map("date_uncertain")
+  venueId                      Int?               @map("venue_id")
+  venueUncertain               Boolean            @default(false) @map("venue_uncertain")
+  eventTypeId                  Int?               @map("event_type_id")
+  contentTypeId                Int?               @map("content_type_id")
+  primaryBandId                Int?               @map("primary_band_id")
+  hunterParticipationUncertain Boolean            @default(false) @map("hunter_participation_uncertain")
+  billing                      String?
+  isSpurious                   Boolean            @default(false) @map("is_spurious")
+  notes                        String?
+  includeInStats               Boolean            @default(true) @map("include_in_stats")
+  verified                     Boolean            @default(false)
+  createdAt                    DateTime           @default(now()) @map("created_at")
+  updatedAt                    DateTime           @default(now()) @updatedAt @map("updated_at")
+  isUncertain                  Boolean            @default(false) @map("is_uncertain")
+  eventContributors            EventContributor[]
+  eventMusicians               EventMusician[]
+  contentType                  ContentType?       @relation(fields: [contentTypeId], references: [id])
+  eventType                    EventType?         @relation(fields: [eventTypeId], references: [id])
+  primaryBand                  Band?              @relation("PrimaryBand", fields: [primaryBandId], references: [id])
+  venue                        Venue?             @relation(fields: [venueId], references: [id])
+  links                        Link[]
+  noteLinks                    NoteLink[]
+  recordings                   Recording[]
+  sets                         Set[]
+  showDialog                   ShowDialog[]
+
   @@map("events")
 }
 
 model EventMusician {
-  id           Int      @id @default(autoincrement())
-  eventId      Int      @map("event_id")
-  musicianId   Int      @map("musician_id")
-  instrumentId Int?     @map("instrument_id")
+  id           Int         @id @default(autoincrement())
+  eventId      Int         @map("event_id")
+  musicianId   Int         @map("musician_id")
+  instrumentId Int?        @map("instrument_id")
   notes        String?
-  createdAt    DateTime @default(now()) @map("created_at")
-  
-  event      Event      @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  musician   Musician   @relation(fields: [musicianId], references: [id])
-  instrument Instrument? @relation(fields: [instrumentId], references: [id])
-  
+  createdAt    DateTime    @default(now()) @map("created_at")
+  event        Event       @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  instrument   Instrument? @relation(fields: [instrumentId], references: [id])
+  musician     Musician    @relation(fields: [musicianId], references: [id])
+
   @@map("event_musicians")
 }
-
-// Set and Performance Structure
 
 model SetType {
   id             Int      @id @default(autoincrement())
@@ -150,77 +133,68 @@ model SetType {
   displayName    String   @map("display_name")
   includeInStats Boolean  @default(true) @map("include_in_stats")
   createdAt      DateTime @default(now()) @map("created_at")
-  
   sets           Set[]
-  
+
   @@map("set_types")
 }
 
 model Set {
-  id            Int      @id @default(autoincrement())
-  eventId       Int      @map("event_id")
-  setTypeId     Int      @map("set_type_id")
-  position      Int
-  isUncertain   Boolean  @default(false) @map("is_uncertain")
-  notes         String?
-  createdAt     DateTime @default(now()) @map("created_at")
-  
-  event     Event   @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  setType   SetType @relation(fields: [setTypeId], references: [id])
-  
-  performances   Performance[]
-  noteLinks      NoteLink[]
-  showDialog     ShowDialog[]
-  
+  id           Int           @id @default(autoincrement())
+  eventId      Int           @map("event_id")
+  setTypeId    Int           @map("set_type_id")
+  position     Int
+  notes        String?
+  createdAt    DateTime      @default(now()) @map("created_at")
+  isUncertain  Boolean       @default(false) @map("is_uncertain")
+  noteLinks    NoteLink[]
+  performances Performance[]
+  event        Event         @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  setType      SetType       @relation(fields: [setTypeId], references: [id])
+  showDialog   ShowDialog[]
+
   @@map("sets")
 }
 
-// Song and Album Structure
-
 model Album {
-  id          Int      @id @default(autoincrement())
+  id          Int         @id @default(autoincrement())
   title       String
   artist      String?
+  releaseYear Int?        @map("release_year")
+  isOfficial  Boolean     @default(true) @map("is_official")
   notes       String?
-  releaseYear Int?     @map("release_year")
-  isOfficial  Boolean  @default(true) @map("is_official")
-  createdAt   DateTime @default(now()) @map("created_at")
-  
+  createdAt   DateTime    @default(now()) @map("created_at")
   songAlbums  SongAlbum[]
-  
+
   @@map("albums")
 }
 
 model Tag {
-  id          Int      @id @default(autoincrement())
-  name        String   @unique
+  id          Int       @id @default(autoincrement())
+  name        String    @unique
   description String?
-  createdAt   DateTime @default(now()) @map("created_at")
-  
+  createdAt   DateTime  @default(now()) @map("created_at")
   songTags    SongTag[]
-  
+
   @@map("tags")
 }
 
 model Song {
-  id             Int      @id @default(autoincrement())
+  id             Int           @id @default(autoincrement())
   title          String
-  originalArtist String?  @map("original_artist")
-  lyricsBy       String?  @map("lyrics_by")
-  musicBy        String?  @map("music_by")
-  leadVocalsId   Int?     @map("lead_vocals_id")
-  isUncertain    Boolean  @default(false) @map("is_uncertain")
-  inBoxOfRain    Boolean  @default(false) @map("in_box_of_rain")
+  originalArtist String?       @map("original_artist")
+  lyricsBy       String?       @map("lyrics_by")
+  musicBy        String?       @map("music_by")
+  leadVocalsId   Int?          @map("lead_vocals_id")
+  isUncertain    Boolean       @default(false) @map("is_uncertain")
   notes          String?
-  createdAt      DateTime @default(now()) @map("created_at")
-  updatedAt      DateTime @default(now()) @updatedAt @map("updated_at")
-  
-  leadVocals   Musician? @relation("LeadVocals", fields: [leadVocalsId], references: [id])
-  
-  performances Performance[]
-  songAlbums   SongAlbum[]
-  songTags     SongTag[]
-  links        Link[]
+  createdAt      DateTime      @default(now()) @map("created_at")
+  updatedAt      DateTime      @default(now()) @updatedAt @map("updated_at")
+  inBoxOfRain    Boolean       @default(false) @map("in_box_of_rain")
+  links          Link[]
+  performances   Performance[]
+  songAlbums     SongAlbum[]
+  songTags       SongTag[]
+  leadVocals     Musician?     @relation("LeadVocals", fields: [leadVocalsId], references: [id])
 
   @@map("songs")
 }
@@ -232,10 +206,9 @@ model SongAlbum {
   trackNumber Int?     @map("track_number")
   notes       String?
   createdAt   DateTime @default(now()) @map("created_at")
-  
-  song  Song  @relation(fields: [songId], references: [id], onDelete: Cascade)
-  album Album @relation(fields: [albumId], references: [id])
-  
+  album       Album    @relation(fields: [albumId], references: [id])
+  song        Song     @relation(fields: [songId], references: [id], onDelete: Cascade)
+
   @@map("song_albums")
 }
 
@@ -244,147 +217,130 @@ model SongTag {
   songId    Int      @map("song_id")
   tagId     Int      @map("tag_id")
   createdAt DateTime @default(now()) @map("created_at")
-  
-  song Song @relation(fields: [songId], references: [id], onDelete: Cascade)
-  tag  Tag  @relation(fields: [tagId], references: [id])
-  
+  song      Song     @relation(fields: [songId], references: [id], onDelete: Cascade)
+  tag       Tag      @relation(fields: [tagId], references: [id])
+
   @@unique([songId, tagId])
   @@map("song_tags")
 }
 
-// Performance Tracking
-
 model Performance {
-  id                 Int      @id @default(autoincrement())
-  setId              Int      @map("set_id")
-  songId             Int      @map("song_id")
-  performanceOrder   Int      @map("performance_order")
-  seguesInto         Boolean  @default(false) @map("segues_into")
-  isTruncatedStart   Boolean  @default(false) @map("is_truncated_start")
-  isTruncatedEnd     Boolean  @default(false) @map("is_truncated_end")
-  hasCuts            Boolean  @default(false) @map("has_cuts")
-  isPartial          Boolean  @default(false) @map("is_partial")
-  hunterVocal        Boolean? @map("hunter_vocal")
-  hunterGuitar       Boolean? @map("hunter_guitar")
-  hunterHarmonica    Boolean? @map("hunter_harmonica")
-  isUncertain        Boolean  @default(false) @map("is_uncertain")
-  leadVocalsId       Int?     @map("lead_vocals_id")
-  leadVocals         Musician? @relation("PerformanceLeadVocals", fields: [leadVocalsId], references: [id])
-  notes              String?
-  createdAt          DateTime @default(now()) @map("created_at")
-  
-  set    Set  @relation(fields: [setId], references: [id], onDelete: Cascade)
-  song   Song @relation(fields: [songId], references: [id])
-  
+  id                   Int                   @id @default(autoincrement())
+  setId                Int                   @map("set_id")
+  songId               Int                   @map("song_id")
+  performanceOrder     Int                   @map("performance_order")
+  seguesInto           Boolean               @default(false) @map("segues_into")
+  isTruncatedStart     Boolean               @default(false) @map("is_truncated_start")
+  isTruncatedEnd       Boolean               @default(false) @map("is_truncated_end")
+  hasCuts              Boolean               @default(false) @map("has_cuts")
+  isPartial            Boolean               @default(false) @map("is_partial")
+  hunterVocal          Boolean?              @map("hunter_vocal")
+  hunterGuitar         Boolean?              @map("hunter_guitar")
+  hunterHarmonica      Boolean?              @map("hunter_harmonica")
+  notes                String?
+  createdAt            DateTime              @default(now()) @map("created_at")
+  isUncertain          Boolean               @default(false) @map("is_uncertain")
+  leadVocalsId         Int?                  @map("lead_vocals_id")
+  noteLinks            NoteLink[]
   performanceMusicians PerformanceMusician[]
-  noteLinks           NoteLink[]
-  
+  leadVocals           Musician?             @relation("PerformanceLeadVocals", fields: [leadVocalsId], references: [id])
+  set                  Set                   @relation(fields: [setId], references: [id], onDelete: Cascade)
+  song                 Song                  @relation(fields: [songId], references: [id])
+
   @@map("performances")
 }
 
 model PerformanceMusician {
-  id            Int      @id @default(autoincrement())
-  performanceId Int      @map("performance_id")
-  musicianId    Int      @map("musician_id")
-  instrumentId  Int?     @map("instrument_id")
+  id            Int         @id @default(autoincrement())
+  performanceId Int         @map("performance_id")
+  musicianId    Int         @map("musician_id")
+  instrumentId  Int?        @map("instrument_id")
   notes         String?
-  createdAt     DateTime @default(now()) @map("created_at")
-  
-  performance Performance @relation(fields: [performanceId], references: [id], onDelete: Cascade)
-  musician    Musician    @relation(fields: [musicianId], references: [id])
-  instrument  Instrument? @relation(fields: [instrumentId], references: [id])
-  
+  createdAt     DateTime    @default(now()) @map("created_at")
+  instrument    Instrument? @relation(fields: [instrumentId], references: [id])
+  musician      Musician    @relation(fields: [musicianId], references: [id])
+  performance   Performance @relation(fields: [performanceId], references: [id], onDelete: Cascade)
+
   @@map("performance_musicians")
 }
 
-// Recording and Source Tracking
-
 model RecordingType {
-  id          Int      @id @default(autoincrement())
+  id          Int         @id @default(autoincrement())
   name        String
   description String?
-  createdAt   DateTime @default(now()) @map("created_at")
-  
+  createdAt   DateTime    @default(now()) @map("created_at")
   recordings  Recording[]
-  
+
   @@map("recording_types")
 }
 
 model Contributor {
-  id        Int      @id @default(autoincrement())
-  name      String
-  email     String?
-  notes     String?
-  createdAt DateTime @default(now()) @map("created_at")
-  
-  recordings         Recording[]
-  eventContributors  EventContributor[]
-  
+  id                Int                @id @default(autoincrement())
+  name              String
+  createdAt         DateTime           @default(now()) @map("created_at")
+  email             String?
+  notes             String?
+  eventContributors EventContributor[]
+  recordings        Recording[]
+
   @@map("contributors")
 }
 
 model Recording {
-  id                Int      @id @default(autoincrement())
-  eventId           Int      @map("event_id")
-  recordingTypeId   Int?     @map("recording_type_id")
-  sourceInfo        String?  @map("source_info")
+  id                Int            @id @default(autoincrement())
+  eventId           Int            @map("event_id")
+  recordingTypeId   Int?           @map("recording_type_id")
+  sourceInfo        String?        @map("source_info")
   url               String?
-  archiveIdentifier String?  @map("archive_identifier")
-  shnId             String?  @map("shn_id")
+  archiveIdentifier String?        @map("archive_identifier")
+  shnId             String?        @map("shn_id")
   taper             String?
-  contributorId     Int?     @map("contributor_id")
-  lengthMinutes     Int?     @map("length_minutes")
+  contributorId     Int?           @map("contributor_id")
+  lengthMinutes     Int?           @map("length_minutes")
   notes             String?
-  createdAt         DateTime @default(now()) @map("created_at")
-  
-  event         Event          @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  recordingType RecordingType? @relation(fields: [recordingTypeId], references: [id])
-  contributor   Contributor?   @relation(fields: [contributorId], references: [id])
-  
-  links         Link[]
+  createdAt         DateTime       @default(now()) @map("created_at")
+  links             Link[]
+  contributor       Contributor?   @relation(fields: [contributorId], references: [id])
+  event             Event          @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  recordingType     RecordingType? @relation(fields: [recordingTypeId], references: [id])
 
   @@map("recordings")
 }
 
 model EventContributor {
-  id            Int      @id @default(autoincrement())
-  eventId       Int      @map("event_id")
-  contributorId Int?     @map("contributor_id")
+  id            Int          @id @default(autoincrement())
+  eventId       Int          @map("event_id")
+  contributorId Int?         @map("contributor_id")
   description   String?
   notes         String?
-  createdAt     DateTime @default(now()) @map("created_at")
-  
-  event       Event        @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  contributor Contributor? @relation(fields: [contributorId], references: [id])
-  
+  createdAt     DateTime     @default(now()) @map("created_at")
+  contributor   Contributor? @relation(fields: [contributorId], references: [id])
+  event         Event        @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
   @@map("event_contributors")
 }
 
-// Notes and Dialog System
-
 model Note {
-  id        Int      @id @default(autoincrement())
-  noteText  String   @map("note_text")
-  createdAt DateTime @default(now()) @map("created_at")
-  
+  id        Int        @id @default(autoincrement())
+  noteText  String     @map("note_text")
+  createdAt DateTime   @default(now()) @map("created_at")
   noteLinks NoteLink[]
-  
+
   @@map("notes")
 }
 
 model NoteLink {
-  id            Int  @id @default(autoincrement())
-  noteId        Int  @map("note_id")
-  eventId       Int? @map("event_id")
-  setId         Int? @map("set_id")
-  performanceId Int? @map("performance_id")
-  createdAt     DateTime @default(now()) @map("created_at")
-  
-  note        Note         @relation(fields: [noteId], references: [id])
-  event       Event?       @relation(fields: [eventId], references: [id])
-  set         Set?         @relation(fields: [setId], references: [id])
-  performance Performance? @relation(fields: [performanceId], references: [id])
-  
+  id            Int          @id @default(autoincrement())
+  noteId        Int          @map("note_id")
+  eventId       Int?         @map("event_id")
+  setId         Int?         @map("set_id")
+  performanceId Int?         @map("performance_id")
+  createdAt     DateTime     @default(now()) @map("created_at")
+  event         Event?       @relation(fields: [eventId], references: [id])
+  note          Note         @relation(fields: [noteId], references: [id])
+  performance   Performance? @relation(fields: [performanceId], references: [id])
+  set           Set?         @relation(fields: [setId], references: [id])
+
   @@map("note_links")
 }
 
@@ -395,10 +351,9 @@ model ShowDialog {
   afterSongOrder Int?     @map("after_song_order")
   dialogText     String   @map("dialog_text")
   createdAt      DateTime @default(now()) @map("created_at")
-  
-  event Event? @relation(fields: [eventId], references: [id])
-  set   Set?   @relation(fields: [setId], references: [id])
-  
+  event          Event?   @relation(fields: [eventId], references: [id])
+  set            Set?     @relation(fields: [setId], references: [id])
+
   @@map("show_dialog")
 }
 
@@ -407,35 +362,31 @@ model MusicianDefaultInstrument {
   musicianId   Int        @map("musician_id")
   instrumentId Int        @map("instrument_id")
   createdAt    DateTime   @default(now()) @map("created_at")
-  
-  musician   Musician   @relation(fields: [musicianId], references: [id], onDelete: Cascade)
-  instrument Instrument @relation(fields: [instrumentId], references: [id])
-  
+  instrument   Instrument @relation(fields: [instrumentId], references: [id])
+  musician     Musician   @relation(fields: [musicianId], references: [id], onDelete: Cascade)
+
   @@unique([musicianId, instrumentId])
   @@map("musician_default_instruments")
 }
 
 model Link {
-  id          Int      @id @default(autoincrement())
+  id          Int        @id @default(autoincrement())
   url         String
   title       String?
   description String?
-  linkType    String?   // 'lyrics', 'video', 'website', 'journal', 'review'
-  isActive    Boolean  @default(true)
-  dateFetched DateTime? @map("date_fetched")
-  isPublic    Boolean  @default(true) @map("is_public")
-  createdAt   DateTime @default(now()) @map("created_at")
-  
-  // Direct foreign keys instead of polymorphic
-  eventId     Int?     @map("event_id")
-  songId      Int?     @map("song_id") 
-  venueId     Int?     @map("venue_id")
-  recordingId Int?     @map("recording_id")
-  
-  event     Event?     @relation(fields: [eventId], references: [id])
-  song      Song?      @relation(fields: [songId], references: [id])
-  venue     Venue?     @relation(fields: [venueId], references: [id])
-  recording Recording? @relation(fields: [recordingId], references: [id])
-  
+  linkType    String?
+  isActive    Boolean    @default(true)
+  dateFetched DateTime?  @map("date_fetched")
+  isPublic    Boolean    @default(true) @map("is_public")
+  createdAt   DateTime   @default(now()) @map("created_at")
+  eventId     Int?       @map("event_id")
+  songId      Int?       @map("song_id")
+  venueId     Int?       @map("venue_id")
+  recordingId Int?       @map("recording_id")
+  event       Event?     @relation(fields: [eventId], references: [id])
+  recording   Recording? @relation(fields: [recordingId], references: [id])
+  song        Song?      @relation(fields: [songId], references: [id])
+  venue       Venue?     @relation(fields: [venueId], references: [id])
+
   @@map("links")
 }
