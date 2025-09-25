@@ -29,7 +29,11 @@ export async function PUT(req: NextRequest, { params }: { params: Params }) {
     }
     const contributor = await prisma.contributor.update({
       where: { id },
-      data: { name: data.name },
+      data: {
+        name: data.name,
+        email: typeof data.email === 'string' ? data.email : undefined,
+        notes: typeof data.notes === 'string' ? data.notes : undefined,
+      },
     });
     return NextResponse.json({ contributor });
   } catch (error) {

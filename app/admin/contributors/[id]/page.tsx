@@ -7,6 +7,8 @@ export default function ContributorEditPage() {
   const router = useRouter();
   const params = useParams();
   const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -17,6 +19,8 @@ export default function ContributorEditPage() {
         const data = await res.json();
         if (res.ok && data.contributor) {
           setName(data.contributor.name);
+          setEmail(data.contributor.email || "");
+          setNotes(data.contributor.notes || "");
         } else {
           setError("Contributor not found.");
         }
@@ -41,7 +45,7 @@ export default function ContributorEditPage() {
       const res = await fetch(`/api/contributors/${params.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name }),
+        body: JSON.stringify({ name, email, notes }),
       });
       if (res.ok) {
         router.push("/admin/contributors");
@@ -92,6 +96,26 @@ export default function ContributorEditPage() {
               disabled={submitting}
             />
             {error && <div className="text-red-500 text-sm mt-2">{error}</div>}
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+            <input
+              type="email"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
+              disabled={submitting}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+            <textarea
+              value={notes}
+              onChange={e => setNotes(e.target.value)}
+              className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
+              rows={2}
+              disabled={submitting}
+            />
           </div>
           <div className="flex gap-2">
             <button
