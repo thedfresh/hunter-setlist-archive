@@ -5,7 +5,7 @@ import { Event, Set } from '@/lib/types';
 import SetPerformancesSection from "./components/SetPerformancesSection";
 import SetForm from './components/SetForm';
 import Link from "next/link";
-import EventContributorsSection from "../../components/EventContributorsSection";
+import EventContributorsSection from "./components/EventContributorsEditor";
 
 export default function EventEditPage() {
   // Performance management state

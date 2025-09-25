@@ -13,6 +13,7 @@ type FormState = {
 };
 "use client";
 import React, { useState, useEffect } from 'react';
+import EventContributorsInput, { EventContributor } from './components/EventContributorsInput';
 import AddVenueModal from './components/AddVenueModal';
 import { useRouter } from 'next/navigation';
 import Link from "next/link";
@@ -25,6 +26,8 @@ export default function NewEventPage() {
   const [bands, setBands] = useState<{ id: string; name: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  // Contributors state for event creation
+  const [contributors, setContributors] = useState<EventContributor[]>([]);
 
   // Form state lifted to parent
   const [form, setForm] = useState<FormState>({
@@ -94,6 +97,8 @@ export default function NewEventPage() {
         onAddVenue={() => setIsVenueModalOpen(true)}
         form={form}
         setForm={setForm}
+        contributors={contributors}
+        setContributors={setContributors}
       />
       <AddVenueModal
         isOpen={isVenueModalOpen}
@@ -125,9 +130,11 @@ interface EventFormProps {
   onAddVenue: () => void,
   form: FormState,
   setForm: React.Dispatch<React.SetStateAction<FormState>>,
+  contributors: EventContributor[],
+  setContributors: React.Dispatch<React.SetStateAction<EventContributor[]>>,
 }
 
-function EventForm({ venues, eventTypes, contentTypes, bands, onAddVenue, form, setForm }: EventFormProps) {
+function EventForm({ venues, eventTypes, contentTypes, bands, onAddVenue, form, setForm, contributors, setContributors }: EventFormProps) {
   const router = useRouter();
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [submitting, setSubmitting] = useState(false);
@@ -149,12 +156,13 @@ function EventForm({ venues, eventTypes, contentTypes, bands, onAddVenue, form, 
       return;
     }
     setSubmitting(true);
-    // Submit to API route (to be implemented)
+    // Submit to API route, including contributors
     try {
+      const payload = { ...form, contributors };
       const res = await fetch('/api/events', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify(payload),
       });
       if (res.ok) {
         const data = await res.json();
@@ -315,6 +323,8 @@ function EventForm({ venues, eventTypes, contentTypes, bands, onAddVenue, form, 
             />
             <label className="text-sm text-gray-700">Event date is uncertain</label>
           </div>
+          {/* Contributors Section */}
+          <EventContributorsInput onContributorsChange={setContributors} />
           {/* Notes */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
