@@ -154,12 +154,14 @@ const RecordingsSection: React.FC<Props> = ({ eventId }) => {
               <td className="py-2 px-4">{rec.contributor?.name || ""}</td>
               <td className="py-2 px-4">
                 <button
-                  className="bg-gray-200 text-gray-800 font-semibold py-0.5 px-2 rounded hover:bg-gray-300 mr-2 text-sm"
+                  className="bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded hover:bg-blue-200 border border-blue-200 mr-1"
                   onClick={() => handleEdit(rec)}
+                  type="button"
                 >Edit</button>
                 <button
-                  className="bg-red-600 text-white font-semibold py-0.5 px-2 rounded hover:bg-red-700 text-sm"
+                  className="bg-red-100 text-red-600 text-xs px-2 py-0.5 rounded hover:bg-red-200 border border-red-200"
                   onClick={() => handleDelete(rec.id)}
+                  type="button"
                 >Delete</button>
               </td>
             </tr>
@@ -389,7 +391,7 @@ const RecordingsSection: React.FC<Props> = ({ eventId }) => {
                     <div className="flex gap-2 justify-end mt-2">
                       <button
                         type="button"
-                        className="bg-gray-300 text-gray-800 px-4 py-2 rounded"
+                        className="bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded hover:bg-blue-200 border border-blue-200 mr-1"
                         onClick={() => {
                           setShowAddLink(false);
                           setLinkError(null);
@@ -399,7 +401,7 @@ const RecordingsSection: React.FC<Props> = ({ eventId }) => {
                       >Cancel</button>
                       <button
                         type="submit"
-                        className="bg-green-600 text-white px-4 py-2 rounded"
+                        className="bg-green-600 text-white text-xs px-2 py-0.5 rounded hover:bg-green-700 border border-green-200"
                         disabled={linkSubmitting}
                       >{linkSubmitting ? "Saving..." : "Save"}</button>
                     </div>
