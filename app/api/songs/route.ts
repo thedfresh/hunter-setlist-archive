@@ -4,30 +4,31 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 export async function GET() {
-  const songs = await prisma.song.findMany({
-    include: {
-      leadVocals: true,
-      songAlbums: { include: { album: true } },
-      songTags: { include: { tag: true } },
-    },
-    orderBy: { title: "asc" },
-  });
+  try {
+    const songs = await prisma.song.findMany({
+      include: {
+        leadVocals: true,
+        songAlbums: { include: { album: true } },
+        songTags: { include: { tag: true } },
+      },
+      orderBy: { title: "asc" },
+    });
 
-  // Fetch links for each song
   const songIds = songs.map(song => song.id);
-  const linkAssociations = await prisma.linkAssociation.findMany({
-    where: { entityType: "song", entityId: { in: songIds } },
-    include: { link: true },
-  });
+  // Fetch links for each song
 
-  return NextResponse.json({
-    songs: songs.map(song => ({
-      ...song,
-      albums: song.songAlbums.map(sa => sa.album),
-      tags: song.songTags.map(st => st.tag),
-      links: linkAssociations.filter(la => la.entityId === song.id).map(la => la.link),
-    })),
-  });
+
+    return NextResponse.json({
+      songs: songs.map(song => ({
+        ...song,
+        albums: song.songAlbums.map(sa => sa.album),
+        tags: song.songTags.map(st => st.tag)
+      })),
+    });
+  } catch (error) {
+    console.error("Error in GET /api/songs:", error);
+    return NextResponse.json({ error: "Failed to fetch songs." }, { status: 500 });
+  }
 }
 
 export async function POST(req: Request) {

@@ -6,6 +6,7 @@ import SetPerformancesSection from "./components/SetPerformancesSection";
 import SetForm from './components/SetForm';
 import Link from "next/link";
 import EventContributorsSection from "./components/EventContributorsEditor";
+import RecordingsSection from "./components/RecordingsSection";
 
 export default function EventEditPage() {
   // Performance management state
@@ -347,6 +348,10 @@ export default function EventEditPage() {
         {/* Contributors Section */}
         {event.id && (
           <EventContributorsSection eventId={event.id} />
+        )}
+        {/* Recordings Section */}
+        {event.id && (
+          <RecordingsSection eventId={event.id} />
         )}
         <hr className="my-8" />
         {/* Sets Section */}
