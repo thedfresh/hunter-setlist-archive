@@ -36,6 +36,7 @@ model ContentType {
 model Band {
   id        Int      @id @default(autoincrement())
   name      String
+  notes     String?
   createdAt DateTime @default(now()) @map("created_at")
   
   events    Event[]  @relation("PrimaryBand")
@@ -49,6 +50,7 @@ model Venue {
   city          String?
   stateProvince String?  @map("state_province")
   country       String?
+  notes         String?
   isUncertain   Boolean  @default(false) @map("is_uncertain")
   createdAt     DateTime @default(now()) @map("created_at")
   
@@ -102,7 +104,8 @@ model Event {
   billing                       String?
   isSpurious                    Boolean  @default(false) @map("is_spurious")
   notes                         String?
-  includeInStats                Boolean  @default(true) @map("include_in_stats")
+  isUncertain                   Boolean  @default(false) @map("is_uncertain")
+  includeInStats                Boolean  @default(true)  @map("include_in_stats")
   verified                      Boolean  @default(false)
   createdAt                     DateTime @default(now()) @map("created_at")
   updatedAt                     DateTime @default(now()) @updatedAt @map("updated_at")
@@ -152,12 +155,13 @@ model SetType {
 }
 
 model Set {
-  id        Int      @id @default(autoincrement())
-  eventId   Int      @map("event_id")
-  setTypeId Int      @map("set_type_id")
-  position  Int
-  notes     String?
-  createdAt DateTime @default(now()) @map("created_at")
+  id            Int      @id @default(autoincrement())
+  eventId       Int      @map("event_id")
+  setTypeId     Int      @map("set_type_id")
+  position      Int
+  isUncertain   Boolean  @default(false) @map("is_uncertain")
+  notes         String?
+  createdAt     DateTime @default(now()) @map("created_at")
   
   event     Event   @relation(fields: [eventId], references: [id], onDelete: Cascade)
   setType   SetType @relation(fields: [setTypeId], references: [id])
@@ -175,9 +179,9 @@ model Album {
   id          Int      @id @default(autoincrement())
   title       String
   artist      String?
+  notes       String?
   releaseYear Int?     @map("release_year")
   isOfficial  Boolean  @default(true) @map("is_official")
-  notes       String?
   createdAt   DateTime @default(now()) @map("created_at")
   
   songAlbums  SongAlbum[]
@@ -306,6 +310,8 @@ model RecordingType {
 model Contributor {
   id        Int      @id @default(autoincrement())
   name      String
+  email     String?
+  notes     String?
   createdAt DateTime @default(now()) @map("created_at")
   
   recordings         Recording[]
