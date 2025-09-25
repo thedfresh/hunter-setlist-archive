@@ -39,13 +39,13 @@ model Band {
 model Venue {
   id            Int      @id @default(autoincrement())
   name          String
-  context       String?
   city          String?
   stateProvince String?  @map("state_province")
   country       String?
   isUncertain   Boolean  @default(false) @map("is_uncertain")
   createdAt     DateTime @default(now()) @map("created_at")
   notes         String?
+  context       String?
   events        Event[]
   links         Link[]
 
@@ -109,7 +109,6 @@ model Event {
   noteLinks                    NoteLink[]
   recordings                   Recording[]
   sets                         Set[]
-  showDialog                   ShowDialog[]
 
   @@map("events")
 }
@@ -151,7 +150,6 @@ model Set {
   performances Performance[]
   event        Event         @relation(fields: [eventId], references: [id], onDelete: Cascade)
   setType      SetType       @relation(fields: [setTypeId], references: [id])
-  showDialog   ShowDialog[]
 
   @@map("sets")
 }
@@ -244,6 +242,7 @@ model Performance {
   leadVocalsId         Int?                  @map("lead_vocals_id")
   noteLinks            NoteLink[]
   performanceMusicians PerformanceMusician[]
+  showDialog           ShowDialog[]
   leadVocals           Musician?             @relation("PerformanceLeadVocals", fields: [leadVocalsId], references: [id])
   set                  Set                   @relation(fields: [setId], references: [id], onDelete: Cascade)
   song                 Song                  @relation(fields: [songId], references: [id])
@@ -347,14 +346,14 @@ model NoteLink {
 
 model ShowDialog {
   id             Int      @id @default(autoincrement())
-  eventId        Int?     @map("event_id")
-  setId          Int?     @map("set_id")
-  afterSongOrder Int?     @map("after_song_order")
+  performanceId  Int      @map("performance_id")
+  isBeforeSong   Boolean  @default(false) @map("is_before_song")
+  isVerbatim     Boolean  @default(false) @map("is_verbatim")
   dialogText     String   @map("dialog_text")
   createdAt      DateTime @default(now()) @map("created_at")
-  event          Event?   @relation(fields: [eventId], references: [id])
-  set            Set?     @relation(fields: [setId], references: [id])
-
+  
+  performance Performance @relation(fields: [performanceId], references: [id])
+  
   @@map("show_dialog")
 }
 
