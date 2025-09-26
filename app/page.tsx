@@ -21,6 +21,7 @@ export default function Home() {
             <li>New user interface</li>
             <li>Hundreds of updates and corrections</li>
             <li>Annotated and searchable setlists</li>
+            <li>Newly circulated recordings</li>
             <li>and much more!</li>
           </ul>
         <p className="text-center text-lg mt-8">
