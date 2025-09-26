@@ -24,7 +24,7 @@ export default function Home() {
             <li>Search and filter functionality</li>
           </ul>
         <p className="text-center text-lg mt-8">
-          Email <a href="mailto:dfresh@gmail.com">dfresh@gmail.com</a> with inquiries or updates!
+          Email <a href="mailto:dfresh@gmail.com">dfresh@gmail.com</a> with inquiries or updates
         </p>
       </div>
     </main>
