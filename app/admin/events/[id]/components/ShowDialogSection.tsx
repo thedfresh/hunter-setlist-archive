@@ -138,7 +138,7 @@ const ShowDialogSection: React.FC<Props> = ({ eventId }) => {
   // UI rendering
   return (
     <section className="mt-8">
-      <h2 className="text-xl font-bold mb-4">Show Dialog</h2>
+      <h2 className="text-xl font-bold mb-4">Show Dialogue</h2>
       {[...dialogs]
         .sort((a, b) => {
           const setA = a.performance.set?.position ?? 0;
