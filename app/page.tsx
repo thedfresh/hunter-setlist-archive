@@ -22,7 +22,7 @@ export default function Home() {
             <li>Hundreds of updates and corrections</li>
             <li>Annotated and searchable setlists</li>
             <li>Newly circulated recordings</li>
-            <li>and much more!</li>
+            <li>And much more!</li>
           </ul>
         <p className="text-center text-lg mt-8">
           Email <a href="mailto:dfresh@gmail.com">dfresh@gmail.com</a> with inquiries or updates!
