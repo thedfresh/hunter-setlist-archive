@@ -1,22 +1,16 @@
-import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
-import './globals.css'
-
-const inter = Inter({ subsets: ['latin'] })
-
-export const metadata: Metadata = {
-  title: 'Hunter Setlist Archive',
-  description: 'Robert Hunter performance archive and setlist database',
-}
-
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
+  if (process.env.NODE_ENV === 'production') {
+    return (
+      <div className="p-8 text-center">
+        <h1>Page Not Found</h1>
+        <p>The page you're looking for doesn't exist.</p>
+      </div>
+    );
+  }
+  
   return (
-    <html lang="en">
-      <body className={inter.className}>{children}</body>
-    </html>
-  )
+    <div>
+      {children}
+    </div>
+  );
 }

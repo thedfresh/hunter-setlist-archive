@@ -17,6 +17,7 @@ jobs:
         key: ${{ secrets.SSH_KEY }}
         script: |
           cd /root/hunter-setlist-archive
+          git restore .
           git pull origin main
           npm install --omit=dev
           npm run build
