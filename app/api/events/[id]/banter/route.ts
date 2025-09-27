@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-// GET: Return all dialog for event
+// GET: Return all banter for event
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   const id = params.id;
   if (!id || isNaN(Number(id))) {
@@ -17,9 +17,9 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
       },
     });
 
-    // Get all dialog entries for those performances
+    // Get all banter entries for those performances
     const performanceIds = performances.map((p) => p.id);
-    const dialogs = await prisma.showDialog.findMany({
+    const banter = await prisma.showBanter.findMany({
       where: { performanceId: { in: performanceIds } },
       include: {
         performance: {
@@ -31,21 +31,21 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
       },
     });
 
-    // Sort dialogs by set position, then performance order
-    dialogs.sort((a: any, b: any) => {
+    // Sort banter by set position, then performance order
+    banter.sort((a: any, b: any) => {
       const setA = a.performance.set?.position ?? 0;
       const setB = b.performance.set?.position ?? 0;
       if (setA !== setB) return setA - setB;
       return (a.performance.order ?? 0) - (b.performance.order ?? 0);
     });
 
-    return NextResponse.json({ dialogs, performances });
+    return NextResponse.json({ banter, performances });
   } catch (error) {
-    return NextResponse.json({ error: "Failed to fetch dialog" }, { status: 500 });
+    return NextResponse.json({ error: "Failed to fetch banter" }, { status: 500 });
   }
 }
 
-// POST: Create new dialog
+// POST: Create new banter
 export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   const id = params.id;
   if (!id || isNaN(Number(id))) {
@@ -53,20 +53,20 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   }
   try {
     const body = await req.json();
-    const { performanceId, isBeforeSong, isVerbatim, dialogText } = body;
-    if (!performanceId || typeof dialogText !== "string") {
+    const { performanceId, isBeforeSong, isVerbatim, banterText } = body;
+    if (!performanceId || typeof banterText !== "string") {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
-    const newDialog = await prisma.showDialog.create({
+    const newBanter = await prisma.showBanter.create({
       data: {
         performanceId,
         isBeforeSong,
         isVerbatim,
-        dialogText,
+        banterText,
       },
     });
-    return NextResponse.json(newDialog);
+    return NextResponse.json(newBanter);
   } catch (error) {
-    return NextResponse.json({ error: "Failed to create dialog" }, { status: 500 });
+    return NextResponse.json({ error: "Failed to create banter" }, { status: 500 });
   }
 }

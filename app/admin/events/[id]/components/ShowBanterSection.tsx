@@ -9,12 +9,12 @@ interface Performance {
   set: { id: number; position: number };
 }
 
-interface ShowDialog {
+interface ShowBanter {
   id: number;
   performanceId: number;
   isBeforeSong: boolean | null;
   isVerbatim: boolean | null;
-  dialogText: string;
+  banterText: string;
   performance: Performance;
 }
 
@@ -22,38 +22,38 @@ interface Props {
   eventId: number;
 }
 
-const ShowDialogSection: React.FC<Props> = ({ eventId }) => {
-  const [dialogs, setDialogs] = useState<ShowDialog[]>([]);
+const ShowBanterSection: React.FC<Props> = ({ eventId }) => {
+  const [banter, setBanter] = useState<ShowBanter[]>([]);
   const [performances, setPerformances] = useState<Performance[]>([]);
   const [loading, setLoading] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
-  const [editData, setEditData] = useState<Partial<ShowDialog>>({});
+  const [editData, setEditData] = useState<Partial<ShowBanter>>({});
   const [adding, setAdding] = useState(false);
-  const [addData, setAddData] = useState<Partial<ShowDialog>>({});
+  const [addData, setAddData] = useState<Partial<ShowBanter>>({});
   const [errors, setErrors] = useState<any>({});
   const router = useRouter();
 
   useEffect(() => {
-    fetchDialogAndPerformances();
+    fetchBanterAndPerformances();
   }, [eventId]);
 
-  async function fetchDialogAndPerformances() {
+  async function fetchBanterAndPerformances() {
     setLoading(true);
-    const res = await fetch(`/api/events/${eventId}/dialog`);
+    const res = await fetch(`/api/events/${eventId}/banter`);
     if (res.ok) {
       const data = await res.json();
-      setDialogs(data.dialogs);
+      setBanter(data.banter);
       setPerformances(data.performances);
     } else {
-      setErrors({ form: "Failed to load dialog" });
+      setErrors({ form: "Failed to load banter" });
     }
     setLoading(false);
   }
 
-  function validateDialog(data: Partial<ShowDialog>) {
+  function validateBanter(data: Partial<ShowBanter>) {
     const newErrors: any = {};
     if (!data.performanceId) newErrors.performanceId = "Performance required";
-    if (!data.dialogText || !data.dialogText.trim()) newErrors.dialogText = "Dialog text required";
+    if (!data.banterText || !data.banterText.trim()) newErrors.banterText = "Banter text required";
     return newErrors;
   }
 
@@ -68,45 +68,45 @@ const ShowDialogSection: React.FC<Props> = ({ eventId }) => {
 
   // Handlers for add/edit/delete
   async function handleAdd() {
-    const newErrors = validateDialog(addData);
+    const newErrors = validateBanter(addData);
     if (Object.keys(newErrors).length) {
       setErrors(newErrors);
       return;
     }
     setLoading(true);
-    const res = await fetch(`/api/events/${eventId}/dialog`, {
+    const res = await fetch(`/api/events/${eventId}/banter`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         performanceId: addData.performanceId,
         isBeforeSong: addData.isBeforeSong ?? false,
         isVerbatim: addData.isVerbatim ?? false,
-        dialogText: addData.dialogText,
+        banterText: addData.banterText,
       }),
     });
     if (res.ok) {
       setAddData({});
       setAdding(false);
-      fetchDialogAndPerformances();
+      fetchBanterAndPerformances();
       setErrors({});
     } else {
-      setErrors({ form: "Failed to add dialog" });
+      setErrors({ form: "Failed to add banter" });
     }
     setLoading(false);
   }
 
   async function handleEdit(id: number) {
-    const newErrors = validateDialog(editData);
+    const newErrors = validateBanter(editData);
     if (Object.keys(newErrors).length) {
       setErrors(newErrors);
       return;
     }
     setLoading(true);
-    const res = await fetch(`/api/events/${eventId}/dialog/${id}`, {
+    const res = await fetch(`/api/events/${eventId}/banter/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        dialogText: editData.dialogText,
+        banterText: editData.banterText,
         isBeforeSong: editData.isBeforeSong ?? false,
         isVerbatim: editData.isVerbatim ?? false,
       }),
@@ -114,23 +114,23 @@ const ShowDialogSection: React.FC<Props> = ({ eventId }) => {
     if (res.ok) {
       setEditingId(null);
       setEditData({});
-      fetchDialogAndPerformances();
+      fetchBanterAndPerformances();
       setErrors({});
     } else {
-      setErrors({ form: "Failed to update dialog" });
+      setErrors({ form: "Failed to update banter" });
     }
     setLoading(false);
   }
 
   async function handleDelete(id: number) {
-    if (!confirm("Delete this dialog?")) return;
+    if (!confirm("Delete this banter?")) return;
     setLoading(true);
-    const res = await fetch(`/api/events/${eventId}/dialog/${id}`, { method: "DELETE" });
+    const res = await fetch(`/api/events/${eventId}/banter/${id}`, { method: "DELETE" });
     if (res.ok) {
-      fetchDialogAndPerformances();
+      fetchBanterAndPerformances();
       setErrors({});
     } else {
-      setErrors({ form: "Failed to delete dialog" });
+      setErrors({ form: "Failed to delete banter" });
     }
     setLoading(false);
   }
@@ -138,8 +138,8 @@ const ShowDialogSection: React.FC<Props> = ({ eventId }) => {
   // UI rendering
   return (
     <section className="mt-8">
-      <h2 className="text-xl font-bold mb-4">Show Dialogue</h2>
-      {[...dialogs]
+      <h2 className="text-xl font-bold mb-4">Show Banter</h2>
+      {[...banter]
         .sort((a, b) => {
           const setA = a.performance.set?.position ?? 0;
           const setB = b.performance.set?.position ?? 0;
@@ -148,15 +148,15 @@ const ShowDialogSection: React.FC<Props> = ({ eventId }) => {
           const orderB = b.performance.performanceOrder ?? b.performance.order ?? 0;
           return orderA - orderB;
         })
-        .map((dialog) => (
-        <div key={dialog.id} className="bg-white rounded shadow p-4 mb-4">
+        .map((banter) => (
+        <div key={banter.id} className="bg-white rounded shadow p-4 mb-4">
           <div className="flex items-center gap-2 mb-2">
             <div className="flex-1 flex gap-2">
             <select
-              disabled={editingId !== dialog.id}
-              value={String(editingId === dialog.id ? editData.isBeforeSong ?? dialog.isBeforeSong ?? false : dialog.isBeforeSong ?? false)}
+              disabled={editingId !== banter.id}
+              value={String(editingId === banter.id ? editData.isBeforeSong ?? banter.isBeforeSong ?? false : banter.isBeforeSong ?? false)}
               onChange={(e) =>
-                editingId === dialog.id && setEditData({ ...editData, isBeforeSong: e.target.value === "true" })
+                editingId === banter.id && setEditData({ ...editData, isBeforeSong: e.target.value === "true" })
               }
               className="border rounded px-2 py-1"
             >
@@ -164,10 +164,10 @@ const ShowDialogSection: React.FC<Props> = ({ eventId }) => {
               <option value="false">After</option>
             </select>
             <select
-              disabled={editingId !== dialog.id}
-              value={editingId === dialog.id ? editData.performanceId ?? dialog.performanceId : dialog.performanceId}
+              disabled={editingId !== banter.id}
+              value={editingId === banter.id ? editData.performanceId ?? banter.performanceId : banter.performanceId}
               onChange={(e) =>
-                editingId === dialog.id && setEditData({ ...editData, performanceId: Number(e.target.value) })
+                editingId === banter.id && setEditData({ ...editData, performanceId: Number(e.target.value) })
               }
               className="border rounded px-2 py-1"
             >
@@ -188,19 +188,19 @@ const ShowDialogSection: React.FC<Props> = ({ eventId }) => {
               <label className="flex items-center gap-1 mr-2">
                 <input
                   type="checkbox"
-                  disabled={editingId !== dialog.id}
-                  checked={editingId === dialog.id ? editData.isVerbatim ?? dialog.isVerbatim ?? false : dialog.isVerbatim ?? false}
+                  disabled={editingId !== banter.id}
+                  checked={editingId === banter.id ? editData.isVerbatim ?? banter.isVerbatim ?? false : banter.isVerbatim ?? false}
                   onChange={(e) =>
-                    editingId === dialog.id && setEditData({ ...editData, isVerbatim: e.target.checked })
+                    editingId === banter.id && setEditData({ ...editData, isVerbatim: e.target.checked })
                   }
                 />
                 Verbatim
               </label>
-              {editingId === dialog.id ? (
+              {editingId === banter.id ? (
                 <>
                   <button
                     className="bg-blue-100 text-blue-800 font-semibold py-0.5 px-2 rounded shadow hover:bg-blue-200 transition text-sm"
-                    onClick={() => handleEdit(dialog.id)}
+                    onClick={() => handleEdit(banter.id)}
                     disabled={loading}
                   >
                     Save
@@ -216,13 +216,13 @@ const ShowDialogSection: React.FC<Props> = ({ eventId }) => {
                 <>
                   <button
                     className="bg-blue-100 text-blue-800 font-semibold py-0.5 px-2 rounded shadow hover:bg-blue-200 transition text-sm"
-                    onClick={() => { setEditingId(dialog.id); setEditData(dialog); }}
+                    onClick={() => { setEditingId(banter.id); setEditData(banter); }}
                   >
                     Edit
                   </button>
                   <button
                     className="bg-red-100 text-red-800 font-semibold py-0.5 px-2 rounded shadow hover:bg-red-200 transition text-sm"
-                    onClick={() => handleDelete(dialog.id)}
+                    onClick={() => handleDelete(banter.id)}
                     disabled={loading}
                   >
                     Delete
@@ -232,18 +232,18 @@ const ShowDialogSection: React.FC<Props> = ({ eventId }) => {
             </div>
           </div>
           <div>
-            {editingId === dialog.id ? (
+            {editingId === banter.id ? (
               <textarea
                 className="w-full border rounded p-2"
-                value={editData.dialogText ?? dialog.dialogText}
-                onChange={(e) => setEditData({ ...editData, dialogText: e.target.value })}
+                value={editData.banterText ?? banter.banterText}
+                onChange={(e) => setEditData({ ...editData, banterText: e.target.value })}
                 rows={3}
               />
             ) : (
-              <div className="w-full p-2 bg-gray-50 rounded whitespace-pre-wrap">{dialog.dialogText}</div>
+              <div className="w-full p-2 bg-gray-50 rounded whitespace-pre-wrap">{banter.banterText}</div>
             )}
-            {editingId === dialog.id && errors.dialogText && (
-              <div className="text-red-500 text-sm mt-1">{errors.dialogText}</div>
+            {editingId === banter.id && errors.banterText && (
+              <div className="text-red-500 text-sm mt-1">{errors.banterText}</div>
             )}
           </div>
         </div>
@@ -289,12 +289,12 @@ const ShowDialogSection: React.FC<Props> = ({ eventId }) => {
           <div>
             <textarea
               className="w-full border rounded p-2"
-              value={addData.dialogText ?? ""}
-              onChange={(e) => setAddData({ ...addData, dialogText: e.target.value })}
+              value={addData.banterText ?? ""}
+              onChange={(e) => setAddData({ ...addData, banterText: e.target.value })}
               rows={3}
             />
-            {errors.dialogText && (
-              <div className="text-red-500 text-sm mt-1">{errors.dialogText}</div>
+            {errors.banterText && (
+              <div className="text-red-500 text-sm mt-1">{errors.banterText}</div>
             )}
           </div>
         </div>
@@ -304,7 +304,7 @@ const ShowDialogSection: React.FC<Props> = ({ eventId }) => {
           onClick={() => setAdding(true)}
           disabled={loading}
         >
-          Add Dialog
+          Add Banter
         </button>
       )}
       {errors.form && <div className="text-red-500 mt-2">{errors.form}</div>}
@@ -312,4 +312,4 @@ const ShowDialogSection: React.FC<Props> = ({ eventId }) => {
   );
 };
 
-export default ShowDialogSection;
+export default ShowBanterSection;

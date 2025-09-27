@@ -23,7 +23,7 @@ DROP TABLE IF EXISTS bands CASCADE;
 DROP TABLE IF EXISTS venues CASCADE;
 
 -- Drop v2.0 tables if they exist
-DROP TABLE IF EXISTS show_dialog CASCADE;
+DROP TABLE IF EXISTS show_banter CASCADE;
 DROP TABLE IF EXISTS note_links CASCADE;
 DROP TABLE IF EXISTS notes CASCADE;
 DROP TABLE IF EXISTS event_contributors CASCADE;
@@ -263,7 +263,7 @@ CREATE TABLE event_contributors (
     created_at TIMESTAMP DEFAULT NOW()
 );
 
--- Notes and Dialog System
+-- Notes and Banter System
 
 CREATE TABLE notes (
     id SERIAL PRIMARY KEY,
@@ -285,12 +285,12 @@ CREATE TABLE note_links (
     )
 );
 
-CREATE TABLE show_dialog (
+CREATE TABLE show_banter (
     id SERIAL PRIMARY KEY,
     event_id INTEGER REFERENCES events(id),
     set_id INTEGER REFERENCES sets(id),
     after_song_order INTEGER,
-    dialog_text TEXT NOT NULL,
+    banter_text TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT NOW()
 );
 
@@ -372,8 +372,8 @@ CREATE INDEX idx_note_links_note ON note_links(note_id);
 CREATE INDEX idx_note_links_event ON note_links(event_id);
 CREATE INDEX idx_note_links_set ON note_links(set_id);
 CREATE INDEX idx_note_links_performance ON note_links(performance_id);
-CREATE INDEX idx_show_dialog_event ON show_dialog(event_id);
-CREATE INDEX idx_show_dialog_set ON show_dialog(set_id);
+CREATE INDEX idx_show_banter_event ON show_banter(event_id);
+CREATE INDEX idx_show_banter_set ON show_banter(set_id);
 CREATE INDEX idx_recordings_event ON recordings(event_id);
 CREATE INDEX idx_recordings_type ON recordings(recording_type_id);
 CREATE INDEX idx_recordings_contributor ON recordings(contributor_id);

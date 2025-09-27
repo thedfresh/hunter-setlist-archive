@@ -90,6 +90,7 @@ model Event {
   eventTypeId                  Int?               @map("event_type_id")
   contentTypeId                Int?               @map("content_type_id")
   primaryBandId                Int?               @map("primary_band_id")
+  showTiming                   String?            @map("show_timing") 
   hunterParticipationUncertain Boolean            @default(false) @map("hunter_participation_uncertain")
   billing                      String?
   isSpurious                   Boolean            @default(false) @map("is_spurious")
@@ -180,6 +181,7 @@ model Tag {
 model Song {
   id             Int           @id @default(autoincrement())
   title          String
+  alternateTitle String?       @map("alternate_title") 
   originalArtist String?       @map("original_artist")
   lyricsBy       String?       @map("lyrics_by")
   musicBy        String?       @map("music_by")
@@ -233,16 +235,20 @@ model Performance {
   isTruncatedEnd       Boolean               @default(false) @map("is_truncated_end")
   hasCuts              Boolean               @default(false) @map("has_cuts")
   isPartial            Boolean               @default(false) @map("is_partial")
+  notes                String?
   hunterVocal          Boolean?              @map("hunter_vocal")
   hunterGuitar         Boolean?              @map("hunter_guitar")
   hunterHarmonica      Boolean?              @map("hunter_harmonica")
-  notes                String?
+  isSoloHunter         Boolean               @default(false) @map("is_solo_hunter") // NEW
+  isLyricalFragment    Boolean               @default(false) @map("is_lyrical_fragment") // NEW
+  isMusicalFragment    Boolean               @default(false) @map("is_musical_fragment") // NEW
+  isMedley             Boolean               @default(false) @map("is_medley") // NEW
   createdAt            DateTime              @default(now()) @map("created_at")
   isUncertain          Boolean               @default(false) @map("is_uncertain")
   leadVocalsId         Int?                  @map("lead_vocals_id")
   noteLinks            NoteLink[]
   performanceMusicians PerformanceMusician[]
-  showDialog           ShowDialog[]
+  showBanter         ShowBanter[]
   leadVocals           Musician?             @relation("PerformanceLeadVocals", fields: [leadVocalsId], references: [id])
   set                  Set                   @relation(fields: [setId], references: [id], onDelete: Cascade)
   song                 Song                  @relation(fields: [songId], references: [id])
@@ -344,17 +350,17 @@ model NoteLink {
   @@map("note_links")
 }
 
-model ShowDialog {
+model ShowBanter {
   id             Int      @id @default(autoincrement())
   performanceId  Int      @map("performance_id")
   isBeforeSong   Boolean  @default(false) @map("is_before_song")
   isVerbatim     Boolean  @default(false) @map("is_verbatim")
-  dialogText     String   @map("dialog_text")
+  banterText     String   @map("banter_text")
   createdAt      DateTime @default(now()) @map("created_at")
   
   performance Performance @relation(fields: [performanceId], references: [id])
   
-  @@map("show_dialog")
+  @@map("show_banter")
 }
 
 model MusicianDefaultInstrument {
