@@ -19,9 +19,8 @@ export async function GET(req: Request, { params }: { params: Params }) {
     if (!song) return NextResponse.json({ error: "Song not found." }, { status: 404 });
 
     // Fetch links for this song
-    const linkAssociations = await prisma.linkAssociation.findMany({
-      where: { entityType: "song", entityId: Number(id) },
-      include: { link: true },
+    const links = await prisma.link.findMany({
+      where: { songId: Number(id) },
     });
 
     return NextResponse.json({
@@ -29,7 +28,7 @@ export async function GET(req: Request, { params }: { params: Params }) {
         ...song,
         albums: song.songAlbums.map(sa => sa.album),
         tags: song.songTags.map(st => st.tag),
-        links: linkAssociations.map(la => la.link),
+        links: links,
       },
     });
   } catch (error) {
@@ -49,6 +48,7 @@ export async function PUT(req: Request, { params }: { params: Params }) {
       where: { id: Number(params.id) },
       data: {
         title: data.title,
+        alternateTitle: data.alternateTitle || null,
         originalArtist: data.originalArtist || null,
         lyricsBy: data.lyricsBy || null,
         musicBy: data.musicBy || null,
@@ -84,7 +84,7 @@ export async function DELETE(req: Request, { params }: { params: Params }) {
     await prisma.song.delete({ where: { id: Number(params.id) } });
     await prisma.songAlbum.deleteMany({ where: { songId: Number(params.id) } });
     await prisma.songTag.deleteMany({ where: { songId: Number(params.id) } });
-    await prisma.linkAssociation.deleteMany({ where: { entityType: "song", entityId: Number(params.id) } });
+    await prisma.link.deleteMany({ where: { songId: Number(params.id) } });
     return NextResponse.json({ success: true });
   } catch {
     return NextResponse.json({ error: "Failed to delete song." }, { status: 500 });

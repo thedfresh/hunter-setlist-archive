@@ -11,6 +11,7 @@ export default function NewSongPage() {
   const router = useRouter();
   const [form, setForm] = useState({
     title: "",
+    alternateTitle: "",
     originalArtist: "",
     lyricsBy: "",
     musicBy: "",
@@ -105,6 +106,17 @@ export default function NewSongPage() {
               required
             />
             {errors.title && <p className="text-red-500 text-xs mt-1">{errors.title}</p>}
+          </div>
+          {/* Alternate Title */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Alternate Title</label>
+            <input
+              type="text"
+              name="alternateTitle"
+              value={form.alternateTitle}
+              onChange={e => setForm(f => ({ ...f, alternateTitle: e.target.value }))}
+              className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
+            />
           </div>
           {/* Original Artist */}
           <div>

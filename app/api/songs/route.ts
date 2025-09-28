@@ -41,6 +41,7 @@ export async function POST(req: Request) {
     const song = await prisma.song.create({
       data: {
         title: data.title,
+        alternateTitle: data.alternateTitle || null,
         originalArtist: data.originalArtist || null,
         lyricsBy: data.lyricsBy || null,
         musicBy: data.musicBy || null,
@@ -65,19 +66,12 @@ export async function POST(req: Request) {
     // External links
     if (data.links?.length) {
       for (const link of data.links) {
-        const createdLink = await prisma.externalLink.create({
+        await prisma.link.create({
           data: {
             url: link.url,
             title: link.title,
             description: link.description,
-          },
-        });
-        await prisma.linkAssociation.create({
-          data: {
-            linkId: createdLink.id,
-            entityType: "song",
-            entityId: song.id,
-            linkType: "website",
+            songId: song.id,
           },
         });
       }
