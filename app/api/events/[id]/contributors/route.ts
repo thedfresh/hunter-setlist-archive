@@ -68,8 +68,9 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
   }
 }
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
-  const eventId = Number(params.id);
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const eventId = Number(id);
   if (!eventId) {
     return NextResponse.json({ error: 'Missing eventId' }, { status: 400 });
   }

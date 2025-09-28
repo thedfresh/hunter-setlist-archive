@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
 // PUT: Update banter
-export async function PUT(req: NextRequest, { params }: { params: { id: string; banterId: string } }) {
-  const { id, banterId } = params;
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string; banterId: string }> }) {
+  const { id, banterId } = await params;
   if (!id || isNaN(Number(id)) || !banterId || isNaN(Number(banterId))) {
     return NextResponse.json({ error: "Invalid event id or banterId" }, { status: 400 });
   }
@@ -31,8 +31,8 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string; 
 }
 
 // DELETE: Remove banter
-export async function DELETE(req: NextRequest, { params }: { params: { id: string; banterId: string } }) {
-  const { id, banterId } = params;
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string; banterId: string }> }) {
+  const { id, banterId } = await params;
   if (!id || isNaN(Number(id)) || !banterId || isNaN(Number(banterId))) {
     return NextResponse.json({ error: "Invalid event id or banterId" }, { status: 400 });
   }

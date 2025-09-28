@@ -2,11 +2,11 @@ import { NextResponse } from "next/server";
 
 export async function GET(
   req: Request,
-  context: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { params } = await context;
-    const eventId = Number(params.id);
+    const { id } = await context.params;
+    const eventId = Number(id);
     if (!eventId || isNaN(eventId)) {
       return NextResponse.json({ error: "Invalid event ID." }, { status: 400 });
     }

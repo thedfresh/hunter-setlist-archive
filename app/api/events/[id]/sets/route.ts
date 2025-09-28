@@ -3,8 +3,9 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-export async function GET(req: Request, { params }: { params: { id: string } }) {
-  const eventId = Number(params.id);
+export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const eventId = Number(id);
   const sets = await prisma.set.findMany({
     where: { eventId },
     include: { setType: true },
@@ -13,8 +14,9 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
   return NextResponse.json({ sets });
 }
 
-export async function POST(req: Request, { params }: { params: { id: string } }) {
-  const eventId = Number(params.id);
+export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const eventId = Number(id);
   const data = await req.json();
   // Prevent duplicate position
   const exists = await prisma.set.findFirst({

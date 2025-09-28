@@ -54,12 +54,22 @@ export default function EventEditPage() {
     async function fetchPerformances() {
       const res = await fetch(`/api/events/${id}/banter`);
       if (res.ok) {
-        const banter = await res.json();
+        const data = await res.json();
+        const { banter, performances } = data;
+        
         // Extract performances from banter, or fetch separately if needed
         const perfMap: { [id: number]: any } = {};
-        banter.forEach((d: any) => {
-          if (d.performance) perfMap[d.performance.id] = d.performance;
-        });
+        if (Array.isArray(banter)) {
+          banter.forEach((d: any) => {
+            if (d.performance) perfMap[d.performance.id] = d.performance;
+          });
+        }
+        // Also include any performances from the API response
+        if (Array.isArray(performances)) {
+          performances.forEach((p: any) => {
+            perfMap[p.id] = p;
+          });
+        }
         setPerformances(Object.values(perfMap));
       }
     }

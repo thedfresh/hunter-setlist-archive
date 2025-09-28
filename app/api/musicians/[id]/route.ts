@@ -3,10 +3,11 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-export async function GET(req: Request, { params }: { params: { id: string } }) {
+export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     const musician = await prisma.musician.findUnique({
-      where: { id: Number(params.id) },
+      where: { id: Number(id) },
       include: {
         defaultInstruments: { include: { instrument: true } }
       }
@@ -20,8 +21,9 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
   }
 }
 
-export async function PUT(req: Request, { params }: { params: { id: string } }) {
+export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     const data = await req.json();
     if (!data.name || typeof data.name !== 'string') {
       return NextResponse.json({ error: 'Musician name is required.' }, { status: 400 });
@@ -29,7 +31,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
     const { name, isUncertain, defaultInstrumentIds } = data;
     // Remove all existing default instruments and set new ones
     const musician = await prisma.musician.update({
-      where: { id: Number(params.id) },
+      where: { id: Number(id) },
       data: {
         name,
         isUncertain: !!isUncertain,
@@ -50,10 +52,11 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
   }
 }
 
-export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     await prisma.musician.delete({
-      where: { id: Number(params.id) },
+      where: { id: Number(id) },
     });
     return NextResponse.json({ success: true });
   } catch (error) {

@@ -4,9 +4,10 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 type Params = { id: string };
 
-export async function GET(req: Request, { params }: { params: Params }) {
+export async function GET(req: Request, { params }: { params: Promise<Params> }) {
   try {
-    const album = await prisma.album.findUnique({ where: { id: Number(params.id) } });
+    const { id } = await params;
+    const album = await prisma.album.findUnique({ where: { id: Number(id) } });
     if (!album) return NextResponse.json({ error: 'Album not found.' }, { status: 404 });
     return NextResponse.json({ album });
   } catch {
@@ -14,14 +15,15 @@ export async function GET(req: Request, { params }: { params: Params }) {
   }
 }
 
-export async function PUT(req: Request, { params }: { params: Params }) {
+export async function PUT(req: Request, { params }: { params: Promise<Params> }) {
   try {
+    const { id } = await params;
     const data = await req.json();
     if (!data.title || typeof data.title !== 'string') {
       return NextResponse.json({ error: 'Album title is required.' }, { status: 400 });
     }
     const album = await prisma.album.update({
-      where: { id: Number(params.id) },
+      where: { id: Number(id) },
       data: {
         title: data.title.trim(),
         artist: data.artist || null,
@@ -36,9 +38,10 @@ export async function PUT(req: Request, { params }: { params: Params }) {
   }
 }
 
-export async function DELETE(req: Request, { params }: { params: Params }) {
+export async function DELETE(req: Request, { params }: { params: Promise<Params> }) {
   try {
-    await prisma.album.delete({ where: { id: Number(params.id) } });
+    const { id } = await params;
+    await prisma.album.delete({ where: { id: Number(id) } });
     return NextResponse.json({ success: true });
   } catch {
     return NextResponse.json({ error: 'Failed to delete album.' }, { status: 500 });

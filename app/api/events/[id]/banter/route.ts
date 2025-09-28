@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
 // GET: Return all banter for event
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
-  const id = params.id;
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   if (!id || isNaN(Number(id))) {
     return NextResponse.json({ error: "Invalid event id" }, { status: 400 });
   }
@@ -46,8 +46,8 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
 }
 
 // POST: Create new banter
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
-  const id = params.id;
+export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   if (!id || isNaN(Number(id))) {
     return NextResponse.json({ error: "Invalid event id" }, { status: 400 });
   }

@@ -6,9 +6,10 @@ const prisma = new PrismaClient();
 import type { NextRequest } from 'next/server';
 type Params = { id: string };
 
-export async function GET(req: NextRequest, context: { params: { id: string } }) {
+export async function GET(req: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
-  const id = Number(context.params.id);
+    const { id: paramId } = await context.params;
+    const id = Number(paramId);
     if (!id) return NextResponse.json({ error: 'Invalid event id.' }, { status: 400 });
     const event = await prisma.event.findUnique({ where: { id } });
     if (!event) return NextResponse.json({ error: 'Event not found.' }, { status: 404 });
@@ -19,9 +20,9 @@ export async function GET(req: NextRequest, context: { params: { id: string } })
   }
 }
 
-export async function PUT(req: NextRequest, context: { params: Params }) {
+export async function PUT(req: NextRequest, context: { params: Promise<Params> }) {
   try {
-  const params = await context.params;
+    const params = await context.params;
     const id = Number(params.id);
     const data = await req.json();
     if (!id || !data.year || isNaN(Number(data.year))) {
@@ -49,9 +50,10 @@ export async function PUT(req: NextRequest, context: { params: Params }) {
   }
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: Params }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<Params> }) {
   try {
-    const id = Number(params.id);
+    const { id: paramId } = await params;
+    const id = Number(paramId);
     if (!id) return NextResponse.json({ error: 'Invalid event id.' }, { status: 400 });
     await prisma.event.delete({ where: { id } });
     return NextResponse.json({ success: true });

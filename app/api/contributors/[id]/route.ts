@@ -7,9 +7,10 @@ type Params = { id: string };
 
 const prisma = new PrismaClient();
 
-export async function GET(req: NextRequest, { params }: { params: Params }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<Params> }) {
   try {
-    const id = Number(params.id);
+    const { id: paramId } = await params;
+    const id = Number(paramId);
     if (!id) return NextResponse.json({ error: 'Invalid contributor id.' }, { status: 400 });
     const contributor = await prisma.contributor.findUnique({ where: { id } });
     if (!contributor) return NextResponse.json({ error: 'Contributor not found.' }, { status: 404 });
@@ -20,9 +21,10 @@ export async function GET(req: NextRequest, { params }: { params: Params }) {
   }
 }
 
-export async function PUT(req: NextRequest, { params }: { params: Params }) {
+export async function PUT(req: NextRequest, { params }: { params: Promise<Params> }) {
   try {
-    const id = Number(params.id);
+    const { id: paramId } = await params;
+    const id = Number(paramId);
     const data = await req.json();
     if (!id || !data.name || typeof data.name !== 'string') {
       return NextResponse.json({ error: 'Invalid input.' }, { status: 400 });
@@ -42,9 +44,10 @@ export async function PUT(req: NextRequest, { params }: { params: Params }) {
   }
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: Params }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<Params> }) {
   try {
-    const id = Number(params.id);
+    const { id: paramId } = await params;
+    const id = Number(paramId);
     if (!id) return NextResponse.json({ error: 'Invalid contributor id.' }, { status: 400 });
     await prisma.contributor.delete({ where: { id } });
     return NextResponse.json({ success: true });

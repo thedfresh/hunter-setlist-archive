@@ -2,8 +2,9 @@ import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
-export async function GET(req: Request, { params }: { params: { setId: string } }) {
-  const setId = Number(params.setId);
+export async function GET(req: Request, { params }: { params: Promise<{ setId: string }> }) {
+  const { setId: setIdParam } = await params;
+  const setId = Number(setIdParam);
   const performances = await prisma.performance.findMany({
     where: { setId },
     include: {
