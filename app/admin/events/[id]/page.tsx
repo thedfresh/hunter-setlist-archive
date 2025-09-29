@@ -10,6 +10,11 @@ import ShowBanterSection from "./components/ShowBanterSection";
 import RecordingsSection from "./components/RecordingsSection";
 
 export default function EventEditPage() {
+  // Collapsible section state
+  const [showNotes, setShowNotes] = useState(false);
+  const [showContribRecordings, setShowContribRecordings] = useState(false);
+  const [showSets, setShowSets] = useState(false);
+  const [showBanter, setShowBanter] = useState(false);
   // Performance management state
   const [songs, setSongs] = useState<any[]>([]);
   const [musicians, setMusicians] = useState<any[]>([]);
@@ -240,7 +245,17 @@ export default function EventEditPage() {
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <div className="max-w-5xl w-full bg-white rounded-xl shadow-lg p-8 mx-auto">
-        <h1 className="text-2xl font-bold mb-6 text-gray-800">Edit Event</h1>
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-2xl font-bold text-gray-800">Edit Event</h1>
+          <button
+            onClick={handleDelete}
+            className="bg-red-600 text-white font-semibold px-3 py-1 rounded shadow hover:bg-red-700 transition disabled:opacity-50 text-xs ml-4"
+            style={{ minWidth: 0 }}
+            disabled={submitting}
+          >
+            Delete
+          </button>
+        </div>
         <div className="mb-4 flex justify-between items-center">
           <Link href="/admin/events" className="text-blue-600 hover:underline font-semibold">Back to Events</Link>
           <div className="flex gap-2">
@@ -253,6 +268,7 @@ export default function EventEditPage() {
           </div>
         </div>
         <form className="space-y-6" onSubmit={handleSubmit}>
+
           {/* isPublic and isUncertain Checkboxes */}
           <div className="flex flex-wrap gap-6 items-center">
             <div className="flex items-center gap-2">
@@ -293,7 +309,7 @@ export default function EventEditPage() {
                 onChange={e => setForm(f => ({ ...f, isSpurious: e.target.checked }))}
                 className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
               />
-              <label className="text-sm text-gray-700">Spurious (questionable show)</label>
+              <label className="text-sm text-gray-700">Spurious</label>
             </div>
             <div className="flex items-center gap-2">
               <input
@@ -408,41 +424,20 @@ export default function EventEditPage() {
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Venue</label>
-            <select
-              name="venueId"
-              value={form.venueId}
-              onChange={e => setForm(f => ({ ...f, venueId: e.target.value }))}
-              className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
-            >
-              <option value="">Select venue</option>
-              {venues.map(v => (
-                <option key={v.id} value={v.id}>{v.name}{v.context ? ` (${v.context})` : ""}{v.city ? `, ${v.city}` : ""}{v.stateProvince ? `, ${v.stateProvince}` : ""}{v.country ? `, ${v.country}` : ""}</option>
-              ))}
-            </select>
-          </div>
           <div className="flex gap-4">
-            <div className="w-1/3">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Public Notes</label>
-              <textarea
-                name="publicNotes"
-                value={form.publicNotes}
-                onChange={e => setForm(f => ({ ...f, publicNotes: e.target.value }))}
-                className="w-full border rounded-md px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
-                rows={5}
-                placeholder="Public notes visible to all users..."
-              />
-            </div>
-            <div className="w-1/3">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Private Notes</label>
-              <textarea
-                name="privateNotes"
-                value={form.privateNotes}
-                onChange={e => setForm(f => ({ ...f, privateNotes: e.target.value }))}
-                className="w-full border rounded-md px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
-                rows={5}
-                placeholder="Private admin notes..."
-              />
+            <div className="w-2/3">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Venue</label>
+              <select
+                name="venueId"
+                value={form.venueId}
+                onChange={e => setForm(f => ({ ...f, venueId: e.target.value }))}
+                className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
+              >
+                <option value="">Select venue</option>
+                {venues.map(v => (
+                  <option key={v.id} value={v.id}>{v.name}{v.context ? ` (${v.context})` : ""}{v.city ? `, ${v.city}` : ""}{v.stateProvince ? `, ${v.stateProvince}` : ""}{v.country ? `, ${v.country}` : ""}</option>
+                ))}
+              </select>
             </div>
             <div className="w-1/3">
               <label className="block text-sm font-medium text-gray-700 mb-1">Billing (opener/headliner)</label>
@@ -456,16 +451,51 @@ export default function EventEditPage() {
               />
             </div>
           </div>
-          <div className="mt-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Raw Data (original source)</label>
-            <textarea
-              name="rawData"
-              value={form.rawData}
-              onChange={e => setForm(f => ({ ...f, rawData: e.target.value }))}
-              className="w-full border rounded-md px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
-              rows={4}
-              placeholder="Paste original source data here..."
-            />
+          </div>
+                    {/* Notes + Raw Data Section (collapsible, collapsed by default) */}
+          <div className="mb-6">
+            <button type="button" className="text-sm text-blue-600 font-semibold mb-2" onClick={() => setShowNotes(v => !v)}>
+              {showNotes ? "▼" : "►"} Notes & Raw Data
+            </button>
+            {showNotes && (
+              <div>
+                <div className="flex gap-4">
+                  <div className="w-1/2">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Public Notes</label>
+                    <textarea
+                      name="publicNotes"
+                      value={form.publicNotes}
+                      onChange={e => setForm(f => ({ ...f, publicNotes: e.target.value }))}
+                      className="w-full border rounded-md px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
+                      rows={5}
+                      placeholder="Public notes visible to all users..."
+                    />
+                  </div>
+                  <div className="w-1/2">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Private Notes</label>
+                    <textarea
+                      name="privateNotes"
+                      value={form.privateNotes}
+                      onChange={e => setForm(f => ({ ...f, privateNotes: e.target.value }))}
+                      className="w-full border rounded-md px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
+                      rows={5}
+                      placeholder="Private admin notes..."
+                    />
+                  </div>
+                </div>
+                <div className="mt-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Raw Data (original source)</label>
+                  <textarea
+                    name="rawData"
+                    value={form.rawData}
+                    onChange={e => setForm(f => ({ ...f, rawData: e.target.value }))}
+                    className="w-full border rounded-md px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
+                    rows={4}
+                    placeholder="Paste original source data here..."
+                  />
+                </div>
+              </div>
+            )}
           </div>
           {success && <p className="text-green-600 text-sm mb-2">Event updated successfully!</p>}
           <div className="flex justify-end">
@@ -479,79 +509,99 @@ export default function EventEditPage() {
           </div>
         </form>
         {/* Contributors Section */}
-        {event.id && (
-          <EventContributorsSection eventId={event.id} />
-        )}
-        {/* Recordings Section */}
-        {event.id && (
-          <RecordingsSection eventId={event.id} />
-        )}
-        <hr className="my-8" />
-        {/* Sets Section */}
-        <h2 className="text-xl font-bold mb-4 text-gray-800">Sets</h2>
-        <div className="mb-4">
-          <button
-            className="bg-blue-600 text-white font-semibold py-2 px-4 rounded shadow hover:bg-blue-700 transition"
-            onClick={() => { setEditingSet(null); setShowSetForm(true); }}
-          >
-            Add New Set
+        {/* Contributors + Recordings Section */}
+        <div className="mb-6">
+          <button type="button" className="text-sm text-blue-600 font-semibold mb-2" onClick={() => setShowContribRecordings(v => !v)}>
+            {showContribRecordings ? "▼" : "►"} Contributors & Recordings
           </button>
+          {showContribRecordings && (
+            <>
+              {event.id && <EventContributorsSection eventId={event.id} />}
+              {event.id && <RecordingsSection eventId={event.id} />}
+            </>
+          )}
         </div>
-        <table className="w-full text-left border-collapse mb-6">
-          <thead>
-            <tr className="bg-gray-100">
-              <th className="py-2 px-4 font-semibold">Type</th>
-              <th className="py-2 px-4 font-semibold">Position</th>
-              <th className="py-2 px-4 font-semibold">Notes</th>
-              <th className="py-2 px-4 font-semibold">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sets.sort((a, b) => a.position - b.position).map(set => (
-              <React.Fragment key={set.id}>
-                <tr className="border-b">
-                  <td className="py-2 px-4">{set.setType.displayName}</td>
-                  <td className="py-2 px-4">{set.position}</td>
-                  <td className="py-2 px-4">{set.notes || <span className="text-gray-400 italic">—</span>}</td>
-                  <td className="py-2 px-4">
-                    <button
-                      className="bg-gray-200 text-gray-800 font-semibold py-0.5 px-2 rounded shadow hover:bg-gray-300 transition mr-2 text-sm"
-                      onClick={() => { setEditingSet(set); setShowSetForm(true); }}
-                    >
-                      Edit
-                    </button>
-                    <button
-                      className="bg-red-600 text-white font-semibold py-0.5 px-2 rounded shadow hover:bg-red-700 transition text-sm"
-                      onClick={async () => {
-                        if (confirm("Delete this set?")) {
-                          await fetch(`/api/events/${id}/sets/${set.id}`, { method: "DELETE" });
-                          setSets(sets.filter(s => s.id !== set.id));
-                        }
-                      }}
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-                <tr>
-                  <td colSpan={4} className="bg-gray-50 px-4 py-2">
-                    <SetPerformancesSection
-                      set={set}
-                      songs={songs}
-                      musicians={musicians}
-                      instruments={instruments}
-                      onPerformancesChanged={() => {}}
-                    />
-                  </td>
-                </tr>
-              </React.Fragment>
-            ))}
-           </tbody>
-         </table>
+        {/* Sets Section */}
+        {/* Sets Section (collapsible) */}
+        <div className="mb-6">
+          <button type="button" className="text-sm text-blue-600 font-semibold mb-2" onClick={() => setShowSets(v => !v)}>
+            {showSets ? "▼" : "►"} Sets
+          </button>
+          {showSets && (
+            <>
+              <h2 className="text-xl font-bold mb-4 text-gray-800">Sets</h2>
+              <div className="mb-4">
+                <button
+                  className="bg-blue-600 text-white font-semibold py-2 px-4 rounded shadow hover:bg-blue-700 transition"
+                  onClick={() => { setEditingSet(null); setShowSetForm(true); }}
+                >
+                  Add New Set
+                </button>
+              </div>
+              <table className="w-full text-left border-collapse mb-6">
+                <thead>
+                  <tr className="bg-gray-100">
+                    <th className="py-2 px-4 font-semibold">Type</th>
+                    <th className="py-2 px-4 font-semibold">Position</th>
+                    <th className="py-2 px-4 font-semibold">Notes</th>
+                    <th className="py-2 px-4 font-semibold">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sets.sort((a, b) => a.position - b.position).map(set => (
+                    <React.Fragment key={set.id}>
+                      <tr className="border-b">
+                        <td className="py-2 px-4">{set.setType.displayName}</td>
+                        <td className="py-2 px-4">{set.position}</td>
+                        <td className="py-2 px-4">{set.notes || <span className="text-gray-400 italic">—</span>}</td>
+                        <td className="py-2 px-4">
+                          <button
+                            className="bg-gray-200 text-gray-800 font-semibold py-0.5 px-2 rounded shadow hover:bg-gray-300 transition mr-2 text-sm"
+                            onClick={() => { setEditingSet(set); setShowSetForm(true); }}
+                          >
+                            Edit
+                          </button>
+                          <button
+                            className="bg-red-600 text-white font-semibold py-0.5 px-2 rounded shadow hover:bg-red-700 transition text-sm"
+                            onClick={async () => {
+                              if (confirm("Delete this set?")) {
+                                await fetch(`/api/events/${id}/sets/${set.id}`, { method: "DELETE" });
+                                setSets(sets.filter(s => s.id !== set.id));
+                              }
+                            }}
+                          >
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td colSpan={4} className="bg-gray-50 px-4 py-2">
+                          <SetPerformancesSection
+                            set={set}
+                            songs={songs}
+                            musicians={musicians}
+                            instruments={instruments}
+                            onPerformancesChanged={() => {}}
+                          />
+                        </td>
+                      </tr>
+                    </React.Fragment>
+                  ))}
+                </tbody>
+              </table>
+            </>
+          )}
+        </div>
         {/* ShowBanter Section */}
-        {event && (
-          <ShowBanterSection eventId={event.id} />
-        )}
+        {/* Show Banter Section (collapsible) */}
+        <div className="mb-6">
+          <button type="button" className="text-sm text-blue-600 font-semibold mb-2" onClick={() => setShowBanter(v => !v)}>
+            {showBanter ? "▼" : "►"} Show Banter
+          </button>
+          {showBanter && event && (
+            <ShowBanterSection eventId={event.id} />
+          )}
+        </div>
          {/* Performance management for each set (removed duplicate) */}
         {showSetForm && (
           <SetForm
@@ -563,13 +613,6 @@ export default function EventEditPage() {
             onSaved={() => setShowSetForm(false)}
           />
         )}
-        <button
-          onClick={handleDelete}
-          className="w-full bg-red-600 text-white font-semibold py-2 rounded-md shadow hover:bg-red-700 transition disabled:opacity-50"
-          disabled={submitting}
-        >
-          Delete Event
-        </button>
         {deleteError && <p className="text-red-500 text-sm mt-2">{deleteError}</p>}
         {event && (
           <p className="mt-6 text-gray-500 text-xs">Created: {new Date(event.createdAt).toLocaleString()}</p>
