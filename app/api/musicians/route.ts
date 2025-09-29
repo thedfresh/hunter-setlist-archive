@@ -26,12 +26,14 @@ export async function POST(req: Request) {
     if (!data.name || typeof data.name !== 'string') {
       return NextResponse.json({ error: 'Musician name is required.' }, { status: 400 });
     }
-    const { name, isUncertain, defaultInstrumentIds } = data;
+    const { name, isUncertain, publicNotes, privateNotes, defaultInstrumentIds } = data;
     // Step 1: Create musician
     const musician = await prisma.musician.create({
       data: {
         name,
         isUncertain: !!isUncertain,
+        publicNotes: typeof publicNotes === 'string' ? publicNotes : undefined,
+        privateNotes: typeof privateNotes === 'string' ? privateNotes : undefined,
       },
     });
 

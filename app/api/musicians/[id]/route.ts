@@ -28,13 +28,15 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     if (!data.name || typeof data.name !== 'string') {
       return NextResponse.json({ error: 'Musician name is required.' }, { status: 400 });
     }
-    const { name, isUncertain, defaultInstrumentIds } = data;
+    const { name, isUncertain, publicNotes, privateNotes, defaultInstrumentIds } = data;
     // Remove all existing default instruments and set new ones
     const musician = await prisma.musician.update({
       where: { id: Number(id) },
       data: {
         name,
         isUncertain: !!isUncertain,
+        publicNotes: typeof publicNotes === 'string' ? publicNotes : undefined,
+        privateNotes: typeof privateNotes === 'string' ? privateNotes : undefined,
         defaultInstruments: {
           deleteMany: {},
           create: defaultInstrumentIds && Array.isArray(defaultInstrumentIds)

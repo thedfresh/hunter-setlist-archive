@@ -23,6 +23,8 @@ export default function MusicianDetailPage() {
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
+  const [notes, setNotes] = useState({ publicNotes: "", privateNotes: "" });
+
   useEffect(() => {
     async function fetchMusician() {
       try {
@@ -34,6 +36,10 @@ export default function MusicianDetailPage() {
             name: data.musician.name,
             isUncertain: data.musician.isUncertain,
             defaultInstrumentIds: (data.musician.defaultInstruments || []).map((di: any) => di.instrument.id),
+          });
+          setNotes({
+            publicNotes: data.musician.publicNotes || "",
+            privateNotes: data.musician.privateNotes || "",
           });
         }
       } finally {
@@ -73,7 +79,11 @@ export default function MusicianDetailPage() {
       const res = await fetch(`/api/musicians/${params.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({
+          ...form,
+          publicNotes: notes.publicNotes,
+          privateNotes: notes.privateNotes,
+        }),
       });
       if (res.ok) {
         setSuccess(true);
@@ -172,6 +182,29 @@ export default function MusicianDetailPage() {
               </div>
             )}
           </div>
+          <div className="flex gap-4">
+            <div className="w-1/2">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Public Notes</label>
+              <textarea
+                name="publicNotes"
+                value={notes.publicNotes}
+                onChange={e => setNotes(n => ({ ...n, publicNotes: e.target.value }))}
+                className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
+                rows={2}
+              />
+            </div>
+            <div className="w-1/2">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Private Notes</label>
+              <textarea
+                name="privateNotes"
+                value={notes.privateNotes}
+                onChange={e => setNotes(n => ({ ...n, privateNotes: e.target.value }))}
+                className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
+                rows={2}
+              />
+            </div>
+          </div>
+
           {/* Error Message */}
           {errors.form && <p className="text-red-500 text-sm mb-2">{errors.form}</p>}
           {/* Success Message */}
