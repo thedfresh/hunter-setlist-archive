@@ -18,7 +18,12 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Contributor name is required.' }, { status: 400 });
     }
     const contributor = await prisma.contributor.create({
-      data: { name: data.name },
+      data: {
+        name: data.name,
+        email: typeof data.email === 'string' ? data.email : undefined,
+        publicNotes: typeof data.publicNotes === 'string' ? data.publicNotes : undefined,
+        privateNotes: typeof data.privateNotes === 'string' ? data.privateNotes : undefined,
+      },
     });
     return NextResponse.json({ contributor }, { status: 201 });
   } catch (error) {

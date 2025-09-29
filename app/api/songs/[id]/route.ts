@@ -11,9 +11,10 @@ export async function GET(req: Request, { params }: { params: Params }) {
     const song = await prisma.song.findUnique({
       where: { id: Number(id) },
       include: {
-        leadVocals: true,
         songAlbums: { include: { album: true } },
         songTags: { include: { tag: true } },
+        links: true,
+        performances: true,
       },
     });
     if (!song) return NextResponse.json({ error: "Song not found." }, { status: 404 });
@@ -52,10 +53,10 @@ export async function PUT(req: Request, { params }: { params: Params }) {
         originalArtist: data.originalArtist || null,
         lyricsBy: data.lyricsBy || null,
         musicBy: data.musicBy || null,
-        notes: data.notes || null,
+        publicNotes: data.publicNotes || null,
+        privateNotes: data.privateNotes || null,
         isUncertain: !!data.isUncertain,
         inBoxOfRain: !!data.inBoxOfRain,
-        leadVocalsId: data.leadVocalsId ? Number(data.leadVocalsId) : null,
       },
     });
     // Many-to-many: songAlbums

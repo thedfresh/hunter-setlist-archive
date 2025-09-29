@@ -34,7 +34,8 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<Params
       data: {
         name: data.name,
         email: typeof data.email === 'string' ? data.email : undefined,
-        notes: typeof data.notes === 'string' ? data.notes : undefined,
+        publicNotes: typeof data.publicNotes === 'string' ? data.publicNotes : undefined,
+        privateNotes: typeof data.privateNotes === 'string' ? data.privateNotes : undefined,
       },
     });
     return NextResponse.json({ contributor });

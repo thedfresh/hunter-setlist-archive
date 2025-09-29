@@ -9,8 +9,10 @@ type FormState = {
   eventTypeId: string;
   contentTypeId: string;
   primaryBandId: string;
-  notes: string;
+  publicNotes: string;
+  privateNotes: string;
   isUncertain: boolean;
+  isPublic: boolean;
 };
 "use client";
 import React, { useState, useEffect } from 'react';
@@ -41,8 +43,10 @@ export default function NewEventPage() {
     eventTypeId: '',
     contentTypeId: '',
     primaryBandId: '',
-    notes: '',
+    publicNotes: '',
+    privateNotes: '',
     isUncertain: false,
+    isPublic: true,
   });
 
   useEffect(() => {
@@ -327,30 +331,55 @@ function EventForm({ venues, eventTypes, contentTypes, bands, onAddVenue, form, 
               </select>
             </div>
           </div>
-          {/* isUncertain Checkbox */}
-          <div className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              name="isUncertain"
-              checked={form.isUncertain}
-              onChange={e => setForm(f => ({ ...f, isUncertain: e.target.checked }))}
-              className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-            />
-            <label className="text-sm text-gray-700">Event date is uncertain</label>
+          {/* isPublic and isUncertain Checkboxes */}
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                name="isPublic"
+                checked={form.isPublic}
+                onChange={e => setForm(f => ({ ...f, isPublic: e.target.checked }))}
+                className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+              />
+              <label className="text-sm text-gray-700">Event is public</label>
+            </div>
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                name="isUncertain"
+                checked={form.isUncertain}
+                onChange={e => setForm(f => ({ ...f, isUncertain: e.target.checked }))}
+                className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+              />
+              <label className="text-sm text-gray-700">Event date is uncertain</label>
+            </div>
           </div>
           {/* Contributors Section */}
           <EventContributorsInput onContributorsChange={setContributors} />
-          {/* Notes */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
-            <textarea
-              name="notes"
-              value={form.notes}
-              onChange={e => setForm(f => ({ ...f, notes: e.target.value }))}
-              className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300 resize-vertical"
-              rows={3}
-              placeholder="Additional notes..."
-            />
+          {/* Public and Private Notes */}
+          <div className="flex gap-4">
+            <div className="w-1/2">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Public Notes</label>
+              <textarea
+                name="publicNotes"
+                value={form.publicNotes}
+                onChange={e => setForm(f => ({ ...f, publicNotes: e.target.value }))}
+                className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300 resize-vertical"
+                rows={3}
+                placeholder="Public notes visible to all users..."
+              />
+            </div>
+            <div className="w-1/2">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Private Notes</label>
+              <textarea
+                name="privateNotes"
+                value={form.privateNotes}
+                onChange={e => setForm(f => ({ ...f, privateNotes: e.target.value }))}
+                className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300 resize-vertical"
+                rows={3}
+                placeholder="Private admin notes..."
+              />
+            </div>
           </div>
           {/* Error Message */}
           {errors.form && <p className="text-red-500 text-sm mb-2">{errors.form}</p>}

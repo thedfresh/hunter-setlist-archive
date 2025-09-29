@@ -32,8 +32,10 @@ export default function EventEditPage() {
     eventTypeId: "",
     contentTypeId: "",
     primaryBandId: "",
-    notes: "",
+    publicNotes: "",
+    privateNotes: "",
     isUncertain: false,
+    isPublic: true,
   });
   const [venues, setVenues] = useState<{ id: number; name: string, context?: string, city?: string, stateProvince?: string, country?: string }[]>([]);
   const [eventTypes, setEventTypes] = useState<{ id: number; name: string }[]>([]);
@@ -110,8 +112,10 @@ export default function EventEditPage() {
             eventTypeId: String(data.event.eventTypeId || ""),
             contentTypeId: String(data.event.contentTypeId || ""),
             primaryBandId: String(data.event.primaryBandId || ""),
-            notes: data.event.notes || "",
+            publicNotes: data.event.publicNotes || "",
+            privateNotes: data.event.privateNotes || "",
             isUncertain: !!data.event.isUncertain,
+            isPublic: data.event.isPublic !== false, // default to true
           });
         } else {
           setError("Event not found.");
@@ -239,16 +243,28 @@ export default function EventEditPage() {
           </div>
         </div>
         <form className="space-y-6" onSubmit={handleSubmit}>
-          {/* isUncertain Checkbox */}
-          <div className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              name="isUncertain"
-              checked={form.isUncertain}
-              onChange={e => setForm(f => ({ ...f, isUncertain: e.target.checked }))}
-              className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-            />
-            <label className="text-sm text-gray-700">Event date is uncertain</label>
+          {/* isPublic and isUncertain Checkboxes */}
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                name="isPublic"
+                checked={form.isPublic}
+                onChange={e => setForm(f => ({ ...f, isPublic: e.target.checked }))}
+                className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+              />
+              <label className="text-sm text-gray-700">Event is public</label>
+            </div>
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                name="isUncertain"
+                checked={form.isUncertain}
+                onChange={e => setForm(f => ({ ...f, isUncertain: e.target.checked }))}
+                className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+              />
+              <label className="text-sm text-gray-700">Event date is uncertain</label>
+            </div>
           </div>
           <div className="flex gap-4">
             <div className="w-1/8">
@@ -365,16 +381,29 @@ export default function EventEditPage() {
               ))}
             </select>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
-            <textarea
-              name="notes"
-              value={form.notes}
-              onChange={e => setForm(f => ({ ...f, notes: e.target.value }))}
-              className="w-full border rounded-md px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
-              rows={5}
-              placeholder="Additional notes..."
-            />
+          <div className="flex gap-4">
+            <div className="w-1/2">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Public Notes</label>
+              <textarea
+                name="publicNotes"
+                value={form.publicNotes}
+                onChange={e => setForm(f => ({ ...f, publicNotes: e.target.value }))}
+                className="w-full border rounded-md px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
+                rows={5}
+                placeholder="Public notes visible to all users..."
+              />
+            </div>
+            <div className="w-1/2">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Private Notes</label>
+              <textarea
+                name="privateNotes"
+                value={form.privateNotes}
+                onChange={e => setForm(f => ({ ...f, privateNotes: e.target.value }))}
+                className="w-full border rounded-md px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
+                rows={5}
+                placeholder="Private admin notes..."
+              />
+            </div>
           </div>
           {success && <p className="text-green-600 text-sm mb-2">Event updated successfully!</p>}
           <div className="flex justify-end">

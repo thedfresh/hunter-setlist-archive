@@ -40,8 +40,10 @@ export async function PUT(req: NextRequest, context: { params: Promise<Params> }
         eventTypeId: data.eventTypeId ? Number(data.eventTypeId) : null,
         contentTypeId: data.contentTypeId ? Number(data.contentTypeId) : null,
         primaryBandId: data.primaryBandId ? Number(data.primaryBandId) : null,
-        notes: data.notes || null,
+        publicNotes: data.publicNotes || null,
+        privateNotes: data.privateNotes || null,
         isUncertain: !!data.isUncertain,
+        isPublic: data.isPublic !== false, // default to true
       },
     });
     return NextResponse.json({ event });

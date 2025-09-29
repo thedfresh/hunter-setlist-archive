@@ -12,7 +12,8 @@ const initialForm = {
   stateProvince: "",
   country: "",
   isUncertain: false,
-  notes: "",
+  publicNotes: "",
+  privateNotes: "",
 };
 
 export default function AddVenueModal({ isOpen, onClose, onVenueCreated }: AddVenueModalProps) {
@@ -125,15 +126,29 @@ export default function AddVenueModal({ isOpen, onClose, onVenueCreated }: AddVe
             />
             <label className="text-sm text-gray-700">Is Uncertain?</label>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
-            <textarea
-              name="notes"
-              value={form.notes}
-              onChange={e => setForm(f => ({ ...f, notes: e.target.value }))}
-              className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300 resize-vertical"
-              rows={2}
-            />
+          <div className="flex gap-4">
+            <div className="w-1/2">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Public Notes</label>
+              <textarea
+                name="publicNotes"
+                value={form.publicNotes}
+                onChange={e => setForm(f => ({ ...f, publicNotes: e.target.value }))}
+                className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300 resize-vertical"
+                rows={2}
+                placeholder="Public notes visible to all users..."
+              />
+            </div>
+            <div className="w-1/2">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Private Notes</label>
+              <textarea
+                name="privateNotes"
+                value={form.privateNotes}
+                onChange={e => setForm(f => ({ ...f, privateNotes: e.target.value }))}
+                className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300 resize-vertical"
+                rows={2}
+                placeholder="Private admin notes..."
+              />
+            </div>
           </div>
           {apiError && <p className="text-red-500 text-sm mb-2">{apiError}</p>}
           <div className="flex justify-end gap-2 mt-4">

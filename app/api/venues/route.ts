@@ -26,6 +26,8 @@ export async function POST(req: Request) {
         stateProvince: data.stateProvince || null,
         country: data.country || null,
         isUncertain: !!data.isUncertain,
+        publicNotes: data.publicNotes || null,
+        privateNotes: data.privateNotes || null,
       },
     });
     return NextResponse.json({ venue }, { status: 201 });

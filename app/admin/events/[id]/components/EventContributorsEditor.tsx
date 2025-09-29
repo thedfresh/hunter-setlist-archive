@@ -1,3 +1,4 @@
+import ContributorForm from '../../shared/ContributorForm';
 import React, { useEffect, useState } from "react";
 
 export interface EventContributor {
@@ -5,7 +6,8 @@ export interface EventContributor {
   contributorId: number;
   contributorName: string;
   description: string;
-  notes: string;
+  publicNotes: string;
+  privateNotes: string;
 }
 
 interface Contributor {
@@ -21,7 +23,7 @@ const EventContributorsSection: React.FC<Props> = ({ eventId }) => {
   const [contributors, setContributors] = useState<EventContributor[]>([]);
   const [allContributors, setAllContributors] = useState<Contributor[]>([]);
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({ contributorId: 0, contributorName: "", description: "", notes: "", isNew: false });
+  const [form, setForm] = useState({ contributorId: 0, contributorName: "", description: "", publicNotes: "", privateNotes: "", isNew: false });
   const [editingId, setEditingId] = useState<number | null>(null);
 
   useEffect(() => {
@@ -63,7 +65,8 @@ const EventContributorsSection: React.FC<Props> = ({ eventId }) => {
       body: JSON.stringify({
         contributorId,
         description: form.description,
-        notes: form.notes,
+        publicNotes: form.publicNotes,
+        privateNotes: form.privateNotes,
       }),
     });
     if (res.ok) {
@@ -74,12 +77,19 @@ const EventContributorsSection: React.FC<Props> = ({ eventId }) => {
       );
       setShowForm(false);
       setEditingId(null);
-      setForm({ contributorId: 0, contributorName: "", description: "", notes: "", isNew: false });
+  setForm({ contributorId: 0, contributorName: "", description: "", publicNotes: "", privateNotes: "", isNew: false });
     }
   };
 
   const handleEdit = (c: EventContributor) => {
-    setForm({ contributorId: c.contributorId, contributorName: "", description: c.description, notes: c.notes, isNew: false });
+    setForm({
+      contributorId: c.contributorId,
+      contributorName: "",
+      description: c.description,
+      publicNotes: c.publicNotes,
+      privateNotes: c.privateNotes,
+      isNew: false
+    });
     setEditingId(c.id);
     setShowForm(true);
   };
@@ -97,7 +107,8 @@ const EventContributorsSection: React.FC<Props> = ({ eventId }) => {
           <tr className="bg-gray-100">
             <th className="px-2 py-1 text-left">Name</th>
             <th className="px-2 py-1 text-left">Description</th>
-            <th className="px-2 py-1 text-left">Notes</th>
+            <th className="px-2 py-1 text-left">Public Notes</th>
+            <th className="px-2 py-1 text-left">Private Notes</th>
             <th className="px-2 py-1 text-left">Actions</th>
           </tr>
         </thead>
@@ -106,7 +117,8 @@ const EventContributorsSection: React.FC<Props> = ({ eventId }) => {
             <tr key={c.id} className="border-t">
               <td className="px-2 py-1">{c.contributorName}</td>
               <td className="px-2 py-1">{c.description}</td>
-              <td className="px-2 py-1">{c.notes}</td>
+              <td className="px-2 py-1">{c.publicNotes}</td>
+              <td className="px-2 py-1">{c.privateNotes}</td>
               <td className="px-2 py-1">
                 <div className="flex gap-1 items-center">
                   <button
@@ -127,47 +139,20 @@ const EventContributorsSection: React.FC<Props> = ({ eventId }) => {
       </table>
       {showForm ? (
         <div className="border p-2 rounded mb-2">
-          <select
-            className="border rounded px-2 py-1 mb-1 w-full"
-            value={form.isNew ? "new" : form.contributorId}
-            onChange={e => {
-              if (e.target.value === "new") {
-                setForm(f => ({ ...f, isNew: true, contributorId: 0 }));
-              } else {
-                setForm(f => ({ ...f, isNew: false, contributorId: Number(e.target.value), contributorName: "" }));
-              }
-            }}
-          >
-            <option key="select" value={0}>Select contributor...</option>
-            {allContributors.map(c => (
-              <option key={"contrib-" + c.id} value={c.id}>{c.name}</option>
-            ))}
-            <option key="new" value="new">Create New Contributor</option>
-          </select>
-          {form.isNew && (
-            <input
-              className="border rounded px-2 py-1 mb-1 w-full"
-              placeholder="Contributor Name"
-              value={form.contributorName}
-              onChange={e => setForm(f => ({ ...f, contributorName: e.target.value }))}
-            />
-          )}
-          <input
-            className="border rounded px-2 py-1 mb-1 w-full"
-            placeholder="Description"
-            value={form.description}
-            onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
-          />
-          <textarea
-            className="border rounded px-2 py-1 mb-1 w-full"
-            placeholder="Notes"
-            value={form.notes}
-            onChange={e => setForm(f => ({ ...f, notes: e.target.value }))}
-            rows={2}
+          {/* Shared ContributorForm */}
+          <ContributorForm
+            contributorId={form.contributorId}
+            contributorName={form.contributorName}
+            isNew={form.isNew}
+            description={form.description}
+            publicNotes={form.publicNotes}
+            privateNotes={form.privateNotes}
+            allContributors={allContributors}
+            onChange={(fields: Partial<typeof form>) => setForm(f => ({ ...f, ...fields }))}
           />
           <div className="flex gap-2 mt-1">
             <button className="bg-blue-600 text-white px-3 py-1 rounded" onClick={handleSave} type="button">Save</button>
-            <button className="bg-gray-300 px-3 py-1 rounded" onClick={() => { setShowForm(false); setEditingId(null); setForm({ contributorId: 0, contributorName: "", description: "", notes: "", isNew: false }); }} type="button">Cancel</button>
+            <button className="bg-gray-300 px-3 py-1 rounded" onClick={() => { setShowForm(false); setEditingId(null); setForm({ contributorId: 0, contributorName: "", description: "", publicNotes: "", privateNotes: "", isNew: false }); }} type="button">Cancel</button>
           </div>
         </div>
       ) : (

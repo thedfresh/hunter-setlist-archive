@@ -83,8 +83,10 @@ export async function POST(req: Request) {
           eventTypeId: data.eventTypeId ? Number(data.eventTypeId) : null,
           contentTypeId: data.contentTypeId ? Number(data.contentTypeId) : null,
           primaryBandId: data.primaryBandId ? Number(data.primaryBandId) : null,
-          notes: data.notes || null,
+          publicNotes: data.publicNotes || null,
+          privateNotes: data.privateNotes || null,
           isUncertain: !!data.isUncertain,
+          isPublic: data.isPublic !== false, // default to true
         },
       });
 
@@ -100,7 +102,8 @@ export async function POST(req: Request) {
               eventId: event.id,
               contributorId: Number(c.contributorId),
               description: c.description || null,
-              notes: c.notes || null,
+              publicNotes: c.publicNotes || null,
+              privateNotes: c.privateNotes || null,
             },
           });
         }

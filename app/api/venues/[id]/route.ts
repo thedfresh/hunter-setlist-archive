@@ -35,6 +35,8 @@ export async function PUT(req: NextRequest, { params }: { params: Params }) {
         city: data.city || null,
         stateProvince: data.stateProvince || null,
         country: data.country || null,
+        publicNotes: typeof data.publicNotes === 'string' ? data.publicNotes : null,
+        privateNotes: typeof data.privateNotes === 'string' ? data.privateNotes : null,
         isUncertain: !!data.isUncertain,
       },
     });

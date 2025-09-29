@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
+import ContributorForm from "../ContributorForm";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 
@@ -8,7 +9,8 @@ export default function ContributorEditPage() {
   const params = useParams();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [notes, setNotes] = useState("");
+  const [publicNotes, setPublicNotes] = useState("");
+  const [privateNotes, setPrivateNotes] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -20,7 +22,8 @@ export default function ContributorEditPage() {
         if (res.ok && data.contributor) {
           setName(data.contributor.name);
           setEmail(data.contributor.email || "");
-          setNotes(data.contributor.notes || "");
+          setPublicNotes(data.contributor.publicNotes || "");
+          setPrivateNotes(data.contributor.privateNotes || "");
         } else {
           setError("Contributor not found.");
         }
@@ -45,7 +48,7 @@ export default function ContributorEditPage() {
       const res = await fetch(`/api/contributors/${params.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, notes }),
+  body: JSON.stringify({ name, email, publicNotes, privateNotes }),
       });
       if (res.ok) {
         router.push("/admin/contributors");
@@ -85,56 +88,23 @@ export default function ContributorEditPage() {
         <div className="mb-4 text-center">
           <Link href="/admin/contributors" className="text-blue-600 hover:underline font-semibold">Back to Contributors</Link>
         </div>
-        <form className="space-y-6" onSubmit={handleSubmit}>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Name<span className="text-red-500">*</span></label>
-            <input
-              type="text"
-              value={name}
-              onChange={e => setName(e.target.value)}
-              className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
-              disabled={submitting}
-            />
-            {error && <div className="text-red-500 text-sm mt-2">{error}</div>}
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-            <input
-              type="email"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
-              disabled={submitting}
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
-            <textarea
-              value={notes}
-              onChange={e => setNotes(e.target.value)}
-              className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
-              rows={2}
-              disabled={submitting}
-            />
-          </div>
-          <div className="flex gap-2">
-            <button
-              type="submit"
-              className="bg-blue-600 text-white font-semibold py-2 px-4 rounded-md shadow hover:bg-blue-700 transition w-full"
-              disabled={submitting}
-            >
-              {submitting ? "Saving..." : "Save Changes"}
-            </button>
-            <button
-              type="button"
-              className="bg-red-500 text-white font-semibold py-2 px-4 rounded-md shadow hover:bg-red-600 transition w-full"
-              onClick={handleDelete}
-              disabled={submitting}
-            >
-              Delete
-            </button>
-          </div>
-        </form>
+        <ContributorForm
+          name={name}
+          email={email}
+          publicNotes={publicNotes}
+          privateNotes={privateNotes}
+          submitting={submitting}
+          error={error}
+          isEdit={true}
+          onChange={fields => {
+            if (fields.name !== undefined) setName(fields.name);
+            if (fields.email !== undefined) setEmail(fields.email);
+            if (fields.publicNotes !== undefined) setPublicNotes(fields.publicNotes);
+            if (fields.privateNotes !== undefined) setPrivateNotes(fields.privateNotes);
+          }}
+          onSubmit={handleSubmit}
+          onDelete={handleDelete}
+        />
       </div>
     </div>
   );

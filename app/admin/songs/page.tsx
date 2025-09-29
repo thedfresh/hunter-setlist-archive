@@ -74,13 +74,10 @@ export default function SongsAdminPage() {
             <thead>
               <tr className="bg-gray-100">
                 <th className="py-2 px-4 font-semibold">Title</th>
-                <th className="py-2 px-4 font-semibold">Original Artist</th>
-                <th className="py-2 px-4 font-semibold">Lead Vocals</th>
                 <th className="py-2 px-4 font-semibold">Albums</th>
                 <th className="py-2 px-4 font-semibold">Tags</th>
                 <th className="py-2 px-4 font-semibold">Uncertain?</th>
                 <th className="py-2 px-4 font-semibold">Box of Rain?</th>
-                <th className="py-2 px-4 font-semibold">Created</th>
                 <th className="py-2 px-4 font-semibold">Actions</th>
               </tr>
             </thead>
@@ -88,8 +85,6 @@ export default function SongsAdminPage() {
               {filtered.map(song => (
                 <tr key={song.id} className="border-b">
                   <td className="py-2 px-4">{song.title}</td>
-                  <td className="py-2 px-4">{song.originalArtist || <span className="text-gray-400 italic">—</span>}</td>
-                  <td className="py-2 px-4">{song.leadVocals?.name || <span className="text-gray-400 italic">—</span>}</td>
                   <td className="py-2 px-4">
                     {song.albums && song.albums.length > 0 ? (
                       <div className="flex flex-wrap gap-1">
@@ -110,10 +105,9 @@ export default function SongsAdminPage() {
                   </td>
                   <td className="py-2 px-4">{song.isUncertain ? "Yes" : "No"}</td>
                   <td className="py-2 px-4">{song.inBoxOfRain ? "Yes" : "No"}</td>
-                  <td className="py-2 px-4">{new Date(song.createdAt).toLocaleDateString()}</td>
                   <td className="py-2 px-4">
                     <Link href={`/admin/songs/${song.id}`}>
-                      <button className="bg-gray-200 text-gray-800 font-semibold py-1 px-3 rounded-md shadow hover:bg-gray-300 transition">View/Edit</button>
+                      <button className="bg-gray-200 text-gray-800 font-semibold py-1 px-3 rounded-md shadow hover:bg-gray-300 transition">Edit</button>
                     </Link>
                   </td>
                 </tr>

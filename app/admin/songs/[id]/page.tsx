@@ -19,7 +19,8 @@ export default function EditSongPage() {
     originalArtist: "",
     lyricsBy: "",
     musicBy: "",
-    notes: "",
+    publicNotes: "",
+    privateNotes: "",
     isUncertain: false,
     inBoxOfRain: false,
     leadVocalsId: "",
@@ -58,7 +59,8 @@ export default function EditSongPage() {
             originalArtist: songData.song.originalArtist || "",
             lyricsBy: songData.song.lyricsBy || "",
             musicBy: songData.song.musicBy || "",
-            notes: songData.song.notes || "",
+            publicNotes: songData.song.publicNotes || "",
+            privateNotes: songData.song.privateNotes || "",
             isUncertain: !!songData.song.isUncertain,
             inBoxOfRain: !!songData.song.inBoxOfRain,
             leadVocalsId: songData.song.leadVocals?.id ? String(songData.song.leadVocals.id) : "",
@@ -101,6 +103,8 @@ export default function EditSongPage() {
           leadVocalsId: form.leadVocalsId ? Number(form.leadVocalsId) : null,
           albumIds: form.albumId ? [Number(form.albumId)] : [],
           tagIds: form.tagIds,
+          publicNotes: form.publicNotes,
+          privateNotes: form.privateNotes,
         }),
       });
       if (res.ok) {
@@ -273,15 +277,27 @@ export default function EditSongPage() {
             />
           </div>
           {/* Notes */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
-            <textarea
-              name="notes"
-              value={form.notes}
-              onChange={e => setForm(f => ({ ...f, notes: e.target.value }))}
-              className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
-              rows={2}
-            />
+          <div className="flex gap-4">
+            <div className="w-1/2">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Public Notes</label>
+              <textarea
+                name="publicNotes"
+                value={form.publicNotes}
+                onChange={e => setForm(f => ({ ...f, publicNotes: e.target.value }))}
+                className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
+                rows={2}
+              />
+            </div>
+            <div className="w-1/2">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Private Notes</label>
+              <textarea
+                name="privateNotes"
+                value={form.privateNotes}
+                onChange={e => setForm(f => ({ ...f, privateNotes: e.target.value }))}
+                className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
+                rows={2}
+              />
+            </div>
           </div>
           {/* Is Uncertain */}
           <div className="flex items-center">

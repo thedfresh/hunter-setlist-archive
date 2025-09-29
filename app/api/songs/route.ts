@@ -7,9 +7,10 @@ export async function GET() {
   try {
     const songs = await prisma.song.findMany({
       include: {
-        leadVocals: true,
         songAlbums: { include: { album: true } },
         songTags: { include: { tag: true } },
+        links: true,
+        performances: true,
       },
       orderBy: { title: "asc" },
     });
@@ -45,10 +46,10 @@ export async function POST(req: Request) {
         originalArtist: data.originalArtist || null,
         lyricsBy: data.lyricsBy || null,
         musicBy: data.musicBy || null,
-        notes: data.notes || null,
+        publicNotes: data.publicNotes || null,
+        privateNotes: data.privateNotes || null,
         isUncertain: !!data.isUncertain,
         inBoxOfRain: !!data.inBoxOfRain,
-        leadVocalsId: data.leadVocalsId ? Number(data.leadVocalsId) : null,
       },
     });
     // Many-to-many: songAlbums

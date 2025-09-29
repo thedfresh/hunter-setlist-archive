@@ -5,7 +5,8 @@ export interface EventContributor {
   contributorId: number;
   contributorName: string;
   description: string;
-  notes: string;
+  publicNotes: string;
+  privateNotes: string;
 }
 
 interface Contributor {
@@ -21,7 +22,7 @@ const EventContributorsInput: React.FC<Props> = ({ onContributorsChange }) => {
   const [contributors, setContributors] = useState<EventContributor[]>([]);
   const [allContributors, setAllContributors] = useState<Contributor[]>([]);
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({ contributorId: 0, contributorName: "", description: "", notes: "", isNew: false });
+  const [form, setForm] = useState({ contributorId: 0, contributorName: "", description: "", publicNotes: "", privateNotes: "", isNew: false });
 
   // Only fetch contributors dropdown
   useEffect(() => {
@@ -82,11 +83,12 @@ const EventContributorsInput: React.FC<Props> = ({ onContributorsChange }) => {
       contributorId,
       contributorName,
       description: form.description,
-      notes: form.notes,
+      publicNotes: form.publicNotes,
+      privateNotes: form.privateNotes,
     };
     setContributors([...contributors, newEntry]);
     setShowForm(false);
-    setForm({ contributorId: 0, contributorName: "", description: "", notes: "", isNew: false });
+    setForm({ contributorId: 0, contributorName: "", description: "", publicNotes: "", privateNotes: "", isNew: false });
   };
 
   // Remove edit/delete functionality
@@ -99,7 +101,8 @@ const EventContributorsInput: React.FC<Props> = ({ onContributorsChange }) => {
           <tr className="bg-gray-100">
             <th className="px-2 py-1 text-left">Name</th>
             <th className="px-2 py-1 text-left">Description</th>
-            <th className="px-2 py-1 text-left">Notes</th>
+            <th className="px-2 py-1 text-left">Public Notes</th>
+            <th className="px-2 py-1 text-left">Private Notes</th>
           </tr>
         </thead>
         <tbody>
@@ -107,7 +110,8 @@ const EventContributorsInput: React.FC<Props> = ({ onContributorsChange }) => {
             <tr key={c.id} className="border-t">
               <td className="px-2 py-1">{c.contributorName}</td>
               <td className="px-2 py-1">{c.description}</td>
-              <td className="px-2 py-1">{c.notes}</td>
+              <td className="px-2 py-1">{c.publicNotes}</td>
+              <td className="px-2 py-1">{c.privateNotes}</td>
             </tr>
           ))}
         </tbody>
@@ -145,16 +149,25 @@ const EventContributorsInput: React.FC<Props> = ({ onContributorsChange }) => {
             value={form.description}
             onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
           />
-          <textarea
-            className="border rounded px-2 py-1 mb-1 w-full"
-            placeholder="Notes"
-            value={form.notes}
-            onChange={e => setForm(f => ({ ...f, notes: e.target.value }))}
-            rows={2}
-          />
+          <div className="flex gap-2">
+            <textarea
+              className="border rounded px-2 py-1 mb-1 w-full"
+              placeholder="Public Notes"
+              value={form.publicNotes}
+              onChange={e => setForm(f => ({ ...f, publicNotes: e.target.value }))}
+              rows={2}
+            />
+            <textarea
+              className="border rounded px-2 py-1 mb-1 w-full"
+              placeholder="Private Notes"
+              value={form.privateNotes}
+              onChange={e => setForm(f => ({ ...f, privateNotes: e.target.value }))}
+              rows={2}
+            />
+          </div>
           <div className="flex gap-2 mt-1">
             <button className="bg-blue-600 text-white px-3 py-1 rounded" onClick={handleSave} type="button">Save</button>
-            <button className="bg-gray-300 px-3 py-1 rounded" onClick={() => { setShowForm(false); setForm({ contributorId: 0, contributorName: "", description: "", notes: "", isNew: false }); }} type="button">Cancel</button>
+            <button className="bg-gray-300 px-3 py-1 rounded" onClick={() => { setShowForm(false); setForm({ contributorId: 0, contributorName: "", description: "", publicNotes: "", privateNotes: "", isNew: false }); }} type="button">Cancel</button>
           </div>
         </div>
       ) : (
