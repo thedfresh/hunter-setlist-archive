@@ -239,8 +239,8 @@ export default function EventEditPage() {
 
   // Previous/Next navigation
   const currentIndex = eventIds.findIndex(eid => String(eid) === id);
-  const prevId = currentIndex > 0 ? eventIds[currentIndex - 1] : null;
-  const nextId = currentIndex < eventIds.length - 1 ? eventIds[currentIndex + 1] : null;
+  const nextId = currentIndex > 0 ? eventIds[currentIndex - 1] : null;
+  const prevId = currentIndex < eventIds.length - 1 ? eventIds[currentIndex + 1] : null;
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
