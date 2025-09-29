@@ -16,29 +16,47 @@ export async function PUT(req: Request, { params }: { params: { setId: string; p
   }
   // Update performance and guest musicians
   await prisma.performanceMusician.deleteMany({ where: { performanceId } });
+  // Fetch current performance to check leadVocals
+  const currentPerf = await prisma.performance.findUnique({
+    where: { id: performanceId },
+    include: { leadVocals: true },
+  });
+  // Build update data object, only include leadVocalsId if present
+  const updateData: any = {
+    song: { connect: { id: data.songId } },
+    performanceOrder: data.performanceOrder,
+    seguesInto: !!data.seguesInto,
+    isTruncatedStart: !!data.isTruncatedStart,
+    isTruncatedEnd: !!data.isTruncatedEnd,
+    hasCuts: !!data.hasCuts,
+    isPartial: !!data.isPartial,
+    publicNotes: data.publicNotes || null,
+    privateNotes: data.privateNotes || null,
+    isUncertain: typeof data.isUncertain === "boolean" ? data.isUncertain : false,
+    isSoloHunter: !!data.isSoloHunter,
+    isLyricalFragment: !!data.isLyricalFragment,
+    isMusicalFragment: !!data.isMusicalFragment,
+    isMedley: !!data.isMedley,
+    performanceMusicians: {
+      create: (data.guestMusicians || []).map((gm: any) => ({
+        musicianId: Number(gm.musicianId),
+        instrumentId: gm.instrumentId ? Number(gm.instrumentId) : null,
+      })),
+    },
+  };
+  if (
+    data.leadVocalsId !== undefined &&
+    data.leadVocalsId !== "" &&
+    !isNaN(Number(data.leadVocalsId)) &&
+    Number(data.leadVocalsId) > 0
+  ) {
+    updateData.leadVocals = { connect: { id: Number(data.leadVocalsId) } };
+  } else {
+    updateData.leadVocals = { disconnect: true };
+  }
   const perf = await prisma.performance.update({
     where: { id: performanceId },
-    data: {
-      song: { connect: { id: data.songId } },
-      performanceOrder: data.performanceOrder,
-      seguesInto: !!data.seguesInto,
-      isTruncatedStart: !!data.isTruncatedStart,
-      isTruncatedEnd: !!data.isTruncatedEnd,
-      hasCuts: !!data.hasCuts,
-      isPartial: !!data.isPartial,
-      notes: data.notes,
-      isUncertain: typeof data.isUncertain === "boolean" ? data.isUncertain : false,
-      isSoloHunter: !!data.isSoloHunter,
-      isLyricalFragment: !!data.isLyricalFragment,
-      isMusicalFragment: !!data.isMusicalFragment,
-      isMedley: !!data.isMedley,
-      performanceMusicians: {
-        create: (data.guestMusicians || []).map((gm: any) => ({
-          musicianId: Number(gm.musicianId),
-          instrumentId: gm.instrumentId ? Number(gm.instrumentId) : null,
-        })),
-      },
-    },
+    data: updateData,
     include: {
       song: true,
       performanceMusicians: { include: { musician: true, instrument: true } },

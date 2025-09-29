@@ -34,6 +34,11 @@ export default function EventEditPage() {
     primaryBandId: "",
     publicNotes: "",
     privateNotes: "",
+    rawData: "",
+    billing: "",
+    hunterParticipationUncertain: false,
+    isSpurious: false,
+    includeInStats: true,
     isUncertain: false,
     isPublic: true,
   });
@@ -114,6 +119,11 @@ export default function EventEditPage() {
             primaryBandId: String(data.event.primaryBandId || ""),
             publicNotes: data.event.publicNotes || "",
             privateNotes: data.event.privateNotes || "",
+            rawData: data.event.rawData || "",
+            billing: data.event.billing || "",
+            hunterParticipationUncertain: !!data.event.hunterParticipationUncertain,
+            isSpurious: !!data.event.isSpurious,
+            includeInStats: data.event.includeInStats !== false,
             isUncertain: !!data.event.isUncertain,
             isPublic: data.event.isPublic !== false, // default to true
           });
@@ -244,7 +254,7 @@ export default function EventEditPage() {
         </div>
         <form className="space-y-6" onSubmit={handleSubmit}>
           {/* isPublic and isUncertain Checkboxes */}
-          <div className="flex items-center gap-6">
+          <div className="flex flex-wrap gap-6 items-center">
             <div className="flex items-center gap-2">
               <input
                 type="checkbox"
@@ -264,6 +274,36 @@ export default function EventEditPage() {
                 className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
               />
               <label className="text-sm text-gray-700">Event date is uncertain</label>
+            </div>
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                name="hunterParticipationUncertain"
+                checked={form.hunterParticipationUncertain}
+                onChange={e => setForm(f => ({ ...f, hunterParticipationUncertain: e.target.checked }))}
+                className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+              />
+              <label className="text-sm text-gray-700">Hunter participation uncertain</label>
+            </div>
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                name="isSpurious"
+                checked={form.isSpurious}
+                onChange={e => setForm(f => ({ ...f, isSpurious: e.target.checked }))}
+                className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+              />
+              <label className="text-sm text-gray-700">Spurious (questionable show)</label>
+            </div>
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                name="includeInStats"
+                checked={form.includeInStats}
+                onChange={e => setForm(f => ({ ...f, includeInStats: e.target.checked }))}
+                className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+              />
+              <label className="text-sm text-gray-700">Include in stats</label>
             </div>
           </div>
           <div className="flex gap-4">
@@ -382,7 +422,7 @@ export default function EventEditPage() {
             </select>
           </div>
           <div className="flex gap-4">
-            <div className="w-1/2">
+            <div className="w-1/3">
               <label className="block text-sm font-medium text-gray-700 mb-1">Public Notes</label>
               <textarea
                 name="publicNotes"
@@ -393,7 +433,7 @@ export default function EventEditPage() {
                 placeholder="Public notes visible to all users..."
               />
             </div>
-            <div className="w-1/2">
+            <div className="w-1/3">
               <label className="block text-sm font-medium text-gray-700 mb-1">Private Notes</label>
               <textarea
                 name="privateNotes"
@@ -404,6 +444,28 @@ export default function EventEditPage() {
                 placeholder="Private admin notes..."
               />
             </div>
+            <div className="w-1/3">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Billing (opener/headliner)</label>
+              <input
+                type="text"
+                name="billing"
+                value={form.billing}
+                onChange={e => setForm(f => ({ ...f, billing: e.target.value }))}
+                className="w-full border rounded-md px-4 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
+                placeholder="e.g. Hunter opening for Garcia Band"
+              />
+            </div>
+          </div>
+          <div className="mt-4">
+            <label className="block text-sm font-medium text-gray-700 mb-1">Raw Data (original source)</label>
+            <textarea
+              name="rawData"
+              value={form.rawData}
+              onChange={e => setForm(f => ({ ...f, rawData: e.target.value }))}
+              className="w-full border rounded-md px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
+              rows={4}
+              placeholder="Paste original source data here..."
+            />
           </div>
           {success && <p className="text-green-600 text-sm mb-2">Event updated successfully!</p>}
           <div className="flex justify-end">

@@ -1,7 +1,5 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { prisma } from '@/lib/prisma';
 
 import type { NextRequest } from 'next/server';
 type Params = { id: string };
@@ -13,7 +11,17 @@ export async function GET(req: NextRequest, context: { params: Promise<{ id: str
     if (!id) return NextResponse.json({ error: 'Invalid event id.' }, { status: 400 });
     const event = await prisma.event.findUnique({ where: { id } });
     if (!event) return NextResponse.json({ error: 'Event not found.' }, { status: 404 });
-    return NextResponse.json({ event });
+    // Ensure all fields are present in response
+    return NextResponse.json({
+      event: {
+        ...event,
+        rawData: event.rawData ?? "",
+        billing: event.billing ?? "",
+        hunterParticipationUncertain: !!event.hunterParticipationUncertain,
+        isSpurious: !!event.isSpurious,
+        includeInStats: event.includeInStats !== false,
+      }
+    });
   } catch (error) {
     console.error('GET /api/events/[id] error:', error);
     return NextResponse.json({ error: 'Failed to fetch event.', details: String(error) }, { status: 500 });
@@ -42,6 +50,11 @@ export async function PUT(req: NextRequest, context: { params: Promise<Params> }
         primaryBandId: data.primaryBandId ? Number(data.primaryBandId) : null,
         publicNotes: data.publicNotes || null,
         privateNotes: data.privateNotes || null,
+        rawData: data.rawData || null,
+        billing: data.billing || null,
+        hunterParticipationUncertain: !!data.hunterParticipationUncertain,
+        isSpurious: !!data.isSpurious,
+        includeInStats: data.includeInStats !== false,
         isUncertain: !!data.isUncertain,
         isPublic: data.isPublic !== false, // default to true
       },

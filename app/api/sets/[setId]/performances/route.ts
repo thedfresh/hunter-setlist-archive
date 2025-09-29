@@ -12,6 +12,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ setId: s
       performanceMusicians: {
         include: { musician: true, instrument: true },
       },
+      leadVocals: true,
     },
     orderBy: { performanceOrder: "asc" },
   });
@@ -28,29 +29,34 @@ export async function POST(req: Request, { params }: { params: { setId: string }
   if (exists) {
     return NextResponse.json({ error: "Duplicate performance order in this set." }, { status: 400 });
   }
-  const perf = await prisma.performance.create({
-    data: {
-      setId,
-      songId: data.songId,
-      performanceOrder: data.performanceOrder,
-      seguesInto: !!data.seguesInto,
-      isTruncatedStart: !!data.isTruncatedStart,
-      isTruncatedEnd: !!data.isTruncatedEnd,
-      hasCuts: !!data.hasCuts,
-      isPartial: !!data.isPartial,
-      notes: data.notes,
-      isUncertain: typeof data.isUncertain === "boolean" ? data.isUncertain : false,
-      isSoloHunter: !!data.isSoloHunter,
-      isLyricalFragment: !!data.isLyricalFragment,
-      isMusicalFragment: !!data.isMusicalFragment,
-      isMedley: !!data.isMedley,
-      performanceMusicians: {
-        create: (data.guestMusicians || []).map((gm: any) => ({
-          musicianId: Number(gm.musicianId),
-          instrumentId: gm.instrumentId ? Number(gm.instrumentId) : null,
-        })),
-      },
+  const perfData: any = {
+    setId,
+    songId: data.songId,
+    performanceOrder: data.performanceOrder,
+    seguesInto: !!data.seguesInto,
+    isTruncatedStart: !!data.isTruncatedStart,
+    isTruncatedEnd: !!data.isTruncatedEnd,
+    hasCuts: !!data.hasCuts,
+    isPartial: !!data.isPartial,
+    publicNotes: data.publicNotes || null,
+    privateNotes: data.privateNotes || null,
+    isUncertain: typeof data.isUncertain === "boolean" ? data.isUncertain : false,
+    isSoloHunter: !!data.isSoloHunter,
+    isLyricalFragment: !!data.isLyricalFragment,
+    isMusicalFragment: !!data.isMusicalFragment,
+    isMedley: !!data.isMedley,
+    performanceMusicians: {
+      create: (data.guestMusicians || []).map((gm: any) => ({
+        musicianId: Number(gm.musicianId),
+        instrumentId: gm.instrumentId ? Number(gm.instrumentId) : null,
+      })),
     },
+  };
+  if (data.leadVocalsId !== undefined && data.leadVocalsId !== "") {
+    perfData.leadVocals = { connect: { id: Number(data.leadVocalsId) } };
+  }
+  const perf = await prisma.performance.create({
+    data: perfData,
     include: {
       song: true,
       performanceMusicians: { include: { musician: true, instrument: true } },

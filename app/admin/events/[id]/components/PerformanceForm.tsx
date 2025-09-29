@@ -19,7 +19,9 @@ function PerformanceForm({ setId, songs, musicians, instruments, performances, e
     isLyricalFragment: editingPerformance?.isLyricalFragment || false,
     isMusicalFragment: editingPerformance?.isMusicalFragment || false,
     isMedley: editingPerformance?.isMedley || false,
-    notes: editingPerformance?.notes || "",
+    publicNotes: editingPerformance?.publicNotes || "",
+    privateNotes: editingPerformance?.privateNotes || "",
+    leadVocalsId: editingPerformance?.leadVocals?.id || "",
     guestMusicians:
       editingPerformance?.performanceMusicians?.map((pm: any) => ({
         musicianId: pm.musician.id,
@@ -78,7 +80,9 @@ function PerformanceForm({ setId, songs, musicians, instruments, performances, e
       isLyricalFragment: !!form.isLyricalFragment,
       isMusicalFragment: !!form.isMusicalFragment,
       isMedley: !!form.isMedley,
-      notes: form.notes,
+      publicNotes: form.publicNotes,
+      privateNotes: form.privateNotes,
+      leadVocalsId: form.leadVocalsId ? Number(form.leadVocalsId) : null,
       guestMusicians: form.guestMusicians,
     };
     let res;
@@ -318,15 +322,45 @@ function PerformanceForm({ setId, songs, musicians, instruments, performances, e
               Add Guest
             </button>
           </div>
-          {/* Notes */}
+          {/* Lead Vocals */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Notes
+              Lead Vocals
+            </label>
+            <select
+              name="leadVocalsId"
+              value={form.leadVocalsId}
+              onChange={(e) => setForm((f) => ({ ...f, leadVocalsId: e.target.value }))}
+              className="w-full border rounded-md px-3 py-2"
+            >
+              <option value="">Select musician</option>
+              {musicians.map((m: any) => (
+                <option key={m.id} value={m.id}>{m.name}</option>
+              ))}
+            </select>
+          </div>
+          {/* Public Notes */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Public Notes
             </label>
             <textarea
-              name="notes"
-              value={form.notes}
-              onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))}
+              name="publicNotes"
+              value={form.publicNotes}
+              onChange={(e) => setForm((f) => ({ ...f, publicNotes: e.target.value }))}
+              className="w-full border rounded-md px-3 py-2"
+              rows={2}
+            />
+          </div>
+          {/* Private Notes */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Private Notes
+            </label>
+            <textarea
+              name="privateNotes"
+              value={form.privateNotes}
+              onChange={(e) => setForm((f) => ({ ...f, privateNotes: e.target.value }))}
               className="w-full border rounded-md px-3 py-2"
               rows={2}
             />

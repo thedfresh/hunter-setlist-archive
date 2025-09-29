@@ -162,9 +162,9 @@ function EventForm({ venues, eventTypes, contentTypes, bands, onAddVenue, form, 
       return;
     }
     setSubmitting(true);
-    // Submit to API route, including contributors
+    // Submit to API route, only form data
     try {
-      const payload = { ...form, contributors };
+      const payload = { ...form };
       const res = await fetch('/api/events', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -352,33 +352,6 @@ function EventForm({ venues, eventTypes, contentTypes, bands, onAddVenue, form, 
                 className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
               />
               <label className="text-sm text-gray-700">Event date is uncertain</label>
-            </div>
-          </div>
-          {/* Contributors Section */}
-          <EventContributorsInput onContributorsChange={setContributors} />
-          {/* Public and Private Notes */}
-          <div className="flex gap-4">
-            <div className="w-1/2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Public Notes</label>
-              <textarea
-                name="publicNotes"
-                value={form.publicNotes}
-                onChange={e => setForm(f => ({ ...f, publicNotes: e.target.value }))}
-                className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300 resize-vertical"
-                rows={3}
-                placeholder="Public notes visible to all users..."
-              />
-            </div>
-            <div className="w-1/2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Private Notes</label>
-              <textarea
-                name="privateNotes"
-                value={form.privateNotes}
-                onChange={e => setForm(f => ({ ...f, privateNotes: e.target.value }))}
-                className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300 resize-vertical"
-                rows={3}
-                placeholder="Private admin notes..."
-              />
             </div>
           </div>
           {/* Error Message */}

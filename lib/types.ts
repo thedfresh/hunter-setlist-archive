@@ -12,7 +12,9 @@ export type Performance = {
   isLyricalFragment: boolean;
   isMusicalFragment: boolean;
   isMedley: boolean;
-  notes?: string;
+  publicNotes?: string;
+  privateNotes?: string;
+  leadVocals?: { id: number; name: string } | null;
   performanceMusicians: {
     id: number;
     musician: { id: number; name: string };

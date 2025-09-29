@@ -11,7 +11,7 @@ export default function AdminIndex() {
     { name: 'Songs', path: '/admin/songs' },
     { name: 'External Links', path: '/admin/external-links' },
     { name: 'Bands', path: '/admin/bands' },
-  ].sort((a, b) => a.name.localeCompare(b.name));
+  ];
 
   return (
     <main className="max-w-xl mx-auto py-12 px-4">
