@@ -128,6 +128,7 @@ export default function EventsAdminPage() {
                           {e.venue.city ? `, ${e.venue.city}` : ""}
                           {e.venue.stateProvince ? `, ${e.venue.stateProvince}` : ""}
                           {e.venue.country ? `, ${e.venue.country}` : ""}
+                          {e.showTiming ? ` (${e.showTiming})` : ""}
                         </span>
                       ) : "—"}
                     </div>

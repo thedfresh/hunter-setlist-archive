@@ -28,6 +28,10 @@ export async function PUT(req: Request, { params }: { params: { setId: string; p
       isPartial: !!data.isPartial,
       notes: data.notes,
       isUncertain: typeof data.isUncertain === "boolean" ? data.isUncertain : false,
+      isSoloHunter: !!data.isSoloHunter,
+      isLyricalFragment: !!data.isLyricalFragment,
+      isMusicalFragment: !!data.isMusicalFragment,
+      isMedley: !!data.isMedley,
       performanceMusicians: {
         create: (data.guestMusicians || []).map((gm: any) => ({
           musicianId: Number(gm.musicianId),

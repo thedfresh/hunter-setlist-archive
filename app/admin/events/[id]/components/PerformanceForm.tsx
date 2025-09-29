@@ -15,6 +15,10 @@ function PerformanceForm({ setId, songs, musicians, instruments, performances, e
     hasCuts: editingPerformance?.hasCuts || false,
     isPartial: editingPerformance?.isPartial || false,
     isUncertain: editingPerformance?.isUncertain || false,
+    isSoloHunter: editingPerformance?.isSoloHunter || false,
+    isLyricalFragment: editingPerformance?.isLyricalFragment || false,
+    isMusicalFragment: editingPerformance?.isMusicalFragment || false,
+    isMedley: editingPerformance?.isMedley || false,
     notes: editingPerformance?.notes || "",
     guestMusicians:
       editingPerformance?.performanceMusicians?.map((pm: any) => ({
@@ -70,6 +74,10 @@ function PerformanceForm({ setId, songs, musicians, instruments, performances, e
       hasCuts: !!form.hasCuts,
       isPartial: !!form.isPartial,
       isUncertain: !!form.isUncertain,
+      isSoloHunter: !!form.isSoloHunter,
+      isLyricalFragment: !!form.isLyricalFragment,
+      isMusicalFragment: !!form.isMusicalFragment,
+      isMedley: !!form.isMedley,
       notes: form.notes,
       guestMusicians: form.guestMusicians,
     };
@@ -224,6 +232,42 @@ function PerformanceForm({ setId, songs, musicians, instruments, performances, e
                 className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
               />
               <span className="text-sm text-gray-700">Uncertain</span>
+            </label>
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={form.isSoloHunter}
+                onChange={(e) => setForm((f) => ({ ...f, isSoloHunter: e.target.checked }))}
+                className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+              />
+              <span className="text-sm text-gray-700">Solo Hunter</span>
+            </label>
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={form.isLyricalFragment}
+                onChange={(e) => setForm((f) => ({ ...f, isLyricalFragment: e.target.checked }))}
+                className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+              />
+              <span className="text-sm text-gray-700">Lyrical Fragment</span>
+            </label>
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={form.isMusicalFragment}
+                onChange={(e) => setForm((f) => ({ ...f, isMusicalFragment: e.target.checked }))}
+                className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+              />
+              <span className="text-sm text-gray-700">Musical Fragment</span>
+            </label>
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={form.isMedley}
+                onChange={(e) => setForm((f) => ({ ...f, isMedley: e.target.checked }))}
+                className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+              />
+              <span className="text-sm text-gray-700">Medley</span>
             </label>
           </div>
           {/* Guest musicians */}

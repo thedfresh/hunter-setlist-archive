@@ -127,6 +127,26 @@ const SetPerformancesSection: React.FC<SetPerformancesSectionProps> = ({ set, so
                         Partial
                       </span>
                     )}
+                    {p.isSoloHunter && (
+                      <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">
+                        Solo Hunter
+                      </span>
+                    )}
+                    {p.isLyricalFragment && (
+                      <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded text-xs">
+                        Lyrical Fragment
+                      </span>
+                    )}
+                    {p.isMusicalFragment && (
+                      <span className="bg-indigo-100 text-indigo-800 px-2 py-1 rounded text-xs">
+                        Musical Fragment
+                      </span>
+                    )}
+                    {p.isMedley && (
+                      <span className="bg-pink-100 text-pink-800 px-2 py-1 rounded text-xs">
+                        Medley
+                      </span>
+                    )}
                   </div>
                 </td>
                 <td className="py-2 px-4">

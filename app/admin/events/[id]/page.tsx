@@ -27,6 +27,7 @@ export default function EventEditPage() {
     month: "",
     day: "",
     displayDate: "",
+    showTiming: "",
     venueId: "",
     eventTypeId: "",
     contentTypeId: "",
@@ -104,6 +105,7 @@ export default function EventEditPage() {
             month: String(data.event.month || ""),
             day: String(data.event.day || ""),
             displayDate: data.event.displayDate || "",
+            showTiming: data.event.showTiming || "",
             venueId: String(data.event.venueId || ""),
             eventTypeId: String(data.event.eventTypeId || ""),
             contentTypeId: String(data.event.contentTypeId || ""),
@@ -249,7 +251,7 @@ export default function EventEditPage() {
             <label className="text-sm text-gray-700">Event date is uncertain</label>
           </div>
           <div className="flex gap-4">
-            <div className="w-1/6">
+            <div className="w-1/8">
               <label className="block text-sm font-medium text-gray-700 mb-1">Year<span className="text-red-500">*</span></label>
               <input
                 type="number"
@@ -260,7 +262,7 @@ export default function EventEditPage() {
                 required
               />
             </div>
-            <div className="w-1/6">
+            <div className="w-1/8">
               <label className="block text-sm font-medium text-gray-700 mb-1">Month</label>
               <input
                 type="number"
@@ -270,7 +272,7 @@ export default function EventEditPage() {
                 className="w-full border rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
               />
             </div>
-            <div className="w-1/6">
+            <div className="w-1/8">
               <label className="block text-sm font-medium text-gray-700 mb-1">Day</label>
               <input
                 type="number"
@@ -280,7 +282,7 @@ export default function EventEditPage() {
                 className="w-full border rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
               />
             </div>
-            <div className="w-1/2">
+            <div className="w-2/5">
               <label className="block text-sm font-medium text-gray-700 mb-1">Display Date</label>
               <input
                 type="text"
@@ -290,6 +292,19 @@ export default function EventEditPage() {
                 className="w-full border rounded-md px-4 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
                 placeholder="e.g. July 4, 1985"
               />
+            </div>
+            <div className="w-1/6">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Set Timing</label>
+              <select
+                name="showTiming"
+                value={form.showTiming}
+                onChange={e => setForm(f => ({ ...f, showTiming: e.target.value }))}
+                className="w-full border rounded-md px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
+              >
+                <option value="">—</option>
+                <option value="Early">Early</option>
+                <option value="Late">Late</option>
+              </select>
             </div>
           </div>
           <div className="flex gap-4">

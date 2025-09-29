@@ -8,6 +8,10 @@ export type Performance = {
   hasCuts: boolean;
   isPartial: boolean;
   isUncertain: boolean;
+  isSoloHunter: boolean;
+  isLyricalFragment: boolean;
+  isMusicalFragment: boolean;
+  isMedley: boolean;
   notes?: string;
   performanceMusicians: {
     id: number;

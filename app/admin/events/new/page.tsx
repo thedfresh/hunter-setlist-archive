@@ -4,6 +4,7 @@ type FormState = {
   month: string;
   day: string;
   displayDate: string;
+  showTiming: string;
   venueId: string;
   eventTypeId: string;
   contentTypeId: string;
@@ -35,6 +36,7 @@ export default function NewEventPage() {
     month: '',
     day: '',
     displayDate: '',
+    showTiming: '',
     venueId: '',
     eventTypeId: '',
     contentTypeId: '',
@@ -189,7 +191,7 @@ function EventForm({ venues, eventTypes, contentTypes, bands, onAddVenue, form, 
         </div>
         <h1 className="text-2xl font-bold mb-6 text-gray-800">Create New Event</h1>
         <form className="space-y-6" onSubmit={handleSubmit}>
-          {/* Date Row: Year, Month, Day, Display Date */}
+          {/* Date Row: Year, Month, Day, Display Date, Set Timing */}
           <div className="flex flex-wrap gap-4 items-end">
             <div className="flex-1 min-w-[80px] max-w-[120px]">
               <label className="block text-sm font-medium text-gray-700 mb-1">Year<span className="text-red-500">*</span></label>
@@ -237,6 +239,19 @@ function EventForm({ venues, eventTypes, contentTypes, bands, onAddVenue, form, 
                 className="w-full border rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
                 placeholder="e.g. July 4, 1985"
               />
+            </div>
+            <div className="flex-1 min-w-[100px] max-w-[120px]">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Set Timing</label>
+              <select
+                name="showTiming"
+                value={form.showTiming}
+                onChange={e => setForm(f => ({ ...f, showTiming: e.target.value }))}
+                className="w-full border rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
+              >
+                <option value="">—</option>
+                <option value="Early">Early</option>
+                <option value="Late">Late</option>
+              </select>
             </div>
           </div>
           {/* Venue Dropdown + Add Venue Button */}

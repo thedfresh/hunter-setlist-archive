@@ -78,6 +78,7 @@ export async function POST(req: Request) {
           month: data.month ? Number(data.month) : null,
           day: data.day ? Number(data.day) : null,
           displayDate: data.displayDate || null,
+          showTiming: data.showTiming || null,
           venueId: data.venueId ? Number(data.venueId) : null,
           eventTypeId: data.eventTypeId ? Number(data.eventTypeId) : null,
           contentTypeId: data.contentTypeId ? Number(data.contentTypeId) : null,
