@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import LinksSection from "@/components/admin/LinksSection";
 import { Event } from "@/lib/types";
 
 interface Recording {
@@ -123,23 +124,30 @@ const RecordingsSection: React.FC<Props> = ({ eventId }) => {
         </thead>
         <tbody>
           {recordings.map(rec => (
-            <tr key={rec.id} className="border-b">
-              <td className="py-2 px-4">{rec.type?.name || ""}</td>
-              <td className="py-2 px-4">{rec.sourceInfo}</td>
-              <td className="py-2 px-4">{rec.contributor?.name || ""}</td>
-              <td className="py-2 px-4 text-right">
-                <button
-                  className="bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded hover:bg-blue-200 border border-blue-200 mr-1"
-                  onClick={() => handleEdit(rec)}
-                  type="button"
-                >Edit</button>
-                <button
-                  className="bg-red-100 text-red-600 text-xs px-2 py-0.5 rounded hover:bg-red-200 border border-red-200"
-                  onClick={() => handleDelete(rec.id)}
-                  type="button"
-                >Delete</button>
-              </td>
-            </tr>
+            <React.Fragment key={rec.id}>
+              <tr className="border-b">
+                <td className="py-2 px-4">{rec.type?.name || ""}</td>
+                <td className="py-2 px-4">{rec.sourceInfo}</td>
+                <td className="py-2 px-4">{rec.contributor?.name || ""}</td>
+                <td className="py-2 px-4 text-right">
+                  <button
+                    className="bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded hover:bg-blue-200 border border-blue-200 mr-1"
+                    onClick={() => handleEdit(rec)}
+                    type="button"
+                  >Edit</button>
+                  <button
+                    className="bg-red-100 text-red-600 text-xs px-2 py-0.5 rounded hover:bg-red-200 border border-red-200"
+                    onClick={() => handleDelete(rec.id)}
+                    type="button"
+                  >Delete</button>
+                </td>
+              </tr>
+              <tr>
+                <td colSpan={4} className="py-2 px-4">
+                  <LinksSection entityType="recording" entityId={rec.id} />
+                </td>
+              </tr>
+            </React.Fragment>
           ))}
         </tbody>
       </table>
