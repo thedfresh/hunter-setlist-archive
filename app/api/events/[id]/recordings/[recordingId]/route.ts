@@ -13,7 +13,6 @@ export async function PUT(req: Request, context: { params: { id: string; recordi
     const updated = await prisma.recording.update({
       where: { id: recordingId },
       data: {
-        eventId,
         recordingTypeId: data.recordingTypeId ? Number(data.recordingTypeId) : null,
         sourceInfo: data.sourceInfo || null,
         url: data.url || null,
@@ -22,7 +21,8 @@ export async function PUT(req: Request, context: { params: { id: string; recordi
         taper: data.taper || null,
         contributorId: data.contributorId ? Number(data.contributorId) : null,
         lengthMinutes: data.lengthMinutes ? Number(data.lengthMinutes) : null,
-        notes: data.notes || null,
+        publicNotes: data.publicNotes || null,
+        privateNotes: data.privateNotes || null,
       },
     });
     return NextResponse.json(updated);

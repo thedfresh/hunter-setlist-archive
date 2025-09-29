@@ -156,7 +156,7 @@ const EventContributorsSection: React.FC<Props> = ({ eventId }) => {
           </div>
         </div>
       ) : (
-        <button className="bg-blue-100 text-blue-700 px-3 py-1 rounded" onClick={() => setShowForm(true)}>Add Contributor</button>
+        <button className="bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded hover:bg-blue-200 border border-blue-200 mr-1" onClick={() => setShowForm(true)}>Add Contributor</button>
       )}
     </div>
   );

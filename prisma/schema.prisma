@@ -381,7 +381,8 @@ model Link {
   url         String
   title       String?
   description String?
-  linkType    String?
+  linkTypeId  Int?     @map("link_type_id")
+  linkType    LinkType? @relation(fields: [linkTypeId], references: [id])
   isActive    Boolean    @default(true)
   dateFetched DateTime?  @map("date_fetched")
   isPublic    Boolean    @default(true) @map("is_public")
@@ -396,4 +397,14 @@ model Link {
   venue       Venue?     @relation(fields: [venueId], references: [id])
 
   @@map("links")
+}
+
+model LinkType {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  links       Link[]
+
+  @@map("link_types")
 }

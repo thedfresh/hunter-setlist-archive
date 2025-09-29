@@ -26,7 +26,8 @@ export async function GET(
         sourceInfo: r.sourceInfo || "",
         url: r.url || "",
         contributor: r.contributor ? { id: r.contributor.id, name: r.contributor.name } : null,
-        notes: r.notes || "",
+        publicNotes: r.publicNotes || "",
+        privateNotes: r.privateNotes || "",
       })),
     });
   } catch (error) {
@@ -61,7 +62,8 @@ export async function POST(
         taper: data.taper || null,
         contributorId: data.contributorId ? Number(data.contributorId) : null,
         lengthMinutes: data.lengthMinutes ? Number(data.lengthMinutes) : null,
-        notes: data.notes || null,
+        publicNotes: data.publicNotes || null,
+        privateNotes: data.privateNotes || null,
       },
     });
     return NextResponse.json(recording);

@@ -28,16 +28,18 @@ export async function PUT(
           url: body.url,
           title: body.title || "",
           description: body.description || "",
-          linkType: body.linkType || "",
+          linkTypeId: body.linkTypeId ?? null,
           isActive: body.isActive !== undefined ? !!body.isActive : true,
         },
+        include: { linkType: true },
       });
       return NextResponse.json({ link: {
         id: updatedLink.id,
         url: updatedLink.url,
         title: updatedLink.title || "",
         description: updatedLink.description || "",
-        linkType: updatedLink.linkType || "",
+  linkTypeId: updatedLink.linkTypeId,
+  linkType: updatedLink.linkType ? updatedLink.linkType.name : "",
         isActive: updatedLink.isActive,
         isPublic: updatedLink.isPublic,
       } });
@@ -90,17 +92,19 @@ export async function POST(
         url: body.url,
         title: body.title || "",
         description: body.description || "",
-        linkType: body.linkType || "",
+        linkTypeId: body.linkTypeId ?? null,
         isActive: body.isActive !== undefined ? !!body.isActive : true,
         recordingId,
       },
+      include: { linkType: true },
     });
     return NextResponse.json({ link: {
       id: newLink.id,
       url: newLink.url,
       title: newLink.title || "",
       description: newLink.description || "",
-      linkType: newLink.linkType || "",
+  linkTypeId: newLink.linkTypeId,
+  linkType: newLink.linkType ? newLink.linkType.name : "",
       isActive: newLink.isActive,
       isPublic: newLink.isPublic,
     } });
@@ -125,6 +129,7 @@ export async function GET(
     const links = await prisma.link.findMany({
       where: { recordingId },
       orderBy: { id: "asc" },
+      include: { linkType: true },
     });
     // Map to frontend shape
     return NextResponse.json({
@@ -133,7 +138,8 @@ export async function GET(
         url: link.url,
         title: link.title || "",
         description: link.description || "",
-        linkType: link.linkType || "",
+        linkTypeId: link.linkTypeId,
+        linkType: link.linkType ? link.linkType.name : "",
         isActive: link.isActive,
         isPublic: link.isPublic,
       })),
