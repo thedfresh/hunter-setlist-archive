@@ -20,5 +20,6 @@ jobs:
           git restore .
           git pull origin main
           npm install --omit=dev
+          npx prisma migrate deploy
           npm run build
           pm2 reload hunter-archive || pm2 start npm --name "hunter-archive" -- start

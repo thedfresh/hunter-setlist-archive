@@ -91,6 +91,7 @@ model Event {
   contentTypeId                Int?               @map("content_type_id")
   primaryBandId                Int?               @map("primary_band_id")
   showTiming                   String?            @map("show_timing") 
+  rawData                      String?            @map("raw_data")
   hunterParticipationUncertain Boolean            @default(false) @map("hunter_participation_uncertain")
   billing                      String?
   isSpurious                   Boolean            @default(false) @map("is_spurious")
