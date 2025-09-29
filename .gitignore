@@ -47,3 +47,4 @@ next-env.d.ts
 CONTEXT.md
 /app/generated/prisma
 local-data/
+backups/
