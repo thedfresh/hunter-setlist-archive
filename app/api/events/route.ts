@@ -29,7 +29,12 @@ export async function GET() {
     }
     // Default: return events with sets, setTypes, performances, and songs
     const events = await prisma.event.findMany({
-      orderBy: { year: 'desc' },
+      // Order by complete date: year, then month, then day (descending)
+      orderBy: [
+        { year: 'desc' },
+        { month: 'desc' },
+        { day: 'desc' }
+      ],
       include: {
         venue: true,
         sets: {

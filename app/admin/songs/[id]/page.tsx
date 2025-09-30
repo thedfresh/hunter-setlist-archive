@@ -349,22 +349,31 @@ export default function EditSongPage() {
         <h2 className="text-xl font-bold mb-4">Performances</h2>
         {song.performances && song.performances.length > 0 ? (
           <div className="space-y-2">
-            {song.performances.map((performance: any) => {
-              const event = performance.set?.event;
-              const venue = event?.venue;
-              const dateStr = event?.displayDate || (
-                event?.year ? `${event.month}/${event.day}/${event.year}` : "Unknown Date"
-              );
-              return (
-                <div key={performance.id} className="flex justify-between items-center border p-4 rounded">
-                  <div>
-                    <p className="font-medium">{dateStr}</p>
-                    <p className="text-sm text-gray-600">{venue?.name || "Unknown Venue"}</p>
+            {[...song.performances]
+              .sort((a: any, b: any) => {
+                const e1 = a.set?.event, e2 = b.set?.event;
+                const y1 = e1?.year || 0, m1 = e1?.month || 0, d1 = e1?.day || 0;
+                const y2 = e2?.year || 0, m2 = e2?.month || 0, d2 = e2?.day || 0;
+                if (y1 !== y2) return y1 - y2;
+                if (m1 !== m2) return m1 - m2;
+                return d1 - d2;
+              })
+              .map((performance: any) => {
+                const event = performance.set?.event;
+                const venue = event?.venue;
+                const dateStr = event?.displayDate || (
+                  event?.year ? `${event.month}/${event.day}/${event.year}` : "Unknown Date"
+                );
+                return (
+                  <div key={performance.id} className="flex justify-between items-center border p-4 rounded">
+                    <div>
+                      <p className="font-medium">{dateStr}</p>
+                      <p className="text-sm text-gray-600">{venue?.name || "Unknown Venue"}</p>
+                    </div>
+                    <Link href={`/admin/events/${event?.id}`} className="text-blue-600 hover:underline">View Event</Link>
                   </div>
-                  <Link href={`/admin/events/${event?.id}`} className="text-blue-600 hover:underline">View Event</Link>
-                </div>
-              );
-            })}
+                );
+              })}
           </div>
         ) : (
           <p className="text-gray-600">No performances found for this song.</p>
