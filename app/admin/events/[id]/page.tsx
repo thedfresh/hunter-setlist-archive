@@ -47,6 +47,7 @@ export default function EventEditPage() {
     includeInStats: true,
     isUncertain: false,
     isPublic: true,
+    verified: false,
   });
   const [venues, setVenues] = useState<{ id: number; name: string, context?: string, city?: string, stateProvince?: string, country?: string }[]>([]);
   const [eventTypes, setEventTypes] = useState<{ id: number; name: string }[]>([]);
@@ -131,8 +132,9 @@ export default function EventEditPage() {
             hunterParticipationUncertain: !!data.event.hunterParticipationUncertain,
             isSpurious: !!data.event.isSpurious,
             includeInStats: data.event.includeInStats !== false,
-            isUncertain: !!data.event.isUncertain,
-            isPublic: data.event.isPublic !== false, // default to true
+              isUncertain: !!data.event.isUncertain,
+              isPublic: data.event.isPublic !== false, // default to true
+              verified: !!data.event.verified,
           });
         } else {
           setError("Event not found.");
@@ -272,6 +274,16 @@ export default function EventEditPage() {
         <form className="space-y-6" onSubmit={handleSubmit}>
 
           {/* isPublic and isUncertain Checkboxes */}
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                name="verified"
+                checked={form.verified}
+                onChange={e => setForm(f => ({ ...f, verified: e.target.checked }))}
+                className="h-4 w-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
+              />
+              <label className="text-sm text-gray-700">Verified</label>
+            </div>
           <div className="flex flex-wrap gap-6 items-center">
             <div className="flex items-center gap-2">
               <input

@@ -37,6 +37,7 @@ export async function GET() {
       ],
       include: {
         venue: true,
+        primaryBand: true,  // include band for name display
         sets: {
           include: {
             setType: true,

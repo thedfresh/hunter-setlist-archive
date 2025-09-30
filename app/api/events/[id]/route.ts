@@ -21,6 +21,7 @@ export async function GET(req: NextRequest, context: { params: Promise<{ id: str
         hunterParticipationUncertain: !!event.hunterParticipationUncertain,
         isSpurious: !!event.isSpurious,
         includeInStats: event.includeInStats !== false,
+        verified: !!event.verified,
       }
     });
   } catch (error) {
@@ -57,8 +58,9 @@ export async function PUT(req: NextRequest, context: { params: Promise<Params> }
         hunterParticipationUncertain: !!data.hunterParticipationUncertain,
         isSpurious: !!data.isSpurious,
         includeInStats: data.includeInStats !== false,
-        isUncertain: !!data.isUncertain,
-        isPublic: data.isPublic !== false, // default to true
+  isUncertain: !!data.isUncertain,
+  isPublic: data.isPublic !== false, // default to true
+  verified: !!data.verified,
       },
     });
     return NextResponse.json({ event });

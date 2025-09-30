@@ -82,7 +82,7 @@ export default function EventsAdminPage() {
         ) : filtered.length === 0 ? (
           <div className="text-center py-8 text-gray-500">No events found.</div>
         ) : (
-          <div className="space-y-8">
+    <div className="space-y-4">
             {filtered.map((e) => {
               // Collect unique guests for footnotes
               const guestMap = new Map(); // key: "name|instrument", value: {name, instrument, idx}
@@ -117,10 +117,14 @@ export default function EventsAdminPage() {
               }
               const eventTextClass = e.isUncertain ? "text-gray-500" : "";
               return (
-                <div key={e.id} className={`border-b pb-6 mb-6 ${eventTextClass}`}>
-                  <div className="flex items-center gap-6 mb-2">
-                    <div className={`font-semibold text-lg ${eventTextClass}`}>{e.displayDate || `${e.year}-${String(e.month || '').padStart(2, '0')}-${String(e.day || '').padStart(2, '0')}`}</div>
-                    <div className={e.isUncertain ? "text-gray-500" : "text-gray-700"}>
+                <div key={e.id} className={`border-b pt-3 pb-4 mb-2 px-4 ${!e.verified ? 'bg-gray-50' : ''} ${eventTextClass}`}>
+                  {/* Band name */}
+                  {e.primaryBand?.name && (
+                    <div className="text-sm font-medium text-gray-600 mb-1">{e.primaryBand.name}</div>
+                  )}
+                  <div className="flex items-center gap-4 mb-1">
+                    <div className={`font-medium text-base ${eventTextClass}`}>{e.displayDate || `${e.year}-${String(e.month || '').padStart(2, '0')}-${String(e.day || '').padStart(2, '0')}`}</div>
+                    <div className={e.isUncertain ? "text-gray-500 text-sm" : "text-gray-700 text-sm"}>
                       {e.venue ? (
                         <span>
                           {e.venue.name}
@@ -133,8 +137,8 @@ export default function EventsAdminPage() {
                       ) : "—"}
                     </div>
                     <div className="flex-1 flex justify-end">
-                      <Link href={`/admin/events/${e.id}`}>
-                        <button className="bg-blue-600 text-white font-semibold py-0.5 px-2 rounded shadow hover:bg-blue-700 transition text-sm">Edit</button>
+                      <Link href={`/admin/events/${e.id}`}>  
+                        <button className="bg-blue-600 text-white font-semibold py-1 px-2 rounded shadow hover:bg-blue-700 transition text-xs">Edit</button>
                       </Link>
                     </div>
                   </div>
@@ -168,7 +172,7 @@ export default function EventsAdminPage() {
                                 const isLast = idx === set.performances.length - 1;
                                 const needsComma = !perf.seguesInto && !perf.isTruncatedEnd && !isLast;
                                 return (
-                                  <span key={perf.id} className={`mr-2 ${eventTextClass}`}>
+                                  <span key={perf.id} className={`mr-2 text-sm ${eventTextClass}`}>
                                     {display}
                                     {guestIndices.length > 0 && guestIndices.map(i => (
                                       <sup key={i} style={{ fontSize: "0.75em", top: "-0.5em", position: "relative" }}>[{i}]</sup>
