@@ -14,8 +14,18 @@ export async function GET(req: Request, { params }: { params: Params }) {
         songAlbums: { include: { album: true } },
         songTags: { include: { tag: true } },
         links: true,
-        performances: true,
-      },
+        performances: {
+          include: {
+            set: {
+              include: {
+                event: {
+                  include: { venue: true }
+                }
+              }
+            }
+          }
+        }
+      }
     });
     if (!song) return NextResponse.json({ error: "Song not found." }, { status: 404 });
 

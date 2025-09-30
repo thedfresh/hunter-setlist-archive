@@ -19,8 +19,9 @@ export async function GET(req: Request, { params }: { params: Promise<{ setId: s
   return NextResponse.json({ performances });
 }
 
-export async function POST(req: Request, { params }: { params: { setId: string } }) {
-  const setId = Number(params.setId);
+export async function POST(req: Request, { params }: { params: Promise<{ setId: string }> }) {
+  const { setId: setIdParam } = await params;
+  const setId = Number(setIdParam);
   const data = await req.json();
   // Check for duplicate order
   const exists = await prisma.performance.findFirst({
@@ -52,8 +53,13 @@ export async function POST(req: Request, { params }: { params: { setId: string }
       })),
     },
   };
-  if (data.leadVocalsId !== undefined && data.leadVocalsId !== "") {
-    perfData.leadVocals = { connect: { id: Number(data.leadVocalsId) } };
+  // Only include leadVocalsId when provided, valid (>0), and exists in database
+  if (typeof data.leadVocalsId === 'number' && data.leadVocalsId > 0) {
+    const musician = await prisma.musician.findUnique({ where: { id: data.leadVocalsId } });
+    if (!musician) {
+      return NextResponse.json({ error: `Lead vocals musician not found (id: ${data.leadVocalsId}).` }, { status: 400 });
+    }
+    perfData.leadVocalsId = data.leadVocalsId;
   }
   const perf = await prisma.performance.create({
     data: perfData,

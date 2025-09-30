@@ -344,6 +344,31 @@ export default function EditSongPage() {
         </button>
         {deleteError && <p className="text-red-500 text-sm mt-2">{deleteError}</p>}
         <p className="mt-6 text-gray-500 text-xs">Created: {new Date(song.createdAt).toLocaleString()}</p>
+        {/* Performances Section */}
+        <hr className="my-8" />
+        <h2 className="text-xl font-bold mb-4">Performances</h2>
+        {song.performances && song.performances.length > 0 ? (
+          <div className="space-y-2">
+            {song.performances.map((performance: any) => {
+              const event = performance.set?.event;
+              const venue = event?.venue;
+              const dateStr = event?.displayDate || (
+                event?.year ? `${event.month}/${event.day}/${event.year}` : "Unknown Date"
+              );
+              return (
+                <div key={performance.id} className="flex justify-between items-center border p-4 rounded">
+                  <div>
+                    <p className="font-medium">{dateStr}</p>
+                    <p className="text-sm text-gray-600">{venue?.name || "Unknown Venue"}</p>
+                  </div>
+                  <Link href={`/admin/events/${event?.id}`} className="text-blue-600 hover:underline">View Event</Link>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <p className="text-gray-600">No performances found for this song.</p>
+        )}
       </div>
     </div>
   );
