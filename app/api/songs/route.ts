@@ -5,25 +5,31 @@ const prisma = new PrismaClient();
 
 export async function GET() {
   try {
+    // Fetch songs without count, we'll compute non-medley performance counts separately
     const songs = await prisma.song.findMany({
       include: {
         songAlbums: { include: { album: true } },
         songTags: { include: { tag: true } },
         links: true,
-        performances: true,
       },
       orderBy: { title: "asc" },
     });
 
-  const songIds = songs.map(song => song.id);
-  // Fetch links for each song
+    // Compute performance counts excluding medleys
+    const nonMedleyCounts = await prisma.performance.groupBy({
+      by: ['songId'],
+      where: { isMedley: false },
+      _count: { _all: true },
+    });
+    const countMap = new Map(nonMedleyCounts.map(c => [c.songId, c._count._all]));
 
 
     return NextResponse.json({
       songs: songs.map(song => ({
         ...song,
         albums: song.songAlbums.map(sa => sa.album),
-        tags: song.songTags.map(st => st.tag)
+        tags: song.songTags.map(st => st.tag),
+        performanceCount: countMap.get(song.id) ?? 0
       })),
     });
   } catch (error) {

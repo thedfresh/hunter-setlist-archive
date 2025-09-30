@@ -40,6 +40,7 @@ export default function EventEditPage() {
     publicNotes: "",
     privateNotes: "",
     rawData: "",
+    rawDataGdsets: "",
     billing: "",
     hunterParticipationUncertain: false,
     isSpurious: false,
@@ -125,6 +126,7 @@ export default function EventEditPage() {
             publicNotes: data.event.publicNotes || "",
             privateNotes: data.event.privateNotes || "",
             rawData: data.event.rawData || "",
+            rawDataGdsets: data.event.rawDataGdsets || "",
             billing: data.event.billing || "",
             hunterParticipationUncertain: !!data.event.hunterParticipationUncertain,
             isSpurious: !!data.event.isSpurious,
@@ -492,6 +494,17 @@ export default function EventEditPage() {
                     className="w-full border rounded-md px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
                     rows={4}
                     placeholder="Paste original source data here..."
+                  />
+                </div>
+                <div className="mt-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Raw Data (GDSets)</label>
+                  <textarea
+                    name="rawDataGdsets"
+                    value={form.rawDataGdsets || ""}
+                    onChange={e => setForm(f => ({ ...f, rawDataGdsets: e.target.value }))}
+                    className="w-full border rounded-md px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
+                    rows={4}
+                    placeholder="Paste original GDSets.com source data here..."
                   />
                 </div>
               </div>

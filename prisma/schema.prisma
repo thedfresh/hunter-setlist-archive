@@ -112,6 +112,7 @@ model Event {
   primaryBandId                Int?               @map("primary_band_id")
   showTiming                   String?            @map("show_timing") 
   rawData                      String?            @map("raw_data")
+  rawDataGdsets                String?            @map("raw_data_gdsets")
   hunterParticipationUncertain Boolean            @default(false) @map("hunter_participation_uncertain")
   billing                      String?
   isSpurious                   Boolean            @default(false) @map("is_spurious")

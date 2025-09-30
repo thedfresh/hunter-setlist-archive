@@ -112,7 +112,12 @@ const RecordingsSection: React.FC<Props> = ({ eventId }) => {
 
   return (
     <div className="mb-8">
-      <h2 className="text-xl font-bold mb-4 text-gray-800">Recordings</h2>
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center gap-2">
+          <h2 className="font-bold text-lg">Recordings</h2>
+           <button className="bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded hover:bg-blue-200 border border-blue-200 mr-1" onClick={handleAdd}>Add</button>
+        </div>
+      </div>
       <table className="w-full text-left border-collapse mb-4">
         <thead>
           <tr className="bg-gray-100">
@@ -151,10 +156,6 @@ const RecordingsSection: React.FC<Props> = ({ eventId }) => {
           ))}
         </tbody>
       </table>
-      <button
-        className="bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded hover:bg-blue-200 border border-blue-200 mr-1"
-        onClick={handleAdd}
-      >Add Recording</button>
       {showForm && (
         <form className="space-y-4 bg-gray-50 p-4 rounded shadow" onSubmit={handleSave}>
           <div className="flex gap-4">

@@ -101,7 +101,12 @@ const EventContributorsSection: React.FC<Props> = ({ eventId }) => {
 
   return (
     <div className="mb-6">
-      <h2 className="font-bold text-lg mb-2">Contributors</h2>
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center gap-2">
+          <h2 className="font-bold text-lg">Contributors</h2>
+          <button className="bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded hover:bg-blue-200 border border-blue-200 mr-1" onClick={() => setShowForm(true)}>Add</button>
+        </div>
+      </div>
       <table className="w-full text-sm mb-2 border">
         <thead>
           <tr className="bg-gray-100">
@@ -137,7 +142,7 @@ const EventContributorsSection: React.FC<Props> = ({ eventId }) => {
           ))}
         </tbody>
       </table>
-      {showForm ? (
+      {showForm && (
         <div className="border p-2 rounded mb-2">
           {/* Shared ContributorForm */}
           <ContributorForm
@@ -151,12 +156,10 @@ const EventContributorsSection: React.FC<Props> = ({ eventId }) => {
             onChange={(fields: Partial<typeof form>) => setForm(f => ({ ...f, ...fields }))}
           />
           <div className="flex gap-2 mt-1">
-            <button className="bg-blue-600 text-white px-3 py-1 rounded" onClick={handleSave} type="button">Save</button>
-            <button className="bg-gray-300 px-3 py-1 rounded" onClick={() => { setShowForm(false); setEditingId(null); setForm({ contributorId: 0, contributorName: "", description: "", publicNotes: "", privateNotes: "", isNew: false }); }} type="button">Cancel</button>
+            <button className="bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded hover:bg-blue-200 border border-blue-200 mr-1" onClick={handleSave} type="button">Save</button>
+            <button className="bg-gray-100 text-gray-700 text-xs px-2 py-0.5 rounded hover:bg-gray-200 border border-gray-200" onClick={() => { setShowForm(false); setEditingId(null); setForm({ contributorId: 0, contributorName: "", description: "", publicNotes: "", privateNotes: "", isNew: false }); }} type="button">Cancel</button>
           </div>
         </div>
-      ) : (
-        <button className="bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded hover:bg-blue-200 border border-blue-200 mr-1" onClick={() => setShowForm(true)}>Add Contributor</button>
       )}
     </div>
   );

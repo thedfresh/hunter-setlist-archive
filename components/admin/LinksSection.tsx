@@ -156,10 +156,10 @@ const LinksSection: React.FC<LinksSectionProps> = ({ entityType, entityId, reado
     }
   }
 
-  return (
-    <section className="mt-6">
-      <div className="flex justify-between items-center mb-2">
-        <h2 className="font-bold text-lg">Links</h2>
+  // Minimal rendering for embedding under recordings
+  if (links.length === 0 && !showForm) {
+    return (
+      <div className="flex justify-end">
         {!readonly && (
           <button
             className="bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded hover:bg-blue-200 border border-blue-200 mr-1"
@@ -170,69 +170,57 @@ const LinksSection: React.FC<LinksSectionProps> = ({ entityType, entityId, reado
           </button>
         )}
       </div>
-      <div className="overflow-x-auto">
-        <table className="min-w-full border">
-          <thead>
-            <tr className="bg-gray-100">
-              <th className="px-2 py-1 border">URL</th>
-              <th className="px-2 py-1 border">Title</th>
-              <th className="px-2 py-1 border">Link Type</th>
-              <th className="px-2 py-1 border">Active</th>
-              <th className="px-2 py-1 border">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {links.length === 0 && (
-              <tr>
-                <td colSpan={5} className="text-center py-2 text-gray-400">
-                  No links found.
-                </td>
-              </tr>
-            )}
-            {links.map((link) => (
-              <React.Fragment key={link.id}>
-                <tr className={link.isActive ? "" : "bg-red-50"}>
-                  <td className="px-2 py-1 border">
-                    <a href={link.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">
-                      {link.url}
-                    </a>
-                  </td>
-                  <td className="px-2 py-1 border">{link.title}</td>
-                  <td className="px-2 py-1 border">{link.linkTypeName}</td>
-                  <td className="px-2 py-1 border text-center">
-                    {link.isActive ? "✅" : "❌"}
-                  </td>
-                  <td className="px-2 py-1 border">
-                    {!readonly ? (
-                      <>
-                        <button
-                          className="bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded hover:bg-blue-200 border border-blue-200 mr-1"
-                          onClick={() => handleEdit(link)}
-                          type="button"
-                        >Edit</button>
-                        <button
-                          className="bg-red-100 text-red-600 text-xs px-2 py-0.5 rounded hover:bg-red-200 border border-red-200"
-                          onClick={() => handleDelete(link.id)}
-                          type="button"
-                        >Delete</button>
-                      </>
-                    ) : null}
-                  </td>
-                </tr>
-                {link.description && (
-                  <tr className={link.isActive ? "" : "bg-red-50"}>
-                    <td colSpan={5} className="px-2 py-1 border text-gray-600 text-sm">
-                      {link.description}
-                    </td>
-                  </tr>
+    );
+  }
+
+  return (
+    <section className="mt-2">
+      {links.length > 0 && (
+        <div className="space-y-2">
+          {links.map((link) => (
+            <div key={link.id} className={`flex flex-col rounded border p-2 mb-2 ${link.isActive ? '' : 'bg-red-50'}`}>
+              <div className="flex items-center gap-4">
+                <a href={link.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline text-sm">
+                  {link.url}
+                </a>
+                <span className="text-sm text-gray-700">{link.title}</span>
+                <span className="text-xs text-gray-500">{link.linkTypeName}</span>
+                <span className="text-sm">{link.isActive ? "✅" : "❌"}</span>
+                {!readonly && (
+                  <>
+                    <button
+                      className="bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded hover:bg-blue-200 border border-blue-200 mr-1"
+                      onClick={() => handleEdit(link)}
+                      type="button"
+                    >Edit</button>
+                    <button
+                      className="bg-red-100 text-red-600 text-xs px-2 py-0.5 rounded hover:bg-red-200 border border-red-200"
+                      onClick={() => handleDelete(link.id)}
+                      type="button"
+                    >Delete</button>
+                  </>
                 )}
-              </React.Fragment>
-            ))}
-          </tbody>
-        </table>
-      </div>
+              </div>
+              {link.description && (
+                <div className="text-gray-600 text-xs mt-1 ml-2">{link.description}</div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+      {!readonly && links.length > 0 && (
+        <div className="flex justify-end mb-2">
+          <button
+            className="bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded hover:bg-blue-200 border border-blue-200 mr-1"
+            onClick={handleAdd}
+            type="button"
+          >
+            Add Link
+          </button>
+        </div>
+      )}
       {showForm && (
-        <form className="mt-4 p-4 border rounded bg-gray-50" onSubmit={handleSubmit}>
+        <form className="mt-2 p-4 border rounded bg-gray-50" onSubmit={handleSubmit}>
           <div className="flex gap-4 mb-2">
             <div className="w-1/3">
               <label className="block font-medium">URL *</label>

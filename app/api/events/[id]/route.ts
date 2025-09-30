@@ -16,6 +16,7 @@ export async function GET(req: NextRequest, context: { params: Promise<{ id: str
       event: {
         ...event,
         rawData: event.rawData ?? "",
+        rawDataGdsets: event.rawDataGdsets ?? "",
         billing: event.billing ?? "",
         hunterParticipationUncertain: !!event.hunterParticipationUncertain,
         isSpurious: !!event.isSpurious,
@@ -51,6 +52,7 @@ export async function PUT(req: NextRequest, context: { params: Promise<Params> }
         publicNotes: data.publicNotes || null,
         privateNotes: data.privateNotes || null,
         rawData: data.rawData || null,
+        rawDataGdsets: data.rawDataGdsets || null,
         billing: data.billing || null,
         hunterParticipationUncertain: !!data.hunterParticipationUncertain,
         isSpurious: !!data.isSpurious,

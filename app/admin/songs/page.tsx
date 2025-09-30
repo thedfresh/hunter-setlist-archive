@@ -12,6 +12,7 @@ type Song = {
   albums?: { id: number; title: string }[];
   tags?: { id: number; name: string }[];
   createdAt: string;
+  performanceCount: number;
 };
 
 export default function SongsAdminPage() {
@@ -26,6 +27,7 @@ export default function SongsAdminPage() {
         const res = await fetch("/api/songs");
         const data = await res.json();
         if (res.ok && data.songs) {
+          console.log('Songs API response:', data.songs);
           setSongs(data.songs);
         } else {
           setError("Failed to load songs");
@@ -78,6 +80,7 @@ export default function SongsAdminPage() {
                 <th className="py-2 px-4 font-semibold">Tags</th>
                 <th className="py-2 px-4 font-semibold">Uncertain?</th>
                 <th className="py-2 px-4 font-semibold">Box of Rain?</th>
+                <th className="py-2 px-4 font-semibold">Performances</th>
                 <th className="py-2 px-4 font-semibold">Actions</th>
               </tr>
             </thead>
@@ -105,8 +108,9 @@ export default function SongsAdminPage() {
                   </td>
                   <td className="py-2 px-4">{song.isUncertain ? "Yes" : "No"}</td>
                   <td className="py-2 px-4">{song.inBoxOfRain ? "Yes" : "No"}</td>
+                  <td className="py-2 px-4">{song.performanceCount > 0 ? song.performanceCount : ""}</td>
                   <td className="py-2 px-4">
-                    <Link href={`/admin/songs/${song.id}`}>
+                    <Link href={`/admin/songs/${song.id}`}> 
                       <button className="bg-gray-200 text-gray-800 font-semibold py-1 px-3 rounded-md shadow hover:bg-gray-300 transition">Edit</button>
                     </Link>
                   </td>
