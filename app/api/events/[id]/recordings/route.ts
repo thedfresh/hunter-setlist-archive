@@ -50,10 +50,10 @@ export async function GET(
 
 export async function POST(
   req: Request,
-  context: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { params } = await context;
+    const params = await context.params;
     const eventId = Number(params.id);
     const data = await req.json();
     // Basic validation (add more as needed)
@@ -64,15 +64,11 @@ export async function POST(
     const recording = await prisma.recording.create({
       data: {
         eventId,
-        // set relation to RecordingType if provided
-        ...(data.recordingTypeId
-          ? { recordingType: { connect: { id: Number(data.recordingTypeId) } } }
-          : {}),
+        recordingTypeId: data.recordingTypeId ? Number(data.recordingTypeId) : null,
         description: data.description || null,
         url: data.url || null,
         lmaIdentifier: data.lmaIdentifier || null,
         losslessLegsId: data.losslessLegsId || null,
-        etreeShowId: data.etreeShowId || null,
         youtubeVideoId: data.youtubeVideoId || null,
         shnId: data.shnId || null,
         taper: data.taper || null,
