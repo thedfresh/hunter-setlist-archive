@@ -30,7 +30,6 @@ export async function GET(
           url: rec.url || "",
           lmaIdentifier: rec.lmaIdentifier || "",
           losslessLegsId: rec.losslessLegsId || "",
-          etreeShowId: rec.etreeShowId || "",
           youtubeVideoId: rec.youtubeVideoId || "",
           shnId: rec.shnId || "",
           taper: rec.taper || "",

@@ -24,7 +24,6 @@ export async function PUT(
         url: data.url || null,
         lmaIdentifier: data.lmaIdentifier || null,
         losslessLegsId: data.losslessLegsId || null,
-        etreeShowId: data.etreeShowId || null,
         youtubeVideoId: data.youtubeVideoId || null,
         shnId: data.shnId || null,
         taper: data.taper || null,
