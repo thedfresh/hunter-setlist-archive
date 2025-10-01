@@ -1,29 +1,40 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-export async function PUT(req: Request, context: { params: { id: string; recordingId: string } }) {
+export async function PUT(
+  req: Request,
+  context: { params: Promise<{ id: string; recordingId: string }> }
+) {
   try {
-    const { params } = await context;
-    const eventId = Number(params.id);
-    const recordingId = Number(params.recordingId);
+    const { id, recordingId } = await context.params;
+    const eventId = Number(id);
+    const recId = Number(recordingId);
     const data = await req.json();
-    if (!eventId || isNaN(eventId) || !recordingId || isNaN(recordingId)) {
+  if (!eventId || isNaN(eventId) || !recId || isNaN(recId)) {
       return NextResponse.json({ error: "Invalid event or recording ID." }, { status: 400 });
     }
     const updated = await prisma.recording.update({
-      where: { id: recordingId },
+      where: { id: recId },
       data: {
-        recordingTypeId: data.recordingTypeId ? Number(data.recordingTypeId) : null,
-        sourceInfo: data.sourceInfo || null,
+        // update relation to RecordingType
+        ...(data.recordingTypeId
+          ? { recordingType: { connect: { id: Number(data.recordingTypeId) } } }
+          : { recordingType: { disconnect: true } }),
+        description: data.description || null,
         url: data.url || null,
-        archiveIdentifier: data.archiveIdentifier || null,
+        lmaIdentifier: data.lmaIdentifier || null,
+        losslessLegsId: data.losslessLegsId || null,
+        etreeShowId: data.etreeShowId || null,
+        youtubeVideoId: data.youtubeVideoId || null,
         shnId: data.shnId || null,
         taper: data.taper || null,
-        contributorId: data.contributorId ? Number(data.contributorId) : null,
+        ...(data.contributorId
+          ? { contributor: { connect: { id: Number(data.contributorId) } } }
+          : { contributor: { disconnect: true } }),
         lengthMinutes: data.lengthMinutes ? Number(data.lengthMinutes) : null,
         publicNotes: data.publicNotes || null,
         privateNotes: data.privateNotes || null,
-      },
+      } as any,
     });
     return NextResponse.json(updated);
   } catch (error) {

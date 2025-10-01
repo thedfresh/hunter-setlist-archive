@@ -1,16 +1,17 @@
 import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
 
 export async function GET(
   req: Request,
-  context: { params: Promise<{ id: string }> }
+  context: { params: { id: string } }
 ) {
   try {
-    const { id } = await context.params;
-    const eventId = Number(id);
+  const { params } = context;
+  const eventId = Number(params.id);
     if (!eventId || isNaN(eventId)) {
       return NextResponse.json({ error: "Invalid event ID." }, { status: 400 });
     }
-    const recordings = await prisma.recording.findMany({
+  const recordings = await prisma.recording.findMany({
       where: { eventId },
       include: {
         recordingType: true,
@@ -20,15 +21,25 @@ export async function GET(
     });
     // Map to frontend shape
     return NextResponse.json({
-      recordings: recordings.map(r => ({
-        id: r.id,
-        type: r.recordingType ? { id: r.recordingType.id, name: r.recordingType.name } : null,
-        sourceInfo: r.sourceInfo || "",
-        url: r.url || "",
-        contributor: r.contributor ? { id: r.contributor.id, name: r.contributor.name } : null,
-        publicNotes: r.publicNotes || "",
-        privateNotes: r.privateNotes || "",
-      })),
+      recordings: recordings.map(r => {
+        const rec: any = r;
+        return {
+          id: r.id,
+          type: r.recordingType ? { id: r.recordingType.id, name: r.recordingType.name } : null,
+          description: rec.description || "",
+          url: rec.url || "",
+          lmaIdentifier: rec.lmaIdentifier || "",
+          losslessLegsId: rec.losslessLegsId || "",
+          etreeShowId: rec.etreeShowId || "",
+          youtubeVideoId: rec.youtubeVideoId || "",
+          shnId: rec.shnId || "",
+          taper: rec.taper || "",
+          lengthMinutes: rec.lengthMinutes != null ? rec.lengthMinutes : null,
+          contributor: r.contributor ? { id: r.contributor.id, name: r.contributor.name } : null,
+          publicNotes: rec.publicNotes || "",
+          privateNotes: rec.privateNotes || "",
+        };
+      }),
     });
   } catch (error) {
     console.error("Error fetching recordings:", error);
@@ -36,7 +47,6 @@ export async function GET(
   }
 }
 
-import { prisma } from "@/lib/prisma";
 
 export async function POST(
   req: Request,
@@ -54,17 +64,23 @@ export async function POST(
     const recording = await prisma.recording.create({
       data: {
         eventId,
-        recordingTypeId: data.recordingTypeId ? Number(data.recordingTypeId) : null,
-        sourceInfo: data.sourceInfo || null,
+        // set relation to RecordingType if provided
+        ...(data.recordingTypeId
+          ? { recordingType: { connect: { id: Number(data.recordingTypeId) } } }
+          : {}),
+        description: data.description || null,
         url: data.url || null,
-        archiveIdentifier: data.archiveIdentifier || null,
+        lmaIdentifier: data.lmaIdentifier || null,
+        losslessLegsId: data.losslessLegsId || null,
+        etreeShowId: data.etreeShowId || null,
+        youtubeVideoId: data.youtubeVideoId || null,
         shnId: data.shnId || null,
         taper: data.taper || null,
         contributorId: data.contributorId ? Number(data.contributorId) : null,
         lengthMinutes: data.lengthMinutes ? Number(data.lengthMinutes) : null,
         publicNotes: data.publicNotes || null,
         privateNotes: data.privateNotes || null,
-      },
+      } as any,
     });
     return NextResponse.json(recording);
   } catch (error) {

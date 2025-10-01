@@ -1,12 +1,18 @@
 import React, { useEffect, useState } from "react";
-import LinksSection from "@/components/admin/LinksSection";
+// Removed LinksSection import as recordings now manage their own fields
 import { Event } from "@/lib/types";
 
 interface Recording {
   id: number;
   type: { id: number; name: string };
-  sourceInfo: string;
+  description: string;
   url: string;
+  lmaIdentifier?: string;
+  losslessLegsId?: string;
+  youtubeVideoId?: string;
+  shnId?: string;
+  taper?: string;
+  lengthMinutes?: number;
   contributor: { id: number; name: string };
   publicNotes?: string;
   privateNotes?: string;
@@ -24,7 +30,14 @@ const RecordingsSection: React.FC<Props> = ({ eventId }) => {
   const [editing, setEditing] = useState<Recording | null>(null);
   const [form, setForm] = useState({
     typeId: "",
-    sourceInfo: "",
+    description: "",
+    url: "",
+    lmaIdentifier: "",
+    losslessLegsId: "",
+    youtubeVideoId: "",
+    shnId: "",
+    taper: "",
+    lengthMinutes: "",
     contributorId: "",
     publicNotes: "",
     privateNotes: "",
@@ -38,7 +51,7 @@ const RecordingsSection: React.FC<Props> = ({ eventId }) => {
         const [recTypesRes, contribRes, recsRes] = await Promise.all([
           fetch("/api/recording-types"),
           fetch("/api/contributors"),
-          fetch(`/api/events/${eventId}/recordings`),
+    fetch(`/api/events/${eventId}/recordings`),
         ]);
         const recTypes = await recTypesRes.json();
         if (!recTypes.recordingTypes || !Array.isArray(recTypes.recordingTypes)) {
@@ -62,7 +75,14 @@ const RecordingsSection: React.FC<Props> = ({ eventId }) => {
     setEditing(rec);
     setForm({
       typeId: rec.type?.id ? String(rec.type.id) : "",
-      sourceInfo: rec.sourceInfo,
+      description: rec.description || "",
+      url: rec.url || "",
+      lmaIdentifier: rec.lmaIdentifier || "",
+      losslessLegsId: rec.losslessLegsId || "",
+      youtubeVideoId: rec.youtubeVideoId || "",
+      shnId: rec.shnId || "",
+      taper: rec.taper || "",
+      lengthMinutes: rec.lengthMinutes != null ? String(rec.lengthMinutes) : "",
       contributorId: rec.contributor?.id ? String(rec.contributor.id) : "",
       publicNotes: rec.publicNotes || "",
       privateNotes: rec.privateNotes || "",
@@ -72,7 +92,7 @@ const RecordingsSection: React.FC<Props> = ({ eventId }) => {
 
   function handleAdd() {
   setEditing(null);
-  setForm({ typeId: "", sourceInfo: "", contributorId: "", publicNotes: "", privateNotes: "" });
+  setForm({ typeId: "", description: "", url: "", lmaIdentifier: "", losslessLegsId: "",   youtubeVideoId: "", shnId: "", taper: "", lengthMinutes: "", contributorId: "", publicNotes: "", privateNotes: "" });
     setShowForm(true);
   }
 
@@ -87,9 +107,16 @@ const RecordingsSection: React.FC<Props> = ({ eventId }) => {
     setSubmitting(true);
     setError(null);
     const payload = {
-      recordingTypeId: form.typeId,
-      sourceInfo: form.sourceInfo,
-      contributorId: form.contributorId,
+      recordingTypeId: Number(form.typeId),
+      description: form.description,
+      url: form.url,
+      lmaIdentifier: form.lmaIdentifier || null,
+      losslessLegsId: form.losslessLegsId || null,
+      youtubeVideoId: form.youtubeVideoId || null,
+      shnId: form.shnId || null,
+      taper: form.taper || null,
+      lengthMinutes: form.lengthMinutes ? Number(form.lengthMinutes) : null,
+      contributorId: form.contributorId ? Number(form.contributorId) : null,
       publicNotes: form.publicNotes,
       privateNotes: form.privateNotes,
     };
@@ -118,11 +145,11 @@ const RecordingsSection: React.FC<Props> = ({ eventId }) => {
            <button className="bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded hover:bg-blue-200 border border-blue-200 mr-1" onClick={handleAdd}>Add</button>
         </div>
       </div>
-      <table className="w-full text-left border-collapse mb-4">
+  <table className="w-full text-left border-collapse mb-4">
         <thead>
           <tr className="bg-gray-100">
             <th className="py-2 px-4 font-semibold">Type</th>
-            <th className="py-2 px-4 font-semibold">Source Info</th>
+            <th className="py-2 px-4 font-semibold">Description</th>
             <th className="py-2 px-4 font-semibold">Contributor</th>
             <th className="py-2 px-4 font-semibold text-right">Actions</th>
           </tr>
@@ -132,7 +159,7 @@ const RecordingsSection: React.FC<Props> = ({ eventId }) => {
             <React.Fragment key={rec.id}>
               <tr className="border-b">
                 <td className="py-2 px-4">{rec.type?.name || ""}</td>
-                <td className="py-2 px-4">{rec.sourceInfo}</td>
+                <td className="py-2 px-4">{rec.description}</td>
                 <td className="py-2 px-4">{rec.contributor?.name || ""}</td>
                 <td className="py-2 px-4 text-right">
                   <button
@@ -147,17 +174,14 @@ const RecordingsSection: React.FC<Props> = ({ eventId }) => {
                   >Delete</button>
                 </td>
               </tr>
-              <tr>
-                <td colSpan={4} className="py-2 px-4">
-                  <LinksSection entityType="recording" entityId={rec.id} />
-                </td>
-              </tr>
+              {/* Removed LinksSection row as no longer needed */}
             </React.Fragment>
           ))}
         </tbody>
       </table>
       {showForm && (
         <form className="space-y-4 bg-gray-50 p-4 rounded shadow" onSubmit={handleSave}>
+          {/* Row 1: Type, Description, Contributor */}
           <div className="flex gap-4">
             <div className="w-1/4">
               <label className="block text-sm font-medium mb-1">Type</label>
@@ -166,30 +190,23 @@ const RecordingsSection: React.FC<Props> = ({ eventId }) => {
                 onChange={e => setForm(f => ({ ...f, typeId: e.target.value }))}
                 className="w-full border rounded px-2 py-1"
                 required
-                disabled={recordingTypes.length === 0}
               >
-                <option value="">{recordingTypes.length === 0 ? "No types found" : "Select type"}</option>
-                {recordingTypes.length > 0 && recordingTypes.map(t => (
-                  <option key={t.id} value={t.id}>
-                    {t.name}
-                    {t.sourceType ? ` (${t.sourceType})` : ""}
-                  </option>
+                <option value="">Select type</option>
+                {recordingTypes.map(t => (
+                  <option key={t.id} value={t.id}>{t.name}</option>
                 ))}
               </select>
-              {recordingTypes.length === 0 && (
-                <p className="text-red-500 text-xs mt-1">No recording types found. Please add types in the database.</p>
-              )}
             </div>
-            <div className="w-1/2">
-              <label className="block text-sm font-medium mb-1">Source Info</label>
+            <div className="flex-1">
+              <label className="block text-sm font-medium mb-1">Description</label>
               <input
                 type="text"
-                value={form.sourceInfo}
-                onChange={e => setForm(f => ({ ...f, sourceInfo: e.target.value }))}
+                value={form.description}
+                onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
                 className="w-full border rounded px-2 py-1"
               />
             </div>
-            <div className="w-1/2">
+            <div className="w-1/4">
               <label className="block text-sm font-medium mb-1">Contributor</label>
               <select
                 value={form.contributorId}
@@ -203,6 +220,76 @@ const RecordingsSection: React.FC<Props> = ({ eventId }) => {
               </select>
             </div>
           </div>
+          {/* Row 2: URL, Length (min), Taper */}
+          <div className="flex gap-4">
+            <div className="w-1/2">
+              <label className="block text-sm font-medium mb-1">URL</label>
+              <input
+                type="url"
+                value={form.url}
+                onChange={e => setForm(f => ({ ...f, url: e.target.value }))}
+                className="w-full border rounded px-2 py-1"
+              />
+            </div>
+            <div className="w-1/4">
+              <label className="block text-sm font-medium mb-1">Length (min)</label>
+              <input
+                type="number"
+                value={form.lengthMinutes}
+                onChange={e => setForm(f => ({ ...f, lengthMinutes: e.target.value }))}
+                className="w-full border rounded px-2 py-1"
+              />
+            </div>
+            <div className="w-1/4">
+              <label className="block text-sm font-medium mb-1">Taper</label>
+              <input
+                type="text"
+                value={form.taper}
+                onChange={e => setForm(f => ({ ...f, taper: e.target.value }))}
+                className="w-full border rounded px-2 py-1"
+              />
+            </div>
+          </div>
+          {/* Row 3: Identifiers */}
+          <div className="flex gap-4">
+            <div className="w-1/4">
+              <label className="block text-sm font-medium mb-1">LMA ID</label>
+              <input
+                type="text"
+                value={form.lmaIdentifier}
+                onChange={e => setForm(f => ({ ...f, lmaIdentifier: e.target.value }))}
+                className="w-full border rounded px-2 py-1"
+              />
+            </div>
+            <div className="w-1/4">
+              <label className="block text-sm font-medium mb-1">LL ID</label>
+              <input
+                type="text"
+                value={form.losslessLegsId}
+                onChange={e => setForm(f => ({ ...f, losslessLegsId: e.target.value }))}
+                className="w-full border rounded px-2 py-1"
+              />
+            </div>
+            <div className="w-1/4">
+              <label className="block text-sm font-medium mb-1">YouTube ID</label>
+              <input
+                type="text"
+                value={form.youtubeVideoId}
+                onChange={e => setForm(f => ({ ...f, youtubeVideoId: e.target.value }))}
+                className="w-full border rounded px-2 py-1"
+              />
+            </div>
+            <div className="w-1/4">
+              <label className="block text-sm font-medium mb-1">SHN ID</label>
+              <input
+                type="text"
+                value={form.shnId}
+                onChange={e => setForm(f => ({ ...f, shnId: e.target.value }))}
+                className="w-full border rounded px-2 py-1"
+              />
+            </div>
+          </div>
+          {/* Row 5: Notes */}
           <div className="flex gap-4">
             <div className="w-1/2">
               <label className="block text-sm font-medium mb-1">Public Notes</label>

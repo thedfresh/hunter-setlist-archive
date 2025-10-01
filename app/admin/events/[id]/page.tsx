@@ -42,6 +42,7 @@ export default function EventEditPage() {
     rawData: "",
     rawDataGdsets: "",
     billing: "",
+    etreeShowId: "",
     hunterParticipationUncertain: false,
     isSpurious: false,
     includeInStats: true,
@@ -129,6 +130,7 @@ export default function EventEditPage() {
             rawData: data.event.rawData || "",
             rawDataGdsets: data.event.rawDataGdsets || "",
             billing: data.event.billing || "",
+            etreeShowId: data.event.etreeShowId || "",
             hunterParticipationUncertain: !!data.event.hunterParticipationUncertain,
             isSpurious: !!data.event.isSpurious,
             includeInStats: data.event.includeInStats !== false,
@@ -462,6 +464,17 @@ export default function EventEditPage() {
                 onChange={e => setForm(f => ({ ...f, billing: e.target.value }))}
                 className="w-full border rounded-md px-4 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
                 placeholder="e.g. Hunter opening for Garcia Band"
+              />
+            </div>
+            <div className="w-1/3">
+              <label className="block text-sm font-medium text-gray-700 mb-1">etree Show ID</label>
+              <input
+                type="text"
+                name="etreeShowId"
+                value={form.etreeShowId}
+                onChange={e => setForm(f => ({ ...f, etreeShowId: e.target.value }))}
+                className="w-full border rounded-md px-4 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
+                placeholder="e.g. 12345"
               />
             </div>
           </div>

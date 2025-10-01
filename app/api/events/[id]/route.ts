@@ -11,10 +11,12 @@ export async function GET(req: NextRequest, context: { params: Promise<{ id: str
     if (!id) return NextResponse.json({ error: 'Invalid event id.' }, { status: 400 });
     const event = await prisma.event.findUnique({ where: { id } });
     if (!event) return NextResponse.json({ error: 'Event not found.' }, { status: 404 });
-    // Ensure all fields are present in response
+    // Ensure all fields are present in response, include etreeShowId
+    const e: any = event;
     return NextResponse.json({
       event: {
-        ...event,
+        ...(event as any),
+        etreeShowId: e.etreeShowId || "",
         rawData: event.rawData ?? "",
         rawDataGdsets: event.rawDataGdsets ?? "",
         billing: event.billing ?? "",
@@ -38,6 +40,7 @@ export async function PUT(req: NextRequest, context: { params: Promise<Params> }
     if (!id || !data.year || isNaN(Number(data.year))) {
       return NextResponse.json({ error: 'Invalid input.' }, { status: 400 });
     }
+    // Update event including etreeShowId
     const event = await prisma.event.update({
       where: { id },
       data: {
@@ -46,10 +49,20 @@ export async function PUT(req: NextRequest, context: { params: Promise<Params> }
         day: data.day ? Number(data.day) : null,
         displayDate: data.displayDate || null,
         showTiming: data.showTiming || null,
-        venueId: data.venueId ? Number(data.venueId) : null,
-        eventTypeId: data.eventTypeId ? Number(data.eventTypeId) : null,
-        contentTypeId: data.contentTypeId ? Number(data.contentTypeId) : null,
-        primaryBandId: data.primaryBandId ? Number(data.primaryBandId) : null,
+        // relations: use connect/disconnect for foreign keys
+        ...(data.venueId
+          ? { venue: { connect: { id: Number(data.venueId) } } }
+          : { venue: { disconnect: true } }),
+        ...(data.eventTypeId
+          ? { eventType: { connect: { id: Number(data.eventTypeId) } } }
+          : { eventType: { disconnect: true } }),
+        ...(data.contentTypeId
+          ? { contentType: { connect: { id: Number(data.contentTypeId) } } }
+          : { contentType: { disconnect: true } }),
+        ...(data.primaryBandId
+          ? { primaryBand: { connect: { id: Number(data.primaryBandId) } } }
+          : { primaryBand: { disconnect: true } }),
+        etreeShowId: data.etreeShowId || null,
         publicNotes: data.publicNotes || null,
         privateNotes: data.privateNotes || null,
         rawData: data.rawData || null,
@@ -58,10 +71,10 @@ export async function PUT(req: NextRequest, context: { params: Promise<Params> }
         hunterParticipationUncertain: !!data.hunterParticipationUncertain,
         isSpurious: !!data.isSpurious,
         includeInStats: data.includeInStats !== false,
-  isUncertain: !!data.isUncertain,
-  isPublic: data.isPublic !== false, // default to true
-  verified: !!data.verified,
-      },
+        isUncertain: !!data.isUncertain,
+        isPublic: data.isPublic !== false,
+        verified: !!data.verified,
+      } as any,
     });
     return NextResponse.json({ event });
   } catch (error) {
