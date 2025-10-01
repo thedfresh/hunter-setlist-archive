@@ -49,18 +49,6 @@ export default function EventEditPage() {
     isPublic: true,
     verified: false,
   });
-  // Auto-save a single field on change
-  async function updateField(field: string, value: any) {
-    try {
-      await fetch(`/api/events/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ [field]: value }),
-      });
-    } catch (error) {
-      console.error('Auto-save error for', field, error);
-    }
-  }
   const [venues, setVenues] = useState<{ id: number; name: string, context?: string, city?: string, stateProvince?: string, country?: string }[]>([]);
   const [eventTypes, setEventTypes] = useState<{ id: number; name: string }[]>([]);
   const [contentTypes, setContentTypes] = useState<{ id: number; name: string }[]>([]);
@@ -396,11 +384,7 @@ export default function EventEditPage() {
               <select
                 name="showTiming"
                 value={form.showTiming}
-                onChange={async e => {
-                  const v = e.target.value;
-                  setForm(f => ({ ...f, showTiming: v }));
-                  await updateField('showTiming', v);
-                }}
+                onChange={e => setForm(f => ({ ...f, showTiming: e.target.value }))}
                 className="w-full border rounded-md px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
               >
                 <option value="">—</option>
@@ -415,11 +399,7 @@ export default function EventEditPage() {
               <select
                 name="eventTypeId"
                 value={form.eventTypeId}
-                onChange={async e => {
-                  const v = e.target.value;
-                  setForm(f => ({ ...f, eventTypeId: v }));
-                  await updateField('eventTypeId', v);
-                }}
+                onChange={e => setForm(f => ({ ...f, eventTypeId: e.target.value }))}
                 className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
               >
                 <option value="">Select type</option>
@@ -433,11 +413,7 @@ export default function EventEditPage() {
               <select
                 name="contentTypeId"
                 value={form.contentTypeId}
-                onChange={async e => {
-                  const v = e.target.value;
-                  setForm(f => ({ ...f, contentTypeId: v }));
-                  await updateField('contentTypeId', v);
-                }}
+                onChange={e => setForm(f => ({ ...f, contentTypeId: e.target.value }))}
                 className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
               >
                 <option value="">Select content</option>
@@ -451,11 +427,7 @@ export default function EventEditPage() {
               <select
                 name="primaryBandId"
                 value={form.primaryBandId}
-                onChange={async e => {
-                  const v = e.target.value;
-                  setForm(f => ({ ...f, primaryBandId: v }));
-                  await updateField('primaryBandId', v);
-                }}
+                onChange={e => setForm(f => ({ ...f, primaryBandId: e.target.value }))}
                 className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
               >
                 <option value="">Select band</option>
@@ -472,11 +444,7 @@ export default function EventEditPage() {
               <select
                 name="venueId"
                 value={form.venueId}
-                onChange={async e => {
-                  const v = Number(e.target.value);
-                  setForm(f => ({ ...f, venueId: e.target.value }));
-                  await updateField('venueId', v);
-                }}
+                onChange={e => setForm(f => ({ ...f, venueId: e.target.value }))}
                 className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
               >
                 <option value="">Select venue</option>
