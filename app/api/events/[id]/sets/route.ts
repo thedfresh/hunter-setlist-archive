@@ -30,7 +30,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       eventId,
       setTypeId: data.setTypeId,
       position: data.position,
-      notes: data.notes,
+      // map notes to publicNotes field
+      publicNotes: data.notes || null,
       isUncertain: data.isUncertain ?? false,
     },
   });

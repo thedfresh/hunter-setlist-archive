@@ -7,21 +7,15 @@ export async function PUT(req: Request, { params }: { params: { setId: string; p
   const setId = Number(awaitedParams.setId);
   const performanceId = Number(awaitedParams.performanceId);
   const data = await req.json();
-  // Check for duplicate order
-  const exists = await prisma.performance.findFirst({
-    where: { setId, performanceOrder: data.performanceOrder, NOT: { id: performanceId } },
-  });
-  if (exists) {
-    return NextResponse.json({ error: "Duplicate performance order in this set." }, { status: 400 });
-  }
-  // Update performance and guest musicians
+  // Shift existing orders to make room, then update performance
+  const newOrder = Number(data.performanceOrder);
+  // Fetch current performance and its old order
+  const currentPerf = await prisma.performance.findUnique({ where: { id: performanceId } });
+  if (!currentPerf) return NextResponse.json({ error: "Performance not found." }, { status: 404 });
+  const oldOrder = currentPerf.performanceOrder;
+  // Delete guest musicians before updating
   await prisma.performanceMusician.deleteMany({ where: { performanceId } });
-  // Fetch current performance to check leadVocals
-  const currentPerf = await prisma.performance.findUnique({
-    where: { id: performanceId },
-    include: { leadVocals: true },
-  });
-  // Build update data object, only include leadVocalsId if present
+  // Build base update payload
   const updateData: any = {
     song: { connect: { id: data.songId } },
     performanceOrder: data.performanceOrder,
@@ -54,14 +48,25 @@ export async function PUT(req: Request, { params }: { params: { setId: string; p
   } else {
     updateData.leadVocals = { disconnect: true };
   }
-  const perf = await prisma.performance.update({
-    where: { id: performanceId },
-    data: updateData,
-    include: {
-      song: true,
-      performanceMusicians: { include: { musician: true, instrument: true } },
-    },
-  });
+  // Perform shift and update in transaction to avoid duplicates
+  const [_, perf] = await prisma.$transaction([
+    // shift others
+    newOrder < oldOrder
+      ? prisma.performance.updateMany({
+          where: { setId, performanceOrder: { gte: newOrder, lt: oldOrder } },
+          data: { performanceOrder: { increment: 1 } },
+        })
+      : prisma.performance.updateMany({
+          where: { setId, performanceOrder: { lte: newOrder, gt: oldOrder } },
+          data: { performanceOrder: { decrement: 1 } },
+        }),
+    // update this performance
+    prisma.performance.update({
+      where: { id: performanceId },
+      data: { ...updateData, performanceOrder: newOrder },
+      include: { song: true, performanceMusicians: { include: { musician: true, instrument: true } } },
+    }),
+  ]);
   return NextResponse.json({ performance: perf });
 }
 

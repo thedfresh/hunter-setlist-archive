@@ -117,7 +117,7 @@ export default function EventsAdminPage() {
               }
               const eventTextClass = e.isUncertain ? "text-gray-500" : "";
               return (
-                <div key={e.id} className={`border-b pt-3 pb-4 mb-2 px-4 ${!e.verified ? 'bg-gray-50' : ''} ${eventTextClass}`}>
+                <div key={e.id} className={`border-b pt-3 pb-4 mb-2 px-4 ${e.verified ? 'bg-blue-50' : ''} ${eventTextClass}`}>
                   {/* Band name */}
                   {e.primaryBand?.name && (
                     <div className="text-sm font-medium text-gray-600 mb-1">{e.primaryBand.name}</div>

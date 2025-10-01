@@ -23,13 +23,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ setId: 
   const { setId: setIdParam } = await params;
   const setId = Number(setIdParam);
   const data = await req.json();
-  // Check for duplicate order
-  const exists = await prisma.performance.findFirst({
-    where: { setId, performanceOrder: data.performanceOrder },
-  });
-  if (exists) {
-    return NextResponse.json({ error: "Duplicate performance order in this set." }, { status: 400 });
-  }
+  // Shift existing performances at or after the desired order down by 1, then create new
+  const newOrder = Number(data.performanceOrder);
   const perfData: any = {
     setId,
     songId: data.songId,
@@ -61,12 +56,19 @@ export async function POST(req: Request, { params }: { params: Promise<{ setId: 
     }
     perfData.leadVocalsId = data.leadVocalsId;
   }
-  const perf = await prisma.performance.create({
-    data: perfData,
-    include: {
-      song: true,
-      performanceMusicians: { include: { musician: true, instrument: true } },
-    },
-  });
+  // Transaction: shift and insert
+  const [, perf] = await prisma.$transaction([
+    prisma.performance.updateMany({
+      where: { setId, performanceOrder: { gte: newOrder } },
+      data: { performanceOrder: { increment: 1 } },
+    }),
+    prisma.performance.create({
+      data: perfData,
+      include: {
+        song: true,
+        performanceMusicians: { include: { musician: true, instrument: true } },
+      },
+    }),
+  ]);
   return NextResponse.json({ performance: perf }, { status: 201 });
 }
