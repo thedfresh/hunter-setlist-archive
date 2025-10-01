@@ -291,16 +291,6 @@ model PerformanceMusician {
   @@map("performance_musicians")
 }
 
-model RecordingType {
-  id          Int         @id @default(autoincrement())
-  name        String
-  description String?
-  createdAt   DateTime    @default(now()) @map("created_at")
-  recordings  Recording[]
-
-  @@map("recording_types")
-}
-
 model Contributor {
   id                Int                @id @default(autoincrement())
   name              String
@@ -318,15 +308,18 @@ model Recording {
   id                Int            @id @default(autoincrement())
   eventId           Int            @map("event_id")
   recordingTypeId   Int?           @map("recording_type_id")
-  sourceInfo        String?        @map("source_info")
-  url               String?
-  archiveIdentifier String?        @map("archive_identifier")
+  url               String?        // Keep for edge cases
+  lmaIdentifier     String?        @map("lma_identifier")
+  losslessLegsId    String?        @map("lossless_legs_id")  
+  etreeShowId       String?        @map("etree_show_id")
+  youtubeVideoId    String?        @map("youtube_video_id")
+  description       String?
   shnId             String?        @map("shn_id")
   taper             String?
   contributorId     Int?           @map("contributor_id")
   lengthMinutes     Int?           @map("length_minutes")
-  publicNotes  String?       @map("public_notes")
-  privateNotes String?       @map("private_notes")  
+  publicNotes       String?        @map("public_notes")
+  privateNotes      String?        @map("private_notes")  
   createdAt         DateTime       @default(now()) @map("created_at")
   links             Link[]
   contributor       Contributor?   @relation(fields: [contributorId], references: [id])
@@ -334,6 +327,16 @@ model Recording {
   recordingType     RecordingType? @relation(fields: [recordingTypeId], references: [id])
 
   @@map("recordings")
+}
+
+model RecordingType {
+  id          Int         @id @default(autoincrement())
+  name        String
+  description String?
+  createdAt   DateTime    @default(now()) @map("created_at")
+  recordings  Recording[]
+
+  @@map("recording_types")
 }
 
 model EventContributor {
