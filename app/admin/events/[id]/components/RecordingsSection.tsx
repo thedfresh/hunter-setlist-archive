@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
-// Removed LinksSection import as recordings now manage their own fields
-import { Event } from "@/lib/types";
+import { recordingLinkPatterns } from '@/lib/recordingLinks';
 
 interface Recording {
   id: number;
@@ -150,7 +149,7 @@ const RecordingsSection: React.FC<Props> = ({ eventId }) => {
           <tr className="bg-gray-100">
             <th className="py-2 px-4 font-semibold">Type</th>
             <th className="py-2 px-4 font-semibold">Description</th>
-            <th className="py-2 px-4 font-semibold">Contributor</th>
+            <th className="py-2 px-4 font-semibold">Links</th>
             <th className="py-2 px-4 font-semibold text-right">Actions</th>
           </tr>
         </thead>
@@ -160,7 +159,20 @@ const RecordingsSection: React.FC<Props> = ({ eventId }) => {
               <tr className="border-b">
                 <td className="py-2 px-4">{rec.type?.name || ""}</td>
                 <td className="py-2 px-4">{rec.description}</td>
-                <td className="py-2 px-4">{rec.contributor?.name || ""}</td>
+                <td className="py-2 px-4">
+                  {rec.lmaIdentifier && (
+                    <a href={recordingLinkPatterns.lma(rec.lmaIdentifier)} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline mr-2">LMA</a>
+                  )}
+                  {rec.losslessLegsId && (
+                    <a href={recordingLinkPatterns.ll(rec.losslessLegsId)} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline mr-2">LL</a>
+                  )}
+                  {rec.youtubeVideoId && (
+                    <a href={recordingLinkPatterns.yt(rec.youtubeVideoId)} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline mr-2">YT</a>
+                  )}
+                  {rec.shnId && (
+                    <a href={recordingLinkPatterns.et(rec.shnId)} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">ET</a>
+                  )}
+                </td>
                 <td className="py-2 px-4 text-right">
                   <button
                     className="bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded hover:bg-blue-200 border border-blue-200 mr-1"

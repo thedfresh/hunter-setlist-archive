@@ -12,8 +12,8 @@ import RecordingsSection from "./components/RecordingsSection";
 export default function EventEditPage() {
   // Collapsible section state
   const [showNotes, setShowNotes] = useState(false);
-  const [showContribRecordings, setShowContribRecordings] = useState(false);
-  const [showSets, setShowSets] = useState(false);
+  const [showContribRecordings, setShowContribRecordings] = useState(true);
+  const [showSets, setShowSets] = useState(true);
   const [showBanter, setShowBanter] = useState(false);
   // Performance management state
   const [songs, setSongs] = useState<any[]>([]);
