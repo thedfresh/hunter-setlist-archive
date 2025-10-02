@@ -90,14 +90,21 @@ export async function PUT(req: Request, { params }: { params: Params }) {
   }
 }
 
-export async function DELETE(req: Request, { params }: { params: Params }) {
+export async function DELETE(req: Request, context: { params: Promise<Params> }) {
   try {
-    await prisma.song.delete({ where: { id: Number(params.id) } });
-    await prisma.songAlbum.deleteMany({ where: { songId: Number(params.id) } });
-    await prisma.songTag.deleteMany({ where: { songId: Number(params.id) } });
-    await prisma.link.deleteMany({ where: { songId: Number(params.id) } });
+    const { id: paramId } = await context.params;
+    const songId = Number(paramId);
+    if (!songId || isNaN(songId)) {
+      return NextResponse.json({ error: 'Invalid song id.' }, { status: 400 });
+    }
+    // Delete song and related entries
+    await prisma.song.delete({ where: { id: songId } });
+    await prisma.songAlbum.deleteMany({ where: { songId } });
+    await prisma.songTag.deleteMany({ where: { songId } });
+    await prisma.link.deleteMany({ where: { songId } });
     return NextResponse.json({ success: true });
-  } catch {
-    return NextResponse.json({ error: "Failed to delete song." }, { status: 500 });
+  } catch (error) {
+    console.error('Error deleting song:', error);
+    return NextResponse.json({ error: 'Failed to delete song.' }, { status: 500 });
   }
 }

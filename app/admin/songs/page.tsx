@@ -20,7 +20,9 @@ export default function SongsAdminPage() {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [hideNoPerformances, setHideNoPerformances] = useState(false);
+  const [showOnlyUncertain, setShowOnlyUncertain] = useState(false);
+  const [showOnlyNoPerformances, setShowOnlyNoPerformances] = useState(false);
+  const [showOnlyWithPerformances, setShowOnlyWithPerformances] = useState(false);
   // Sorting state: field and order
   const [sortField, setSortField] = useState<'title' | 'performanceCount'>('title');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
@@ -54,13 +56,20 @@ export default function SongsAdminPage() {
     fetchSongs();
   }, []);
 
-  const filtered = songs.filter(song =>
+  const filtered = songs.filter(song => {
     // Match search term
-    (song.title.toLowerCase().includes(search.toLowerCase()) ||
-      (song.originalArtist || "").toLowerCase().includes(search.toLowerCase())) &&
-    // Optionally hide songs with zero performances
-    (!hideNoPerformances || song.performanceCount > 0)
-  );
+    const matchesSearch =
+      song.title.toLowerCase().includes(search.toLowerCase()) ||
+      (song.originalArtist || "").toLowerCase().includes(search.toLowerCase());
+    if (!matchesSearch) return false;
+    // Show only uncertain songs if toggled
+    if (showOnlyUncertain && !song.isUncertain) return false;
+    // Show only songs with no performances if toggled
+    if (showOnlyNoPerformances && song.performanceCount > 0) return false;
+    // Show only songs with performances if toggled
+    if (showOnlyWithPerformances && song.performanceCount === 0) return false;
+    return true;
+  });
 
   // Apply sorting to filtered list
   const displayed = [...filtered].sort((a, b) => {
@@ -74,6 +83,13 @@ export default function SongsAdminPage() {
         : b.performanceCount - a.performanceCount;
     }
   });
+  // Handler to delete a song
+  async function handleDeleteSong(id: number) {
+    if (!confirm('Delete this song?')) return;
+    const res = await fetch(`/api/songs/${id}`, { method: 'DELETE' });
+    if (res.ok) setSongs(s => s.filter(song => song.id !== id));
+    else alert('Failed to delete song.');
+  }
   return (
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="mb-4 text-center">
@@ -93,15 +109,37 @@ export default function SongsAdminPage() {
           onChange={e => setSearch(e.target.value)}
           className="w-full border rounded-md px-3 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
         />
-        <div className="mb-4 flex items-center gap-2">
-          <input
-            type="checkbox"
-            id="hideNoPerformances"
-            checked={hideNoPerformances}
-            onChange={e => setHideNoPerformances(e.target.checked)}
-            className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-          />
-          <label htmlFor="hideNoPerformances" className="text-sm text-gray-700">Hide songs with no performances</label>
+        <div className="mb-4 flex items-center gap-4">
+          <label className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={showOnlyUncertain}
+              onChange={e => setShowOnlyUncertain(e.target.checked)}
+              className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+            />
+            <span className="text-sm text-gray-700">Show only uncertain songs</span>
+          </label>
+          <label className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={showOnlyNoPerformances}
+              onChange={e => setShowOnlyNoPerformances(e.target.checked)}
+              className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+            />
+            <span className="text-sm text-gray-700">Show only songs with no performances</span>
+          </label>
+          <label className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={showOnlyWithPerformances}
+              onChange={e => setShowOnlyWithPerformances(e.target.checked)}
+              className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+            />
+            <span className="text-sm text-gray-700">Show only songs with performances</span>
+          </label>
+        </div>
+        <div className="mb-4 text-sm text-gray-600">
+          Showing {displayed.length} {displayed.length === 1 ? 'song' : 'songs'}
         </div>
         {loading ? (
           <div className="text-center py-8">Loading songs...</div>
@@ -120,8 +158,6 @@ export default function SongsAdminPage() {
                   Title
                   {sortField === 'title' && (sortOrder === 'asc' ? ' ▲' : ' ▼')}
                 </th>
-                <th className="py-2 px-4 font-semibold">Albums</th>
-                <th className="py-2 px-4 font-semibold">Tags</th>
                 <th className="py-2 px-4 font-semibold">Uncertain?</th>
                 <th className="py-2 px-4 font-semibold">Box of Rain?</th>
                 <th
@@ -137,31 +173,17 @@ export default function SongsAdminPage() {
               {displayed.map(song => (
                 <tr key={song.id} className="border-b">
                   <td className="py-2 px-4">{song.title}</td>
-                  <td className="py-2 px-4">
-                    {song.albums && song.albums.length > 0 ? (
-                      <div className="flex flex-wrap gap-1">
-                        {song.albums.map(album => (
-                          <span key={album.id} className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">{album.title}</span>
-                        ))}
-                      </div>
-                    ) : <span className="text-gray-400 italic">—</span>}
-                  </td>
-                  <td className="py-2 px-4">
-                    {song.tags && song.tags.length > 0 ? (
-                      <div className="flex flex-wrap gap-1">
-                        {song.tags.map(tag => (
-                          <span key={tag.id} className="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full">{tag.name}</span>
-                        ))}
-                      </div>
-                    ) : <span className="text-gray-400 italic">—</span>}
-                  </td>
                   <td className="py-2 px-4">{song.isUncertain ? "Yes" : "No"}</td>
                   <td className="py-2 px-4">{song.inBoxOfRain ? "Yes" : "No"}</td>
                   <td className="py-2 px-4">{song.performanceCount > 0 ? song.performanceCount : ""}</td>
                   <td className="py-2 px-4">
                     <Link href={`/admin/songs/${song.id}`}> 
-                      <button className="bg-gray-200 text-gray-800 font-semibold py-1 px-3 rounded-md shadow hover:bg-gray-300 transition">Edit</button>
+                      <button className="bg-gray-200 text-gray-800 text-sm py-1 px-2 rounded hover:bg-gray-300 transition mr-1">Edit</button>
                     </Link>
+                    <button
+                      className="bg-red-200 text-red-800 text-sm py-1 px-2 rounded hover:bg-red-300 transition"
+                      onClick={() => handleDeleteSong(song.id)}
+                    >Delete</button>
                   </td>
                 </tr>
               ))}
