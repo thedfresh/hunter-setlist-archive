@@ -21,6 +21,18 @@ export default function SongsAdminPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [hideNoPerformances, setHideNoPerformances] = useState(false);
+  // Sorting state: field and order
+  const [sortField, setSortField] = useState<'title' | 'performanceCount'>('title');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  // Change sort field or toggle order
+  function changeSort(field: 'title' | 'performanceCount') {
+    if (field === sortField) {
+      setSortOrder(o => (o === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setSortField(field);
+      setSortOrder(field === 'title' ? 'asc' : 'desc');
+    }
+  }
 
   useEffect(() => {
     async function fetchSongs() {
@@ -50,6 +62,18 @@ export default function SongsAdminPage() {
     (!hideNoPerformances || song.performanceCount > 0)
   );
 
+  // Apply sorting to filtered list
+  const displayed = [...filtered].sort((a, b) => {
+    if (sortField === 'title') {
+      return sortOrder === 'asc'
+        ? a.title.localeCompare(b.title)
+        : b.title.localeCompare(a.title);
+    } else {
+      return sortOrder === 'asc'
+        ? a.performanceCount - b.performanceCount
+        : b.performanceCount - a.performanceCount;
+    }
+  });
   return (
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="mb-4 text-center">
@@ -89,17 +113,28 @@ export default function SongsAdminPage() {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-gray-100">
-                <th className="py-2 px-4 font-semibold">Title</th>
+                <th
+                  className="py-2 px-4 font-semibold cursor-pointer"
+                  onClick={() => changeSort('title')}
+                >
+                  Title
+                  {sortField === 'title' && (sortOrder === 'asc' ? ' ▲' : ' ▼')}
+                </th>
                 <th className="py-2 px-4 font-semibold">Albums</th>
                 <th className="py-2 px-4 font-semibold">Tags</th>
                 <th className="py-2 px-4 font-semibold">Uncertain?</th>
                 <th className="py-2 px-4 font-semibold">Box of Rain?</th>
-                <th className="py-2 px-4 font-semibold">Performances</th>
+                <th
+                  className="py-2 px-4 font-semibold cursor-pointer"
+                  onClick={() => changeSort('performanceCount')}
+                >
+                  Performances {sortField === 'performanceCount' ? (sortOrder === 'asc' ? '▲' : '▼') : null}
+                </th>
                 <th className="py-2 px-4 font-semibold">Actions</th>
               </tr>
             </thead>
             <tbody>
-              {filtered.map(song => (
+              {displayed.map(song => (
                 <tr key={song.id} className="border-b">
                   <td className="py-2 px-4">{song.title}</td>
                   <td className="py-2 px-4">
