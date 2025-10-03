@@ -138,7 +138,7 @@ export default function EventsAdminPage() {
                     </div>
                     <div className="flex-1 flex justify-end">
                       <Link href={`/admin/events/${e.id}`}>  
-                        <button className="bg-blue-600 text-white font-semibold py-1 px-2 rounded shadow hover:bg-blue-700 transition text-xs">Edit</button>
+                        <button className="bg-blue-600 text-white text-xs py-0.5 px-1 rounded hover:bg-blue-700 transition">Edit</button>
                       </Link>
                     </div>
                   </div>

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import PerformanceForm from './PerformanceForm';
 import { Performance } from '@/lib/types';
@@ -163,10 +162,10 @@ const SetPerformancesSection: React.FC<SetPerformancesSectionProps> = ({ set, so
                     <span className="text-gray-400 italic">—</span>
                   )}
                 </td>
-                <td className="py-2 px-4">{p.notes || <span className="text-gray-400 italic">—</span>}</td>
+                <td className="py-2 px-4">{p.publicNotes || <span className="text-gray-400 italic">—</span>}</td>
                 <td className="py-2 px-4">
                   <button
-                    className="bg-gray-200 text-gray-800 font-semibold py-1 px-3 rounded-md shadow hover:bg-gray-300 transition mr-2"
+                    className="bg-gray-200 text-gray-800 text-xs py-1 px-2 rounded hover:bg-gray-300 transition mr-1"
                     onClick={() => {
                       setEditingPerformance(p);
                       setShowPerformanceForm(true);
@@ -175,7 +174,7 @@ const SetPerformancesSection: React.FC<SetPerformancesSectionProps> = ({ set, so
                     Edit
                   </button>
                   <button
-                    className="bg-red-600 text-white font-semibold py-1 px-3 rounded-md shadow hover:bg-red-700 transition"
+                    className="bg-red-600 text-white text-xs py-1 px-2 rounded hover:bg-red-700 transition"
                     onClick={() => handleDelete(p.id)}
                   >
                     Delete
@@ -186,7 +185,7 @@ const SetPerformancesSection: React.FC<SetPerformancesSectionProps> = ({ set, so
         </tbody>
       </table>
       <button
-        className="bg-blue-600 text-white font-semibold py-2 px-4 rounded-md shadow hover:bg-blue-700 transition"
+        className="bg-blue-600 text-white text-xs py-1 px-2 rounded hover:bg-blue-700 transition"
         onClick={() => {
           setEditingPerformance(null);
           setShowPerformanceForm(true);

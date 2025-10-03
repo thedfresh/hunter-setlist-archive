@@ -307,7 +307,7 @@ function PerformanceForm({ setId, songs, musicians, instruments, performances, e
                 </select>
                 <button
                   type="button"
-                  className="text-red-600 px-2"
+                  className="text-red-600 text-xs py-0.5 px-1 hover:text-red-800"
                   onClick={() => removeGuestMusician(idx)}
                 >
                   Remove
@@ -316,7 +316,7 @@ function PerformanceForm({ setId, songs, musicians, instruments, performances, e
             ))}
             <button
               type="button"
-              className="bg-gray-200 text-gray-800 px-3 py-1 rounded shadow hover:bg-gray-300"
+              className="bg-gray-200 text-gray-800 text-xs py-1 px-2 rounded hover:bg-gray-300 transition"
               onClick={addGuestMusician}
             >
               Add Guest
@@ -369,18 +369,18 @@ function PerformanceForm({ setId, songs, musicians, instruments, performances, e
           <div className="flex gap-2 mt-4">
             <button
               type="submit"
-              className="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700"
-              disabled={submitting}
-            >
-              {submitting ? "Saving..." : "Save"}
-            </button>
+              className="bg-blue-600 text-white text-xs py-1 px-2 rounded hover:bg-blue-700 transition"
+               disabled={submitting}
+             >
+               {submitting ? "Saving..." : "Save"}
+             </button>
             <button
               type="button"
-              className="bg-gray-200 text-gray-800 px-4 py-2 rounded shadow hover:bg-gray-300"
-              onClick={onClose}
-            >
-              Cancel
-            </button>
+              className="bg-gray-200 text-gray-800 text-xs py-1 px-2 rounded hover:bg-gray-300 transition"
+               onClick={onClose}
+             >
+               Cancel
+             </button>
           </div>
         </form>
       </div>
