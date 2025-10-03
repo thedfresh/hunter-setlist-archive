@@ -63,7 +63,15 @@ const ShowBanterSection: React.FC<Props> = ({ eventId }) => {
       if (!sets[p.set.id]) sets[p.set.id] = { position: p.set.position, songs: [] };
       sets[p.set.id].songs.push(p);
     });
-    return Object.values(sets).sort((a, b) => a.position - b.position);
+    // Convert to array, sort sets by position, and sort songs by performanceOrder
+    return Object.values(sets)
+      .map(group => ({
+        position: group.position,
+        songs: group.songs.sort((a, b) =>
+          (a.performanceOrder ?? a.order ?? 0) - (b.performanceOrder ?? b.order ?? 0)
+        ),
+      }))
+      .sort((a, b) => a.position - b.position);
   }
 
   // Handlers for add/edit/delete
