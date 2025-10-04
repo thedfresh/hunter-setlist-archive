@@ -3,6 +3,53 @@
 @tailwind utilities;
 
 @layer components {
+
+  /* ============================================
+    LINKS
+    ============================================ */
+
+  /* Internal links (database navigation) */
+  .link-internal {
+    @apply text-inherit no-underline cursor-pointer transition-all;
+  }
+
+  /* Hover colors - performer-specific */
+  .link-internal-solo:hover {
+    @apply text-[#8b6914] underline;
+  }
+
+  .link-internal-roadhog:hover {
+    @apply text-[#a67c00] underline;
+  }
+
+  .link-internal-comfort:hover {
+    @apply text-[#4a6617] underline;
+  }
+
+  .link-internal-dinosaurs:hover {
+    @apply text-[#0891b2] underline;
+  }
+
+  .link-internal-special:hover {
+    @apply text-[#5a3d5c] underline;
+  }
+
+  /* Default internal link (for non-performer pages) */
+  .link-internal:hover {
+    @apply text-gray-700 underline;
+  }
+
+  /* External links (off-site resources) */
+  .link-external {
+    @apply text-blue-600 font-semibold no-underline transition-all;
+    @apply hover:underline;
+  }
+
+  .link-external::after {
+    content: " ↗";
+    @apply text-[0.85em] opacity-70;
+  }
+
   /* ============================================
      BUTTONS
      ============================================ */
@@ -893,5 +940,162 @@
     .sort-check {
     @apply w-4 h-4 text-[#b8913d];
     }
+
+    /* ============================================
+      CHECKBOXES & RADIOS
+      ============================================ */
+
+    .checkbox-group,
+    .radio-group {
+      @apply flex flex-col gap-2.5;
+    }
+
+    .checkbox-label,
+    .radio-label {
+      @apply flex items-center gap-2.5 cursor-pointer text-sm text-gray-700;
+    }
+
+    .checkbox-input {
+      @apply w-[18px] h-[18px] border-[1.5px] border-gray-300;
+      @apply rounded appearance-none bg-white cursor-pointer;
+      @apply transition-all relative;
+      @apply checked:bg-[#b8913d] checked:border-[#b8913d];
+      @apply focus:ring-4 focus:ring-[#b8913d]/10 focus:outline-none;
+    }
+
+    .checkbox-input:checked::after {
+      content: '';
+      @apply absolute left-[5px] top-[2px];
+      @apply w-1 h-2 border-white border-r-2 border-b-2;
+      transform: rotate(45deg);
+    }
+
+    .radio-input {
+      @apply w-[18px] h-[18px] border-[1.5px] border-gray-300;
+      @apply rounded-full appearance-none bg-white cursor-pointer;
+      @apply transition-all relative;
+      @apply checked:border-[#b8913d];
+      @apply focus:ring-4 focus:ring-[#b8913d]/10 focus:outline-none;
+    }
+
+    .radio-input:checked::after {
+      content: '';
+      @apply absolute left-[3px] top-[3px] w-2 h-2;
+      @apply rounded-full bg-[#b8913d];
+    }
+
+    /* ============================================
+      SETLIST DISPLAY (Detail Page)
+      ============================================ */
+
+    .set-section {
+      @apply mt-5;
+    }
+
+    .set-label {
+      @apply text-sm font-semibold text-gray-900 mb-2;
+    }
+
+    .set-note {
+      @apply text-xs text-gray-600 italic mb-2;
+    }
+
+    .setlist {
+      @apply text-sm leading-relaxed text-gray-800;
+    }
+
+    /* Notes sections */
+    .notes-section {
+      @apply mt-5 pt-5 border-t border-gray-200;
+    }
+
+    .notes-title {
+      @apply text-base font-semibold text-gray-900 mb-2;
+    }
+
+    .notes-content {
+      @apply text-xs leading-relaxed text-gray-600;
+    }
+
+    .banter-label {
+      @apply font-semibold text-gray-800 mt-3 mb-1;
+    }
+
+    /* ============================================
+      RECORDINGS DISPLAY
+      ============================================ */
+
+    .recording-section {
+      @apply mt-5 pt-5 border-t border-gray-200;
+    }
+
+    .recording-item {
+      @apply mb-4 text-xs text-gray-600 leading-relaxed;
+    }
+
+    .recording-type-badge {
+      @apply inline-block px-2.5 py-0.5 rounded-full;
+      @apply text-[11px] font-semibold uppercase tracking-wide mr-2;
+    }
+
+    /* ============================================
+      UTILITY CLASSES
+      ============================================ */
+
+    .results-count {
+      @apply text-sm text-gray-600;
+    }
+
+    .results-count strong {
+      @apply text-gray-900 font-semibold;
+    }
+
+    .section-divider {
+      @apply border-t border-gray-200;
+    }
+
+    /* ============================================
+      FORM LAYOUTS
+      ============================================ */
+
+    .form-group {
+      @apply mb-5;
+    }
+
+    .input-group {
+      @apply flex gap-3 items-end;
+    }
+
+    .input-group .form-group {
+      @apply flex-1 mb-0;
+    }
+
+    /* ============================================
+      PAGE LAYOUTS
+      ============================================ */
+
+    /* Two-column layout (filter sidebar + content) */
+    .two-column {
+      @apply grid grid-cols-[280px_1fr] gap-6;
+    }
+
+    @media (max-width: 768px) {
+      .two-column {
+        @apply grid-cols-1;
+      }
+    }
+
+    /* Page header */
+    .page-header {
+      @apply py-6 border-b border-gray-200 mb-6;
+    }
+
+    .page-title {
+      @apply text-3xl font-semibold text-gray-900 mb-2;
+    }
+
+    .page-subtitle {
+      @apply text-base text-gray-600;
+    }    
 
 }
