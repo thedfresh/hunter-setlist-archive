@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hunter Archive - Navigation & Structure</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #fafafa;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        h1 {
+            font-size: 32px;
+            font-weight: 600;
+            color: #222;
+            margin-bottom: 40px;
+        }
+        
+        .section {
+            margin-bottom: 60px;
+        }
+        
+        .section-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #222;
+            margin-bottom: 20px;
+        }
+        
+        .component-card {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+        
+        .component-label {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #888;
+            margin-bottom: 16px;
+        }
+        
+        /* SITE HEADER */
+        .site-header {
+            background: white;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .header-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 40px;
+        }
+        
+        .site-logo {
+            font-size: 20px;
+            font-weight: 600;
+            color: #222;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .site-logo:hover {
+            color: #b8913d;
+        }
+        
+        .main-nav {
+            display: flex;
+            gap: 32px;
+            align-items: center;
+            flex: 1;
+        }
+        
+        .nav-link {
+            color: #374151;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: color 0.15s ease;
+        }
+        
+        .nav-link:hover {
+            color: #b8913d;
+        }
+        
+        .nav-link-active {
+            color: #b8913d;
+            font-weight: 600;
+        }
+        
+        .header-search {
+            position: relative;
+            width: 300px;
+        }
+        
+        .header-search input {
+            width: 100%;
+            padding: 8px 36px 8px 36px;
+            border: 1.5px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+            color: #222;
+            background: #f9fafb;
+            transition: all 0.15s ease;
+        }
+        
+        .header-search input:focus {
+            border-color: #b8913d;
+            background: white;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(184, 145, 61, 0.1);
+        }
+        
+        .header-search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 16px;
+            height: 16px;
+            color: #9ca3af;
+        }
+        
+        /* BREADCRUMBS */
+        .breadcrumbs {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: #6b7280;
+            padding: 16px 0;
+        }
+        
+        .breadcrumb-link {
+            color: #6b7280;
+            text-decoration: none;
+            transition: color 0.15s ease;
+        }
+        
+        .breadcrumb-link:hover {
+            color: #b8913d;
+        }
+        
+        .breadcrumb-separator {
+            color: #d1d5db;
+        }
+        
+        .breadcrumb-current {
+            color: #374151;
+            font-weight: 500;
+        }
+        
+        /* TABS */
+        .tabs {
+            border-bottom: 2px solid #e0e0e0;
+            display: flex;
+            gap: 0;
+        }
+        
+        .tab {
+            padding: 12px 24px;
+            color: #6b7280;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+            transition: all 0.15s ease;
+            cursor: pointer;
+            background: none;
+            border-top: none;
+            border-left: none;
+            border-right: none;
+        }
+        
+        .tab:hover {
+            color: #374151;
+            background: #f9fafb;
+        }
+        
+        .tab-active {
+            color: #b8913d;
+            border-bottom-color: #b8913d;
+            font-weight: 600;
+        }
+        
+        .tab-active:hover {
+            background: none;
+        }
+        
+        /* SECONDARY TABS (Pills) */
+        .tabs-pills {
+            display: flex;
+            gap: 8px;
+            padding: 4px;
+            background: #f3f4f6;
+            border-radius: 8px;
+            width: fit-content;
+        }
+        
+        .tab-pill {
+            padding: 8px 16px;
+            color: #6b7280;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            border-radius: 6px;
+            transition: all 0.15s ease;
+            cursor: pointer;
+            background: none;
+            border: none;
+        }
+        
+        .tab-pill:hover {
+            color: #374151;
+            background: #e5e7eb;
+        }
+        
+        .tab-pill-active {
+            color: #222;
+            background: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            font-weight: 600;
+        }
+        
+        .tab-pill-active:hover {
+            background: white;
+        }
+        
+        /* PAGINATION */
+        .pagination {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            justify-content: center;
+            padding: 24px 0;
+        }
+        
+        .page-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 40px;
+            height: 40px;
+            padding: 0 12px;
+            color: #374151;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            border: 1.5px solid #e0e0e0;
+            border-radius: 6px;
+            transition: all 0.15s ease;
+            background: white;
+        }
+        
+        .page-link:hover {
+            border-color: #b8913d;
+            color: #b8913d;
+            background: #fefdfb;
+        }
+        
+        .page-link-active {
+            background: #b8913d;
+            color: white;
+            border-color: #b8913d;
+        }
+        
+        .page-link-active:hover {
+            background: #a07c2f;
+            border-color: #a07c2f;
+        }
+        
+        .page-link:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+        
+        .page-ellipsis {
+            padding: 0 8px;
+            color: #9ca3af;
+        }
+        
+        /* PAGINATION COMPACT */
+        .pagination-compact {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            font-size: 14px;
+            color: #6b7280;
+        }
+        
+        .pagination-info {
+            font-weight: 500;
+        }
+        
+        .pagination-controls {
+            display: flex;
+            gap: 8px;
+        }
+        
+        /* PAGE HEADER */
+        .page-header {
+            padding: 24px 0;
+            border-bottom: 1px solid #e0e0e0;
+            margin-bottom: 24px;
+        }
+        
+        .page-title {
+            font-size: 28px;
+            font-weight: 600;
+            color: #222;
+            margin-bottom: 8px;
+        }
+        
+        .page-subtitle {
+            font-size: 15px;
+            color: #6b7280;
+        }
+        
+        /* MOBILE NAV */
+        .mobile-menu-button {
+            display: none;
+            padding: 8px;
+            background: none;
+            border: none;
+            color: #374151;
+            cursor: pointer;
+        }
+        
+        .mobile-menu-icon {
+            width: 24px;
+            height: 24px;
+        }
+        
+        @media (max-width: 768px) {
+            .main-nav {
+                display: none;
+            }
+            
+            .header-search {
+                display: none;
+            }
+            
+            .mobile-menu-button {
+                display: block;
+            }
+        }
+        
+        .content-preview {
+            padding: 32px;
+            background: #f9fafb;
+            border-radius: 8px;
+            text-align: center;
+            color: #9ca3af;
+            font-size: 14px;
+            margin-top: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Hunter Archive - Navigation & Structure</h1>
+        
+        <!-- SITE HEADER -->
+        <div class="section">
+            <div class="section-title">Site Header / Navigation Bar</div>
+            
+            <div class="component-card" style="padding: 0; overflow: hidden;">
+                <div class="component-label" style="padding: 16px 24px 0;">Desktop Header</div>
+                <div class="site-header">
+                    <div class="header-container">
+                        <a href="#" class="site-logo">
+                            🎵 Hunter Archive
+                        </a>
+                        
+                        <nav class="main-nav">
+                            <a href="#" class="nav-link nav-link-active">Shows</a>
+                            <a href="#" class="nav-link">Songs</a>
+                            <a href="#" class="nav-link">Venues</a>
+                            <a href="#" class="nav-link">Musicians</a>
+                            <a href="#" class="nav-link">About</a>
+                        </nav>
+                        
+                        <div class="header-search">
+                            <svg class="header-search-icon" viewBox="0 0 16 16" fill="none">
+                                <circle cx="7" cy="7" r="4" stroke="currentColor" stroke-width="1.5"/>
+                                <path d="M11 11l3 3" stroke="currentColor" stroke-width="1.5"/>
+                            </svg>
+                            <input type="text" placeholder="Search shows...">
+                        </div>
+                        
+                        <button class="mobile-menu-button">
+                            <svg class="mobile-menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path d="M4 6h16M4 12h16M4 18h16" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="component-card" style="padding: 0; overflow: hidden;">
+                <div class="component-label" style="padding: 16px 24px 0;">Alternative Header (with subtitle)</div>
+                <div class="site-header">
+                    <div class="header-container">
+                        <div>
+                            <a href="#" class="site-logo">Hunter Archive</a>
+                            <div style="font-size: 12px; color: #9ca3af; margin-top: 2px;">Complete Robert Hunter Performance Database</div>
+                        </div>
+                        
+                        <nav class="main-nav">
+                            <a href="#" class="nav-link">Browse</a>
+                            <a href="#" class="nav-link nav-link-active">Search</a>
+                            <a href="#" class="nav-link">Statistics</a>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- BREADCRUMBS -->
+        <div class="section">
+            <div class="section-title">Breadcrumbs</div>
+            
+            <div class="component-card">
+                <div class="component-label">Simple Breadcrumb Trail</div>
+                <nav class="breadcrumbs">
+                    <a href="#" class="breadcrumb-link">Home</a>
+                    <span class="breadcrumb-separator">/</span>
+                    <a href="#" class="breadcrumb-link">Shows</a>
+                    <span class="breadcrumb-separator">/</span>
+                    <a href="#" class="breadcrumb-link">2002</a>
+                    <span class="breadcrumb-separator">/</span>
+                    <span class="breadcrumb-current">August 7, 2002</span>
+                </nav>
+            </div>
+            
+            <div class="component-card">
+                <div class="component-label">With Icons</div>
+                <nav class="breadcrumbs">
+                    <a href="#" class="breadcrumb-link">
+                        <svg style="width: 14px; height: 14px; display: inline;" viewBox="0 0 16 16" fill="currentColor">
+                            <path d="M8 2L2 7h2v5h3V9h2v3h3V7h2L8 2z"/>
+                        </svg>
+                    </a>
+                    <span class="breadcrumb-separator">/</span>
+                    <a href="#" class="breadcrumb-link">Venues</a>
+                    <span class="breadcrumb-separator">/</span>
+                    <a href="#" class="breadcrumb-link">San Francisco</a>
+                    <span class="breadcrumb-separator">/</span>
+                    <span class="breadcrumb-current">The Fillmore</span>
+                </nav>
+            </div>
+        </div>
+        
+        <!-- TABS -->
+        <div class="section">
+            <div class="section-title">Tabs</div>
+            
+            <div class="component-card" style="padding: 24px 24px 0;">
+                <div class="component-label">Underline Tabs (Primary)</div>
+                <div class="tabs">
+                    <button class="tab tab-active">Overview</button>
+                    <button class="tab">Performances</button>
+                    <button class="tab">Recordings</button>
+                    <button class="tab">Contributors</button>
+                    <button class="tab">History</button>
+                </div>
+                <div class="content-preview">
+                    Tab content would appear here
+                </div>
+            </div>
+            
+            <div class="component-card">
+                <div class="component-label">Pill Tabs (Secondary)</div>
+                <div class="tabs-pills">
+                    <button class="tab-pill tab-pill-active">All Shows</button>
+                    <button class="tab-pill">Verified Only</button>
+                    <button class="tab-pill">With Recordings</button>
+                    <button class="tab-pill">Uncertain Dates</button>
+                </div>
+                <div class="content-preview">
+                    Filtered content would appear here
+                </div>
+            </div>
+            
+            <div class="component-card" style="padding: 24px 24px 0;">
+                <div class="component-label">Tabs with Counts</div>
+                <div class="tabs">
+                    <button class="tab tab-active">
+                        All Shows
+                        <span style="margin-left: 6px; padding: 2px 8px; background: #b8913d; color: white; border-radius: 12px; font-size: 12px;">517</span>
+                    </button>
+                    <button class="tab">
+                        Solo Hunter
+                        <span style="margin-left: 6px; padding: 2px 8px; background: #e5e7eb; color: #6b7280; border-radius: 12px; font-size: 12px;">342</span>
+                    </button>
+                    <button class="tab">
+                        Dinosaurs
+                        <span style="margin-left: 6px; padding: 2px 8px; background: #e5e7eb; color: #6b7280; border-radius: 12px; font-size: 12px;">89</span>
+                    </button>
+                    <button class="tab">
+                        Other Bands
+                        <span style="margin-left: 6px; padding: 2px 8px; background: #e5e7eb; color: #6b7280; border-radius: 12px; font-size: 12px;">86</span>
+                    </button>
+                </div>
+                <div class="content-preview">
+                    Filtered show list would appear here
+                </div>
+            </div>
+        </div>
+        
+        <!-- PAGINATION -->
+        <div class="section">
+            <div class="section-title">Pagination</div>
+            
+            <div class="component-card">
+                <div class="component-label">Full Pagination</div>
+                <nav class="pagination">
+                    <button class="page-link" disabled>
+                        <svg style="width: 16px; height: 16px;" viewBox="0 0 16 16" fill="none" stroke="currentColor">
+                            <path d="M10 12L6 8l4-4" stroke-width="2"/>
+                        </svg>
+                    </button>
+                    <a href="#" class="page-link page-link-active">1</a>
+                    <a href="#" class="page-link">2</a>
+                    <a href="#" class="page-link">3</a>
+                    <a href="#" class="page-link">4</a>
+                    <a href="#" class="page-link">5</a>
+                    <span class="page-ellipsis">...</span>
+                    <a href="#" class="page-link">23</a>
+                    <button class="page-link">
+                        <svg style="width: 16px; height: 16px;" viewBox="0 0 16 16" fill="none" stroke="currentColor">
+                            <path d="M6 12l4-4-4-4" stroke-width="2"/>
+                        </svg>
+                    </button>
+                </nav>
+            </div>
+            
+            <div class="component-card">
+                <div class="component-label">Compact Pagination</div>
+                <nav class="pagination-compact" style="justify-content: center; display: flex;">
+                    <div class="pagination-info">
+                        Showing <strong>1-25</strong> of <strong>517</strong> shows
+                    </div>
+                    <div class="pagination-controls">
+                        <button class="page-link" disabled>
+                            Previous
+                        </button>
+                        <button class="page-link">
+                            Next
+                        </button>
+                    </div>
+                </nav>
+            </div>
+            
+            <div class="component-card">
+                <div class="component-label">Minimal Pagination (middle of results)</div>
+                <nav class="pagination">
+                    <button class="page-link">
+                        <svg style="width: 16px; height: 16px;" viewBox="0 0 16 16" fill="none" stroke="currentColor">
+                            <path d="M10 12L6 8l4-4" stroke-width="2"/>
+                        </svg>
+                    </button>
+                    <a href="#" class="page-link">8</a>
+                    <a href="#" class="page-link">9</a>
+                    <a href="#" class="page-link page-link-active">10</a>
+                    <a href="#" class="page-link">11</a>
+                    <a href="#" class="page-link">12</a>
+                    <button class="page-link">
+                        <svg style="width: 16px; height: 16px;" viewBox="0 0 16 16" fill="none" stroke="currentColor">
+                            <path d="M6 12l4-4-4-4" stroke-width="2"/>
+                        </svg>
+                    </button>
+                </nav>
+            </div>
+        </div>
+        
+        <!-- PAGE HEADER -->
+        <div class="section">
+            <div class="section-title">Page Headers</div>
+            
+            <div class="component-card" style="padding: 0;">
+                <div class="component-label" style="padding: 16px 24px 0;">Page Header with Breadcrumbs</div>
+                <div style="padding: 0 24px;">
+                    <nav class="breadcrumbs">
+                        <a href="#" class="breadcrumb-link">Home</a>
+                        <span class="breadcrumb-separator">/</span>
+                        <a href="#" class="breadcrumb-link">Shows</a>
+                        <span class="breadcrumb-separator">/</span>
+                        <span class="breadcrumb-current">2002-08-07</span>
+                    </nav>
+                    <div class="page-header">
+                        <h2 class="page-title">August 7, 2002 • Solo Hunter</h2>
+                        <p class="page-subtitle">Gallatin Gateway Inn, Bozeman, MT</p>
+                    </div>
+                </div>
+                <div class="content-preview" style="margin: 0; border-radius: 0;">
+                    Event details would appear here
+                </div>
+            </div>
+            
+            <div class="component-card" style="padding: 0;">
+                <div class="component-label" style="padding: 16px 24px 0;">Page Header with Tabs</div>
+                <div style="padding: 0 24px;">
+                    <div class="page-header">
+                        <h2 class="page-title">The Fillmore</h2>
+                        <p class="page-subtitle">San Francisco, CA • 24 performances</p>
+                    </div>
+                    <div class="tabs">
+                        <button class="tab tab-active">All Shows</button>
+                        <button class="tab">Timeline</button>
+                        <button class="tab">Statistics</button>
+                    </div>
+                </div>
+                <div class="content-preview" style="margin: 0; border-radius: 0;">
+                    Venue shows would appear here
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

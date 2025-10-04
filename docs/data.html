@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hunter Archive - Data Display</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #fafafa;
+            padding: 40px 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            font-size: 32px;
+            font-weight: 600;
+            color: #222;
+            margin-bottom: 40px;
+        }
+        
+        .section {
+            margin-bottom: 60px;
+        }
+        
+        .section-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #222;
+            margin-bottom: 20px;
+        }
+        
+        .component-card {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+        
+        .component-label {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #888;
+            margin-bottom: 16px;
+        }
+        
+        /* TABLES */
+        .table-container {
+            overflow-x: auto;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+        }
+        
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        
+        .table thead {
+            background: #f9fafb;
+        }
+        
+        .table th {
+            text-align: left;
+            padding: 12px 16px;
+            font-weight: 600;
+            color: #374151;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .table th.sortable {
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        .table th.sortable:hover {
+            background: #f3f4f6;
+            color: #b8913d;
+        }
+        
+        .table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f3f4f6;
+            color: #374151;
+        }
+        
+        .table tbody tr:hover {
+            background: #fefdfb;
+        }
+        
+        .table tbody tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .table-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .action-btn {
+            padding: 4px 8px;
+            font-size: 12px;
+            border: none;
+            background: none;
+            color: #6b7280;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.15s ease;
+        }
+        
+        .action-btn:hover {
+            background: #f3f4f6;
+            color: #b8913d;
+        }
+        
+        .sort-icon {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            margin-left: 6px;
+            opacity: 0.4;
+        }
+        
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .badge-verified {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .badge-uncertain {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .badge-sbd {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        
+        /* CARDS/LIST ITEMS */
+        .card-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .list-card {
+            border-radius: 8px;
+            padding: 16px;
+            border: 1px solid #e0e0e0;
+            border-left: 8px solid;
+            position: relative;
+            transition: all 0.15s ease;
+            cursor: pointer;
+        }
+        
+        .list-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background-color: var(--secondary-color);
+        }
+        
+        .list-card:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transform: translateY(-1px);
+        }
+        
+        /* Performer-specific card styles */
+        .list-card-solo {
+            background: #f5f1e8;
+            border-left-color: #b8913d;
+            --secondary-color: #8b6914;
+        }
+        
+        .list-card-dinosaurs {
+            background: #e8f4ff;
+            border-left-color: #00d9ff;
+            --secondary-color: #7b2cbf;
+        }
+        
+        .list-card-roadhog {
+            background: #fef5e7;
+            border-left-color: #d4a017;
+            --secondary-color: #cc6600;
+        }
+        
+        .list-card-comfort {
+            background: #eff5e8;
+            border-left-color: #6b8e23;
+            --secondary-color: #8b7355;
+        }
+        
+        .list-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+        }
+        
+        .list-card-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #222;
+        }
+        
+        .list-card-meta {
+            font-size: 13px;
+            color: #6b7280;
+            line-height: 1.6;
+        }
+        
+        .list-card-tags {
+            display: flex;
+            gap: 6px;
+            margin-top: 12px;
+        }
+        
+        /* EMPTY STATES */
+        .empty-state {
+            text-align: center;
+            padding: 60px 40px;
+            color: #9ca3af;
+        }
+        
+        .empty-icon {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 20px;
+            opacity: 0.4;
+        }
+        
+        .empty-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #6b7280;
+            margin-bottom: 8px;
+        }
+        
+        .empty-description {
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+        
+        .empty-action {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: #b8913d;
+            color: white;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.15s ease;
+        }
+        
+        .empty-action:hover {
+            background: #a07c2f;
+        }
+        
+        /* LOADING STATES */
+        .loading-state {
+            text-align: center;
+            padding: 60px 40px;
+        }
+        
+        .spinner {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 20px;
+            border: 4px solid #f3f4f6;
+            border-top-color: #b8913d;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .loading-text {
+            font-size: 14px;
+            color: #6b7280;
+        }
+        
+        /* SKELETON LOADERS */
+        .skeleton {
+            background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 4px;
+        }
+        
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        
+        .skeleton-line {
+            height: 16px;
+            margin-bottom: 12px;
+        }
+        
+        .skeleton-line-short {
+            width: 60%;
+        }
+        
+        .skeleton-card {
+            padding: 16px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+        
+        /* ERROR STATES */
+        .error-state {
+            text-align: center;
+            padding: 60px 40px;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            border-radius: 8px;
+        }
+        
+        .error-icon {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 20px;
+            color: #dc2626;
+        }
+        
+        .error-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #991b1b;
+            margin-bottom: 8px;
+        }
+        
+        .error-description {
+            font-size: 14px;
+            color: #b91c1c;
+            margin-bottom: 20px;
+        }
+        
+        .error-action {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: white;
+            color: #dc2626;
+            border: 1.5px solid #dc2626;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.15s ease;
+            cursor: pointer;
+        }
+        
+        .error-action:hover {
+            background: #fef2f2;
+        }
+        
+        /* STATS CARDS */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+        }
+        
+        .stat-card {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        
+        .stat-label {
+            font-size: 13px;
+            color: #6b7280;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .stat-value {
+            font-size: 32px;
+            font-weight: 600;
+            color: #222;
+            margin-bottom: 4px;
+        }
+        
+        .stat-change {
+            font-size: 13px;
+            font-weight: 500;
+        }
+        
+        .stat-change-positive {
+            color: #6b8e23;
+        }
+        
+        .stat-change-negative {
+            color: #dc2626;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Hunter Archive - Data Display</h1>
+        
+        <!-- TABLES -->
+        <div class="section">
+            <div class="section-title">Tables</div>
+            
+            <div class="component-card" style="padding: 24px 0;">
+                <div class="component-label" style="padding: 0 24px;">Basic Table</div>
+                <div class="table-container" style="border: none;">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th class="sortable">
+                                    Date
+                                    <svg class="sort-icon" viewBox="0 0 12 12" fill="currentColor">
+                                        <path d="M6 3L3 6h6L6 3zM6 9l3-3H3l3 3z"/>
+                                    </svg>
+                                </th>
+                                <th class="sortable">Venue</th>
+                                <th class="sortable">Performer</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>2002-08-07</td>
+                                <td>Gallatin Gateway Inn, Bozeman, MT</td>
+                                <td>Solo Hunter</td>
+                                <td><span class="badge badge-verified">Verified</span></td>
+                                <td>
+                                    <div class="table-actions">
+                                        <button class="action-btn">View</button>
+                                        <button class="action-btn">Edit</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>1983-05-15</td>
+                                <td>Great American Music Hall, San Francisco, CA</td>
+                                <td>Dinosaurs</td>
+                                <td><span class="badge badge-verified">Verified</span></td>
+                                <td>
+                                    <div class="table-actions">
+                                        <button class="action-btn">View</button>
+                                        <button class="action-btn">Edit</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>1977-03-12</td>
+                                <td>The Boarding House, San Francisco, CA</td>
+                                <td>Comfort</td>
+                                <td><span class="badge badge-verified">Verified</span></td>
+                                <td>
+                                    <div class="table-actions">
+                                        <button class="action-btn">View</button>
+                                        <button class="action-btn">Edit</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Early 1976</td>
+                                <td>The Keystone, Berkeley, CA</td>
+                                <td>Roadhog</td>
+                                <td><span class="badge badge-uncertain">Uncertain</span></td>
+                                <td>
+                                    <div class="table-actions">
+                                        <button class="action-btn">View</button>
+                                        <button class="action-btn">Edit</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="component-card" style="padding: 24px 0;">
+                <div class="component-label" style="padding: 0 24px;">Compact Table (Songs)</div>
+                <div class="table-container" style="border: none;">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th class="sortable">Song Title</th>
+                                <th class="sortable">Times Played</th>
+                                <th class="sortable">First</th>
+                                <th class="sortable">Last</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Box Of Rain</strong></td>
+                                <td>127</td>
+                                <td>1970-08-18</td>
+                                <td>2024-10-15</td>
+                                <td>
+                                    <div class="table-actions">
+                                        <button class="action-btn">View</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Ripple</strong></td>
+                                <td>143</td>
+                                <td>1970-08-01</td>
+                                <td>2024-09-22</td>
+                                <td>
+                                    <div class="table-actions">
+                                        <button class="action-btn">View</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Terrapin Station</strong></td>
+                                <td>89</td>
+                                <td>1977-02-26</td>
+                                <td>2024-08-15</td>
+                                <td>
+                                    <div class="table-actions">
+                                        <button class="action-btn">View</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- CARD LISTS -->
+        <div class="section">
+            <div class="section-title">Card Lists</div>
+            
+            <div class="component-card">
+                <div class="component-label">Show Cards</div>
+                <div class="card-list">
+                    <div class="list-card list-card-solo">
+                        <div class="list-card-header">
+                            <div>
+                                <div class="list-card-title">2002-08-07 • Solo Hunter</div>
+                                <div class="list-card-meta">Gallatin Gateway Inn, Bozeman, MT</div>
+                            </div>
+                            <span class="badge badge-verified">Verified</span>
+                        </div>
+                        <div class="list-card-meta">
+                            Box Of Rain, Cumberland Blues, Lazy River Road, Uncle John's Band > Brokedown Palace...
+                        </div>
+                        <div class="list-card-tags">
+                            <span class="badge badge-sbd">SBD</span>
+                            <span class="badge" style="background: rgba(255,255,255,0.7); color: #6b7280;">2 Recordings</span>
+                        </div>
+                    </div>
+                    
+                    <div class="list-card list-card-dinosaurs">
+                        <div class="list-card-header">
+                            <div>
+                                <div class="list-card-title">1983-05-15 • Dinosaurs</div>
+                                <div class="list-card-meta">Great American Music Hall, San Francisco, CA</div>
+                            </div>
+                            <span class="badge badge-verified">Verified</span>
+                        </div>
+                        <div class="list-card-meta">
+                            Easy Wind, Mister Charlie, Stagger Lee, New Speedway Boogie, Terrapin Station...
+                        </div>
+                        <div class="list-card-tags">
+                            <span class="badge badge-sbd">SBD</span>
+                        </div>
+                    </div>
+                    
+                    <div class="list-card list-card-roadhog">
+                        <div class="list-card-header">
+                            <div>
+                                <div class="list-card-title">Early 1976 • Roadhog</div>
+                                <div class="list-card-meta">The Keystone, Berkeley, CA</div>
+                            </div>
+                            <span class="badge badge-uncertain">Date Uncertain</span>
+                        </div>
+                        <div class="list-card-meta">
+                            Box Of Rain, Cumberland Blues, Brown Eyed Women, Stella Blue
+                        </div>
+                    </div>
+                    
+                    <div class="list-card list-card-comfort">
+                        <div class="list-card-header">
+                            <div>
+                                <div class="list-card-title">1977-03-12 • Comfort</div>
+                                <div class="list-card-meta">The Boarding House, San Francisco, CA</div>
+                            </div>
+                            <span class="badge badge-verified">Verified</span>
+                        </div>
+                        <div class="list-card-meta">
+                            Ripple, Dire Wolf, Lady With A Fan, Wharf Rat, Liberty, Uncle John's Band...
+                        </div>
+                        <div class="list-card-tags">
+                            <span class="badge" style="background: rgba(255,255,255,0.7); color: #6b7280;">Complete</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- STAT CARDS -->
+        <div class="section">
+            <div class="section-title">Statistics Cards</div>
+            
+            <div class="component-card">
+                <div class="component-label">Dashboard Stats</div>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Total Shows</div>
+                        <div class="stat-value">517</div>
+                        <div class="stat-change stat-change-positive">↑ 12 this month</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Verified Shows</div>
+                        <div class="stat-value">342</div>
+                        <div class="stat-change" style="color: #6b7280;">66% verified</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Unique Songs</div>
+                        <div class="stat-value">860</div>
+                        <div class="stat-change stat-change-positive">↑ 8 added</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Recordings</div>
+                        <div class="stat-value">423</div>
+                        <div class="stat-change" style="color: #6b7280;">82% coverage</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- EMPTY STATES -->
+        <div class="section">
+            <div class="section-title">Empty States</div>
+            
+            <div class="component-card">
+                <div class="component-label">No Results Found</div>
+                <div class="empty-state">
+                    <svg class="empty-icon" viewBox="0 0 64 64" fill="none" stroke="currentColor">
+                        <circle cx="26" cy="26" r="16" stroke-width="3"/>
+                        <path d="M38 38l14 14" stroke-width="3" stroke-linecap="round"/>
+                    </svg>
+                    <div class="empty-title">No shows found</div>
+                    <div class="empty-description">
+                        We couldn't find any shows matching your search criteria.<br>
+                        Try adjusting your filters or search terms.
+                    </div>
+                    <a href="#" class="empty-action">Clear Filters</a>
+                </div>
+            </div>
+            
+            <div class="component-card">
+                <div class="component-label">No Data Yet</div>
+                <div class="empty-state">
+                    <svg class="empty-icon" viewBox="0 0 64 64" fill="none" stroke="currentColor">
+                        <rect x="12" y="16" width="40" height="36" rx="2" stroke-width="3"/>
+                        <path d="M20 28h24M20 36h16M20 44h20" stroke-width="3" stroke-linecap="round"/>
+                    </svg>
+                    <div class="empty-title">No recordings yet</div>
+                    <div class="empty-description">
+                        This show doesn't have any recordings in the archive.<br>
+                        Help us out by adding one!
+                    </div>
+                    <a href="#" class="empty-action">
+                        <svg style="width: 16px; height: 16px;" viewBox="0 0 16 16" fill="none" stroke="currentColor">
+                            <path d="M8 3v10M3 8h10" stroke-width="2"/>
+                        </svg>
+                        Add Recording
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- LOADING STATES -->
+        <div class="section">
+            <div class="section-title">Loading States</div>
+            
+            <div class="component-card">
+                <div class="component-label">Loading Spinner</div>
+                <div class="loading-state">
+                    <div class="spinner"></div>
+                    <div class="loading-text">Loading shows...</div>
+                </div>
+            </div>
+            
+            <div class="component-card">
+                <div class="component-label">Skeleton Loaders</div>
+                <div class="skeleton-card">
+                    <div class="skeleton skeleton-line"></div>
+                    <div class="skeleton skeleton-line skeleton-line-short"></div>
+                </div>
+                <div class="skeleton-card">
+                    <div class="skeleton skeleton-line"></div>
+                    <div class="skeleton skeleton-line skeleton-line-short"></div>
+                </div>
+                <div class="skeleton-card">
+                    <div class="skeleton skeleton-line"></div>
+                    <div class="skeleton skeleton-line skeleton-line-short"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ERROR STATES -->
+        <div class="section">
+            <div class="section-title">Error States</div>
+            
+            <div class="component-card" style="padding: 0; border: none;">
+                <div class="component-label" style="padding: 0 24px 16px;">Error Message</div>
+                <div class="error-state">
+                    <svg class="error-icon" viewBox="0 0 48 48" fill="none" stroke="currentColor">
+                        <circle cx="24" cy="24" r="20" stroke-width="3"/>
+                        <path d="M24 14v12M24 30v2" stroke-width="3" stroke-linecap="round"/>
+                    </svg>
+                    <div class="error-title">Failed to load shows</div>
+                    <div class="error-description">
+                        Something went wrong while fetching the data.<br>
+                        Please try again in a moment.
+                    </div>
+                    <button class="error-action">
+                        <svg style="width: 16px; height: 16px;" viewBox="0 0 16 16" fill="none" stroke="currentColor">
+                            <path d="M14 8A6 6 0 104 8" stroke-width="2" stroke-linecap="round"/>
+                            <path d="M4 8l-2-2M4 8l2-2" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                        Try Again
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

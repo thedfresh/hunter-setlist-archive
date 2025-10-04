@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hunter Archive - Filtering & Search</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #fafafa;
+            padding: 40px 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            font-size: 32px;
+            font-weight: 600;
+            color: #222;
+            margin-bottom: 40px;
+        }
+        
+        .section {
+            margin-bottom: 60px;
+        }
+        
+        .section-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #222;
+            margin-bottom: 20px;
+        }
+        
+        .component-card {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+        
+        .component-label {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #888;
+            margin-bottom: 16px;
+        }
+        
+        /* SEARCH BAR */
+        .search-bar {
+            position: relative;
+            width: 100%;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 14px 48px 14px 48px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 16px;
+            color: #222;
+            background: white;
+            transition: all 0.2s ease;
+        }
+        
+        .search-input:focus {
+            border-color: #b8913d;
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(184, 145, 61, 0.1);
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            color: #9ca3af;
+            pointer-events: none;
+        }
+        
+        .search-clear {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #9ca3af;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            transition: all 0.15s ease;
+        }
+        
+        .search-clear:hover {
+            background: #f3f4f6;
+            color: #374151;
+        }
+        
+        /* AUTOCOMPLETE */
+        .autocomplete-dropdown {
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 10;
+        }
+        
+        .autocomplete-item {
+            padding: 12px 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid #f3f4f6;
+            transition: background 0.15s ease;
+        }
+        
+        .autocomplete-item:last-child {
+            border-bottom: none;
+        }
+        
+        .autocomplete-item:hover {
+            background: #fefdfb;
+        }
+        
+        .autocomplete-item-active {
+            background: #fefdfb;
+        }
+        
+        .autocomplete-icon {
+            width: 16px;
+            height: 16px;
+            color: #9ca3af;
+        }
+        
+        .autocomplete-text {
+            flex: 1;
+        }
+        
+        .autocomplete-primary {
+            font-size: 14px;
+            color: #222;
+            font-weight: 500;
+        }
+        
+        .autocomplete-secondary {
+            font-size: 13px;
+            color: #6b7280;
+            margin-top: 2px;
+        }
+        
+        .autocomplete-match {
+            background: #fef3c7;
+            font-weight: 600;
+        }
+        
+        /* FILTER CHIPS */
+        .filter-chips {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        
+        .filter-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: #f3f4f6;
+            border: 1px solid #e0e0e0;
+            border-radius: 20px;
+            font-size: 13px;
+            color: #374151;
+            font-weight: 500;
+            transition: all 0.15s ease;
+        }
+        
+        .filter-chip-active {
+            background: #fef3e7;
+            border-color: #b8913d;
+            color: #8b6914;
+        }
+        
+        .filter-chip-remove {
+            background: none;
+            border: none;
+            color: inherit;
+            cursor: pointer;
+            padding: 2px;
+            display: flex;
+            align-items: center;
+            border-radius: 50%;
+            transition: all 0.15s ease;
+        }
+        
+        .filter-chip-remove:hover {
+            background: rgba(0,0,0,0.1);
+        }
+        
+        .clear-all-btn {
+            padding: 6px 12px;
+            background: none;
+            border: 1px solid #e0e0e0;
+            border-radius: 20px;
+            font-size: 13px;
+            color: #6b7280;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        
+        .clear-all-btn:hover {
+            background: #f3f4f6;
+            border-color: #d1d5db;
+            color: #374151;
+        }
+        
+        /* FILTER SIDEBAR */
+        .filter-sidebar {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        
+        .filter-section {
+            margin-bottom: 24px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid #f3f4f6;
+        }
+        
+        .filter-section:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+        
+        .filter-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #222;
+            margin-bottom: 12px;
+        }
+        
+        .filter-options {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .filter-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+        
+        .filter-checkbox {
+            width: 18px;
+            height: 18px;
+            border: 1.5px solid #d1d5db;
+            border-radius: 4px;
+            appearance: none;
+            background: white;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.15s ease;
+        }
+        
+        .filter-checkbox:checked {
+            background: #b8913d;
+            border-color: #b8913d;
+        }
+        
+        .filter-checkbox:checked::after {
+            content: '';
+            position: absolute;
+            left: 5px;
+            top: 2px;
+            width: 4px;
+            height: 8px;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+        }
+        
+        .filter-label {
+            font-size: 14px;
+            color: #374151;
+            cursor: pointer;
+            flex: 1;
+        }
+        
+        .filter-count {
+            font-size: 13px;
+            color: #9ca3af;
+        }
+        
+        /* SORT CONTROL */
+        .sort-control {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 14px;
+            background: white;
+            border: 1.5px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #374151;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        
+        .sort-control:hover {
+            border-color: #b8913d;
+            background: #fefdfb;
+        }
+        
+        .sort-label {
+            font-weight: 500;
+        }
+        
+        .sort-value {
+            color: #6b7280;
+        }
+        
+        .sort-icon {
+            width: 16px;
+            height: 16px;
+            color: #9ca3af;
+        }
+        
+        /* SORT DROPDOWN */
+        .sort-dropdown {
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+            min-width: 200px;
+            z-index: 10;
+        }
+        
+        .sort-option {
+            padding: 10px 16px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #374151;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: background 0.15s ease;
+        }
+        
+        .sort-option:hover {
+            background: #fefdfb;
+        }
+        
+        .sort-option-active {
+            color: #b8913d;
+            font-weight: 600;
+            background: #fefdfb;
+        }
+        
+        .sort-check {
+            width: 16px;
+            height: 16px;
+            color: #b8913d;
+        }
+        
+        /* LAYOUT */
+        .two-column {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 24px;
+        }
+        
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .results-count {
+            font-size: 14px;
+            color: #6b7280;
+        }
+        
+        .results-count strong {
+            color: #222;
+            font-weight: 600;
+        }
+        
+        @media (max-width: 768px) {
+            .two-column {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* RANGE SLIDER */
+        .range-slider {
+            margin-top: 12px;
+        }
+        
+        .range-input {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #e0e0e0;
+            outline: none;
+            appearance: none;
+        }
+        
+        .range-input::-webkit-slider-thumb {
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #b8913d;
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .range-input::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #b8913d;
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .range-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 8px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            border: none;
+            transition: all 0.15s ease;
+        }
+        
+        .btn-primary {
+            background: #b8913d;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #a07c2f;
+        }
+        
+        .btn-secondary {
+            background: white;
+            color: #374151;
+            border: 1.5px solid #d1d5db;
+        }
+        
+        .btn-secondary:hover {
+            background: #f9fafb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Hunter Archive - Filtering & Search</h1>
+        
+        <!-- SEARCH BAR -->
+        <div class="section">
+            <div class="section-title">Search Components</div>
+            
+            <div class="component-card">
+                <div class="component-label">Basic Search Bar</div>
+                <div class="search-bar">
+                    <svg class="search-icon" viewBox="0 0 20 20" fill="none">
+                        <circle cx="9" cy="9" r="6" stroke="currentColor" stroke-width="2"/>
+                        <path d="M14 14l4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                    <input type="text" class="search-input" placeholder="Search shows, songs, venues, or dates...">
+                    <button class="search-clear" style="display: none;">
+                        <svg style="width: 20px; height: 20px;" viewBox="0 0 20 20" fill="currentColor">
+                            <circle cx="10" cy="10" r="9" fill="#d1d5db"/>
+                            <path d="M7 7l6 6M13 7l-6 6" stroke="white" stroke-width="2"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="component-card">
+                <div class="component-label">Search with Autocomplete Results</div>
+                <div style="position: relative;">
+                    <div class="search-bar">
+                        <svg class="search-icon" viewBox="0 0 20 20" fill="none">
+                            <circle cx="9" cy="9" r="6" stroke="currentColor" stroke-width="2"/>
+                            <path d="M14 14l4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                        <input type="text" class="search-input" placeholder="Search..." value="box of">
+                    </div>
+                    <div class="autocomplete-dropdown">
+                        <div class="autocomplete-item autocomplete-item-active">
+                            <svg class="autocomplete-icon" viewBox="0 0 16 16" fill="currentColor">
+                                <path d="M8 2a1 1 0 011 1v4h4a1 1 0 110 2H9v4a1 1 0 11-2 0V9H3a1 1 0 110-2h4V3a1 1 0 011-1z"/>
+                            </svg>
+                            <div class="autocomplete-text">
+                                <div class="autocomplete-primary">
+                                    <span class="autocomplete-match">Box of</span> Rain
+                                </div>
+                                <div class="autocomplete-secondary">Song • 127 performances</div>
+                            </div>
+                        </div>
+                        <div class="autocomplete-item">
+                            <svg class="autocomplete-icon" viewBox="0 0 16 16" fill="currentColor">
+                                <circle cx="8" cy="8" r="6"/>
+                            </svg>
+                            <div class="autocomplete-text">
+                                <div class="autocomplete-primary">2002-08-07</div>
+                                <div class="autocomplete-secondary">Gallatin Gateway Inn • <span class="autocomplete-match">Box Of</span> Rain, Cumberland Blues...</div>
+                            </div>
+                        </div>
+                        <div class="autocomplete-item">
+                            <svg class="autocomplete-icon" viewBox="0 0 16 16" fill="currentColor">
+                                <circle cx="8" cy="8" r="6"/>
+                            </svg>
+                            <div class="autocomplete-text">
+                                <div class="autocomplete-primary">1995-06-15</div>
+                                <div class="autocomplete-secondary">The Fillmore • <span class="autocomplete-match">Box Of</span> Rain, Ripple...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- FILTER CHIPS -->
+        <div class="section">
+            <div class="section-title">Active Filters</div>
+            
+            <div class="component-card">
+                <div class="component-label">Filter Chips</div>
+                <div class="filter-chips">
+                    <div class="filter-chip filter-chip-active">
+                        Verified only
+                        <button class="filter-chip-remove">
+                            <svg style="width: 14px; height: 14px;" viewBox="0 0 14 14" fill="none" stroke="currentColor">
+                                <path d="M3 3l8 8M11 3l-8 8" stroke-width="2"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="filter-chip filter-chip-active">
+                        Solo Hunter
+                        <button class="filter-chip-remove">
+                            <svg style="width: 14px; height: 14px;" viewBox="0 0 14 14" fill="none" stroke="currentColor">
+                                <path d="M3 3l8 8M11 3l-8 8" stroke-width="2"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="filter-chip filter-chip-active">
+                        Has recordings
+                        <button class="filter-chip-remove">
+                            <svg style="width: 14px; height: 14px;" viewBox="0 0 14 14" fill="none" stroke="currentColor">
+                                <path d="M3 3l8 8M11 3l-8 8" stroke-width="2"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="filter-chip filter-chip-active">
+                        1990-2000
+                        <button class="filter-chip-remove">
+                            <svg style="width: 14px; height: 14px;" viewBox="0 0 14 14" fill="none" stroke="currentColor">
+                                <path d="M3 3l8 8M11 3l-8 8" stroke-width="2"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <button class="clear-all-btn">Clear all</button>
+                </div>
+                <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid #f3f4f6;">
+                    <div class="results-count">
+                        Showing <strong>142 shows</strong> matching your filters
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- SORT CONTROLS -->
+        <div class="section">
+            <div class="section-title">Sort Controls</div>
+            
+            <div class="component-card">
+                <div class="component-label">Sort Dropdown</div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div class="results-count">
+                        <strong>517 shows</strong> found
+                    </div>
+                    <div style="position: relative;">
+                        <button class="sort-control">
+                            <span class="sort-label">Sort:</span>
+                            <span class="sort-value">Date (Newest)</span>
+                            <svg class="sort-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor">
+                                <path d="M4 6l4 4 4-4" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 16px; position: relative; display: flex; justify-content: flex-end;">
+                    <div class="sort-dropdown">
+                        <div class="sort-option sort-option-active">
+                            Date (Newest)
+                            <svg class="sort-check" viewBox="0 0 16 16" fill="none" stroke="currentColor">
+                                <path d="M3 8l4 4 6-7" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                        </div>
+                        <div class="sort-option">
+                            Date (Oldest)
+                        </div>
+                        <div class="sort-option">
+                            Venue (A-Z)
+                        </div>
+                        <div class="sort-option">
+                            Performer
+                        </div>
+                        <div class="sort-option">
+                            Recently Added
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- FILTER SIDEBAR -->
+        <div class="section">
+            <div class="section-title">Filter Sidebar</div>
+            
+            <div class="component-card">
+                <div class="component-label">Complete Filter Panel</div>
+                <div class="two-column">
+                    <div class="filter-sidebar">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <h3 style="font-size: 16px; font-weight: 600; color: #222;">Filters</h3>
+                            <button style="background: none; border: none; color: #6b7280; font-size: 13px; cursor: pointer; font-weight: 500;">
+                                Reset
+                            </button>
+                        </div>
+                        
+                        <div class="filter-section">
+                            <div class="filter-title">Performer</div>
+                            <div class="filter-options">
+                                <label class="filter-option">
+                                    <input type="checkbox" class="filter-checkbox" checked>
+                                    <span class="filter-label">Solo Hunter</span>
+                                    <span class="filter-count">342</span>
+                                </label>
+                                <label class="filter-option">
+                                    <input type="checkbox" class="filter-checkbox">
+                                    <span class="filter-label">Dinosaurs</span>
+                                    <span class="filter-count">89</span>
+                                </label>
+                                <label class="filter-option">
+                                    <input type="checkbox" class="filter-checkbox">
+                                    <span class="filter-label">Comfort</span>
+                                    <span class="filter-count">45</span>
+                                </label>
+                                <label class="filter-option">
+                                    <input type="checkbox" class="filter-checkbox">
+                                    <span class="filter-label">Roadhog</span>
+                                    <span class="filter-count">28</span>
+                                </label>
+                                <label class="filter-option">
+                                    <input type="checkbox" class="filter-checkbox">
+                                    <span class="filter-label">Special Ensembles</span>
+                                    <span class="filter-count">13</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="filter-section">
+                            <div class="filter-title">Year Range</div>
+                            <div class="range-slider">
+                                <input type="range" class="range-input" min="1970" max="2024" value="1990">
+                                <div class="range-labels">
+                                    <span>1970</span>
+                                    <span>2024</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="filter-section">
+                            <div class="filter-title">Show Status</div>
+                            <div class="filter-options">
+                                <label class="filter-option">
+                                    <input type="checkbox" class="filter-checkbox" checked>
+                                    <span class="filter-label">Verified</span>
+                                    <span class="filter-count">342</span>
+                                </label>
+                                <label class="filter-option">
+                                    <input type="checkbox" class="filter-checkbox">
+                                    <span class="filter-label">Uncertain dates</span>
+                                    <span class="filter-count">68</span>
+                                </label>
+                                <label class="filter-option">
+                                    <input type="checkbox" class="filter-checkbox">
+                                    <span class="filter-label">Incomplete setlists</span>
+                                    <span class="filter-count">89</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="filter-section">
+                            <div class="filter-title">Recordings</div>
+                            <div class="filter-options">
+                                <label class="filter-option">
+                                    <input type="checkbox" class="filter-checkbox" checked>
+                                    <span class="filter-label">Has recordings</span>
+                                    <span class="filter-count">423</span>
+                                </label>
+                                <label class="filter-option">
+                                    <input type="checkbox" class="filter-checkbox">
+                                    <span class="filter-label">Soundboard</span>
+                                    <span class="filter-count">287</span>
+                                </label>
+                                <label class="filter-option">
+                                    <input type="checkbox" class="filter-checkbox">
+                                    <span class="filter-label">Audience</span>
+                                    <span class="filter-count">198</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <button class="btn btn-primary" style="width: 100%;">Apply Filters</button>
+                    </div>
+                    
+                    <div>
+                        <div style="background: #f9fafb; border: 1px dashed #d1d5db; border-radius: 8px; padding: 60px 40px; text-align: center; color: #9ca3af;">
+                            Search results would appear here<br>
+                            (342 shows matching current filters)
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- COMPLETE SEARCH INTERFACE -->
+        <div class="section">
+            <div class="section-title">Complete Search Interface</div>
+            
+            <div class="component-card">
+                <div class="component-label">Full Page Search Experience</div>
+                
+                <!-- Search Bar -->
+                <div class="search-bar" style="margin-bottom: 20px;">
+                    <svg class="search-icon" viewBox="0 0 20 20" fill="none">
+                        <circle cx="9" cy="9" r="6" stroke="currentColor" stroke-width="2"/>
+                        <path d="M14 14l4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                    <input type="text" class="search-input" placeholder="Search shows, songs, or venues...">
+                </div>
+                
+                <!-- Active Filters -->
+                <div class="filter-chips" style="margin-bottom: 20px;">
+                    <div class="filter-chip filter-chip-active">
+                        Solo Hunter
+                        <button class="filter-chip-remove">
+                            <svg style="width: 14px; height: 14px;" viewBox="0 0 14 14" fill="none" stroke="currentColor">
+                                <path d="M3 3l8 8M11 3l-8 8" stroke-width="2"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="filter-chip filter-chip-active">
+                        Verified
+                        <button class="filter-chip-remove">
+                            <svg style="width: 14px; height: 14px;" viewBox="0 0 14 14" fill="none" stroke="currentColor">
+                                <path d="M3 3l8 8M11 3l-8 8" stroke-width="2"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <button class="clear-all-btn">Clear all</button>
+                </div>
+                
+                <!-- Results Header with Sort -->
+                <div class="results-header">
+                    <div class="results-count">
+                        Showing <strong>142 shows</strong>
+                    </div>
+                    <button class="sort-control">
+                        <span class="sort-label">Sort:</span>
+                        <span class="sort-value">Date (Newest)</span>
+                        <svg class="sort-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor">
+                            <path d="M4 6l4 4 4-4" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </button>
+                </div>
+                
+                <div style="background: #f9fafb; border: 1px dashed #d1d5db; border-radius: 8px; padding: 80px 40px; text-align: center; color: #9ca3af;">
+                    Filtered search results would display here<br>
+                    <span style="font-size: 13px;">(Show cards with performer colors)</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -65,7 +65,7 @@ export default function EventsAdminPage() {
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold text-gray-800">Events</h1>
           <Link href="/admin/events/new">
-            <button className="bg-blue-600 text-white font-semibold py-2 px-4 rounded-md shadow hover:bg-blue-700 transition">Add Event</button>
+            <button className="btn btn-primary btn-medium">Add Event</button>
           </Link>
         </div>
         <input
@@ -73,7 +73,7 @@ export default function EventsAdminPage() {
           placeholder="Search events..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full border rounded-md px-3 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
+          className="input"
         />
         {loading ? (
           <div className="text-center py-8">Loading events...</div>

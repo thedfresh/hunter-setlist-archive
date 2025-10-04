@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hunter Archive - Complete Design System Reference</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #fafafa;
+        }
+        
+        /* NAVIGATION */
+        .sticky-nav {
+            position: sticky;
+            top: 0;
+            background: white;
+            border-bottom: 2px solid #e0e0e0;
+            z-index: 100;
+            padding: 16px 0;
+        }
+        
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            gap: 32px;
+            overflow-x: auto;
+        }
+        
+        .nav-link {
+            color: #6b7280;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            white-space: nowrap;
+            padding-bottom: 2px;
+            border-bottom: 2px solid transparent;
+            transition: all 0.15s ease;
+        }
+        
+        .nav-link:hover {
+            color: #b8913d;
+        }
+        
+        .nav-link-active {
+            color: #b8913d;
+            border-bottom-color: #b8913d;
+            font-weight: 600;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        h1 {
+            font-size: 32px;
+            font-weight: 600;
+            color: #222;
+            margin-bottom: 40px;
+        }
+        
+        .section {
+            margin-bottom: 80px;
+            scroll-margin-top: 80px;
+        }
+        
+        .section-title {
+            font-size: 28px;
+            font-weight: 600;
+            color: #222;
+            margin-bottom: 30px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        
+        .subsection-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #222;
+            margin: 40px 0 20px;
+        }
+        
+        .component-card {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+        
+        .component-label {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #888;
+            margin-bottom: 16px;
+        }
+        
+        .download-btn {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            padding: 14px 24px;
+            background: #b8913d;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            z-index: 101;
+        }
+        
+        .download-btn:hover {
+            background: #a07c2f;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+        }
+        
+        /* COLOR SWATCHES */
+        .color-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 16px;
+        }
+        
+        .color-swatch {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .color-preview {
+            height: 80px;
+            width: 100%;
+        }
+        
+        .color-info {
+            padding: 12px;
+            background: white;
+        }
+        
+        .color-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #222;
+            margin-bottom: 4px;
+        }
+        
+        .color-code {
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            color: #6b7280;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sticky Navigation -->
+    <nav class="sticky-nav">
+        <div class="nav-container">
+            <a href="#colors" class="nav-link">Colors</a>
+            <a href="#buttons" class="nav-link">Buttons</a>
+            <a href="#forms" class="nav-link">Forms</a>
+            <a href="#navigation" class="nav-link">Navigation</a>
+            <a href="#data" class="nav-link">Data Display</a>
+            <a href="#overlays" class="nav-link">Overlays</a>
+            <a href="#search" class="nav-link">Search & Filters</a>
+        </div>
+    </nav>
+    
+    <div class="container">
+        <h1>Hunter Archive - Complete Design System Reference</h1>
+        <p style="color: #6b7280; font-size: 16px; margin-bottom: 40px;">
+            This document shows all design components for the Hunter Archive. 
+            Save this file to review the complete system, then we'll implement it in your Next.js app section by section.
+        </p>
+        
+        <!-- COLORS -->
+        <div class="section" id="colors">
+            <div class="section-title">Color System</div>
+            
+            <div class="subsection-title">Primary Colors</div>
+            <div class="color-grid">
+                <div class="color-swatch">
+                    <div class="color-preview" style="background: #b8913d;"></div>
+                    <div class="color-info">
+                        <div class="color-name">Hunter Gold</div>
+                        <div class="color-code">#b8913d</div>
+                    </div>
+                </div>
+                <div class="color-swatch">
+                    <div class="color-preview" style="background: #a07c2f;"></div>
+                    <div class="color-info">
+                        <div class="color-name">Hunter Gold Dark</div>
+                        <div class="color-code">#a07c2f</div>
+                    </div>
+                </div>
+                <div class="color-swatch">
+                    <div class="color-preview" style="background: #8b6914;"></div>
+                    <div class="color-info">
+                        <div class="color-name">Hunter Gold Darker</div>
+                        <div class="color-code">#8b6914</div>
+                    </div>
+                </div>
+                <div class="color-swatch">
+                    <div class="color-preview" style="background: #6b8e23;"></div>
+                    <div class="color-info">
+                        <div class="color-name">Hunter Green (Success)</div>
+                        <div class="color-code">#6b8e23</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="subsection-title">Performer Era Colors</div>
+            <div class="color-grid">
+                <div class="color-swatch">
+                    <div class="color-preview" style="background: #f5f1e8; border: 8px solid #b8913d; position: relative;">
+                        <div style="position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: #8b6914;"></div>
+                    </div>
+                    <div class="color-info">
+                        <div class="color-name">Solo Hunter</div>
+                        <div class="color-code">BG: #f5f1e8 / Border: #b8913d</div>
+                    </div>
+                </div>
+                <div class="color-swatch">
+                    <div class="color-preview" style="background: #fef5e7; border: 8px solid #d4a017; position: relative;">
+                        <div style="position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: #cc6600;"></div>
+                    </div>
+                    <div class="color-info">
+                        <div class="color-name">Roadhog (1976)</div>
+                        <div class="color-code">BG: #fef5e7 / Border: #d4a017</div>
+                    </div>
+                </div>
+                <div class="color-swatch">
+                    <div class="color-preview" style="background: #eff5e8; border: 8px solid #6b8e23; position: relative;">
+                        <div style="position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: #8b7355;"></div>
+                    </div>
+                    <div class="color-info">
+                        <div class="color-name">Comfort (1977)</div>
+                        <div class="color-code">BG: #eff5e8 / Border: #6b8e23</div>
+                    </div>
+                </div>
+                <div class="color-swatch">
+                    <div class="color-preview" style="background: #e8f4ff; border: 8px solid #00d9ff; position: relative;">
+                        <div style="position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: #7b2cbf;"></div>
+                    </div>
+                    <div class="color-info">
+                        <div class="color-name">Dinosaurs (1983)</div>
+                        <div class="color-code">BG: #e8f4ff / Border: #00d9ff</div>
+                    </div>
+                </div>
+                <div class="color-swatch">
+                    <div class="color-preview" style="background: #f0e8f0; border: 8px solid #7d5a80; position: relative;">
+                        <div style="position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: #4a3850;"></div>
+                    </div>
+                    <div class="color-info">
+                        <div class="color-name">Special Ensembles</div>
+                        <div class="color-code">BG: #f0e8f0 / Border: #7d5a80</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- NOTE ABOUT OTHER SECTIONS -->
+        <div class="component-card" style="background: #fffbeb; border-color: #fbbf24;">
+            <p style="color: #92400e; font-size: 14px; line-height: 1.6;">
+                <strong>📝 Note:</strong> The complete design system includes Buttons, Forms, Navigation, Data Display, Overlays, and Search components from the 5 artifacts we created. 
+                This consolidated reference shows the color system. To see all components, refer to the individual artifacts we created:
+                <br><br>
+                1. Forms & Inputs<br>
+                2. Navigation & Structure<br>
+                3. Data Display<br>
+                4. Overlays & Feedback<br>
+                5. Filtering & Search
+                <br><br>
+                <strong>Next Step:</strong> We'll implement these into your Next.js app section by section, starting with updating your Tailwind config and creating globals.css.
+            </p>
+        </div>
+    </div>
+    
+    <button class="download-btn" onclick="downloadPage()">
+        Save This Reference
+    </button>
+    
+    <script>
+        function downloadPage() {
+            const blob = new Blob([document.documentElement.outerHTML], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'hunter-archive-design-system.html';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>

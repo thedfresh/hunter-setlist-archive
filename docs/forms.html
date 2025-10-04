@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hunter Archive - Forms & Inputs</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #fafafa;
+            padding: 40px 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            font-size: 32px;
+            font-weight: 600;
+            color: #222;
+            margin-bottom: 40px;
+        }
+        
+        .section {
+            margin-bottom: 50px;
+        }
+        
+        .section-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #222;
+            margin-bottom: 20px;
+        }
+        
+        .component-grid {
+            display: grid;
+            gap: 24px;
+        }
+        
+        .component-card {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 24px;
+        }
+        
+        .component-label {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #888;
+            margin-bottom: 16px;
+        }
+        
+        /* FORM ELEMENTS */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 6px;
+        }
+        
+        .form-label-required::after {
+            content: " *";
+            color: #dc2626;
+        }
+        
+        .form-help {
+            font-size: 13px;
+            color: #6b7280;
+            margin-top: 4px;
+        }
+        
+        /* TEXT INPUTS */
+        .input-text {
+            width: 100%;
+            border: 1.5px solid #d1d5db;
+            border-radius: 6px;
+            padding: 10px 14px;
+            font-size: 14px;
+            color: #222;
+            background: white;
+            font-family: inherit;
+            transition: all 0.15s ease;
+        }
+        
+        .input-text:focus {
+            border-color: #b8913d;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(184, 145, 61, 0.1);
+        }
+        
+        .input-text:disabled {
+            background: #f3f4f6;
+            color: #9ca3af;
+            cursor: not-allowed;
+        }
+        
+        .input-text::placeholder {
+            color: #9ca3af;
+        }
+        
+        /* INPUT SIZES */
+        .input-small {
+            padding: 6px 12px;
+            font-size: 13px;
+        }
+        
+        .input-large {
+            padding: 12px 16px;
+            font-size: 15px;
+        }
+        
+        /* TEXTAREA */
+        .textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        /* SELECT */
+        .select {
+            width: 100%;
+            border: 1.5px solid #d1d5db;
+            border-radius: 6px;
+            padding: 10px 36px 10px 14px;
+            font-size: 14px;
+            color: #222;
+            background: white;
+            font-family: inherit;
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%23374151' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            transition: all 0.15s ease;
+        }
+        
+        .select:focus {
+            border-color: #b8913d;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(184, 145, 61, 0.1);
+        }
+        
+        .select:disabled {
+            background-color: #f3f4f6;
+            color: #9ca3af;
+            cursor: not-allowed;
+        }
+        
+        /* CHECKBOX & RADIO */
+        .checkbox-group,
+        .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .checkbox-label,
+        .radio-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #374151;
+        }
+        
+        .checkbox-input,
+        .radio-input {
+            width: 18px;
+            height: 18px;
+            border: 1.5px solid #d1d5db;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        
+        .checkbox-input {
+            border-radius: 4px;
+            appearance: none;
+            background: white;
+            position: relative;
+        }
+        
+        .checkbox-input:checked {
+            background: #b8913d;
+            border-color: #b8913d;
+        }
+        
+        .checkbox-input:checked::after {
+            content: '';
+            position: absolute;
+            left: 5px;
+            top: 2px;
+            width: 4px;
+            height: 8px;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+        }
+        
+        .checkbox-input:focus,
+        .radio-input:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(184, 145, 61, 0.1);
+        }
+        
+        .radio-input {
+            border-radius: 50%;
+            appearance: none;
+            background: white;
+            position: relative;
+        }
+        
+        .radio-input:checked {
+            border-color: #b8913d;
+        }
+        
+        .radio-input:checked::after {
+            content: '';
+            position: absolute;
+            left: 3px;
+            top: 3px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #b8913d;
+        }
+        
+        /* VALIDATION STATES */
+        .input-error {
+            border-color: #dc2626;
+        }
+        
+        .input-error:focus {
+            border-color: #dc2626;
+            box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+        }
+        
+        .input-success {
+            border-color: #6b8e23;
+        }
+        
+        .input-success:focus {
+            border-color: #6b8e23;
+            box-shadow: 0 0 0 3px rgba(107, 142, 35, 0.1);
+        }
+        
+        .input-warning {
+            border-color: #d97706;
+        }
+        
+        .input-warning:focus {
+            border-color: #d97706;
+            box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.1);
+        }
+        
+        .error-message {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            color: #dc2626;
+            margin-top: 6px;
+        }
+        
+        .success-message {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            color: #6b8e23;
+            margin-top: 6px;
+        }
+        
+        .warning-message {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            color: #d97706;
+            margin-top: 6px;
+        }
+        
+        /* DATE INPUT */
+        .date-input {
+            width: 100%;
+            border: 1.5px solid #d1d5db;
+            border-radius: 6px;
+            padding: 10px 14px;
+            font-size: 14px;
+            color: #222;
+            background: white;
+            font-family: inherit;
+        }
+        
+        .date-input:focus {
+            border-color: #b8913d;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(184, 145, 61, 0.1);
+        }
+        
+        /* INPUT GROUPS */
+        .input-group {
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+        }
+        
+        .input-group .form-group {
+            flex: 1;
+            margin-bottom: 0;
+        }
+        
+        /* SEARCH INPUT */
+        .search-container {
+            position: relative;
+        }
+        
+        .search-input {
+            padding-left: 40px;
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 18px;
+            height: 18px;
+            color: #9ca3af;
+        }
+        
+        /* BUTTONS */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.15s ease;
+            font-family: inherit;
+            padding: 10px 20px;
+            font-size: 14px;
+        }
+        
+        .btn-primary {
+            background: #b8913d;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #a07c2f;
+        }
+        
+        .btn-secondary {
+            background: white;
+            color: #374151;
+            border: 1.5px solid #d1d5db;
+        }
+        
+        .btn-secondary:hover {
+            background: #f9fafb;
+            border-color: #9ca3af;
+        }
+        
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+        
+        @media (max-width: 768px) {
+            .two-column {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Hunter Archive - Forms & Inputs</h1>
+        
+        <!-- TEXT INPUTS -->
+        <div class="section">
+            <div class="section-title">Text Inputs</div>
+            <div class="component-grid">
+                <div class="component-card">
+                    <div class="component-label">Basic Text Input</div>
+                    <div class="form-group">
+                        <label class="form-label">Venue Name</label>
+                        <input type="text" class="input-text" placeholder="Enter venue name...">
+                        <div class="form-help">The official name of the venue</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label form-label-required">Event Date</label>
+                        <input type="text" class="input-text" placeholder="YYYY-MM-DD">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Disabled Input</label>
+                        <input type="text" class="input-text" value="Cannot edit this field" disabled>
+                    </div>
+                </div>
+                
+                <div class="component-card">
+                    <div class="component-label">Input Sizes</div>
+                    <div class="form-group">
+                        <label class="form-label">Small Input</label>
+                        <input type="text" class="input-text input-small" placeholder="Small size...">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Medium Input (Default)</label>
+                        <input type="text" class="input-text" placeholder="Default size...">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Large Input</label>
+                        <input type="text" class="input-text input-large" placeholder="Large size...">
+                    </div>
+                </div>
+                
+                <div class="component-card">
+                    <div class="component-label">Textarea</div>
+                    <div class="form-group">
+                        <label class="form-label">Show Notes</label>
+                        <textarea class="input-text textarea" placeholder="Enter detailed notes about the show..."></textarea>
+                        <div class="form-help">Provide context about the performance, guests, or recording quality</div>
+                    </div>
+                </div>
+                
+                <div class="component-card">
+                    <div class="component-label">Search Input</div>
+                    <div class="form-group">
+                        <label class="form-label">Search Shows</label>
+                        <div class="search-container">
+                            <svg class="search-icon" viewBox="0 0 16 16" fill="none">
+                                <circle cx="7" cy="7" r="4" stroke="currentColor" stroke-width="1.5"/>
+                                <path d="M11 11l3 3" stroke="currentColor" stroke-width="1.5"/>
+                            </svg>
+                            <input type="text" class="input-text search-input" placeholder="Search by venue, song, or date...">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- SELECT DROPDOWNS -->
+        <div class="section">
+            <div class="section-title">Select Dropdowns</div>
+            <div class="component-grid">
+                <div class="two-column">
+                    <div class="component-card">
+                        <div class="component-label">Basic Select</div>
+                        <div class="form-group">
+                            <label class="form-label">Performer</label>
+                            <select class="select">
+                                <option value="">Select performer...</option>
+                                <option value="solo">Solo Hunter</option>
+                                <option value="dinosaurs">Dinosaurs</option>
+                                <option value="comfort">Comfort</option>
+                                <option value="roadhog">Roadhog</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Recording Type</label>
+                            <select class="select">
+                                <option value="">Select type...</option>
+                                <option value="sbd">Soundboard (SBD)</option>
+                                <option value="aud">Audience (AUD)</option>
+                                <option value="matrix">Matrix</option>
+                                <option value="fm">FM Broadcast</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="component-card">
+                        <div class="component-label">Select States</div>
+                        <div class="form-group">
+                            <label class="form-label">Default Select</label>
+                            <select class="select">
+                                <option value="">Choose an option...</option>
+                                <option value="1">Option 1</option>
+                                <option value="2">Option 2</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Disabled Select</label>
+                            <select class="select" disabled>
+                                <option value="">Cannot change...</option>
+                                <option value="1">Option 1</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- CHECKBOXES & RADIOS -->
+        <div class="section">
+            <div class="section-title">Checkboxes & Radio Buttons</div>
+            <div class="component-grid">
+                <div class="two-column">
+                    <div class="component-card">
+                        <div class="component-label">Checkboxes</div>
+                        <div class="form-group">
+                            <label class="form-label">Performance Flags</label>
+                            <div class="checkbox-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" class="checkbox-input" checked>
+                                    <span>Hunter performed</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" class="checkbox-input">
+                                    <span>Verified setlist</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" class="checkbox-input">
+                                    <span>Recording available</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" class="checkbox-input">
+                                    <span>Include in statistics</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="component-card">
+                        <div class="component-label">Radio Buttons</div>
+                        <div class="form-group">
+                            <label class="form-label">Date Certainty</label>
+                            <div class="radio-group">
+                                <label class="radio-label">
+                                    <input type="radio" class="radio-input" name="certainty" value="certain" checked>
+                                    <span>Date is certain</span>
+                                </label>
+                                <label class="radio-label">
+                                    <input type="radio" class="radio-input" name="certainty" value="uncertain">
+                                    <span>Date is uncertain</span>
+                                </label>
+                                <label class="radio-label">
+                                    <input type="radio" class="radio-input" name="certainty" value="unknown">
+                                    <span>Date unknown</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- VALIDATION STATES -->
+        <div class="section">
+            <div class="section-title">Validation States</div>
+            <div class="component-grid">
+                <div class="component-card">
+                    <div class="component-label">Input Validation</div>
+                    <div class="form-group">
+                        <label class="form-label form-label-required">Venue Name</label>
+                        <input type="text" class="input-text input-error" value="">
+                        <div class="error-message">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                                <circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.5"/>
+                                <path d="M8 4v5M8 11v1"/>
+                            </svg>
+                            Venue name is required
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Event Date</label>
+                        <input type="text" class="input-text input-success" value="2002-08-07">
+                        <div class="success-message">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                <circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.5"/>
+                                <path d="M5 8l2 2 4-4" stroke="currentColor" stroke-width="1.5"/>
+                            </svg>
+                            Date format is valid
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Recording URL</label>
+                        <input type="text" class="input-text input-warning" value="http://old-archive.org/show123">
+                        <div class="warning-message">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                                <path d="M8 1L1 14h14L8 1z" fill="none" stroke="currentColor" stroke-width="1.5"/>
+                                <path d="M8 6v4M8 11v1"/>
+                            </svg>
+                            This URL may be outdated
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- DATE INPUTS -->
+        <div class="section">
+            <div class="section-title">Date Inputs</div>
+            <div class="component-grid">
+                <div class="two-column">
+                    <div class="component-card">
+                        <div class="component-label">Date Fields</div>
+                        <div class="form-group">
+                            <label class="form-label">Full Date</label>
+                            <input type="date" class="date-input">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Month & Year</label>
+                            <input type="month" class="date-input">
+                        </div>
+                    </div>
+                    
+                    <div class="component-card">
+                        <div class="component-label">Date Range</div>
+                        <div class="input-group">
+                            <div class="form-group">
+                                <label class="form-label">From</label>
+                                <input type="date" class="date-input">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">To</label>
+                                <input type="date" class="date-input">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- FORM LAYOUTS -->
+        <div class="section">
+            <div class="section-title">Complete Form Examples</div>
+            <div class="component-grid">
+                <div class="component-card">
+                    <div class="component-label">Add New Show Form</div>
+                    <form>
+                        <div class="form-group">
+                            <label class="form-label form-label-required">Event Date</label>
+                            <input type="date" class="date-input">
+                            <div class="form-help">Use YYYY-MM-DD format</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label form-label-required">Venue</label>
+                            <input type="text" class="input-text" placeholder="Enter venue name...">
+                        </div>
+                        
+                        <div class="input-group">
+                            <div class="form-group">
+                                <label class="form-label">City</label>
+                                <input type="text" class="input-text" placeholder="City">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">State</label>
+                                <input type="text" class="input-text input-small" placeholder="CA">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label form-label-required">Performer</label>
+                            <select class="select">
+                                <option value="">Select performer...</option>
+                                <option value="solo">Solo Hunter</option>
+                                <option value="dinosaurs">Dinosaurs</option>
+                                <option value="comfort">Comfort</option>
+                                <option value="roadhog">Roadhog</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Show Notes</label>
+                            <textarea class="input-text textarea" placeholder="Add any notes about this show..."></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <div class="checkbox-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" class="checkbox-input">
+                                    <span>Date is uncertain</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" class="checkbox-input" checked>
+                                    <span>Include in statistics</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; gap: 12px; margin-top: 24px;">
+                            <button type="submit" class="btn btn-primary">Create Show</button>
+                            <button type="button" class="btn btn-secondary">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+                
+                <div class="component-card">
+                    <div class="component-label">Search & Filter Form</div>
+                    <form>
+                        <div class="form-group">
+                            <label class="form-label">Search</label>
+                            <div class="search-container">
+                                <svg class="search-icon" viewBox="0 0 16 16" fill="none">
+                                    <circle cx="7" cy="7" r="4" stroke="currentColor" stroke-width="1.5"/>
+                                    <path d="M11 11l3 3" stroke="currentColor" stroke-width="1.5"/>
+                                </svg>
+                                <input type="text" class="input-text search-input" placeholder="Search shows...">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Date Range</label>
+                            <div class="input-group">
+                                <input type="date" class="date-input">
+                                <span style="color: #9ca3af; font-size: 14px;">to</span>
+                                <input type="date" class="date-input">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Performer</label>
+                            <select class="select">
+                                <option value="">All performers</option>
+                                <option value="solo">Solo Hunter</option>
+                                <option value="dinosaurs">Dinosaurs</option>
+                                <option value="comfort">Comfort</option>
+                                <option value="roadhog">Roadhog</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Filters</label>
+                            <div class="checkbox-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" class="checkbox-input">
+                                    <span>Verified only</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" class="checkbox-input">
+                                    <span>Has recordings</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" class="checkbox-input">
+                                    <span>Complete setlists</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; gap: 12px; margin-top: 24px;">
+                            <button type="submit" class="btn btn-primary">Search</button>
+                            <button type="button" class="btn btn-secondary">Clear Filters</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

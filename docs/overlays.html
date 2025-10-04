@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hunter Archive - Overlays & Feedback</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #fafafa;
+            padding: 40px 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            font-size: 32px;
+            font-weight: 600;
+            color: #222;
+            margin-bottom: 40px;
+        }
+        
+        .section {
+            margin-bottom: 60px;
+        }
+        
+        .section-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #222;
+            margin-bottom: 20px;
+        }
+        
+        .component-card {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+        
+        .component-label {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #888;
+            margin-bottom: 16px;
+        }
+        
+        /* MODAL */
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+            animation: fadeIn 0.2s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .modal {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
+            max-width: 500px;
+            width: 100%;
+            margin: 20px;
+            animation: slideUp 0.2s ease;
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .modal-header {
+            padding: 24px 24px 16px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #222;
+            margin-bottom: 4px;
+        }
+        
+        .modal-description {
+            font-size: 14px;
+            color: #6b7280;
+        }
+        
+        .modal-body {
+            padding: 24px;
+        }
+        
+        .modal-footer {
+            padding: 16px 24px;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+        
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            color: #9ca3af;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            transition: all 0.15s ease;
+        }
+        
+        .modal-close:hover {
+            background: #f3f4f6;
+            color: #374151;
+        }
+        
+        /* BUTTONS */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.15s ease;
+            font-family: inherit;
+            padding: 10px 20px;
+            font-size: 14px;
+        }
+        
+        .btn-primary {
+            background: #b8913d;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #a07c2f;
+        }
+        
+        .btn-secondary {
+            background: white;
+            color: #374151;
+            border: 1.5px solid #d1d5db;
+        }
+        
+        .btn-secondary:hover {
+            background: #f9fafb;
+        }
+        
+        .btn-danger {
+            background: #dc2626;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #b91c1c;
+        }
+        
+        .btn-success {
+            background: #6b8e23;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #5a7a1e;
+        }
+        
+        /* TOOLTIPS */
+        .tooltip-container {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .tooltip {
+            position: absolute;
+            bottom: calc(100% + 8px);
+            left: 50%;
+            transform: translateX(-50%);
+            background: #374151;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+            z-index: 10;
+        }
+        
+        .tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 5px solid transparent;
+            border-top-color: #374151;
+        }
+        
+        .tooltip-container:hover .tooltip {
+            opacity: 1;
+        }
+        
+        .tooltip-bottom {
+            bottom: auto;
+            top: calc(100% + 8px);
+        }
+        
+        .tooltip-bottom::after {
+            top: auto;
+            bottom: 100%;
+            border-top-color: transparent;
+            border-bottom-color: #374151;
+        }
+        
+        /* ALERTS */
+        .alert {
+            padding: 16px;
+            border-radius: 8px;
+            border: 1px solid;
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+        
+        .alert-icon {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+        }
+        
+        .alert-content {
+            flex: 1;
+        }
+        
+        .alert-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        
+        .alert-description {
+            font-size: 13px;
+            line-height: 1.5;
+        }
+        
+        .alert-close {
+            background: none;
+            border: none;
+            padding: 4px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.15s ease;
+            flex-shrink: 0;
+        }
+        
+        .alert-info {
+            background: #eff6ff;
+            border-color: #bfdbfe;
+            color: #1e40af;
+        }
+        
+        .alert-info .alert-close:hover {
+            background: #dbeafe;
+        }
+        
+        .alert-success {
+            background: #f0fdf4;
+            border-color: #bbf7d0;
+            color: #15803d;
+        }
+        
+        .alert-success .alert-close:hover {
+            background: #dcfce7;
+        }
+        
+        .alert-warning {
+            background: #fffbeb;
+            border-color: #fde68a;
+            color: #92400e;
+        }
+        
+        .alert-warning .alert-close:hover {
+            background: #fef3c7;
+        }
+        
+        .alert-error {
+            background: #fef2f2;
+            border-color: #fecaca;
+            color: #991b1b;
+        }
+        
+        .alert-error .alert-close:hover {
+            background: #fee2e2;
+        }
+        
+        /* TOAST NOTIFICATIONS */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 100;
+            max-width: 400px;
+        }
+        
+        .toast {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+            padding: 16px;
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+            border-left: 4px solid;
+            animation: slideInRight 0.3s ease;
+        }
+        
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .toast-info {
+            border-left-color: #3b82f6;
+        }
+        
+        .toast-success {
+            border-left-color: #6b8e23;
+        }
+        
+        .toast-warning {
+            border-left-color: #f59e0b;
+        }
+        
+        .toast-error {
+            border-left-color: #dc2626;
+        }
+        
+        .toast-icon {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+        }
+        
+        .toast-content {
+            flex: 1;
+        }
+        
+        .toast-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #222;
+            margin-bottom: 2px;
+        }
+        
+        .toast-description {
+            font-size: 13px;
+            color: #6b7280;
+        }
+        
+        .toast-close {
+            background: none;
+            border: none;
+            color: #9ca3af;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            transition: all 0.15s ease;
+        }
+        
+        .toast-close:hover {
+            background: #f3f4f6;
+            color: #374151;
+        }
+        
+        /* CONFIRMATION DIALOG */
+        .dialog {
+            max-width: 400px;
+        }
+        
+        .dialog-icon {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 16px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .dialog-icon-danger {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+        
+        .dialog-icon-warning {
+            background: #fef3c7;
+            color: #d97706;
+        }
+        
+        .dialog-icon svg {
+            width: 24px;
+            height: 24px;
+        }
+        
+        .dialog-body {
+            text-align: center;
+        }
+        
+        /* DEMO STYLES */
+        .demo-trigger {
+            padding: 12px 24px;
+            background: #f3f4f6;
+            border: 1px dashed #d1d5db;
+            border-radius: 8px;
+            text-align: center;
+            color: #6b7280;
+            font-size: 14px;
+        }
+        
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        
+        @media (max-width: 768px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Hunter Archive - Overlays & Feedback</h1>
+        
+        <!-- MODALS -->
+        <div class="section">
+            <div class="section-title">Modals / Dialogs</div>
+            
+            <div class="component-card">
+                <div class="component-label">Basic Modal</div>
+                <div class="demo-trigger">
+                    Modal examples shown below (normally triggered by user action)
+                </div>
+                
+                <div style="margin-top: 24px; padding: 20px; background: #f9fafb; border-radius: 8px;">
+                    <div style="position: relative; background: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); max-width: 500px; margin: 0 auto;">
+                        <div class="modal-header" style="position: relative;">
+                            <div class="modal-title">Edit Show Details</div>
+                            <div class="modal-description">Update information for this performance</div>
+                            <button class="modal-close">
+                                <svg style="width: 20px; height: 20px;" viewBox="0 0 20 20" fill="currentColor">
+                                    <path d="M4 4l12 12M16 4L4 16" stroke="currentColor" stroke-width="2" fill="none"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div style="margin-bottom: 16px;">
+                                <label style="display: block; font-size: 14px; font-weight: 600; color: #374151; margin-bottom: 6px;">Venue Name</label>
+                                <input type="text" value="Gallatin Gateway Inn" style="width: 100%; padding: 8px 12px; border: 1.5px solid #d1d5db; border-radius: 6px; font-size: 14px;">
+                            </div>
+                            <div>
+                                <label style="display: block; font-size: 14px; font-weight: 600; color: #374151; margin-bottom: 6px;">Notes</label>
+                                <textarea style="width: 100%; padding: 8px 12px; border: 1.5px solid #d1d5db; border-radius: 6px; font-size: 14px; min-height: 80px; font-family: inherit;"></textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-secondary">Cancel</button>
+                            <button class="btn btn-primary">Save Changes</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="component-card">
+                <div class="component-label">Confirmation Dialog - Danger Action</div>
+                <div style="padding: 20px; background: #f9fafb; border-radius: 8px;">
+                    <div style="position: relative; background: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); max-width: 400px; margin: 0 auto;">
+                        <div class="modal-body dialog-body" style="padding: 32px 24px;">
+                            <div class="dialog-icon dialog-icon-danger">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                    <path d="M12 9v4m0 4h.01M3 12l9-9 9 9-9 9-9-9z" stroke-width="2" stroke-linecap="round"/>
+                                </svg>
+                            </div>
+                            <div class="modal-title" style="margin-bottom: 8px;">Delete Show?</div>
+                            <div class="modal-description">
+                                Are you sure you want to delete this show? This action cannot be undone and will remove all associated data including setlists and recordings.
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-secondary">Cancel</button>
+                            <button class="btn btn-danger">Delete Show</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="component-card">
+                <div class="component-label">Confirmation Dialog - Warning</div>
+                <div style="padding: 20px; background: #f9fafb; border-radius: 8px;">
+                    <div style="position: relative; background: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); max-width: 400px; margin: 0 auto;">
+                        <div class="modal-body dialog-body" style="padding: 32px 24px;">
+                            <div class="dialog-icon dialog-icon-warning">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                    <path d="M12 9v4m0 4h.01M5 19h14l-7-12-7 12z" stroke-width="2" stroke-linecap="round"/>
+                                </svg>
+                            </div>
+                            <div class="modal-title" style="margin-bottom: 8px;">Unsaved Changes</div>
+                            <div class="modal-description">
+                                You have unsaved changes to this show. Are you sure you want to leave without saving?
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-secondary">Stay</button>
+                            <button class="btn btn-primary">Leave Anyway</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- TOOLTIPS -->
+        <div class="section">
+            <div class="section-title">Tooltips</div>
+            
+            <div class="component-card">
+                <div class="component-label">Tooltip Examples (Hover to see)</div>
+                <div style="display: flex; gap: 24px; flex-wrap: wrap; align-items: center;">
+                    <div class="tooltip-container">
+                        <span class="badge" style="background: #dbeafe; color: #1e40af; cursor: help;">SBD</span>
+                        <div class="tooltip">Soundboard Recording</div>
+                    </div>
+                    
+                    <div class="tooltip-container">
+                        <button class="btn btn-secondary">
+                            <svg style="width: 16px; height: 16px;" viewBox="0 0 16 16" fill="currentColor">
+                                <circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="2"/>
+                                <path d="M8 7v4M8 5v1"/>
+                            </svg>
+                        </button>
+                        <div class="tooltip">More information</div>
+                    </div>
+                    
+                    <div class="tooltip-container">
+                        <span style="color: #6b7280; cursor: help; text-decoration: underline dotted;">Uncertain Date</span>
+                        <div class="tooltip">Date based on partial information</div>
+                    </div>
+                    
+                    <div class="tooltip-container">
+                        <button class="btn btn-primary">Save</button>
+                        <div class="tooltip tooltip-bottom">Save your changes</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ALERTS -->
+        <div class="section">
+            <div class="section-title">Alert Banners</div>
+            
+            <div class="component-card">
+                <div class="component-label">Alert Types</div>
+                
+                <div style="display: flex; flex-direction: column; gap: 16px;">
+                    <div class="alert alert-info">
+                        <svg class="alert-icon" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M10 2a8 8 0 100 16 8 8 0 000-16zm1 11H9V9h2v4zm0-5H9V6h2v2z"/>
+                        </svg>
+                        <div class="alert-content">
+                            <div class="alert-title">New features available</div>
+                            <div class="alert-description">
+                                We've added advanced search filters to help you find shows more easily.
+                            </div>
+                        </div>
+                        <button class="alert-close">
+                            <svg style="width: 16px; height: 16px;" viewBox="0 0 16 16" fill="currentColor">
+                                <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="2" fill="none"/>
+                            </svg>
+                        </button>
+                    </div>
+                    
+                    <div class="alert alert-success">
+                        <svg class="alert-icon" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M10 2a8 8 0 100 16 8 8 0 000-16zm-1 11l-3-3 1.5-1.5L9 10l4.5-4.5L15 7l-6 6z"/>
+                        </svg>
+                        <div class="alert-content">
+                            <div class="alert-title">Show saved successfully</div>
+                            <div class="alert-description">
+                                Your changes to the August 7, 2002 show have been saved.
+                            </div>
+                        </div>
+                        <button class="alert-close">
+                            <svg style="width: 16px; height: 16px;" viewBox="0 0 16 16" fill="currentColor">
+                                <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="2" fill="none"/>
+                            </svg>
+                        </button>
+                    </div>
+                    
+                    <div class="alert alert-warning">
+                        <svg class="alert-icon" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M10 2L2 18h16L10 2zm1 11H9v-2h2v2zm0-3H9V7h2v3z"/>
+                        </svg>
+                        <div class="alert-content">
+                            <div class="alert-title">Date verification needed</div>
+                            <div class="alert-description">
+                                This show has an uncertain date. Please verify the date if you have additional information.
+                            </div>
+                        </div>
+                        <button class="alert-close">
+                            <svg style="width: 16px; height: 16px;" viewBox="0 0 16 16" fill="currentColor">
+                                <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="2" fill="none"/>
+                            </svg>
+                        </button>
+                    </div>
+                    
+                    <div class="alert alert-error">
+                        <svg class="alert-icon" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M10 2a8 8 0 100 16 8 8 0 000-16zm1 11H9V9h2v4zm0-5H9V6h2v2z"/>
+                        </svg>
+                        <div class="alert-content">
+                            <div class="alert-title">Failed to save changes</div>
+                            <div class="alert-description">
+                                There was an error saving your changes. Please try again or contact support if the problem persists.
+                            </div>
+                        </div>
+                        <button class="alert-close">
+                            <svg style="width: 16px; height: 16px;" viewBox="0 0 16 16" fill="currentColor">
+                                <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="2" fill="none"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- TOAST NOTIFICATIONS -->
+        <div class="section">
+            <div class="section-title">Toast Notifications</div>
+            
+            <div class="component-card">
+                <div class="component-label">Toast Examples (Fixed Position)</div>
+                <div class="demo-trigger">
+                    Toast notifications appear in the top-right corner (shown inline below for demo)
+                </div>
+                
+                <div style="margin-top: 24px; display: flex; flex-direction: column; gap: 12px; max-width: 400px;">
+                    <div class="toast toast-success">
+                        <svg class="toast-icon" viewBox="0 0 20 20" fill="#6b8e23">
+                            <circle cx="10" cy="10" r="9" fill="none" stroke="currentColor" stroke-width="2"/>
+                            <path d="M6 10l3 3 5-6" stroke="#6b8e23" stroke-width="2" fill="none"/>
+                        </svg>
+                        <div class="toast-content">
+                            <div class="toast-title">Show verified</div>
+                            <div class="toast-description">The show has been marked as verified.</div>
+                        </div>
+                        <button class="toast-close">
+                            <svg style="width: 16px; height: 16px;" viewBox="0 0 16 16" fill="currentColor">
+                                <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="2" fill="none"/>
+                            </svg>
+                        </button>
+                    </div>
+                    
+                    <div class="toast toast-info">
+                        <svg class="toast-icon" viewBox="0 0 20 20" fill="#3b82f6">
+                            <circle cx="10" cy="10" r="9" fill="none" stroke="currentColor" stroke-width="2"/>
+                            <path d="M10 7v6M10 5v1"/>
+                        </svg>
+                        <div class="toast-content">
+                            <div class="toast-title">Processing recording</div>
+                            <div class="toast-description">Your recording is being uploaded.</div>
+                        </div>
+                        <button class="toast-close">
+                            <svg style="width: 16px; height: 16px;" viewBox="0 0 16 16" fill="currentColor">
+                                <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="2" fill="none"/>
+                            </svg>
+                        </button>
+                    </div>
+                    
+                    <div class="toast toast-error">
+                        <svg class="toast-icon" viewBox="0 0 20 20" fill="#dc2626">
+                            <circle cx="10" cy="10" r="9" fill="none" stroke="currentColor" stroke-width="2"/>
+                            <path d="M7 7l6 6M13 7l-6 6"/>
+                        </svg>
+                        <div class="toast-content">
+                            <div class="toast-title">Upload failed</div>
+                            <div class="toast-description">Could not upload the recording file.</div>
+                        </div>
+                        <button class="toast-close">
+                            <svg style="width: 16px; height: 16px;" viewBox="0 0 16 16" fill="currentColor">
+                                <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="2" fill="none"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

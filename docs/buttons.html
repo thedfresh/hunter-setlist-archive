@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hunter Archive Button System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #fafafa;
+            padding: 40px 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            font-size: 32px;
+            font-weight: 600;
+            color: #222;
+            margin-bottom: 40px;
+        }
+        
+        .section {
+            margin-bottom: 50px;
+        }
+        
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #222;
+            margin-bottom: 20px;
+        }
+        
+        .button-grid {
+            display: grid;
+            gap: 30px;
+        }
+        
+        .button-row {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 24px;
+        }
+        
+        .row-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #666;
+            margin-bottom: 16px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        /* BASE BUTTON */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            text-decoration: none;
+            transition: all 0.15s ease;
+            font-family: inherit;
+        }
+        
+        /* SIZES */
+        .btn-large {
+            padding: 12px 24px;
+            font-size: 16px;
+        }
+        
+        .btn-medium {
+            padding: 10px 20px;
+            font-size: 14px;
+        }
+        
+        .btn-small {
+            padding: 6px 14px;
+            font-size: 13px;
+        }
+        
+        /* PRIMARY (Golden) */
+        .btn-primary {
+            background: #b8913d;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #a07c2f;
+        }
+        
+        .btn-primary:active {
+            background: #8b6914;
+        }
+        
+        /* SECONDARY (Outline) */
+        .btn-secondary {
+            background: white;
+            color: #374151;
+            border: 1.5px solid #d1d5db;
+        }
+        
+        .btn-secondary:hover {
+            background: #f9fafb;
+            border-color: #9ca3af;
+        }
+        
+        .btn-secondary:active {
+            background: #f3f4f6;
+        }
+        
+        /* SUCCESS (Avocado Green from Comfort) */
+        .btn-success {
+            background: #6b8e23;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #5a7a1e;
+        }
+        
+        .btn-success:active {
+            background: #4a6617;
+        }
+        
+        /* DANGER (Red) */
+        .btn-danger {
+            background: #dc2626;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #b91c1c;
+        }
+        
+        .btn-danger:active {
+            background: #991b1b;
+        }
+        
+        /* GHOST (Text only) */
+        .btn-ghost {
+            background: transparent;
+            color: #6b7280;
+            border: none;
+        }
+        
+        .btn-ghost:hover {
+            background: #f3f4f6;
+            color: #374151;
+        }
+        
+        .btn-ghost:active {
+            background: #e5e7eb;
+        }
+        
+        /* ICON ONLY */
+        .btn-icon {
+            padding: 10px;
+            width: 40px;
+            height: 40px;
+        }
+        
+        .btn-icon-small {
+            padding: 6px;
+            width: 32px;
+            height: 32px;
+        }
+        
+        /* DISABLED */
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        /* ICON */
+        .btn-icon-svg {
+            width: 16px;
+            height: 16px;
+            fill: currentColor;
+        }
+        
+        .btn-large .btn-icon-svg {
+            width: 18px;
+            height: 18px;
+        }
+        
+        .btn-small .btn-icon-svg {
+            width: 14px;
+            height: 14px;
+        }
+        
+        /* CONTEXT BACKGROUNDS */
+        .context-white {
+            background: white;
+            padding: 24px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .context-solo {
+            background: #f5f1e8;
+            padding: 24px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .context-dino {
+            background: #e8f4ff;
+            padding: 24px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .context-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #888;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Hunter Archive Button System</h1>
+        
+        <!-- PRIMARY BUTTONS -->
+        <div class="section">
+            <div class="section-title">Primary Actions (Golden)</div>
+            <div class="button-grid">
+                <div class="button-row">
+                    <div class="row-label">Sizes</div>
+                    <div class="button-group">
+                        <button class="btn btn-primary btn-large">Large Primary</button>
+                        <button class="btn btn-primary btn-medium">Medium Primary</button>
+                        <button class="btn btn-primary btn-small">Small Primary</button>
+                    </div>
+                </div>
+                
+                <div class="button-row">
+                    <div class="row-label">With Icons</div>
+                    <div class="button-group">
+                        <button class="btn btn-primary btn-medium">
+                            <svg class="btn-icon-svg" viewBox="0 0 16 16">
+                                <path d="M8 2a6 6 0 100 12A6 6 0 008 2zm1 9H7V7h2v4zm0-5H7V5h2v1z"/>
+                            </svg>
+                            Save Changes
+                        </button>
+                        <button class="btn btn-primary btn-medium">
+                            Add Show
+                            <svg class="btn-icon-svg" viewBox="0 0 16 16">
+                                <path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="2" fill="none"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="button-row">
+                    <div class="row-label">States</div>
+                    <div class="button-group">
+                        <button class="btn btn-primary btn-medium">Normal</button>
+                        <button class="btn btn-primary btn-medium" style="background: #a07c2f;">Hover</button>
+                        <button class="btn btn-primary btn-medium" style="background: #8b6914;">Active</button>
+                        <button class="btn btn-primary btn-medium" disabled>Disabled</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- SECONDARY BUTTONS -->
+        <div class="section">
+            <div class="section-title">Secondary Actions (Outline)</div>
+            <div class="button-grid">
+                <div class="button-row">
+                    <div class="row-label">Sizes</div>
+                    <div class="button-group">
+                        <button class="btn btn-secondary btn-large">Large Secondary</button>
+                        <button class="btn btn-secondary btn-medium">Medium Secondary</button>
+                        <button class="btn btn-secondary btn-small">Small Secondary</button>
+                    </div>
+                </div>
+                
+                <div class="button-row">
+                    <div class="row-label">With Icons</div>
+                    <div class="button-group">
+                        <button class="btn btn-secondary btn-medium">
+                            <svg class="btn-icon-svg" viewBox="0 0 16 16">
+                                <path d="M12 2H4l-2 2v8l2 2h8l2-2V4l-2-2zM5 11l2-3 2 2 3-4 2 3" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                            </svg>
+                            Edit
+                        </button>
+                        <button class="btn btn-secondary btn-medium">
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- SUCCESS & DANGER -->
+        <div class="section">
+            <div class="section-title">Success & Danger</div>
+            <div class="button-grid">
+                <div class="button-row">
+                    <div class="row-label">Success (Green)</div>
+                    <div class="button-group">
+                        <button class="btn btn-success btn-large">Save</button>
+                        <button class="btn btn-success btn-medium">Verify</button>
+                        <button class="btn btn-success btn-small">Confirm</button>
+                        <button class="btn btn-success btn-medium">
+                            <svg class="btn-icon-svg" viewBox="0 0 16 16">
+                                <path d="M13 4L6 11 3 8" stroke="currentColor" stroke-width="2" fill="none"/>
+                            </svg>
+                            Mark Verified
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="button-row">
+                    <div class="row-label">Danger (Red)</div>
+                    <div class="button-group">
+                        <button class="btn btn-danger btn-large">Delete</button>
+                        <button class="btn btn-danger btn-medium">Remove</button>
+                        <button class="btn btn-danger btn-small">Delete</button>
+                        <button class="btn btn-danger btn-medium">
+                            <svg class="btn-icon-svg" viewBox="0 0 16 16">
+                                <path d="M3 4h10M5 4V3h6v1M6 7v4M10 7v4M4 4l1 9h6l1-9" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                            </svg>
+                            Delete Show
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- GHOST BUTTONS -->
+        <div class="section">
+            <div class="section-title">Ghost / Tertiary</div>
+            <div class="button-grid">
+                <div class="button-row">
+                    <div class="row-label">Text Only</div>
+                    <div class="button-group">
+                        <button class="btn btn-ghost btn-large">View Details</button>
+                        <button class="btn btn-ghost btn-medium">Learn More</button>
+                        <button class="btn btn-ghost btn-small">Skip</button>
+                        <button class="btn btn-ghost btn-medium">
+                            <svg class="btn-icon-svg" viewBox="0 0 16 16">
+                                <path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="2"/>
+                            </svg>
+                            Add Note
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ICON ONLY -->
+        <div class="section">
+            <div class="section-title">Icon Only Buttons</div>
+            <div class="button-grid">
+                <div class="button-row">
+                    <div class="row-label">Primary Icons</div>
+                    <div class="button-group">
+                        <button class="btn btn-primary btn-icon" title="Edit">
+                            <svg class="btn-icon-svg" viewBox="0 0 16 16">
+                                <path d="M11 2l3 3-8 8H3v-3l8-8z" fill="currentColor"/>
+                            </svg>
+                        </button>
+                        <button class="btn btn-primary btn-icon" title="Add">
+                            <svg class="btn-icon-svg" viewBox="0 0 16 16">
+                                <path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="2"/>
+                            </svg>
+                        </button>
+                        <button class="btn btn-primary btn-icon" title="Search">
+                            <svg class="btn-icon-svg" viewBox="0 0 16 16">
+                                <circle cx="7" cy="7" r="4" stroke="currentColor" stroke-width="2" fill="none"/>
+                                <path d="M11 11l3 3" stroke="currentColor" stroke-width="2"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="button-row">
+                    <div class="row-label">Secondary Icons</div>
+                    <div class="button-group">
+                        <button class="btn btn-secondary btn-icon" title="Edit">
+                            <svg class="btn-icon-svg" viewBox="0 0 16 16">
+                                <path d="M11 2l3 3-8 8H3v-3l8-8z" fill="currentColor"/>
+                            </svg>
+                        </button>
+                        <button class="btn btn-secondary btn-icon" title="More">
+                            <svg class="btn-icon-svg" viewBox="0 0 16 16">
+                                <circle cx="8" cy="3" r="1.5" fill="currentColor"/>
+                                <circle cx="8" cy="8" r="1.5" fill="currentColor"/>
+                                <circle cx="8" cy="13" r="1.5" fill="currentColor"/>
+                            </svg>
+                        </button>
+                        <button class="btn btn-secondary btn-icon" title="Filter">
+                            <svg class="btn-icon-svg" viewBox="0 0 16 16">
+                                <path d="M2 3h12L9 9v4l-2 1V9L2 3z" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="button-row">
+                    <div class="row-label">Ghost Icons (small)</div>
+                    <div class="button-group">
+                        <button class="btn btn-ghost btn-icon-small" title="Close">
+                            <svg class="btn-icon-svg" viewBox="0 0 16 16">
+                                <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="2"/>
+                            </svg>
+                        </button>
+                        <button class="btn btn-ghost btn-icon-small" title="Info">
+                            <svg class="btn-icon-svg" viewBox="0 0 16 16">
+                                <circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="2" fill="none"/>
+                                <path d="M8 7v4M8 5v1" stroke="currentColor" stroke-width="2"/>
+                            </svg>
+                        </button>
+                        <button class="btn btn-ghost btn-icon-small" title="Download">
+                            <svg class="btn-icon-svg" viewBox="0 0 16 16">
+                                <path d="M8 2v8M5 7l3 3 3-3M3 12h10" stroke="currentColor" stroke-width="2"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- COMMON BUTTON GROUPS -->
+        <div class="section">
+            <div class="section-title">Common Button Patterns</div>
+            <div class="button-grid">
+                <div class="button-row">
+                    <div class="row-label">Edit / Save / Cancel</div>
+                    <div class="button-group">
+                        <button class="btn btn-secondary btn-medium">
+                            <svg class="btn-icon-svg" viewBox="0 0 16 16">
+                                <path d="M11 2l3 3-8 8H3v-3l8-8z" fill="currentColor"/>
+                            </svg>
+                            Edit
+                        </button>
+                    </div>
+                    <div class="button-group" style="margin-top: 12px;">
+                        <button class="btn btn-success btn-medium">
+                            <svg class="btn-icon-svg" viewBox="0 0 16 16">
+                                <path d="M13 4L6 11 3 8" stroke="currentColor" stroke-width="2" fill="none"/>
+                            </svg>
+                            Save
+                        </button>
+                        <button class="btn btn-ghost btn-medium">Cancel</button>
+                    </div>
+                </div>
+                
+                <div class="button-row">
+                    <div class="row-label">Create / Delete</div>
+                    <div class="button-group">
+                        <button class="btn btn-primary btn-medium">
+                            <svg class="btn-icon-svg" viewBox="0 0 16 16">
+                                <path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="2"/>
+                            </svg>
+                            Add New Show
+                        </button>
+                        <button class="btn btn-danger btn-medium">
+                            <svg class="btn-icon-svg" viewBox="0 0 16 16">
+                                <path d="M3 4h10M5 4V3h6v1M6 7v4M10 7v4M4 4l1 9h6l1-9" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                            </svg>
+                            Delete
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="button-row">
+                    <div class="row-label">Action with Secondary Options</div>
+                    <div class="button-group">
+                        <button class="btn btn-primary btn-medium">Continue</button>
+                        <button class="btn btn-ghost btn-medium">Go Back</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- CONTEXT TESTING -->
+        <div class="section">
+            <div class="section-title">Buttons on Different Backgrounds</div>
+            <div style="display: grid; gap: 20px;">
+                <div class="context-white">
+                    <div class="context-label">White Background (Admin/Forms)</div>
+                    <div class="button-group">
+                        <button class="btn btn-primary btn-medium">Save</button>
+                        <button class="btn btn-secondary btn-medium">Cancel</button>
+                        <button class="btn btn-danger btn-medium">Delete</button>
+                        <button class="btn btn-ghost btn-medium">Skip</button>
+                    </div>
+                </div>
+                
+                <div class="context-solo">
+                    <div class="context-label">Solo Hunter Background</div>
+                    <div class="button-group">
+                        <button class="btn btn-primary btn-medium">Save</button>
+                        <button class="btn btn-secondary btn-medium">Cancel</button>
+                        <button class="btn btn-danger btn-medium">Delete</button>
+                        <button class="btn btn-ghost btn-medium">Skip</button>
+                    </div>
+                </div>
+                
+                <div class="context-dino">
+                    <div class="context-label">Dinosaurs Background</div>
+                    <div class="button-group">
+                        <button class="btn btn-primary btn-medium">Save</button>
+                        <button class="btn btn-secondary btn-medium">Cancel</button>
+                        <button class="btn btn-danger btn-medium">Delete</button>
+                        <button class="btn btn-ghost btn-medium">Skip</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
