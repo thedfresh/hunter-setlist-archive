@@ -10,6 +10,9 @@ const columns = [
 ];
 
 function sortVenues(venues: any[], sortKey: string, sortDir: 'asc' | 'desc') {
+  function stripThe(str: string) {
+    return str.replace(/^the\s+/i, '');
+  }
   return [...venues].sort((a, b) => {
     let aVal = a[sortKey];
     let bVal = b[sortKey];
@@ -20,6 +23,8 @@ function sortVenues(venues: any[], sortKey: string, sortDir: 'asc' | 'desc') {
     if (aVal == null) return 1;
     if (bVal == null) return -1;
     if (typeof aVal === 'string') {
+      aVal = stripThe(aVal);
+      bVal = stripThe(bVal);
       return sortDir === 'asc' ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
     }
     return sortDir === 'asc' ? aVal - bVal : bVal - aVal;
@@ -62,7 +67,7 @@ export default function VenueTableClient({ venues }: { venues: any[] }) {
             <tr key={venue.id}>
               <td>
                 <Link href={`/venue/${venue.slug}`} className="link-internal">
-                  {venue.name}
+                  {venue.name} {venue.context ? `(${venue.context})` : null}
                 </Link>
               </td>
               <td>{venue.city || ''}</td>

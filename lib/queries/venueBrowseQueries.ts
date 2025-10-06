@@ -40,6 +40,7 @@ export async function getVenuesBrowse(/* params: GetVenuesBrowseParams */) {
       id: true,
       slug: true,
       name: true,
+      context: true,
       city: true,
       stateProvince: true,
       publicNotes: true,
