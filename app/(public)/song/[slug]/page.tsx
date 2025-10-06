@@ -1,24 +1,3 @@
-// Generate event slug from displayDate and showTiming (matches performance list logic)
-function getEventSlug(event: any) {
-  if (event.slug) return event.slug;
-  let slug = '';
-  if (event.displayDate) {
-    slug = event.displayDate;
-    if (event.showTiming) {
-      slug += `-${event.showTiming.toLowerCase()}`;
-    }
-  } else if (event.year) {
-    const mm = event.month ? String(event.month).padStart(2, '0') : 'unknown';
-    const dd = event.day ? String(event.day).padStart(2, '0') : 'unknown';
-    slug = `${event.year}-${mm}-${dd}`;
-    if (event.showTiming) {
-      slug += `-${event.showTiming.toLowerCase()}`;
-    }
-  } else {
-    slug = String(event.id);
-  }
-  return slug;
-}
 import { prisma } from '@/lib/prisma';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
@@ -62,8 +41,31 @@ export default async function SongDetailPage({ params }: { params: { slug: strin
           set: {
             include: {
               event: {
+                select: {
+                  id: true,
+                  slug: true,
+                  year: true,
+                  month: true,
+                  day: true,
+                  displayDate: true,
+                  showTiming: true,
+                  includeInStats: true,
+                  venue: {
+                    select: {
+                      id: true,
+                      slug: true,
+                      name: true,
+                      context: true,
+                      city: true,
+                      stateProvince: true,
+                      country: true,
+                    },
+                  },
+                },
+              },
+              performances: {
                 include: {
-                  venue: true,
+                  song: true,
                 },
               },
             },
@@ -76,20 +78,25 @@ export default async function SongDetailPage({ params }: { params: { slug: strin
   if (!song) return notFound();
 
   // Compute performance stats
+  // For stats, filter out medleys, but for display, include all
   const filteredPerformances = song.performances.filter(
     (p: any) => !p.isMedley && p.set?.event?.includeInStats
   );
   const totalPerformed = filteredPerformances.length;
-  const sortedByDate = [...filteredPerformances].sort((a: any, b: any) => {
+  // For display, include all performances, but sort by event date and set order
+  const sortedByDate = [...song.performances].sort((a: any, b: any) => {
     const aDate = new Date(a.set.event.year || 0, (a.set.event.month || 1) - 1, a.set.event.day || 1);
     const bDate = new Date(b.set.event.year || 0, (b.set.event.month || 1) - 1, b.set.event.day || 1);
-    return aDate.getTime() - bDate.getTime();
+    if (aDate.getTime() !== bDate.getTime()) return aDate.getTime() - bDate.getTime();
+    // If same event, order by set position and performanceOrder
+    if (a.set.position !== b.set.position) return a.set.position - b.set.position;
+    return a.performanceOrder - b.performanceOrder;
   });
-  const firstPerf = sortedByDate[0];
-  const lastPerf = sortedByDate[sortedByDate.length - 1];
+  const firstPerf = filteredPerformances.length > 0 ? sortedByDate.find((p: any) => !p.isMedley) : undefined;
+  const lastPerf = filteredPerformances.length > 0 ? [...sortedByDate].reverse().find((p: any) => !p.isMedley) : undefined;
 
   return (
-    <div className="max-w-3xl mx-auto p-6">
+    <div className="max-w-6xl mx-auto p-6">
       <div className="bg-white rounded shadow p-6">
         <div className="page-header mb-4">
           <h1 className="page-title text-2xl font-bold">{song.title}</h1>
@@ -128,7 +135,7 @@ export default async function SongDetailPage({ params }: { params: { slug: strin
             <div>
               First Performance:{' '}
               {firstPerf ? (
-                <Link href={`/event/${getEventSlug(firstPerf.set.event)}`} className="link-internal">
+                <Link href={`/event/${firstPerf.set.event.slug}`} className="link-internal">
                   {formatDate(firstPerf.set.event)}
                 </Link>
               ) : '—'}
@@ -136,7 +143,7 @@ export default async function SongDetailPage({ params }: { params: { slug: strin
             <div>
               Last Performance:{' '}
               {lastPerf ? (
-                <Link href={`/event/${getEventSlug(lastPerf.set.event)}`} className="link-internal">
+                <Link href={`/event/${lastPerf.set.event.slug}`} className="link-internal">
                   {formatDate(lastPerf.set.event)}
                 </Link>
               ) : '—'}
@@ -175,43 +182,98 @@ export default async function SongDetailPage({ params }: { params: { slug: strin
         <section>
           <div className="section-header text-lg font-semibold mb-2">All Performances</div>
           <div className="overflow-x-auto">
-            <table className="min-w-full text-sm border">
+            <table className="min-w-[900px] text-sm border">
               <thead>
                 <tr className="bg-gray-100">
                   <th className="px-2 py-1 text-left">Date</th>
                   <th className="px-2 py-1 text-left">Venue</th>
-                  <th className="px-2 py-1 text-left">Event</th>
+                  <th className="px-2 py-1 text-left">Previous Song</th>
+                  <th className="px-2 py-1 text-left">Next Song</th>
                 </tr>
               </thead>
               <tbody>
-                {sortedByDate.map((perf: any) => (
-                  <tr key={perf.id} className="border-t">
-                    <td className="px-2 py-1">
-                      <Link href={`/event/${getEventSlug(perf.set.event)}`} className="link-internal">
-                        {formatDate(perf.set.event)}
-                      </Link>
-                    </td>
-                    <td className="px-2 py-1">
-                      {perf.set.event.venue ? (
-                        <Link href={`/venue/${perf.set.event.venue.slug}`} className="link-internal">
-                          {perf.set.event.venue.name}
-                          {perf.set.event.venue.context ? `, ${perf.set.event.venue.context}` : ''}
-                          {perf.set.event.venue.city ? `, ${perf.set.event.venue.city}` : ''}
-                          {perf.set.event.venue.stateProvince ? `, ${perf.set.event.venue.stateProvince}` : ''}
-                          {perf.set.event.venue.country ? `, ${perf.set.event.venue.country}` : ''}
-                        </Link>
-                      ) : ''}
-                    </td>
-                    <td className="px-2 py-1">
-                      <Link
-                        href={`/event/${getEventSlug(perf.set.event)}`}
-                        className="link-internal action-btn"
-                      >
-                        View
-                      </Link>
-                    </td>
-                  </tr>
-                ))}
+                {sortedByDate.map((perf: any, idx: number, arr: any[]) => {
+                  // Find all performances in this set, sorted by performanceOrder
+                  const setPerformances = perf.set.performances
+                    ? [...perf.set.performances].sort((a: any, b: any) => a.performanceOrder - b.performanceOrder)
+                    : [];
+                  // Find this performance's index in its set
+                  const perfIdx = setPerformances.findIndex((p: any) => p.id === perf.id);
+                  const prevPerf = perfIdx > 0 ? setPerformances[perfIdx - 1] : null;
+                  const nextPerf = perfIdx >= 0 && perfIdx < setPerformances.length - 1 ? setPerformances[perfIdx + 1] : null;
+                  // Only show date/venue for non-medley, and only for the first occurrence for that event/set
+                  let showDateVenue = true;
+                  if (perf.isMedley) {
+                    showDateVenue = false;
+                  } else if (idx > 0) {
+                    const prev = arr[idx - 1];
+                    if (
+                      prev.set.event.id === perf.set.event.id &&
+                      prev.set.id === perf.set.id &&
+                      !prev.isMedley
+                    ) {
+                      showDateVenue = false;
+                    }
+                  }
+                  return (
+                    <tr key={perf.id} className="border-t">
+                      <td className="px-2 py-1">
+                        {showDateVenue ? (
+                          <Link href={`/event/${perf.set.event.slug}`} className="link-internal">
+                            {formatDate(perf.set.event)}
+                          </Link>
+                        ) : ''}
+                      </td>
+                      <td className="px-2 py-1">
+                        {showDateVenue && perf.set.event.venue ? (
+                          perf.set.event.venue.slug ? (
+                            <Link href={`/venue/${perf.set.event.venue.slug}`} className="link-internal">
+                              {perf.set.event.venue.name}
+                              {perf.set.event.venue.context ? `, ${perf.set.event.venue.context}` : ''}
+                              {perf.set.event.venue.city ? `, ${perf.set.event.venue.city}` : ''}
+                              {perf.set.event.venue.stateProvince ? `, ${perf.set.event.venue.stateProvince}` : ''}
+                              {perf.set.event.venue.country ? `, ${perf.set.event.venue.country}` : ''}
+                            </Link>
+                          ) : (
+                            <span>
+                              {perf.set.event.venue.name}
+                              {perf.set.event.venue.context ? `, ${perf.set.event.venue.context}` : ''}
+                              {perf.set.event.venue.city ? `, ${perf.set.event.venue.city}` : ''}
+                              {perf.set.event.venue.stateProvince ? `, ${perf.set.event.venue.stateProvince}` : ''}
+                              {perf.set.event.venue.country ? `, ${perf.set.event.venue.country}` : ''}
+                            </span>
+                          )
+                        ) : ''}
+                      </td>
+                      <td className="px-2 py-1">
+                        {prevPerf ? (
+                          <>
+                            {prevPerf.isTruncatedEnd && <span className="text-xs text-gray-500">…</span>}
+                            {prevPerf.song?.slug ? (
+                              <Link href={`/song/${prevPerf.song.slug}`} className="link-internal">
+                                {prevPerf.song.title}
+                              </Link>
+                            ) : (prevPerf.song?.title || '—')}
+                            {prevPerf.seguesInto && <span className="text-gray-500"> &gt; </span>}
+                          </>
+                        ) : '—'}
+                      </td>
+                      <td className="px-2 py-1">
+                        {nextPerf ? (
+                          <>
+                            {perf.isTruncatedStart && <span className="text-xs text-gray-500">…</span>}
+                            {perf.seguesInto && <span className="text-gray-500">&gt; </span>}
+                            {nextPerf.song?.slug ? (
+                              <Link href={`/song/${nextPerf.song.slug}`} className="link-internal">
+                                {nextPerf.song.title}
+                              </Link>
+                            ) : (nextPerf.song?.title || '—')}
+                          </>
+                        ) : '—'}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
             {/* No cap or pagination message needed */}
