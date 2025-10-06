@@ -32,6 +32,7 @@ model Band {
   createdAt       DateTime @default(now()) @map("created_at")
   publicNotes     String?  @map("public_notes")
   privateNotes    String?  @map("private_notes")
+  slug            String?  @unique
   events          Event[]  @relation("PrimaryBand")
   bandMusicians   BandMusician[]
 
@@ -62,9 +63,10 @@ model Venue {
   country       String?
   isUncertain   Boolean  @default(false) @map("is_uncertain")
   createdAt     DateTime @default(now()) @map("created_at")
-  publicNotes  String? @map("public_notes")
-  privateNotes String? @map("private_notes")  
+  publicNotes   String? @map("public_notes")
+  privateNotes  String? @map("private_notes")  
   context       String?
+  slug          String?  @unique
   events        Event[]
   links         Link[]
 
@@ -76,8 +78,9 @@ model Musician {
   name                 String
   isUncertain          Boolean                     @default(false) @map("is_uncertain")
   createdAt            DateTime                    @default(now()) @map("created_at")
-  publicNotes  String? @map("public_notes")
-  privateNotes String? @map("private_notes")  
+  publicNotes          String? @map("public_notes")
+  privateNotes         String? @map("private_notes")  
+  slug                 String? @unique
   eventMusicians       EventMusician[]
   defaultInstruments   MusicianDefaultInstrument[]
   performanceMusicians PerformanceMusician[]
@@ -125,6 +128,7 @@ model Event {
   updatedAt                    DateTime           @default(now()) @updatedAt @map("updated_at")
   isUncertain                  Boolean            @default(false) @map("is_uncertain")
   isPublic                     Boolean            @default(true)  @map("is_public")
+  slug                         String?            @unique
   eventContributors            EventContributor[]
   eventMusicians               EventMusician[]
   contentType                  ContentType?       @relation(fields: [contentTypeId], references: [id])
@@ -188,6 +192,7 @@ model Album {
   isOfficial  Boolean     @default(true) @map("is_official")
   publicNotes  String?       @map("public_notes")
   privateNotes String?       @map("private_notes")  
+  slug         String?    @unique
   createdAt   DateTime    @default(now()) @map("created_at")
   songAlbums  SongAlbum[]
 
@@ -217,6 +222,7 @@ model Song {
   createdAt      DateTime      @default(now()) @map("created_at")
   updatedAt      DateTime      @default(now()) @updatedAt @map("updated_at")
   inBoxOfRain    Boolean       @default(false) @map("in_box_of_rain")
+  slug           String?       @unique
   links          Link[]
   performances   Performance[]
   songAlbums     SongAlbum[]
@@ -299,6 +305,7 @@ model Contributor {
   email             String?
   publicNotes  String?       @map("public_notes")
   privateNotes String?       @map("private_notes")  
+  slug              String?  @unique
   eventContributors EventContributor[]
   recordings        Recording[]
 

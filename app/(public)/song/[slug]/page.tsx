@@ -110,7 +110,7 @@ export default async function SongDetailPage({ params }: { params: { slug: strin
               <div>
                 Albums: {song.songAlbums.map((sa: any, i: number) => (
                   <span key={sa.album.id}>
-                    <Link href={`/admin/albums/${sa.album.id}`} className="link-internal">
+                    <Link href={`/admin/albums/${sa.album.slug}`} className="link-internal">
                       {sa.album.title}
                     </Link>
                     {i < song.songAlbums.length - 1 && ', '}
@@ -128,7 +128,7 @@ export default async function SongDetailPage({ params }: { params: { slug: strin
             <div>
               First Performance:{' '}
               {firstPerf ? (
-                <Link href={`/event/${firstPerf.set.event.id}`} className="link-internal">
+                <Link href={`/event/${getEventSlug(firstPerf.set.event)}`} className="link-internal">
                   {formatDate(firstPerf.set.event)}
                 </Link>
               ) : '—'}
@@ -136,7 +136,7 @@ export default async function SongDetailPage({ params }: { params: { slug: strin
             <div>
               Last Performance:{' '}
               {lastPerf ? (
-                <Link href={`/event/${lastPerf.set.event.id}`} className="link-internal">
+                <Link href={`/event/${getEventSlug(lastPerf.set.event)}`} className="link-internal">
                   {formatDate(lastPerf.set.event)}
                 </Link>
               ) : '—'}
@@ -186,16 +186,20 @@ export default async function SongDetailPage({ params }: { params: { slug: strin
               <tbody>
                 {sortedByDate.map((perf: any) => (
                   <tr key={perf.id} className="border-t">
-                    <td className="px-2 py-1">{formatDate(perf.set.event)}</td>
+                    <td className="px-2 py-1">
+                      <Link href={`/event/${getEventSlug(perf.set.event)}`} className="link-internal">
+                        {formatDate(perf.set.event)}
+                      </Link>
+                    </td>
                     <td className="px-2 py-1">
                       {perf.set.event.venue ? (
-                        <>
+                        <Link href={`/venue/${perf.set.event.venue.slug}`} className="link-internal">
                           {perf.set.event.venue.name}
                           {perf.set.event.venue.context ? `, ${perf.set.event.venue.context}` : ''}
                           {perf.set.event.venue.city ? `, ${perf.set.event.venue.city}` : ''}
                           {perf.set.event.venue.stateProvince ? `, ${perf.set.event.venue.stateProvince}` : ''}
                           {perf.set.event.venue.country ? `, ${perf.set.event.venue.country}` : ''}
-                        </>
+                        </Link>
                       ) : ''}
                     </td>
                     <td className="px-2 py-1">
