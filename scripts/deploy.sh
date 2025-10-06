@@ -2,7 +2,7 @@
 set -e
 
 echo "Dumping local database..."
-pg_dump -U dfresh -d hunter_archive_dev > /tmp/hunter-dump.sql
+pg_dump -U dfresh -d hunter_archive_dev --data-only --no-owner --no-acl > /tmp/hunter-dump.sql
 
 echo "Uploading database to server..."
 scp /tmp/hunter-dump.sql root@134.199.227.86:/root/hunter-dump.sql
