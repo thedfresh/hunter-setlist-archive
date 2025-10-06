@@ -24,5 +24,6 @@ jobs:
           sudo -u postgres psql -d hunter_archive -c "GRANT ALL PRIVILEGES ON SCHEMA public TO hunter_admin; ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO hunter_admin; ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO hunter_admin;"
           source .env && npx prisma db push --accept-data-loss
           source .env && psql "$DATABASE_URL" -f /root/hunter-dump.sql
+          sudo -u postgres psql -d hunter_archive -c "GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO hunter_admin; GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO hunter_admin;"
           npm run build
           pm2 reload hunter-archive || pm2 start npm --name "hunter-archive" -- start
