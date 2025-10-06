@@ -3,19 +3,6 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 
 
-// Reverse the slug logic from the list page
-function deslugify(slug: string) {
-  // Replace hyphens with spaces, remove extra spaces, and title-case
-  const cleaned = slug
-    .replace(/-/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
-  // Title-case each word
-  return cleaned
-    .split(' ')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
-}
 
 function formatDate(event: any) {
   if (!event) return '';
@@ -28,10 +15,9 @@ function formatDate(event: any) {
 
 export default async function SongDetailPage({ params }: { params: { slug: string } }) {
   const { slug } = params;
-  const titleFromSlug = deslugify(slug);
 
   const song = await prisma.song.findFirst({
-    where: { title: { equals: titleFromSlug, mode: 'insensitive' } },
+    where: { slug },
     include: {
       songAlbums: { include: { album: true } },
       songTags: { include: { tag: true } },
