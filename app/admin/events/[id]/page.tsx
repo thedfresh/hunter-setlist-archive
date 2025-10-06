@@ -3,6 +3,7 @@ import { useRouter, useParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { Event, Set } from '@/lib/types';
 import SetPerformancesSection from "./components/SetPerformancesSection";
+import SetMusiciansSection from "./components/SetMusiciansSection";
 import SetForm from './components/SetForm';
 import Link from "next/link";
 import EventContributorsSection from "./components/EventContributorsEditor";
@@ -614,6 +615,11 @@ export default function EventEditPage() {
                       </tr>
                       <tr>
                         <td colSpan={4} className="bg-gray-50 px-4 py-2">
+                          <SetMusiciansSection
+                            setId={set.id}
+                            musicians={musicians}
+                            instruments={instruments}
+                          />
                           <SetPerformancesSection
                             set={set}
                             songs={songs}
