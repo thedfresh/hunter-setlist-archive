@@ -20,7 +20,9 @@ jobs:
           git restore .
           git pull origin main
           npm install --omit=dev
-          source .env && npx prisma db push --force-reset --accept-data-loss
+          sudo -u postgres psql -c "DROP DATABASE IF EXISTS hunter_archive WITH (FORCE);" -c "CREATE DATABASE hunter_archive;" -c "GRANT ALL PRIVILEGES ON DATABASE hunter_archive TO hunter_admin;"
+          sudo -u postgres psql -d hunter_archive -c "GRANT ALL PRIVILEGES ON SCHEMA public TO hunter_admin; ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO hunter_admin; ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO hunter_admin;"
+          source .env && npx prisma db push --accept-data-loss
           source .env && psql "$DATABASE_URL" -f /root/hunter-dump.sql
           npm run build
           pm2 reload hunter-archive || pm2 start npm --name "hunter-archive" -- start
