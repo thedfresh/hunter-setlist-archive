@@ -26,4 +26,6 @@ jobs:
           source .env && psql "$DATABASE_URL" -f /root/hunter-dump.sql
           sudo -u postgres psql -d hunter_archive -c "GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO hunter_admin; GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO hunter_admin;"
           export $(cat .env | xargs) && npm run build
-          pm2 reload hunter-archive || pm2 start npm --name "hunter-archive" -- start
+          pm2 delete hunter-archive 2>/dev/null || true
+          export $(cat .env | xargs) && pm2 start npm --name "hunter-archive" -- start
+          pm2 save
