@@ -20,7 +20,7 @@ jobs:
           git restore .
           git pull origin main
           npm install --omit=dev
-          source .env && npx prisma db push --accept-data-loss
+          source .env && npx prisma db push --force-reset --accept-data-loss
           source .env && psql "$DATABASE_URL" -f /root/hunter-dump.sql
           npm run build
           pm2 reload hunter-archive || pm2 start npm --name "hunter-archive" -- start
