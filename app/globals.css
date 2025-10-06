@@ -10,7 +10,7 @@
     ============================================ */
 
   .site-header {
-    @apply bg-[#ffffee] pt-20 relative;
+    @apply bg-[#ffffed] pt-20 relative;
   }
 
   .logo-container {
