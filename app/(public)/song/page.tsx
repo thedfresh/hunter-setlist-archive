@@ -1,4 +1,6 @@
 "use client";
+
+import Link from "next/link";
 import React, { useState } from "react";
 
 type PageSize = number | "All";
@@ -171,33 +173,49 @@ export default function SongBrowsePage() {
             </tr>
           </thead>
           <tbody>
-            {pagedSongs.map((song) => (
-              <tr key={song.id}>
-                <td>{song.title}</td>
-                <td>{song.performanceCount}</td>
-                <td>
-                  {song.firstPerformance?.slug ? (
-                    <a href={`/event/${song.firstPerformance.slug}`} className="link-internal">
-                      {formatDate(song.firstPerformance.date)}
-                    </a>
-                  ) : (
-                    <span>{formatDate(song.firstPerformance?.date)}</span>
-                  )}
-                </td>
-                <td>
-                  {song.lastPerformance?.slug ? (
-                    <a href={`/event/${song.lastPerformance.slug}`} className="link-internal">
-                      {formatDate(song.lastPerformance.date)}
-                    </a>
-                  ) : (
-                    <span>{formatDate(song.lastPerformance?.date)}</span>
-                  )}
-                </td>
-                <td className="table-actions">
-                  <button className="action-btn">View</button>
-                </td>
-              </tr>
-            ))}
+            {pagedSongs.map((song) => {
+              // Slugify the song title for the detail page
+              const slug = song.title
+                .toLowerCase()
+                .replace(/[^a-z0-9\s-]/g, "")
+                .replace(/\s+/g, "-")
+                .replace(/-+/g, "-");
+              return (
+                <tr key={song.id}>
+                  <td>
+                    <Link href={`/song/${slug}`} className="link-internal">
+                      {song.title}
+                    </Link>
+                  </td>
+                  <td>{song.performanceCount}</td>
+                  <td>
+                    {song.firstPerformance?.slug ? (
+                      <a href={`/event/${song.firstPerformance.slug}`} className="link-internal">
+                        {formatDate(song.firstPerformance.date)}
+                      </a>
+                    ) : (
+                      <span>{formatDate(song.firstPerformance?.date)}</span>
+                    )}
+                  </td>
+                  <td>
+                    {song.lastPerformance?.slug ? (
+                      <a href={`/event/${song.lastPerformance.slug}`} className="link-internal">
+                        {formatDate(song.lastPerformance.date)}
+                      </a>
+                    ) : (
+                      <span>{formatDate(song.lastPerformance?.date)}</span>
+                    )}
+                  </td>
+                  <td className="table-actions">
+                    {song.firstPerformance?.slug ? (
+                      <Link href={`/event/${song.firstPerformance.slug}`} className="action-btn link-internal">View</Link>
+                    ) : (
+                      <span className="text-gray-400">—</span>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
