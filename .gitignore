@@ -48,3 +48,4 @@ CONTEXT.md
 /app/generated/prisma
 local-data/
 backups/
+*.sql
