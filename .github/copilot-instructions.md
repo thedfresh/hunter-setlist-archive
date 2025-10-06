@@ -27,7 +27,7 @@ This document guides AI coding agents to be productive in the Hunter Setlist Arc
 - **Component Organization:** Place feature-specific components in `components/` subfolders within entity directories
 - **Styling:** Use Tailwind utility classes; global styles in `app/globals.css`
 
-## Schema Changes
+## Schema Changes  
 - **Update Schema:** Edit `prisma/schema.prisma` 
 - **Apply Changes:** `npx prisma db push` (database not managed by migrations)
 - **Update Client:** `npx prisma generate`
