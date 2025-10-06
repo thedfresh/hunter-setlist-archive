@@ -9,7 +9,7 @@ export async function GET() {
         isMedley: false,
         set: {
           event: {
-            includeInStats: true  // Add this filter
+            includeInStats: true
           }
         },
         song: {
@@ -31,7 +31,8 @@ export async function GET() {
                 year: true,
                 month: true,
                 day: true,
-                displayDate: true
+                displayDate: true,
+                showTiming: true,
               }
             }
           }
@@ -44,23 +45,23 @@ export async function GET() {
     
     performances.forEach(perf => {
       const event = perf.set.event;
-      if (!event.year) return; // Skip if no year
-      
-      // Create comparable date (use year/month/day, fallback to year only)
+      if (!event.year) return;
       const dateValue = event.year * 10000 + (event.month || 0) * 100 + (event.day || 0);
       const displayDate = event.displayDate || 
         `${event.year}${event.month ? '-' + String(event.month).padStart(2, '0') : ''}${event.day ? '-' + String(event.day).padStart(2, '0') : ''}`;
-      
+      let slug = displayDate;
+      if (event.showTiming === "early" || event.showTiming === "late") {
+        slug += `-${event.showTiming}`;
+      }
       if (!songData.has(perf.songId)) {
         songData.set(perf.songId, {
           count: 0,
           dates: []
         });
       }
-      
       const data = songData.get(perf.songId);
       data.count++;
-      data.dates.push({ value: dateValue, display: displayDate });
+      data.dates.push({ value: dateValue, display: displayDate, slug });
     });
 
     // Fetch songs that have performances
@@ -81,15 +82,14 @@ export async function GET() {
     return NextResponse.json({
       songs: songs.map(song => {
         const data = songData.get(song.id);
-  const sortedDates = data.dates.sort((a: { value: number; display: string }, b: { value: number; display: string }) => a.value - b.value);
-        
+        const sortedDates = data.dates.sort((a: { value: number; display: string; slug: string }, b: { value: number; display: string; slug: string }) => a.value - b.value);
         return {
           ...song,
           albums: song.songAlbums.map(sa => sa.album),
           tags: song.songTags.map(st => st.tag),
           performanceCount: data.count,
-          firstPerformance: sortedDates[0].display,
-          lastPerformance: sortedDates[sortedDates.length - 1].display,
+          firstPerformance: { date: sortedDates[0].display, slug: sortedDates[0].slug },
+          lastPerformance: { date: sortedDates[sortedDates.length - 1].display, slug: sortedDates[sortedDates.length - 1].slug },
         };
       }),
     });

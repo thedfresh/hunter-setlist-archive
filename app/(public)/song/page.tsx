@@ -10,8 +10,8 @@ type Song = {
   id: number;
   title: string;
   performanceCount: number;
-  firstPerformance?: string;
-  lastPerformance?: string;
+  firstPerformance?: { date: string; slug: string };
+  lastPerformance?: { date: string; slug: string };
 };
 
 
@@ -126,8 +126,9 @@ export default function SongBrowsePage() {
   return (
     <div className="max-w-4xl mx-auto py-10 px-4">
       <div className="page-header">
-        <div className="page-title">All Songs</div>
-        <div className="page-subtitle">{total} songs in archive</div>
+        <div className="page-title">Songs Performed</div>
+        <div className="page-subtitle">{total} songs found</div>
+        <p className="note-text">Note: song counts are exclusive of duplicate performances in medleys.</p>
       </div>
       <div className="flex items-center justify-between mb-6 gap-4 flex-wrap">
         <div className="search-bar w-full sm:w-96">
@@ -174,8 +175,24 @@ export default function SongBrowsePage() {
               <tr key={song.id}>
                 <td>{song.title}</td>
                 <td>{song.performanceCount}</td>
-                <td>{formatDate(song.firstPerformance)}</td>
-                <td>{formatDate(song.lastPerformance)}</td>
+                <td>
+                  {song.firstPerformance?.slug ? (
+                    <a href={`/event/${song.firstPerformance.slug}`} className="link-internal">
+                      {formatDate(song.firstPerformance.date)}
+                    </a>
+                  ) : (
+                    <span>{formatDate(song.firstPerformance?.date)}</span>
+                  )}
+                </td>
+                <td>
+                  {song.lastPerformance?.slug ? (
+                    <a href={`/event/${song.lastPerformance.slug}`} className="link-internal">
+                      {formatDate(song.lastPerformance.date)}
+                    </a>
+                  ) : (
+                    <span>{formatDate(song.lastPerformance?.date)}</span>
+                  )}
+                </td>
                 <td className="table-actions">
                   <button className="action-btn">View</button>
                 </td>
