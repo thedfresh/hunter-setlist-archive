@@ -44,4 +44,5 @@ export type Set = {
   notes?: string;
   isUncertain?: boolean;
   setType: { id: number; name: string; displayName: string };
+  bandId?: number | null;
 };

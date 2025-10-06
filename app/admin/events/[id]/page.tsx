@@ -649,6 +649,7 @@ export default function EventEditPage() {
             editingSet={editingSet}
             onClose={() => setShowSetForm(false)}
             onSaved={() => setShowSetForm(false)}
+            bands={bands || []}
           />
         )}
         {deleteError && <p className="text-red-500 text-sm mt-2">{deleteError}</p>}

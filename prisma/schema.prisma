@@ -33,6 +33,7 @@ model Band {
   publicNotes     String?  @map("public_notes")
   privateNotes    String?  @map("private_notes")
   slug            String?  @unique
+  sets        Set[]
   events          Event[]  @relation("PrimaryBand")
   bandMusicians   BandMusician[]
 
@@ -86,6 +87,7 @@ model Musician {
   performanceMusicians PerformanceMusician[]
   performanceVocals    Performance[]               @relation("PerformanceLeadVocals")
   bandMusicians        BandMusician[]
+  setMusicians         SetMusician[]
   @@map("musicians")
 }
 
@@ -97,6 +99,7 @@ model Instrument {
   eventMusicians       EventMusician[]
   musicianDefaults     MusicianDefaultInstrument[]
   performanceMusicians PerformanceMusician[]
+  setMusicians         SetMusician[]
 
   @@map("instruments")
 }
@@ -177,11 +180,30 @@ model Set {
   privateNotes String?       @map("private_notes")  
   createdAt    DateTime      @default(now()) @map("created_at")
   isUncertain  Boolean       @default(false) @map("is_uncertain")
+  bandId       Int?     @map("band_id")
+  band        Band?    @relation(fields: [bandId], references: [id])
   performances Performance[]
+  setMusicians   SetMusician[]
   event        Event         @relation(fields: [eventId], references: [id], onDelete: Cascade)
   setType      SetType       @relation(fields: [setTypeId], references: [id])
 
   @@map("sets")
+}
+
+model SetMusician {
+  id           Int         @id @default(autoincrement())
+  setId        Int         @map("set_id")
+  musicianId   Int         @map("musician_id")
+  instrumentId Int?        @map("instrument_id")
+  publicNotes  String?     @map("public_notes")
+  privateNotes String?     @map("private_notes")
+  createdAt    DateTime    @default(now()) @map("created_at")
+  
+  set          Set         @relation(fields: [setId], references: [id], onDelete: Cascade)
+  musician     Musician    @relation(fields: [musicianId], references: [id])
+  instrument   Instrument? @relation(fields: [instrumentId], references: [id])
+  
+  @@map("set_musicians")
 }
 
 model Album {

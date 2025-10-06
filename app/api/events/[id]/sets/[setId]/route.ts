@@ -17,12 +17,11 @@ export async function PUT(req: Request, { params }: { params: { id: string; setI
   const set = await prisma.set.update({
     where: { id: setId },
     data: {
-      // Connect new setType relation
       setType: { connect: { id: Number(data.setTypeId) } },
       position: data.position,
-      // Map incoming notes to publicNotes field
       publicNotes: data.notes,
       isUncertain: data.isUncertain ?? false,
+      band: data.bandId ? { connect: { id: data.bandId } } : { disconnect: true },
     },
   });
   return NextResponse.json({ set });

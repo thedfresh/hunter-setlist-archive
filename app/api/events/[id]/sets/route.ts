@@ -30,9 +30,9 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       eventId,
       setTypeId: data.setTypeId,
       position: data.position,
-      // map notes to publicNotes field
       publicNotes: data.notes || null,
       isUncertain: data.isUncertain ?? false,
+      bandId: data.bandId ?? null,
     },
   });
   return NextResponse.json({ set }, { status: 201 });

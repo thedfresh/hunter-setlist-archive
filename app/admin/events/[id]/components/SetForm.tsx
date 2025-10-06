@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Set } from '@/lib/types';
 
+
 interface SetFormProps {
   eventId: any;
   setTypes: any[];
@@ -8,14 +9,16 @@ interface SetFormProps {
   editingSet: Set | null;
   onClose: () => void;
   onSaved: () => void;
+  bands: any[];
 }
 
-const SetForm: React.FC<SetFormProps> = ({ eventId, setTypes, sets, editingSet, onClose, onSaved }) => {
+const SetForm: React.FC<SetFormProps> = ({ eventId, setTypes, sets, editingSet, onClose, onSaved, bands }) => {
   const [form, setForm] = useState({
     setTypeId: editingSet?.setTypeId || "",
     position: editingSet?.position || (sets.length + 1),
     notes: editingSet?.notes || "",
     isUncertain: editingSet?.isUncertain || false,
+    bandId: editingSet?.bandId || "",
   });
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [submitting, setSubmitting] = useState(false);
@@ -49,6 +52,7 @@ const SetForm: React.FC<SetFormProps> = ({ eventId, setTypes, sets, editingSet, 
       position: Number(form.position),
       notes: form.notes,
       isUncertain: form.isUncertain,
+      bandId: form.bandId === "" ? null : Number(form.bandId),
     };
     let res;
     if (editingSet) {
@@ -92,6 +96,20 @@ const SetForm: React.FC<SetFormProps> = ({ eventId, setTypes, sets, editingSet, 
               ))}
             </select>
             {errors.setTypeId && <p className="text-red-500 text-xs mt-1">{errors.setTypeId}</p>}
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Band</label>
+            <select
+              name="bandId"
+              value={form.bandId}
+              onChange={e => setForm(f => ({ ...f, bandId: e.target.value }))}
+              className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
+            >
+              <option value="">None (defaults to event primary band)</option>
+              {bands.map((b: any) => (
+                <option key={b.id} value={b.id}>{b.name}</option>
+              ))}
+            </select>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Position<span className="text-red-500">*</span></label>
