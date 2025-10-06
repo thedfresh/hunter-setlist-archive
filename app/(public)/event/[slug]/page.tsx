@@ -1,62 +1,77 @@
+
+import { notFound } from 'next/navigation';
 import React from 'react';
 
-export default function EventDetailPage() {
+import EventHeader from '@/components/ui/EventHeader';
+import EventSetlist from '@/components/ui/EventSetlist';
+import PerformanceNotes from '@/components/ui/PerformanceNotes';
+import RecordingsSection from '@/components/ui/RecordingsSection';
+import ContributorsSection from '@/components/ui/ContributorsSection';
+import StageTalk from '@/components/ui/StageTalk';
+import { fetchEventBySlug, fetchAdjacentEvents } from '@/lib/eventQueries';
+
+
+export default async function EventDetailPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const event = await fetchEventBySlug(slug);
+  if (!event) notFound();
+  const adjacent = await fetchAdjacentEvents(event);
+
+  // Dynamic performer card class
+  const performer = event.primaryBand?.name || 'Solo Hunter';
+  let cardClass = 'event-card-solo';
+  if (performer === 'Dinosaurs') cardClass = 'event-card-dinosaurs';
+  else if (performer === 'Comfort') cardClass = 'event-card-comfort';
+  else if (performer === 'Roadhog') cardClass = 'event-card-roadhog';
+
+  // Flatten performances for notes
+  const flattenedPerformances = event.sets.flatMap((s: any) => s.performances);
+
   return (
-    <main className="event-card event-card-solo p-6">
-      <header className="card-title mb-4">
-        <span>2002-08-07</span> - <span>Solo Hunter</span> <span className="badge badge-verified">Verified</span>
-      </header>
-      <div className="card-subtitle mb-6">Gallatin Gateway Inn, Bozeman, MT</div>
-  <div className="notes-section mb-6">
-        <div className="notes-title font-semibold mb-1">Show Notes:</div>
-        <div className="notes-content">With Larry Klein on bass for Set 2. Opening for New Riders of the Purple Sage.</div>
-      </div>
-
-  <div className="rounded-lg p-2.5 border border-gray-100 bg-white/40">
-        <section className="set-section flex gap-3 mt-0">
-          <div className="set-label min-w-[80px] text-right">Set 1</div>
-          <div className="setlist flex-1">Box Of Rain, Cruel White Water, Cumberland Blues[1], Lazy River Road, Brown Eyed Women[1], The Wind Blows High, Rum Runners, Stella Blue, Candyman, Scarlet Begonias, Doin' That Rag, Promontory Rider</div>
-        </section>
-
-        <section className="set-section flex gap-3 mt-3">
-          <div className="set-label min-w-[80px] text-right">Set 2</div>
-          <div className="setlist flex-1">Uncle John's Band &gt; Brokedown Palace &gt; Days Between, Lady With A Fan &gt; Terrapin Station, Dire Wolf &gt; Peggy-O &gt; Dire Wolf &gt; Peggy-O, Stagger Lee, Beedle Um Bum &gt; Crazy Words Crazy Tune &gt; Beedle Um Bum &gt; We Shall Not Be Moved &gt; Tiger Rose &gt; Louis Collins, Easy Wind, Reuben And Cerise, Wharf Rat, Liberty</div>
-        </section>
-
-        <section className="set-section flex gap-3 mt-3">
-          <div className="set-label min-w-[80px] text-right">Encore</div>
-          <div className="setlist flex-1">Ripple</div>
-        </section>
-      </div>
-
-      <div className="notes-section pt-5 border-t mt-8">
-        <div className="notes-title font-semibold mb-1">Performance Notes:</div>
-        <div className="notes-content">[1] First verse only</div>
-      </div>
-
-      {/* Stage Talk Section */}
-  <div className="notes-section mt-5">
-        <div className="notes-title font-semibold mb-1">Stage Talk:</div>
-        <div>
-          <span className="banter-label font-semibold text-sm">Before Uncle John's Band:</span>{' '}
-          <span className="text-sm">Hunter mentions this was one of the first songs he wrote with Jerry Garcia.</span>
+    <main className={`event-card ${cardClass} p-6`}>
+      <EventHeader
+        event={{
+          year: event.year ?? 0,
+          month: event.month ?? undefined,
+          day: event.day ?? undefined,
+          displayDate: event.displayDate,
+          venue: event.venue,
+          primaryBand: event.primaryBand,
+          showTiming: event.showTiming,
+          verified: event.verified,
+        }}
+        eventMusicians={event.eventMusicians
+          ?.filter((em: any) => em.musician && em.instrument)
+          .map((em: any) => ({ musician: { name: em.musician.name }, instrument: { name: em.instrument.name } }))}
+        adjacent={adjacent}
+      />
+      {event.publicNotes && (
+        <div className="notes-section mb-6">
+          <div className="notes-title font-semibold mb-1">Show Notes</div>
+          <div className="notes-content">{event.publicNotes}</div>
         </div>
-        <div className="mt-2">
-          <span className="banter-label font-semibold text-sm">After Terrapin Station:</span>{' '}
-          <span className="text-sm">A brief story about the song's origins.</span>
+      )}
+      <EventSetlist sets={event.sets} />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+          <div>
+            <PerformanceNotes performances={flattenedPerformances} />
+            <ContributorsSection
+              contributors={
+                (event.eventContributors || [])
+                  .filter((c: any) => c.contributor && c.description != null)
+                  .map((c: any) => ({
+                    id: c.id,
+                    description: c.description ?? '',
+                    contributor: { name: c.contributor.name },
+                  }))
+              }
+            />
+            <RecordingsSection recordings={event.recordings} />
+          </div>
+          <div>
+            <StageTalk sets={event.sets} />
+          </div>
         </div>
-      </div>
-
-      {/* Recordings Section */}
-      <div className="recording-section mt-5">
-        <div className="notes-title font-semibold mb-1">Recordings:</div>
-        <div className="recording-item mb-1">
-          SBD • Soundboard recording by Dan Healy <span className="badge badge-sbd ml-2">SBD</span>
-        </div>
-        <div className="recording-item">
-          AUD • Audience recording, Sony microphones <span className="badge badge-aud ml-2">AUD</span>
-        </div>
-      </div>
     </main>
   );
 }

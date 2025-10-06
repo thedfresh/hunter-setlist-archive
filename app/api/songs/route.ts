@@ -1,12 +1,75 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { prisma } from "@/lib/prisma";
 
 export async function GET() {
   try {
-    // Fetch songs without count, we'll compute non-medley performance counts separately
+    // Get all non-medley performances with event dates
+    const performances = await prisma.performance.findMany({
+      where: { 
+        isMedley: false,
+        set: {
+          event: {
+            includeInStats: true  // Add this filter
+          }
+        },
+        song: {
+          songTags: {
+            none: {
+              tag: {
+                name: "medley"
+              }
+            }
+          }
+        }
+      },
+      select: {
+        songId: true,
+        set: {
+          select: {
+            event: {
+              select: {
+                year: true,
+                month: true,
+                day: true,
+                displayDate: true
+              }
+            }
+          }
+        }
+      }
+    });
+
+    // Group by songId
+    const songData = new Map();
+    
+    performances.forEach(perf => {
+      const event = perf.set.event;
+      if (!event.year) return; // Skip if no year
+      
+      // Create comparable date (use year/month/day, fallback to year only)
+      const dateValue = event.year * 10000 + (event.month || 0) * 100 + (event.day || 0);
+      const displayDate = event.displayDate || 
+        `${event.year}${event.month ? '-' + String(event.month).padStart(2, '0') : ''}${event.day ? '-' + String(event.day).padStart(2, '0') : ''}`;
+      
+      if (!songData.has(perf.songId)) {
+        songData.set(perf.songId, {
+          count: 0,
+          dates: []
+        });
+      }
+      
+      const data = songData.get(perf.songId);
+      data.count++;
+      data.dates.push({ value: dateValue, display: displayDate });
+    });
+
+    // Fetch songs that have performances
+    const songIds = Array.from(songData.keys());
+    
     const songs = await prisma.song.findMany({
+      where: {
+        id: { in: songIds }
+      },
       include: {
         songAlbums: { include: { album: true } },
         songTags: { include: { tag: true } },
@@ -15,77 +78,23 @@ export async function GET() {
       orderBy: { title: "asc" },
     });
 
-    // Compute performance counts excluding medleys
-    const nonMedleyCounts = await prisma.performance.groupBy({
-      by: ['songId'],
-      where: { isMedley: false },
-      _count: { _all: true },
-    });
-    const countMap = new Map(nonMedleyCounts.map(c => [c.songId, c._count._all]));
-
-
     return NextResponse.json({
-      songs: songs.map(song => ({
-        ...song,
-        albums: song.songAlbums.map(sa => sa.album),
-        tags: song.songTags.map(st => st.tag),
-        performanceCount: countMap.get(song.id) ?? 0
-      })),
+      songs: songs.map(song => {
+        const data = songData.get(song.id);
+  const sortedDates = data.dates.sort((a: { value: number; display: string }, b: { value: number; display: string }) => a.value - b.value);
+        
+        return {
+          ...song,
+          albums: song.songAlbums.map(sa => sa.album),
+          tags: song.songTags.map(st => st.tag),
+          performanceCount: data.count,
+          firstPerformance: sortedDates[0].display,
+          lastPerformance: sortedDates[sortedDates.length - 1].display,
+        };
+      }),
     });
   } catch (error) {
     console.error("Error in GET /api/songs:", error);
     return NextResponse.json({ error: "Failed to fetch songs." }, { status: 500 });
-  }
-}
-
-export async function POST(req: Request) {
-  try {
-    const data = await req.json();
-    if (!data.title || typeof data.title !== "string") {
-      return NextResponse.json({ error: "Title is required." }, { status: 400 });
-    }
-    // Create song
-    const song = await prisma.song.create({
-      data: {
-        title: data.title,
-        alternateTitle: data.alternateTitle || null,
-        originalArtist: data.originalArtist || null,
-        lyricsBy: data.lyricsBy || null,
-        musicBy: data.musicBy || null,
-        publicNotes: data.publicNotes || null,
-        privateNotes: data.privateNotes || null,
-        isUncertain: !!data.isUncertain,
-        inBoxOfRain: !!data.inBoxOfRain,
-      },
-    });
-    // Many-to-many: songAlbums
-    if (data.albumIds?.length) {
-      await prisma.songAlbum.createMany({
-        data: data.albumIds.map((albumId: number) => ({ songId: song.id, albumId })),
-      });
-    }
-    // Many-to-many: songTags
-    if (data.tagIds?.length) {
-      await prisma.songTag.createMany({
-        data: data.tagIds.map((tagId: number) => ({ songId: song.id, tagId })),
-      });
-    }
-    // External links
-    if (data.links?.length) {
-      for (const link of data.links) {
-        await prisma.link.create({
-          data: {
-            url: link.url,
-            title: link.title,
-            description: link.description,
-            songId: song.id,
-          },
-        });
-      }
-    }
-    return NextResponse.json({ song }, { status: 201 });
-  } catch (error) {
-    console.error("SONG CREATE ERROR", error);
-    return NextResponse.json({ error: "Failed to create song", details: String(error) }, { status: 500 });
   }
 }
