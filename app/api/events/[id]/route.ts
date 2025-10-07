@@ -49,6 +49,8 @@ export async function PUT(req: NextRequest, context: { params: Promise<Params> }
         day: data.day ? Number(data.day) : null,
         displayDate: data.displayDate || null,
         showTiming: data.showTiming || null,
+        // include slug field
+        slug: data.slug || null,
         // relations: use connect/disconnect for foreign keys
         ...(data.venueId
           ? { venue: { connect: { id: Number(data.venueId) } } }

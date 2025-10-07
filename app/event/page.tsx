@@ -98,7 +98,7 @@ export default async function EventBrowsePage({ searchParams }: { searchParams: 
         {events.map((event: any) => (
           <Link
             key={event.id}
-            href={`/event/${generateSlug(event)}`}
+            href={`/event/${event.slug ?? generateSlug(event)}`}
             className={`event-card ${getCardClass(event)} block p-6`}
           >
             <div className="mb-4">

@@ -2,6 +2,7 @@
 import { useRouter, useParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { Event, Set } from '@/lib/types';
+import { generateSlug } from '@/lib/eventSlug';
 import SetPerformancesSection from "./components/SetPerformancesSection";
 import SetMusiciansSection from "./components/SetMusiciansSection";
 import EventMusiciansSection from "./components/EventMusiciansSection";
@@ -51,6 +52,7 @@ export default function EventEditPage() {
     isUncertain: false,
     isPublic: true,
     verified: false,
+    slug: "",
   });
   const [venues, setVenues] = useState<{ id: number; name: string, context?: string, city?: string, stateProvince?: string, country?: string }[]>([]);
   const [eventTypes, setEventTypes] = useState<{ id: number; name: string }[]>([]);
@@ -139,6 +141,7 @@ export default function EventEditPage() {
               isUncertain: !!data.event.isUncertain,
               isPublic: data.event.isPublic !== false, // default to true
               verified: !!data.event.verified,
+              slug: data.event.slug || "",
           });
         } else {
           setError("Event not found.");
@@ -340,39 +343,39 @@ export default function EventEditPage() {
               <label className="text-sm text-gray-700">Include in stats</label>
             </div>
           </div>
-          <div className="flex gap-4">
-            <div className="w-1/8">
+          <div className="flex gap-2 items-end">  {/* Date row: year/month/day/displayDate/showTiming/slug */}
+            <div className="w-24">
               <label className="block text-sm font-medium text-gray-700 mb-1">Year<span className="text-red-500">*</span></label>
               <input
                 type="number"
                 name="year"
                 value={form.year}
                 onChange={e => setForm(f => ({ ...f, year: e.target.value }))}
-                className={`w-full border rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${error ? "border-red-500" : "border-gray-300"}`}
+                className={`w-full border rounded-md px-4 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 ${error ? "border-red-500" : "border-gray-300"}`}
                 required
               />
             </div>
-            <div className="w-1/8">
+            <div className="w-24">
               <label className="block text-sm font-medium text-gray-700 mb-1">Month</label>
               <input
                 type="number"
                 name="month"
                 value={form.month}
                 onChange={e => setForm(f => ({ ...f, month: e.target.value }))}
-                className="w-full border rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
+                className="w-full border rounded-md px-4 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
               />
             </div>
-            <div className="w-1/8">
+            <div className="w-24">
               <label className="block text-sm font-medium text-gray-700 mb-1">Day</label>
               <input
                 type="number"
                 name="day"
                 value={form.day}
                 onChange={e => setForm(f => ({ ...f, day: e.target.value }))}
-                className="w-full border rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
+                className="w-full border rounded-md px-4 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
               />
             </div>
-            <div className="w-2/5">
+            <div className="w-48">
               <label className="block text-sm font-medium text-gray-700 mb-1">Display Date</label>
               <input
                 type="text"
@@ -383,21 +386,49 @@ export default function EventEditPage() {
                 placeholder="e.g. July 4, 1985"
               />
             </div>
-            <div className="w-1/6">
+            <div className="w-32">
               <label className="block text-sm font-medium text-gray-700 mb-1">Set Timing</label>
-              <select
+                <select
                 name="showTiming"
                 value={form.showTiming}
                 onChange={e => setForm(f => ({ ...f, showTiming: e.target.value }))}
-                className="w-full border rounded-md px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
+                className="w-full border rounded-md px-4 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
               >
                 <option value="">—</option>
                 <option value="Early">Early</option>
                 <option value="Late">Late</option>
               </select>
+            </div>  {/* Set Timing field */}
+            <div className="w-248">  {/* Slug Field with regenerate button */}
+              <label className="block text-sm font-medium text-gray-700 mb-1">Slug (URL)</label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  name="slug"
+                  value={form.slug}
+                  onChange={e => setForm(f => ({ ...f, slug: e.target.value }))}
+                  className="w-full bg-gray-100 border border-gray-300 rounded-md px-4 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    const newSlug = generateSlug({
+                      year: form.year ? Number(form.year) : null,
+                      month: form.month ? Number(form.month) : null,
+                      day: form.day ? Number(form.day) : null,
+                      showTiming: form.showTiming || null,
+                    });
+                    setForm(f => ({ ...f, slug: newSlug }));
+                  }}
+                  className="bg-blue-600 text-white px-3 py-1 rounded-md text-sm hover:bg-blue-700 focus:outline-none"
+                >
+                  Regenerate
+                </button>
+              </div>
             </div>
           </div>
-          <div className="flex gap-4">
+          {/* End Slug Field */}
+          <div className="flex gap-4">  {/* Event Type and Content Type row */}
             <div className="w-1/3">
               <label className="block text-sm font-medium text-gray-700 mb-1">Event Type</label>
               <select
@@ -438,7 +469,7 @@ export default function EventEditPage() {
                 {bands.map(b => (
                   <option key={b.id} value={b.id}>{b.name}</option>
                 ))}
-              </select>
+                </select>
             </div>
           </div>
           <div>

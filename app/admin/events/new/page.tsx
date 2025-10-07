@@ -74,8 +74,8 @@ export default function NewEventPage() {
         // Set default values for dropdowns after fetch
         setForm(f => ({
           ...f,
-          eventTypeId: eventTypesData.eventTypes?.find((t: any) => t.name.toLowerCase() === 'public show')?.id || (eventTypesData.eventTypes?.[0]?.id ?? ''),
-          contentTypeId: contentTypesData.contentTypes?.find((t: any) => t.name.toLowerCase() === 'musical')?.id || (contentTypesData.contentTypes?.[0]?.id ?? ''),
+          eventTypeId: eventTypesData.eventTypes?.find((t: any) => t.name.toLowerCase() === 'public performance')?.id || (eventTypesData.eventTypes?.[0]?.id ?? ''),
+          contentTypeId: contentTypesData.contentTypes?.find((t: any) => t.name.toLowerCase() === 'music')?.id || (contentTypesData.contentTypes?.[0]?.id ?? ''),
           primaryBandId: bandsData.bands?.find((b: any) => b.name.toLowerCase() === 'robert hunter')?.id || (bandsData.bands?.[0]?.id ?? ''),
         }));
       } catch (err: any) {

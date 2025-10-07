@@ -4,6 +4,7 @@ import Link from "next/link";
 
 type Event = {
   id: number;
+  slug?: string;
   year: number;
   month?: number;
   day?: number;

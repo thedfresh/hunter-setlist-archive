@@ -5,9 +5,9 @@ import { parseSlug, generateSlug, ParsedSlug } from './eventSlug';
 export type EventWithAll = Awaited<ReturnType<typeof fetchEventBySlug>>;
 
 export async function fetchEventBySlug(slug: string) {
-  const { year, month, day, showTiming }: ParsedSlug = parseSlug(slug);
-  const event = await prisma.event.findFirst({
-    where: { year, month, day, showTiming },
+  // First try direct lookup by slug column
+  let event = await prisma.event.findUnique({
+    where: { slug },
     include: {
       venue: true,
       primaryBand: true,
@@ -47,6 +47,51 @@ export async function fetchEventBySlug(slug: string) {
       },
     },
   });
+  // Fallback to legacy date-based lookup
+  if (!event) {
+    const { year, month, day, showTiming }: ParsedSlug = parseSlug(slug);
+    event = await prisma.event.findFirst({
+      where: { year, month, day, showTiming },
+      include: {
+        venue: true,
+        primaryBand: true,
+        eventType: true,
+        contentType: true,
+        sets: {
+          include: {
+            setType: true,
+            performances: {
+              include: {
+                song: true,
+                showBanter: { orderBy: { id: 'asc' } },
+                performanceMusicians: {
+                  include: { musician: true, instrument: true },
+                },
+              },
+              orderBy: { performanceOrder: 'asc' },
+            },
+            band: true,
+            setMusicians: {
+              include: {
+                musician: true,
+                instrument: true,
+              },
+            },
+          },
+          orderBy: { position: 'asc' },
+        },
+        eventMusicians: {
+          include: { musician: true, instrument: true },
+        },
+        recordings: {
+          include: { recordingType: true, contributor: true },
+        },
+        eventContributors: {
+          include: { contributor: true },
+        },
+      },
+    });
+  }
   return event;
 }
 
@@ -79,7 +124,7 @@ export async function fetchAdjacentEvents(event: EventForAdjacent) {
       { day: 'desc' },
       { showTiming: 'desc' },
     ],
-    select: { year: true, month: true, day: true, showTiming: true },
+    select: { year: true, month: true, day: true, showTiming: true, slug: true },
   });
   // Next event: after current date
   const nextWhere: any[] = [];
@@ -97,10 +142,10 @@ export async function fetchAdjacentEvents(event: EventForAdjacent) {
       { day: 'asc' },
       { showTiming: 'asc' },
     ],
-    select: { year: true, month: true, day: true, showTiming: true },
+    select: { year: true, month: true, day: true, showTiming: true, slug: true },
   });
   return {
-    prev: prev ? { ...prev, slug: generateSlug(prev) } : null,
-    next: next ? { ...next, slug: generateSlug(next) } : null,
+    prev: prev ? { ...prev, slug: prev.slug ?? generateSlug(prev) } : null,
+    next: next ? { ...next, slug: next.slug ?? generateSlug(next) } : null,
   };
 }
