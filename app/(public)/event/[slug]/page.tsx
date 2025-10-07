@@ -40,18 +40,50 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
           showTiming: event.showTiming,
           verified: event.verified,
         }}
-        eventMusicians={event.eventMusicians
-          ?.filter((em: any) => em.musician && em.instrument)
-          .map((em: any) => ({ musician: { name: em.musician.name }, instrument: { name: em.instrument.name } }))}
         adjacent={adjacent}
       />
-      {event.publicNotes && (
-        <div className="notes-section mb-6">
-          <div className="notes-title font-semibold mb-1">Show Notes</div>
+      <div className="notes-section mb-6">
+        <div className="notes-title font-semibold mb-1">Show Notes</div>
+        {/* Event-level musicians */}
+        {event.eventMusicians && event.eventMusicians.length > 0 && (
+          <div className="text-xs text-gray-700 mb-2">
+            With {event.eventMusicians
+              .filter((em: any) => em.musician && em.instrument)
+              .map((em: any) => `${em.musician.name} on ${em.instrument.name}`)
+              .join(', ')}
+          </div>
+        )}
+        {/* Set band context lines */}
+        {event.sets && event.sets.length > 0 && event.sets.map((set: any, idx: number) => (
+          set.bandId && set.bandId !== event.primaryBandId && set.band ? (
+            <div key={set.id} className="text-xs text-gray-700 mb-2">
+              Set {set.position ?? idx + 1} is {set.band.name}
+            </div>
+          ) : null
+        ))}
+        {/* Set-level musicians */}
+        {event.sets && event.sets.length > 0 && event.sets.map((set: any, idx: number) => (
+          set.setMusicians && set.setMusicians.length > 0 ? (
+            <div key={set.id + '-musicians'} className="text-xs text-gray-700 mb-2">
+              Set {idx + 1}: with {set.setMusicians
+                .filter((sm: any) => sm.musician && sm.instrument)
+                .map((sm: any) => `${sm.musician.name} on ${sm.instrument.displayName}`)
+                .join(', ')}
+            </div>
+          ) : null
+        ))}
+        {/* Public notes */}
+        {event.publicNotes && (
           <div className="notes-content">{event.publicNotes}</div>
-        </div>
-      )}
-      <EventSetlist sets={event.sets} />
+        )}
+      </div>
+      <EventSetlist
+        sets={event.sets.map((set: any) => ({
+          ...set,
+          setMusicians: [], // Remove set musicians from setlist display
+        }))}
+        eventPrimaryBandId={event.primaryBandId}
+      />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
           <div>
             <PerformanceNotes performances={flattenedPerformances} />

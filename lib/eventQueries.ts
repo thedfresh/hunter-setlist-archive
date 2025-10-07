@@ -20,8 +20,18 @@ export async function fetchEventBySlug(slug: string) {
             include: {
               song: true,
               showBanter: { orderBy: { id: 'asc' } },
+              performanceMusicians: {
+                include: { musician: true, instrument: true },
+              },
             },
             orderBy: { performanceOrder: 'asc' },
+          },
+          band: true,
+          setMusicians: {
+            include: {
+              musician: true,
+              instrument: true,
+            },
           },
         },
         orderBy: { position: 'asc' },

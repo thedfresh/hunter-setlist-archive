@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { Event, Set } from '@/lib/types';
 import SetPerformancesSection from "./components/SetPerformancesSection";
 import SetMusiciansSection from "./components/SetMusiciansSection";
+import EventMusiciansSection from "./components/EventMusiciansSection";
 import SetForm from './components/SetForm';
 import Link from "next/link";
 import EventContributorsSection from "./components/EventContributorsEditor";
@@ -480,6 +481,10 @@ export default function EventEditPage() {
             </div>
           </div>
           </div>
+                    {/* Event Musicians Section */}
+                    <div className="mb-6">
+                      <EventMusiciansSection eventId={Number(id)} />
+                    </div>
                     {/* Notes + Raw Data Section (collapsible, collapsed by default) */}
           <div className="mb-6">
             <button type="button" className="text-sm text-blue-600 font-semibold mb-2" onClick={() => setShowNotes(v => !v)}>

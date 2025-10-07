@@ -1,30 +1,53 @@
 import React from 'react';
 
+interface PerformanceMusician {
+  musician: { name: string };
+  instrument: { displayName: string };
+}
+
 interface PerformanceNotesProps {
   performances: Array<{
     id: number;
     publicNotes?: string | null;
     song: { title: string };
+    performanceMusicians?: PerformanceMusician[];
   }>;
 }
 
 const PerformanceNotes: React.FC<PerformanceNotesProps> = ({ performances }) => {
-  // 1. Filter performances with notes
-  const noted = performances.filter((p) => p.publicNotes && p.publicNotes.trim());
-  if (noted.length === 0) return null;
+  // Collect all notes: publicNotes and generated performanceMusicians notes
+  type PerfNote = { perfId: number; note: string };
+  const allNotes: PerfNote[] = [];
 
-  // 2. Map for unique notes
+  for (const perf of performances) {
+    if (perf.publicNotes && perf.publicNotes.trim()) {
+      allNotes.push({ perfId: perf.id, note: perf.publicNotes.trim() });
+    }
+    if (perf.performanceMusicians && perf.performanceMusicians.length > 0) {
+      perf.performanceMusicians.forEach(pm => {
+        if (pm.musician?.name && pm.instrument?.displayName) {
+          allNotes.push({
+            perfId: perf.id,
+            note: `${pm.musician.name} on ${pm.instrument.displayName}`,
+          });
+        }
+      });
+    }
+  }
+
+  if (allNotes.length === 0) return null;
+
+  // Deduplicate notes and assign numbers
   const noteMap = new Map<string, number>();
   let noteNum = 1;
-  for (const perf of noted) {
-    const note = perf.publicNotes!.trim();
+  for (const { note } of allNotes) {
     if (!noteMap.has(note)) {
       noteMap.set(note, noteNum++);
     }
   }
 
   // 3. Map performance id to footnote number (if needed elsewhere)
-  // const perfToNoteNum = Object.fromEntries(noted.map(p => [p.id, noteMap.get(p.publicNotes!.trim())]));
+  // const perfToNoteNum = Object.fromEntries(allNotes.map(n => [n.perfId, noteMap.get(n.note)]));
 
   // 4. Render
   return (
