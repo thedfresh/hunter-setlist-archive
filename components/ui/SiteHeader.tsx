@@ -7,7 +7,7 @@ const SiteHeader = () => (
       <Link href="/">
         <Image 
           src="/images/title.png" 
-          alt="Robert Hunter Setlist Archive" 
+          alt="Robert Hunter Performance Archive" 
           width={200} 
           height={184}
           className="site-logo"

@@ -7,7 +7,7 @@ export default function Home() {
         <div className="flex justify-center mb-8">
           <Image
             src="/images/title.png"
-            alt="Hunter Setlist Archive Logo"
+            alt="Hunter Performance Archive Logo"
             width={200}
             height={184}
             priority
@@ -15,7 +15,7 @@ export default function Home() {
           />
         </div>
         <p className="text-center text-lg">
-          Robert Hunter Setlist Archive v2.0 coming soon, featuring...
+          Robert Hunter Performance Archive v2.0 coming soon, featuring...
         </p>
           <ul className="flex flex-col items-center justify-center">
             <li>New user interface</li>

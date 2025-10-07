@@ -7,7 +7,7 @@ import ConditionalSiteHeader from './ConditionalSiteHeader';
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Hunter Setlist Archive',
+  title: 'The Robert Hunter Performance Archive',
   description: 'Robert Hunter performance archive and setlist database',
 }
 

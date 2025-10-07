@@ -53,10 +53,10 @@ export default async function BetaHomePage() {
   return (
     <div className="max-w-4xl mx-auto p-8">
       <section className="mb-10">
-        <h1 className="text-3xl font-bold mb-4  text-center">Robert Hunter Setlist Archive 2.0 (Beta)</h1>
+        <h1 className="text-3xl font-bold mb-4  text-center">Robert Hunter Performance Archive 2.0 (Beta)</h1>
         <p className="text-sm text-gray-700 mb-2">
-            Hello, and welcome to the resurrected Robert Hunter Setlist Archive!  I originaly built this site in the late '90s as a way to 
-            document and share Hunter setlists from circulating tapes and contemporary tours.  I stopped updating the site after his 1998 tour,
+            Hello, and welcome to the resurrected Robert Hunter Performance Archive!  I originaly built this site in the late '90s as a way to 
+            document and share Hunter performances from circulating tapes and contemporary tours.  I stopped updating the site after his 1998 tour,
             and by the mid-2000s the site was no longer online.  In 2025 I developed a plan to rebuild and modernize the site, this time 
             leveraging modern technology to create a searchable database of known performances.</p> 
         <p className="text-sm text-gray-700 mb-2">There is still a tremendous amount of work 
@@ -66,7 +66,7 @@ export default async function BetaHomePage() {
         </p>
       </section>
       <section>
-        <h2 className="text-xl font-semibold mb-4 text-center">Today in Hunter History</h2>
+        <h2 className="text-xl font-semibold mb-4 text-center">Today in Robert Hunter Performances</h2>
         {events.length === 0 ? (
           <div className="text-center text-gray-500 py-8">No shows on this date in history</div>
         ) : (

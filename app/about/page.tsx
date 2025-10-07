@@ -1,7 +1,7 @@
 export default function AboutPage() {
   return (
     <div className="max-w-3xl mx-auto p-8">
-      <h1 className="text-2xl font-bold mb-8 text-center">About the Robert Hunter Setlist Archive</h1>
+      <h1 className="text-2xl font-bold mb-8 text-center">About the Robert Hunter Performance Archive</h1>
 
       <section className="mb-8">
         <div className="section-header mb-2">Project History</div>
