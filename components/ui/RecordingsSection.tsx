@@ -62,7 +62,7 @@ const RecordingsSection: React.FC<RecordingsSectionProps> = ({ recordings }) => 
           )}
           {rec.losslessLegsId && (
             <a
-              href={`https://www.lossless-legs.com/board/showthread.php?t=${rec.losslessLegsId}`}
+              href={`https://www.shnflac.net/index.php?page=torrent-details&id=${rec.losslessLegsId}`}
               className="link-external text-blue-600 underline ml-2"
               target="_blank"
               rel="noopener noreferrer"
