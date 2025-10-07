@@ -20,6 +20,8 @@ interface EventHeaderProps {
 }
 
 function formatDateAmerican(event: EventHeaderProps['event']) {
+  // Use displayDate if provided
+  if (event.displayDate) return event.displayDate;
   // Always format as MM/DD/YYYY
   const m = event.month ? event.month.toString().padStart(2, '0') : '??';
   const d = event.day ? event.day.toString().padStart(2, '0') : '??';

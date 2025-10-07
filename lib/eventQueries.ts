@@ -102,40 +102,9 @@ export type EventForAdjacent = {
   showTiming?: string | null;
 };
 
-export async function fetchAdjacentEvents(event: EventForAdjacent) {
-  const { year, month, day, showTiming } = event;
-  // Helper to build valid where clauses for prev/next
-  function isNum(n: number | null | undefined): n is number {
-    return typeof n === 'number' && !isNaN(n);
-  }
-  // Previous event: before current date
-  const prevWhere: any[] = [];
-  if (isNum(year)) prevWhere.push({ year: { lt: year } });
-  if (isNum(year) && isNum(month)) prevWhere.push({ year, month: { lt: month } });
-  if (isNum(year) && isNum(month) && isNum(day)) prevWhere.push({ year, month, day: { lt: day } });
-  if (isNum(year) && isNum(month) && isNum(day) && showTiming) prevWhere.push({ year, month, day, showTiming: { lt: showTiming } });
-  const prev = await prisma.event.findFirst({
-    where: {
-      OR: prevWhere.length > 0 ? prevWhere : undefined,
-    },
-    orderBy: [
-      { year: 'desc' },
-      { month: 'desc' },
-      { day: 'desc' },
-      { showTiming: 'desc' },
-    ],
-    select: { year: true, month: true, day: true, showTiming: true, slug: true },
-  });
-  // Next event: after current date
-  const nextWhere: any[] = [];
-  if (isNum(year)) nextWhere.push({ year: { gt: year } });
-  if (isNum(year) && isNum(month)) nextWhere.push({ year, month: { gt: month } });
-  if (isNum(year) && isNum(month) && isNum(day)) nextWhere.push({ year, month, day: { gt: day } });
-  if (isNum(year) && isNum(month) && isNum(day) && showTiming) nextWhere.push({ year, month, day, showTiming: { gt: showTiming } });
-  const next = await prisma.event.findFirst({
-    where: {
-      OR: nextWhere.length > 0 ? nextWhere : undefined,
-    },
+export async function fetchAdjacentEvents(event: EventForAdjacent & { slug?: string }) {
+  // Fetch all events sorted chronologically by year, month, day, showTiming
+  const all = await prisma.event.findMany({
     orderBy: [
       { year: 'asc' },
       { month: 'asc' },
@@ -144,6 +113,11 @@ export async function fetchAdjacentEvents(event: EventForAdjacent) {
     ],
     select: { year: true, month: true, day: true, showTiming: true, slug: true },
   });
+  // Determine current slug, falling back to generated
+  const targetSlug = event.slug ?? generateSlug(event as any);
+  const idx = all.findIndex(e => e.slug === targetSlug);
+  const prev = idx > 0 ? all[idx - 1] : null;
+  const next = idx >= 0 && idx < all.length - 1 ? all[idx + 1] : null;
   return {
     prev: prev ? { ...prev, slug: prev.slug ?? generateSlug(prev) } : null,
     next: next ? { ...next, slug: next.slug ?? generateSlug(next) } : null,

@@ -230,7 +230,6 @@ export default function BandMembersSection({ bandId, bandMusicians }: BandMember
               placeholder="YYYY-MM-DD"
               value={addForm.joinedDate}
               onChange={e => setAddForm(f => ({ ...f, joinedDate: e.target.value }))}
-              required
             />
           </div>
           <div>
