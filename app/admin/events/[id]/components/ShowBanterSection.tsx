@@ -82,7 +82,7 @@ const ShowBanterSection: React.FC<Props> = ({ eventId }) => {
       return;
     }
     setLoading(true);
-    const res = await fetch(`/api/events/${eventId}/banter`, {
+    const res = await fetch(`/api/admin/events/${eventId}/banter`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
