@@ -120,6 +120,18 @@ export default function EventEditPage() {
         const allData = await allRes.json();
         if (res.ok && data.event) {
           setEvent(data.event);
+          // Format sortDate for datetime-local input
+          let sortDateValue = "";
+          if (data.event.sortDate) {
+            const d = new Date(data.event.sortDate);
+            // Pad month and day
+            const yyyy = d.getFullYear();
+            const mm = String(d.getMonth() + 1).padStart(2, '0');
+            const dd = String(d.getDate()).padStart(2, '0');
+            const hh = String(d.getHours()).padStart(2, '0');
+            const min = String(d.getMinutes()).padStart(2, '0');
+            sortDateValue = `${yyyy}-${mm}-${dd}T${hh}:${min}`;
+          }
           setForm({
             year: String(data.event.year || ""),
             month: String(data.event.month || ""),
@@ -143,7 +155,7 @@ export default function EventEditPage() {
             isPublic: data.event.isPublic !== false, // default to true
             verified: !!data.event.verified,
             slug: data.event.slug || "",
-            sortDate: data.event.sortDate || ""
+            sortDate: sortDateValue
           });
         } else {
           setError("Event not found.");
@@ -398,20 +410,6 @@ export default function EventEditPage() {
                 onChange={e => setForm(f => ({ ...f, sortDate: e.target.value }))}
                 className="w-full border rounded-md px-4 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
               />
-              <div className="flex gap-2 mt-2">
-                <button
-                  type="button"
-                  className="bg-gray-200 text-gray-800 px-2 py-1 rounded text-xs hover:bg-gray-300"
-                  onClick={() => {
-                    if (form.year && form.month && form.day) {
-                      const dt = new Date(Number(form.year), Number(form.month) - 1, Number(form.day));
-                      const iso = dt.toISOString().slice(0,16);
-                      setForm(f => ({ ...f, sortDate: iso }));
-                    }
-                  }}
-                >Set from Current Date</button>
-              </div>
-              <p className="text-xs text-gray-500 mt-1">Optional - overrides automatic date sorting. Leave empty for automatic.</p>
             </div>
             <div className="w-32">
               <label className="block text-sm font-medium text-gray-700 mb-1">Set Timing</label>

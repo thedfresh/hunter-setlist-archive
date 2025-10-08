@@ -21,8 +21,10 @@ function getPerformerName(event: any) {
 }
 
 function getCardClass(event: any) {
+  if (event.primaryBand && event.primaryBand.isHunterBand === false) {
+    return 'event-card-guest';
+  }
   const name = getPerformerName(event).toLowerCase();
-  console.log(name);
   if (name === 'robert hunter' || name === 'solo') return 'event-card-solo';
   if (name.includes('roadhog')) return 'event-card-roadhog';
   if (name.includes('comfort')) return 'event-card-comfort';

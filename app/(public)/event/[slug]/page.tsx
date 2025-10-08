@@ -24,11 +24,17 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
   });
 
   // Dynamic performer card class
-  const performer = event.primaryBand?.name || 'Solo Hunter';
   let cardClass = 'event-card-solo';
-  if (performer === 'Dinosaurs') cardClass = 'event-card-dinosaurs';
-  else if (performer === 'Comfort') cardClass = 'event-card-comfort';
-  else if (performer === 'Roadhog') cardClass = 'event-card-roadhog';
+  if (event.primaryBand && event.primaryBand.isHunterBand === false) {
+    cardClass = 'event-card-guest';
+  } else {
+    const performer = event.primaryBand?.name || 'Solo Hunter';
+    if (performer === 'Dinosaurs') cardClass = 'event-card-dinosaurs';
+    else if (performer === 'Comfort') cardClass = 'event-card-comfort';
+    else if (performer === 'Roadhog') cardClass = 'event-card-roadhog';
+    else if (performer === 'Solo Hunter') cardClass = 'event-card-solo';
+    else cardClass = 'event-card-special';
+  }
 
   // Determine if Show Notes section should be shown
   const hasEventMusicians = event.eventMusicians && event.eventMusicians.length > 0;

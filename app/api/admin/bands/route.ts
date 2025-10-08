@@ -13,6 +13,8 @@ export async function POST(req: Request) {
     const band = await prisma.band.create({
       data: {
         name: data.name,
+        displayName: typeof data.displayName === 'string' ? data.displayName : undefined,
+        isHunterBand: typeof data.isHunterBand === 'boolean' ? data.isHunterBand : true,
         publicNotes: typeof data.publicNotes === 'string' ? data.publicNotes : undefined,
         privateNotes: typeof data.privateNotes === 'string' ? data.privateNotes : undefined,
         slug,

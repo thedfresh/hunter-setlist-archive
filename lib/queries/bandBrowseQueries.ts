@@ -39,6 +39,8 @@ export async function getBandsBrowse() {
       id: true,
       slug: true,
       name: true,
+      displayName: true,
+      isHunterBand: true,
       publicNotes: true,
       _count: {
         select: {

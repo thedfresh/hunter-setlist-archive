@@ -10,6 +10,8 @@ interface BandFormProps {
 
 export default function BandForm({ band, onClose, onSaved }: BandFormProps) {
   const [name, setName] = useState(band?.name || "");
+  const [displayName, setDisplayName] = useState(band?.displayName || "");
+  const [isHunterBand, setIsHunterBand] = useState(band?.isHunterBand ?? true);
   const [publicNotes, setPublicNotes] = useState(band?.publicNotes || "");
   const [privateNotes, setPrivateNotes] = useState(band?.privateNotes || "");
   const [error, setError] = useState<string | null>(null);
@@ -20,7 +22,7 @@ export default function BandForm({ band, onClose, onSaved }: BandFormProps) {
     setSaving(true);
     setError(null);
   const slug = generateSlugFromName(name);
-  const payload = { name, slug, publicNotes, privateNotes };
+  const payload = { name, slug, displayName, isHunterBand, publicNotes, privateNotes };
     try {
       const res = await fetch(band ? `/api/admin/bands/${band.id}` : "/api/admin/bands", {
         method: band ? "PUT" : "POST",
@@ -61,6 +63,27 @@ export default function BandForm({ band, onClose, onSaved }: BandFormProps) {
               onChange={e => setName(e.target.value)}
               required
             />
+          </div>
+          <div>
+            <label className="block font-semibold mb-1">Display Name</label>
+            <input
+              type="text"
+              className="w-full border rounded px-3 py-2"
+              value={displayName}
+              onChange={e => setDisplayName(e.target.value)}
+              placeholder="Optional display name"
+            />
+          </div>
+          <div>
+            <label className="block font-semibold mb-1">Is Hunter Band?</label>
+            <select
+              className="w-full border rounded px-3 py-2"
+              value={isHunterBand ? "true" : "false"}
+              onChange={e => setIsHunterBand(e.target.value === "true")}
+            >
+              <option value="true">Yes</option>
+              <option value="false">No</option>
+            </select>
           </div>
           <div>
             <label className="block font-semibold mb-1">Public Notes</label>

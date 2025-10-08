@@ -14,6 +14,8 @@ export async function PUT(req: Request, { params }: { params: Params }) {
       where: { id },
       data: {
         name: data.name,
+        displayName: typeof data.displayName === 'string' ? data.displayName : undefined,
+        isHunterBand: typeof data.isHunterBand === 'boolean' ? data.isHunterBand : true,
         publicNotes: typeof data.publicNotes === 'string' ? data.publicNotes : undefined,
         privateNotes: typeof data.privateNotes === 'string' ? data.privateNotes : undefined,
       },

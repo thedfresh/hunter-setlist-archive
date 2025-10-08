@@ -22,7 +22,7 @@ export default function BandListPage() {
       const res = await fetch("/api/bands");
       const data = await res.json();
       if (res.ok && data.bands) {
-        setBands(data.bands);
+  setBands(data.bands);
       } else {
         setError(data.error || "Failed to fetch bands.");
       }
@@ -87,37 +87,76 @@ export default function BandListPage() {
         {loading ? (
           <div className="text-center py-8">Loading bands...</div>
         ) : (
-          <table className="w-full border rounded-md overflow-hidden">
-            <thead>
-              <tr className="bg-gray-100">
-                <th className="text-left px-4 py-2">Name</th>
-                <th className="text-left px-4 py-2">Member Count</th>
-                <th className="text-left px-4 py-2">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {bands.map(band => (
-                <tr key={band.id} className="border-t">
-                  <td className="px-4 py-2 font-semibold text-gray-800">{band.name}</td>
-                  <td className="px-4 py-2">{band.bandMusicians?.length || 0}</td>
-                  <td className="px-4 py-2 flex gap-2">
-                    <Link
-                      href={`/admin/bands/${band.id}`}
-                      className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 text-sm"
-                    >
-                      Edit
-                    </Link>
-                    <button
-                      className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 text-sm"
-                      onClick={() => handleDelete(band.id)}
-                    >
-                      Delete
-                    </button>
-                  </td>
+          <>
+            <h2 className="text-xl font-bold mt-4 mb-2">Hunter Bands</h2>
+            <table className="w-full border rounded-md overflow-hidden mb-8">
+              <thead>
+                <tr className="bg-gray-100">
+                  <th className="text-left px-4 py-2">Name</th>
+                  <th className="text-left px-4 py-2">Display Name</th>
+                  <th className="text-left px-4 py-2">Member Count</th>
+                  <th className="text-left px-4 py-2">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {bands.filter(b => b.isHunterBand).map(band => (
+                  <tr key={band.id} className="border-t">
+                    <td className="px-4 py-2 font-semibold text-gray-800">{band.name}</td>
+                    <td className="px-4 py-2">{band.displayName || <span className="text-gray-400">—</span>}</td>
+                    <td className="px-4 py-2">{band.bandMusicians?.length || 0}</td>
+                    <td className="px-4 py-2 flex gap-2">
+                      <Link
+                        href={`/admin/bands/${band.id}`}
+                        className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 text-sm"
+                      >
+                        Edit
+                      </Link>
+                      <button
+                        className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 text-sm"
+                        onClick={() => handleDelete(band.id)}
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <h2 className="text-xl font-bold mt-4 mb-2">Hunter as Guest</h2>
+            <table className="w-full border rounded-md overflow-hidden">
+              <thead>
+                <tr className="bg-gray-100">
+                  <th className="text-left px-4 py-2">Name</th>
+                  <th className="text-left px-4 py-2">Display Name</th>
+                  <th className="text-left px-4 py-2">Member Count</th>
+                  <th className="text-left px-4 py-2">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {bands.filter(b => !b.isHunterBand).map(band => (
+                  <tr key={band.id} className="border-t">
+                    <td className="px-4 py-2 font-semibold text-gray-800">{band.name}</td>
+                    <td className="px-4 py-2">{band.displayName || <span className="text-gray-400">—</span>}</td>
+                    <td className="px-4 py-2">{band.bandMusicians?.length || 0}</td>
+                    <td className="px-4 py-2 flex gap-2">
+                      <Link
+                        href={`/admin/bands/${band.id}`}
+                        className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 text-sm"
+                      >
+                        Edit
+                      </Link>
+                      <button
+                        className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 text-sm"
+                        onClick={() => handleDelete(band.id)}
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </>
         )}
         {showForm && (
           <BandForm

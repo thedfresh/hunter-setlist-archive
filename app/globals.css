@@ -72,7 +72,7 @@
   }
 
   .link-internal-roadhog:hover {
-    @apply text-[#a67c00] underline;
+    @apply text-[#c2410c] underline;
   }
 
   .link-internal-comfort:hover {
@@ -83,8 +83,12 @@
     @apply text-[#0891b2] underline;
   }
 
-  .link-internal-special:hover {
-    @apply text-[#5a3d5c] underline;
+   .link-internal-special:hover {
+    @apply text-[#9f1239] underline;
+  }
+
+    .link-internal-guest:hover {
+    @apply text-[#475569] underline;
   }
 
   /* Default internal link (for non-performer pages) */
@@ -354,12 +358,10 @@
   --border-secondary: #8b6914;
   }
 
-  /* Roadhog cards */
-  .event-card-roadhog {
-  @apply bg-[#fef5e7] border-l-[#d4a017];
-  --border-secondary: #cc6600;
-  }
-
+.event-card-roadhog {
+  @apply bg-[#fef3e7] border-l-[#d97706];
+  --border-secondary: #c2410c;
+}
   /* Comfort cards */
   .event-card-comfort {
   @apply bg-[#eff5e8] border-l-[#6b8e23];
@@ -374,8 +376,13 @@
 
   /* Special Ensembles cards */
   .event-card-special {
-  @apply bg-[#f0e8f0] border-l-[#7d5a80];
-  --border-secondary: #4a3850;
+    @apply bg-[#faf5f7] border-l-[#9f1239];
+    --border-secondary: #4c0519;
+  }
+
+  .event-card-guest {
+    @apply bg-[#f8fafc] border-l-[#475569];
+    --border-secondary: #1e293b;
   }
 
   /* Card content sections */

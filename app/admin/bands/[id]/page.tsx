@@ -71,6 +71,8 @@ export default function EditBandPage() {
           <div>
             <div className="mb-6">
               <div className="font-bold text-lg mb-1">{band.name}</div>
+              <div className="text-gray-600 mb-1">Display Name: {band.displayName || <span className="text-gray-400">—</span>}</div>
+              <div className="text-gray-600 mb-1">Hunter Band: {band.isHunterBand ? "Yes" : "No"}</div>
               <div className="text-gray-700 mb-2">{band.publicNotes}</div>
               <div className="text-gray-500 text-sm">Private: {band.privateNotes}</div>
             </div>
