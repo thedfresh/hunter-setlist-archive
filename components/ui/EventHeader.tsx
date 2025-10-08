@@ -40,7 +40,7 @@ function formatDateAmerican(event: EventHeaderProps['event']) {
 }
 
 const EventHeader: React.FC<EventHeaderProps> = ({ event, eventMusicians, adjacent }) => {
-  const performer = event.primaryBand?.name || 'Solo Hunter';
+  const performer = event.primaryBand?.name || 'Robert Hunter';
   let performerClass = 'event-card-solo';
   if (performer === 'Dinosaurs') performerClass = 'event-card-dinosaurs';
   else if (performer === 'Comfort') performerClass = 'event-card-comfort';

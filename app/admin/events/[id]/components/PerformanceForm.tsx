@@ -246,7 +246,7 @@ function PerformanceForm({ setId, songs, musicians, instruments, performances, e
                 onChange={(e) => setForm((f) => ({ ...f, isSoloHunter: e.target.checked }))}
                 className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
               />
-              <span className="text-sm text-gray-700">Solo Hunter</span>
+              <span className="text-sm text-gray-700">Robert Hunter</span>
             </label>
             <label className="flex items-center gap-2">
               <input
