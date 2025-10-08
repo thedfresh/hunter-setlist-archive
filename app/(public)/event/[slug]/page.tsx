@@ -77,7 +77,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
           {event.sets && event.sets.length > 0 && event.sets.map((set: any, idx: number) => (
             (set.bandId && set.bandId !== event.primaryBandId && set.band) ? (
               <div key={set.id} className="text-xs text-gray-700 mb-2">
-                Set {set.position ?? idx + 1} is {set.band.name}
+                Set {set.position ?? idx + 1} is {set.band.name === 'Robert Hunter' ? ` ${set.band.name} solo` : `${set.band.name}`} 
               </div>
             ) : null
           ))}
