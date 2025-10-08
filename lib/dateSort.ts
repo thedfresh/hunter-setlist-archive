@@ -7,11 +7,9 @@
  * Usage: prisma.event.findMany({ orderBy: getPrismaDateOrderBy() })
  */
 export function getPrismaDateOrderBy() {
+  // Canonical event sort: sortDate only
   return [
-    { year: 'asc' as const },
-    { month: 'asc' as const },
-    { day: 'asc' as const },
-    { showTiming: 'asc' as const }, // Early before Late
+    { sortDate: 'asc' }
   ];
 }
 
@@ -24,6 +22,11 @@ export function getPrismaDateOrderBy() {
  * @returns -1, 0, or 1 for array.sort()
  */
 export function compareDates(a: any, b: any): number {
+  // 0. Use sortDate if present
+  if (a.sortDate && b.sortDate && a.sortDate !== b.sortDate) {
+    return a.sortDate < b.sortDate ? -1 : 1;
+  }
+
   // 1. Year
   if (a.year !== b.year) return (a.year ?? 0) - (b.year ?? 0);
 

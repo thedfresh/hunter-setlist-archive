@@ -28,6 +28,7 @@ export type Event = {
   month?: number;
   day?: number;
   displayDate?: string;
+  sortDate?: string | null;
   etreeShowId?: string;
   venueId?: number;
   eventTypeId?: number;

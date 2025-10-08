@@ -29,6 +29,8 @@ model ContentType {
 model Band {
   id              Int      @id @default(autoincrement())
   name            String
+  displayName     String?  @map("display_name")
+  isHunterBand    Boolean  @default(true) @map("is_hunter_band")
   createdAt       DateTime @default(now()) @map("created_at")
   publicNotes     String?  @map("public_notes")
   privateNotes    String?  @map("private_notes")
@@ -110,6 +112,7 @@ model Event {
   month                        Int?
   day                          Int?
   displayDate                  String?            @map("display_date")
+  sortDate                     DateTime?          @map("sort_date")
   dateUncertain                Boolean            @default(false) @map("date_uncertain")
   venueId                      Int?               @map("venue_id")
   venueUncertain               Boolean            @default(false) @map("venue_uncertain")
@@ -345,6 +348,8 @@ model Recording {
   description       String?
   shnId             String?        @map("shn_id")
   taper             String?
+  featured          Boolean        @default(false)
+  featuredText      String?        @map("featured_text")
   contributorId     Int?           @map("contributor_id")
   lengthMinutes     Int?           @map("length_minutes")
   publicNotes       String?        @map("public_notes")

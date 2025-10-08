@@ -10,7 +10,10 @@ function formatDate(event: any) {
   if (!year) return '';
   const mm = month ? String(month).padStart(2, '0') : '??';
   const dd = day ? String(day).padStart(2, '0') : '??';
-  return `${year}-${mm}-${dd}`;
+  let timing = '';
+  if (event?.showTiming?.toLowerCase() === 'early') timing = ' (Early)';
+  else if (event?.showTiming?.toLowerCase() === 'late') timing = ' (Late)';
+  return `${year}-${mm}-${dd}${timing}`;
 }
 
 export default async function SongDetailPage({ params }: { params: { slug: string } }) {

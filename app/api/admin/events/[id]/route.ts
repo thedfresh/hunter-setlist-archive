@@ -23,6 +23,7 @@ export async function PUT(req: NextRequest, context: { params: Promise<Params> }
         showTiming: data.showTiming || null,
         // include slug field
         slug: data.slug || null,
+        sortDate: data.sortDate || null,
         // relations: use connect/disconnect for foreign keys
         ...(data.venueId
           ? { venue: { connect: { id: Number(data.venueId) } } }

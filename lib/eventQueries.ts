@@ -104,10 +104,10 @@ export type EventForAdjacent = {
 };
 
 export async function fetchAdjacentEvents(event: EventForAdjacent & { slug?: string }) {
-  // Fetch all events sorted chronologically by universal date sort
+  // Fetch all events sorted chronologically by sortDate
   const all = await prisma.event.findMany({
-    orderBy: getPrismaDateOrderBy(),
-    select: { year: true, month: true, day: true, showTiming: true, slug: true },
+    orderBy: [{ sortDate: 'asc' }],
+    select: { year: true, month: true, day: true, showTiming: true, slug: true, sortDate: true },
   });
   // Determine current slug, falling back to generated
   const targetSlug = event.slug ?? generateSlug(event as any);

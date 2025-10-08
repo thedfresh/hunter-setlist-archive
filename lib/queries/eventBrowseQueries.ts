@@ -5,20 +5,12 @@ export async function getHunterPerformanceStats() {
 
   // First and last show (by date)
   const firstShow = await prisma.event.findFirst({
-    orderBy: [
-      { year: 'asc' },
-      { month: 'asc' },
-      { day: 'asc' },
-    ],
-    select: { year: true, month: true, day: true, displayDate: true }
+    orderBy: { sortDate: 'asc' },
+    select: { year: true, month: true, day: true, displayDate: true, sortDate: true }
   });
   const lastShow = await prisma.event.findFirst({
-    orderBy: [
-      { year: 'desc' },
-      { month: 'desc' },
-      { day: 'desc' },
-    ],
-    select: { year: true, month: true, day: true, displayDate: true }
+    orderBy: { sortDate: 'desc' },
+    select: { year: true, month: true, day: true, displayDate: true, sortDate: true }
   });
 
   // Breakdown by performer type (primaryBand.name)
@@ -94,9 +86,7 @@ export async function getEventsOnThisDate() {
         orderBy: { position: 'asc' },
       },
     },
-    orderBy: {
-      year: 'asc',
-    },
+    orderBy: { sortDate: 'asc' },
   });
   return events;
 }
@@ -138,7 +128,7 @@ export async function getEventsBrowse({ page = 1, pageSize = 100 }: GetEventsBro
           orderBy: { position: 'asc' },
         },
       },
-      orderBy: getPrismaDateOrderBy(),
+  orderBy: { sortDate: 'asc' },
       skip: (page - 1) * pageSize,
       take: pageSize,
     }),
