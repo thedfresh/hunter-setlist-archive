@@ -22,11 +22,12 @@ function getPerformerName(event: any) {
 
 function getCardClass(event: any) {
   const name = getPerformerName(event).toLowerCase();
+  console.log(name);
+  if (name === 'robert hunter' || name === 'solo') return 'event-card-solo';
   if (name.includes('roadhog')) return 'event-card-roadhog';
   if (name.includes('comfort')) return 'event-card-comfort';
   if (name.includes('dinosaurs')) return 'event-card-dinosaurs';
-  if (name.includes('special')) return 'event-card-special';
-  return 'event-card-solo';
+  return 'event-card-special';
 }
 
 function Setlist({ sets }: { sets: any[] }) {
@@ -79,7 +80,7 @@ export default async function EventBrowsePage({ searchParams }: { searchParams: 
 
   // Color legend for each artist
   const legend = [
-    { label: 'Solo', className: 'event-card-solo' },
+    { label: 'Robert Hunter', className: 'event-card-solo' },
     { label: 'Roadhog', className: 'event-card-roadhog' },
     { label: 'Comfort', className: 'event-card-comfort' },
     { label: 'Dinosaurs', className: 'event-card-dinosaurs' },
@@ -101,6 +102,14 @@ export default async function EventBrowsePage({ searchParams }: { searchParams: 
             href={`/event/${event.slug ?? generateSlug(event)}`}
             className={`event-card ${getCardClass(event)} block p-6`}
           >
+            {/* Display billing or band name, default to Robert Hunter */}
+            <div className="mb-2 text-sm font-medium text-gray-700">
+              {event.billing
+                ? event.billing
+                : event.primaryBand?.name
+                ? event.primaryBand.name
+                : 'Robert Hunter'}
+            </div>
             <div className="mb-4">
               <div className="flex items-center gap-3 text-lg font-semibold">
                 <span>{formatEventDate(event)}</span>
