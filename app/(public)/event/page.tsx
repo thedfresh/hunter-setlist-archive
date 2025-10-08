@@ -2,6 +2,18 @@ import { getEventsBrowse } from '@/lib/queries/eventBrowseQueries';
 import Link from 'next/link';
 import { generateSlug } from '@/lib/eventSlug';
 
+const FILTER_CATEGORIES = [
+  { key: 'all', label: 'All Shows', className: 'card', bandNames: [] },
+  { key: 'solo', label: 'Solo Hunter', className: 'event-card-solo', bandNames: ['Robert Hunter'] },
+  { key: 'roadhog', label: 'Roadhog', className: 'event-card-roadhog', bandNames: ['Roadhog'] },
+  { key: 'comfort', label: 'Comfort', className: 'event-card-comfort', bandNames: ['Comfort'] },
+  { key: 'dinosaurs', label: 'Dinosaurs', className: 'event-card-dinosaurs', bandNames: ['Dinosaurs'] },
+  { key: 'special', label: 'Ad Hoc Bands', className: 'event-card-special', bandNames: [] },
+  { key: 'guest', label: 'Guest Appearances', className: 'event-card-guest', bandNames: [] }
+];
+
+import { BandFilterChips } from './BandFilterChips';
+
 function formatEventDate(event: any) {
   let date = '';
   if (event.displayDate) date = event.displayDate;
@@ -53,35 +65,103 @@ function Setlist({ sets }: { sets: any[] }) {
   );
 }
 
-function Pagination({ currentPage, totalPages }: { currentPage: number; totalPages: number }) {
+function Pagination({ currentPage, totalPages, searchParams }: { currentPage: number; totalPages: number; searchParams: Record<string, string | undefined> }) {
   const pageLinks = [];
   for (let i = 1; i <= totalPages; i++) {
+    const params = new URLSearchParams();
+    params.set('page', i.toString());
+    if (searchParams.types) {
+      params.set('types', searchParams.types);
+    }
     pageLinks.push(
       <Link
         key={i}
-        href={`?page=${i}`}
+        href={`/event?${params.toString()}`}
         className={`page-link${i === currentPage ? ' page-link-active' : ''}`}
       >
         {i}
       </Link>
     );
   }
+  // Previous/Next links
+  const prevParams = new URLSearchParams();
+  prevParams.set('page', (currentPage - 1).toString());
+  if (searchParams.types) {
+    prevParams.set('types', searchParams.types);
+  }
+  const nextParams = new URLSearchParams();
+  nextParams.set('page', (currentPage + 1).toString());
+  if (searchParams.types) {
+    nextParams.set('types', searchParams.types);
+  }
   return (
     <div className="pagination mt-6 flex gap-2 items-center justify-center">
-      <Link href={`?page=${currentPage - 1}`} className="page-link" aria-disabled={currentPage === 1} tabIndex={currentPage === 1 ? -1 : 0}>
+      <Link href={`/event?${prevParams.toString()}`} className="page-link" aria-disabled={currentPage === 1} tabIndex={currentPage === 1 ? -1 : 0}>
         Previous
       </Link>
       {pageLinks}
-      <Link href={`?page=${currentPage + 1}`} className="page-link" aria-disabled={currentPage === totalPages} tabIndex={currentPage === totalPages ? -1 : 0}>
+      <Link href={`/event?${nextParams.toString()}`} className="page-link" aria-disabled={currentPage === totalPages} tabIndex={currentPage === totalPages ? -1 : 0}>
         Next
       </Link>
     </div>
   );
 }
 
-export default async function EventBrowsePage({ searchParams }: { searchParams: { page?: string } }) {
+export default async function EventBrowsePage({ searchParams }: { searchParams: Record<string, string | undefined> }) {
   const page = parseInt(searchParams?.page || '1', 10) || 1;
-  const { events, totalCount, currentPage, totalPages, pageSize } = await getEventsBrowse({ page });
+  const prisma = (await import('@/lib/prisma')).prisma;
+  const { getAllEventsWhere } = await import('@/lib/queryDefaults');
+
+  // Parse selected types from searchParams.types
+  const ALL_KEYS = FILTER_CATEGORIES.map((cat: { key: string }) => cat.key);
+  const selectedTypes = (searchParams.types?.split(',').map((s: string) => s.trim()).filter((key: string) => ALL_KEYS.includes(key))) || ALL_KEYS;
+
+  // Build OR filter for selected categories
+  let bandOrFilters: any[] = [];
+  if (selectedTypes.length < ALL_KEYS.length) {
+    for (const type of selectedTypes) {
+      if (type === 'solo') {
+        bandOrFilters.push({ primaryBand: { name: 'Robert Hunter' } });
+      } else if (type === 'roadhog') {
+        bandOrFilters.push({ primaryBand: { name: 'Roadhog' } });
+      } else if (type === 'comfort') {
+        bandOrFilters.push({ primaryBand: { name: 'Comfort' } });
+      } else if (type === 'dinosaurs') {
+        bandOrFilters.push({ primaryBand: { name: 'Dinosaurs' } });
+      } else if (type === 'special') {
+        bandOrFilters.push({ primaryBand: { isHunterBand: true, name: { notIn: ['Robert Hunter', 'Roadhog', 'Comfort', 'Dinosaurs'] } } });
+      } else if (type === 'guest') {
+        bandOrFilters.push({ primaryBand: { isHunterBand: false } });
+      }
+    }
+  }
+
+  // Query counts for each filter category (unchanged)
+  const allCount = await prisma.event.count({ where: getAllEventsWhere() });
+  const soloCount = await prisma.event.count({ where: { primaryBand: { name: 'Robert Hunter' } } });
+  const roadhogCount = await prisma.event.count({ where: { primaryBand: { name: 'Roadhog' } } });
+  const comfortCount = await prisma.event.count({ where: { primaryBand: { name: 'Comfort' } } });
+  const dinosaursCount = await prisma.event.count({ where: { primaryBand: { name: 'Dinosaurs' } } });
+  const specialCount = await prisma.event.count({ where: { primaryBand: { isHunterBand: true, name: { notIn: ['Robert Hunter', 'Roadhog', 'Comfort', 'Dinosaurs'] } } } });
+  const guestCount = await prisma.event.count({ where: { primaryBand: { isHunterBand: false } } });
+
+  const bandCounts = [
+    { key: 'all', label: 'All Shows', className: 'card', count: allCount },
+    { key: 'solo', label: 'Solo Hunter', className: 'event-card-solo', count: soloCount },
+    { key: 'roadhog', label: 'Roadhog', className: 'event-card-roadhog', count: roadhogCount },
+    { key: 'comfort', label: 'Comfort', className: 'event-card-comfort', count: comfortCount },
+    { key: 'dinosaurs', label: 'Dinosaurs', className: 'event-card-dinosaurs', count: dinosaursCount },
+    { key: 'special', label: 'Ad-Hoc Bands', className: 'event-card-special', count: specialCount },
+    { key: 'guest', label: 'Guest Appearances', className: 'event-card-guest', count: guestCount }
+  ];
+
+  // Build where clause for events query
+  const baseWhere = getAllEventsWhere();
+  const where = (bandOrFilters.length > 0)
+    ? { ...baseWhere, OR: bandOrFilters }
+    : baseWhere;
+
+  const { events, totalCount, currentPage, totalPages, pageSize } = await getEventsBrowse({ page, where });
 
   // Color legend for each artist
   const legend = [
@@ -89,18 +169,16 @@ export default async function EventBrowsePage({ searchParams }: { searchParams: 
     { label: 'Roadhog', className: 'event-card-roadhog' },
     { label: 'Comfort', className: 'event-card-comfort' },
     { label: 'Dinosaurs', className: 'event-card-dinosaurs' },
-    { label: 'Special', className: 'event-card-special' },
+    { label: 'Ad-Hoc Bands', className: 'event-card-special' },
+    { label: 'Guest Appearances', className: 'event-card-guest' },
   ];
 
   return (
-  <div className="max-w-4xl mx-auto p-6">
+    <div className="max-w-4xl mx-auto p-6">
       <h1 className="text-2xl font-bold mb-6">Browse Events</h1>
-      <div className="flex gap-3 mb-8">
-        {legend.map(l => (
-          <div key={l.label} className={`card ${l.className} px-3 py-1 text-xs font-semibold`}>{l.label}</div>
-        ))}
-      </div>
-  <div className="grid grid-cols-1 gap-4">
+      {/* Band filter chips */}
+      <BandFilterChips bandCounts={bandCounts} selectedKeys={selectedTypes} />
+      <div className="grid grid-cols-1 gap-4">
         {events.map((event: any) => (
           <Link
             key={event.id}
@@ -127,7 +205,7 @@ export default async function EventBrowsePage({ searchParams }: { searchParams: 
           </Link>
         ))}
       </div>
-      <Pagination currentPage={currentPage} totalPages={totalPages} />
+  <Pagination currentPage={currentPage} totalPages={totalPages} searchParams={searchParams} />
     </div>
   );
 }

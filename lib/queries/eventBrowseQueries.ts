@@ -1,3 +1,14 @@
+export type GetEventsBrowseParams = {
+  page?: number;
+  pageSize?: number;
+  where?: any;
+  // For future filters:
+  performerType?: string;
+  searchTerm?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  verified?: boolean;
+};
 // Get Hunter performance stats for hub page
 export async function getHunterPerformanceStats() {
   // Total show count
@@ -92,21 +103,10 @@ export async function getEventsOnThisDate() {
 }
 import { prisma } from '@/lib/prisma';
 import { getPrismaDateOrderBy } from '@/lib/dateSort';
+// ...existing code...
 
-export interface GetEventsBrowseParams {
-  page?: number;
-  pageSize?: number;
-  // For future filters:
-  performerType?: string;
-  searchTerm?: string;
-  dateFrom?: string;
-  dateTo?: string;
-  verified?: boolean;
-}
-
-export async function getEventsBrowse({ page = 1, pageSize = 100 }: GetEventsBrowseParams) {
+export async function getEventsBrowse({ page = 1, pageSize = 100, where = {} }: GetEventsBrowseParams) {
   // Future: add filters to where
-  const where = {};
 
   const [totalCount, events] = await Promise.all([
     prisma.event.count({ where }),
@@ -128,7 +128,7 @@ export async function getEventsBrowse({ page = 1, pageSize = 100 }: GetEventsBro
           orderBy: { position: 'asc' },
         },
       },
-  orderBy: { sortDate: 'asc' },
+      orderBy: { sortDate: 'asc' },
       skip: (page - 1) * pageSize,
       take: pageSize,
     }),
