@@ -64,13 +64,8 @@ export async function GET() {
       data.dates.push({ value: dateValue, display: displayDate, slug });
     });
 
-    // Fetch songs that have performances
-    const songIds = Array.from(songData.keys());
-    
+    // Fetch all songs
     const songs = await prisma.song.findMany({
-      where: {
-        id: { in: songIds }
-      },
       include: {
         songAlbums: { include: { album: true } },
         songTags: { include: { tag: true } },
@@ -82,14 +77,22 @@ export async function GET() {
     return NextResponse.json({
       songs: songs.map(song => {
         const data = songData.get(song.id);
-        const sortedDates = data.dates.sort((a: { value: number; display: string; slug: string }, b: { value: number; display: string; slug: string }) => a.value - b.value);
+        let performanceCount = 0;
+        let firstPerformance = null;
+        let lastPerformance = null;
+        if (data && data.dates.length > 0) {
+          const sortedDates = data.dates.sort((a: { value: number; display: string; slug: string }, b: { value: number; display: string; slug: string }) => a.value - b.value);
+          performanceCount = data.count;
+          firstPerformance = { date: sortedDates[0].display, slug: sortedDates[0].slug };
+          lastPerformance = { date: sortedDates[sortedDates.length - 1].display, slug: sortedDates[sortedDates.length - 1].slug };
+        }
         return {
           ...song,
           albums: song.songAlbums.map(sa => sa.album),
           tags: song.songTags.map(st => st.tag),
-          performanceCount: data.count,
-          firstPerformance: { date: sortedDates[0].display, slug: sortedDates[0].slug },
-          lastPerformance: { date: sortedDates[sortedDates.length - 1].display, slug: sortedDates[sortedDates.length - 1].slug },
+          performanceCount,
+          firstPerformance,
+          lastPerformance,
         };
       }),
     });

@@ -7,6 +7,9 @@ export async function POST(req: Request) {
     if (!data.title || typeof data.title !== 'string') {
       return NextResponse.json({ error: 'Song title is required.' }, { status: 400 });
     }
+    // Generate slug
+    const { generateSlugFromName } = require("@/lib/generateSlug");
+    const slug = generateSlugFromName(data.title);
     const song = await prisma.song.create({
       data: {
         title: data.title,
@@ -16,6 +19,7 @@ export async function POST(req: Request) {
         musicBy: data.musicBy || null,
         publicNotes: data.publicNotes || null,
         privateNotes: data.privateNotes || null,
+        slug,
       },
     });
     return NextResponse.json({ song }, { status: 201 });

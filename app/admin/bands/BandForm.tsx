@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from "react";
+import { generateSlugFromName } from '@/lib/generateSlug';
 
 interface BandFormProps {
   band?: any;
@@ -18,7 +19,8 @@ export default function BandForm({ band, onClose, onSaved }: BandFormProps) {
     e.preventDefault();
     setSaving(true);
     setError(null);
-    const payload = { name, publicNotes, privateNotes };
+  const slug = generateSlugFromName(name);
+  const payload = { name, slug, publicNotes, privateNotes };
     try {
       const res = await fetch(band ? `/api/admin/bands/${band.id}` : "/api/admin/bands", {
         method: band ? "PUT" : "POST",

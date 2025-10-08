@@ -10,6 +10,9 @@ export async function POST(req: Request) {
     if (!data.name || typeof data.name !== 'string') {
       return NextResponse.json({ error: 'Venue name is required.' }, { status: 400 });
     }
+    // Generate slug
+    const { generateVenueSlug } = require("@/lib/generateSlug");
+    const slug = generateVenueSlug(data.name, data.city, data.stateProvince);
     const venue = await prisma.venue.create({
       data: {
         name: data.name,
@@ -20,6 +23,7 @@ export async function POST(req: Request) {
         isUncertain: !!data.isUncertain,
         publicNotes: data.publicNotes || null,
         privateNotes: data.privateNotes || null,
+        slug,
       },
     });
     return NextResponse.json({ venue }, { status: 201 });

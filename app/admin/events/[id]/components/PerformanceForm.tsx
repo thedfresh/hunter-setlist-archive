@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { compareSongTitles } from '@/lib/songSort';
 
 function PerformanceForm({ setId, songs, musicians, instruments, performances, editingPerformance, onClose, onSaved }: any) {
   const [form, setForm] = useState({
@@ -34,6 +35,7 @@ function PerformanceForm({ setId, songs, musicians, instruments, performances, e
   const filteredSongs = songs.filter((s: any) =>
     s.title.toLowerCase().includes(songSearch.toLowerCase())
   );
+  const sortedSongs = [...filteredSongs].sort(compareSongTitles);
 
   function validate() {
     const newErrors: { [key: string]: string } = {};
@@ -149,7 +151,7 @@ function PerformanceForm({ setId, songs, musicians, instruments, performances, e
               className={`w-full border rounded-md px-3 py-2 ${errors.songId ? "border-red-500" : "border-gray-300"}`}
             >
               <option value="">Select song</option>
-              {filteredSongs.map((s: any) => (
+              {sortedSongs.map((s: any) => (
                 <option key={s.id} value={s.id}>
                   {s.title}
                 </option>

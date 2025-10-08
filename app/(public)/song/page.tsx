@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import React, { useState } from "react";
+import { compareSongTitles } from '@/lib/songSort';
 
 type PageSize = number | "All";
 
@@ -40,6 +41,11 @@ export default function SongBrowsePage() {
 
   // Sort songs before paging
   const sortedSongs = [...filteredSongs].sort((a, b) => {
+    if (sortKey === "title") {
+      return sortDirection === "asc"
+        ? compareSongTitles(a, b)
+        : compareSongTitles(b, a);
+    }
     let aVal: any = a[sortKey];
     let bVal: any = b[sortKey];
     // For dates, sort as strings (YYYY-MM-DD)
@@ -56,7 +62,6 @@ export default function SongBrowsePage() {
       bVal = bVal ?? 0;
       return sortDirection === "asc" ? aVal - bVal : bVal - aVal;
     }
-    // For strings (title)
     aVal = (aVal || "").toString().toLowerCase();
     bVal = (bVal || "").toString().toLowerCase();
     if (aVal < bVal) return sortDirection === "asc" ? -1 : 1;
@@ -169,7 +174,6 @@ export default function SongBrowsePage() {
               <th className="sortable cursor-pointer" onClick={() => handleSort("performanceCount")}>Times Played {sortKey === "performanceCount" && (sortDirection === "asc" ? "▲" : "▼")}</th>
               <th className="sortable cursor-pointer" onClick={() => handleSort("firstPerformance")}>First {sortKey === "firstPerformance" && (sortDirection === "asc" ? "▲" : "▼")}</th>
               <th className="sortable cursor-pointer" onClick={() => handleSort("lastPerformance")}>Last {sortKey === "lastPerformance" && (sortDirection === "asc" ? "▲" : "▼")}</th>
-              <th className="sortable">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -204,13 +208,6 @@ export default function SongBrowsePage() {
                       </a>
                     ) : (
                       <span>{formatDate(song.lastPerformance?.date)}</span>
-                    )}
-                  </td>
-                  <td className="table-actions">
-                    {song.firstPerformance?.slug ? (
-                      <Link href={`/event/${song.firstPerformance.slug}`} className="action-btn link-internal">View</Link>
-                    ) : (
-                      <span className="text-gray-400">—</span>
                     )}
                   </td>
                 </tr>

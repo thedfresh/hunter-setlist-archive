@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from "react";
+import { generateSlugFromName } from '@/lib/generateSlug';
 import { useRouter } from "next/navigation";
 
 export default function NewVenuePage() {
@@ -29,10 +30,11 @@ export default function NewVenuePage() {
     }
     setSubmitting(true);
     try {
+      const slug = generateSlugFromName(form.name);
       const res = await fetch("/api/admin/venues", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, slug }),
       });
       if (res.ok) {
         router.push("/admin/venues/success");

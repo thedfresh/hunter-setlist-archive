@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
+import { compareSongTitles } from '@/lib/songSort';
 import Link from "next/link";
 
 type Song = {
@@ -75,8 +76,8 @@ export default function SongsAdminPage() {
   const displayed = [...filtered].sort((a, b) => {
     if (sortField === 'title') {
       return sortOrder === 'asc'
-        ? a.title.localeCompare(b.title)
-        : b.title.localeCompare(a.title);
+        ? compareSongTitles(a, b)
+        : compareSongTitles(b, a);
     } else {
       return sortOrder === 'asc'
         ? a.performanceCount - b.performanceCount

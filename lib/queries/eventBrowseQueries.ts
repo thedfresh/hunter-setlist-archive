@@ -101,6 +101,7 @@ export async function getEventsOnThisDate() {
   return events;
 }
 import { prisma } from '@/lib/prisma';
+import { getPrismaDateOrderBy } from '@/lib/dateSort';
 
 export interface GetEventsBrowseParams {
   page?: number;
@@ -137,11 +138,7 @@ export async function getEventsBrowse({ page = 1, pageSize = 100 }: GetEventsBro
           orderBy: { position: 'asc' },
         },
       },
-      orderBy: [
-        { year: 'asc' },
-        { month: 'asc' },
-        { day: 'asc' },
-      ],
+      orderBy: getPrismaDateOrderBy(),
       skip: (page - 1) * pageSize,
       take: pageSize,
     }),

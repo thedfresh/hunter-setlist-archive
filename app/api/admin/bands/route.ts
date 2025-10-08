@@ -7,11 +7,15 @@ export async function POST(req: Request) {
     if (!data.name || typeof data.name !== 'string') {
       return NextResponse.json({ error: 'Band name is required.' }, { status: 400 });
     }
+    // Generate slug
+    const { generateSlugFromName } = require("@/lib/generateSlug");
+    const slug = generateSlugFromName(data.name);
     const band = await prisma.band.create({
       data: {
         name: data.name,
         publicNotes: typeof data.publicNotes === 'string' ? data.publicNotes : undefined,
         privateNotes: typeof data.privateNotes === 'string' ? data.privateNotes : undefined,
+        slug,
       },
     });
     return NextResponse.json({ band }, { status: 201 });

@@ -16,6 +16,7 @@ type FormState = {
 };
 "use client";
 import React, { useState, useEffect } from 'react';
+import { generateSlug } from '@/lib/eventSlug';
 import EventContributorsInput, { EventContributor } from './components/EventContributorsInput';
 import AddVenueModal from './components/AddVenueModal';
 import { useRouter } from 'next/navigation';
@@ -162,9 +163,15 @@ function EventForm({ venues, eventTypes, contentTypes, bands, onAddVenue, form, 
       return;
     }
     setSubmitting(true);
-    // Submit to API route, only form data
+    // Auto-generate slug from form data
+    const slug = generateSlug({
+      year: Number(form.year),
+      month: Number(form.month),
+      day: Number(form.day),
+      showTiming: form.showTiming
+    });
     try {
-      const payload = { ...form };
+      const payload = { ...form, slug };
       const res = await fetch('/api/admin/events', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

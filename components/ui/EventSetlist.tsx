@@ -35,6 +35,9 @@ interface EventSetlistProps {
 }
 
 const EventSetlist: React.FC<EventSetlistProps> = ({ sets, eventPrimaryBandId }) => {
+  if (!sets || sets.length === 0) {
+    return <div className="text-gray-500 text-sm italic">No known setlist</div>;
+  }
   // Build noteMap in performance order: assign numbers as notes are encountered
   const noteMap = new Map<string, number>();
   let noteNum = 1;

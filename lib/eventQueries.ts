@@ -1,6 +1,7 @@
 // lib/eventQueries.ts
 import { prisma } from './prisma';
 import { parseSlug, generateSlug, ParsedSlug } from './eventSlug';
+import { getPrismaDateOrderBy } from '@/lib/dateSort';
 
 export type EventWithAll = Awaited<ReturnType<typeof fetchEventBySlug>>;
 
@@ -103,14 +104,9 @@ export type EventForAdjacent = {
 };
 
 export async function fetchAdjacentEvents(event: EventForAdjacent & { slug?: string }) {
-  // Fetch all events sorted chronologically by year, month, day, showTiming
+  // Fetch all events sorted chronologically by universal date sort
   const all = await prisma.event.findMany({
-    orderBy: [
-      { year: 'asc' },
-      { month: 'asc' },
-      { day: 'asc' },
-      { showTiming: 'asc' },
-    ],
+    orderBy: getPrismaDateOrderBy(),
     select: { year: true, month: true, day: true, showTiming: true, slug: true },
   });
   // Determine current slug, falling back to generated

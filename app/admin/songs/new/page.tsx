@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
+import { generateSlugFromName } from '@/lib/generateSlug';
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
@@ -63,11 +64,13 @@ export default function NewSongPage() {
     if (Object.keys(newErrors).length > 0) return;
     setSubmitting(true);
     try {
+      const slug = generateSlugFromName(form.title);
       const res = await fetch("/api/admin/songs", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...form,
+          slug,
           leadVocalsId: form.leadVocalsId ? Number(form.leadVocalsId) : null,
           albumIds: form.albumIds,
           tagIds: form.tagIds,
