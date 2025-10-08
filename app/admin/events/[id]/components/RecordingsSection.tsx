@@ -97,7 +97,7 @@ const RecordingsSection: React.FC<Props> = ({ eventId }) => {
 
   async function handleDelete(id: number) {
     if (!confirm("Delete this recording?")) return;
-    await fetch(`/api/events/${eventId}/recordings/${id}`, { method: "DELETE" });
+  await fetch(`/api/admin/events/${eventId}/recordings/${id}`, { method: "DELETE" });
     setRecordings(recs => recs.filter(r => r.id !== id));
   }
 
@@ -121,8 +121,8 @@ const RecordingsSection: React.FC<Props> = ({ eventId }) => {
     };
     const method = editing ? "PUT" : "POST";
     const url = editing
-      ? `/api/events/${eventId}/recordings/${editing.id}`
-      : `/api/events/${eventId}/recordings`;
+      ? `/api/admin/events/${eventId}/recordings/${editing.id}`
+      : `/api/admin/events/${eventId}/recordings`;
     const res = await fetch(url, {
       method,
       headers: { "Content-Type": "application/json" },

@@ -207,7 +207,7 @@ export default function EventEditPage() {
     setSubmitting(true);
     setError(null);
     try {
-      const res = await fetch(`/api/events/${id}`, {
+      const res = await fetch(`/api/admin/events/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
@@ -228,7 +228,7 @@ export default function EventEditPage() {
     if (!confirm("Are you sure you want to delete this event?")) return;
     setSubmitting(true);
     try {
-      const res = await fetch(`/api/events/${id}`, { method: "DELETE" });
+  const res = await fetch(`/api/admin/events/${id}`, { method: "DELETE" });
       if (res.ok) {
         router.push("/admin/events");
       } else {
@@ -640,7 +640,7 @@ export default function EventEditPage() {
                             className="bg-red-600 text-white font-semibold py-0.5 px-2 rounded shadow hover:bg-red-700 transition text-sm"
                             onClick={async () => {
                               if (confirm("Delete this set?")) {
-                                await fetch(`/api/events/${id}/sets/${set.id}`, { method: "DELETE" });
+                                await fetch(`/api/admin/events/${id}/sets/${set.id}`, { method: "DELETE" });
                                 setSets(sets.filter(s => s.id !== set.id));
                               }
                             }}

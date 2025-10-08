@@ -30,7 +30,7 @@ export default function NewAlbumPage() {
     }
     setSubmitting(true);
     try {
-      const res = await fetch("/api/albums", {
+      const res = await fetch("/api/admin/albums", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

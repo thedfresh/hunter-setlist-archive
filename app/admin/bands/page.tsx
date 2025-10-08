@@ -46,7 +46,7 @@ export default function BandListPage() {
   async function handleDelete(id: number) {
     if (!confirm("Are you sure you want to delete this band?")) return;
     try {
-      const res = await fetch(`/api/bands/${id}`, { method: "DELETE" });
+  const res = await fetch(`/api/admin/bands/${id}`, { method: "DELETE" });
       if (res.ok) {
         setSuccess("Band deleted.");
         fetchBands();

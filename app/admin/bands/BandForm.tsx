@@ -20,7 +20,7 @@ export default function BandForm({ band, onClose, onSaved }: BandFormProps) {
     setError(null);
     const payload = { name, publicNotes, privateNotes };
     try {
-      const res = await fetch(band ? `/api/bands/${band.id}` : "/api/bands", {
+      const res = await fetch(band ? `/api/admin/bands/${band.id}` : "/api/admin/bands", {
         method: band ? "PUT" : "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),

@@ -57,7 +57,7 @@ export default function SetMusiciansSection({ setId, musicians, instruments }: S
     if (!confirm("Delete this set musician?")) return;
     setSubmitting(true);
     try {
-      const res = await fetch(`/api/sets/${setId}/musicians/${id}`, { method: "DELETE" });
+  const res = await fetch(`/api/admin/sets/${setId}/musicians/${id}`, { method: "DELETE" });
       if (res.ok) {
         setSetMusicians(setMusicians.filter((m) => m.id !== id));
       } else {
@@ -76,7 +76,7 @@ export default function SetMusiciansSection({ setId, musicians, instruments }: S
     setError(null);
     try {
       const method = editing ? "PUT" : "POST";
-      const url = editing ? `/api/sets/${setId}/musicians/${editing.id}` : `/api/sets/${setId}/musicians`;
+      const url = editing ? `/api/admin/sets/${setId}/musicians/${editing.id}` : `/api/admin/sets/${setId}/musicians`;
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },

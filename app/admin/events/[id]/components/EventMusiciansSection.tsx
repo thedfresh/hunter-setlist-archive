@@ -65,7 +65,7 @@ const EventMusiciansSection: React.FC<Props> = ({ eventId }) => {
 
   const handleDelete = async (id: number) => {
     setLoading(true);
-    await fetch(`/api/events/${eventId}/musicians/${id}`, { method: 'DELETE' });
+  await fetch(`/api/admin/events/${eventId}/musicians/${id}`, { method: 'DELETE' });
     setEventMusicians(eventMusicians.filter(em => em.id !== id));
     setLoading(false);
   };
@@ -80,13 +80,13 @@ const EventMusiciansSection: React.FC<Props> = ({ eventId }) => {
     };
     let res;
     if (editing) {
-      res = await fetch(`/api/events/${eventId}/musicians/${editing.id}`, {
+      res = await fetch(`/api/admin/events/${eventId}/musicians/${editing.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
       } else {
-        res = await fetch(`/api/events/${eventId}/musicians`, {
+        res = await fetch(`/api/admin/events/${eventId}/musicians`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),

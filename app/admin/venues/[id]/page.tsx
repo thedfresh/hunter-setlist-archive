@@ -80,7 +80,7 @@ export default function VenueEditPage() {
     setSubmitting(true);
     setError(null);
     try {
-      const res = await fetch(`/api/venues/${id}`, {
+      const res = await fetch(`/api/admin/venues/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
@@ -101,7 +101,7 @@ export default function VenueEditPage() {
     if (!confirm("Are you sure you want to delete this venue?")) return;
     setSubmitting(true);
     try {
-      const res = await fetch(`/api/venues/${id}`, { method: "DELETE" });
+  const res = await fetch(`/api/admin/venues/${id}`, { method: "DELETE" });
       if (res.ok) {
         router.push("/admin/venues");
       } else {

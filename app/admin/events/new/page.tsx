@@ -165,7 +165,7 @@ function EventForm({ venues, eventTypes, contentTypes, bands, onAddVenue, form, 
     // Submit to API route, only form data
     try {
       const payload = { ...form };
-      const res = await fetch('/api/events', {
+      const res = await fetch('/api/admin/events', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),

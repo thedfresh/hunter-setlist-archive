@@ -110,7 +110,7 @@ const ShowBanterSection: React.FC<Props> = ({ eventId }) => {
       return;
     }
     setLoading(true);
-    const res = await fetch(`/api/events/${eventId}/banter/${id}`, {
+    const res = await fetch(`/api/admin/events/${eventId}/banter/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -133,7 +133,7 @@ const ShowBanterSection: React.FC<Props> = ({ eventId }) => {
   async function handleDelete(id: number) {
     if (!confirm("Delete this banter?")) return;
     setLoading(true);
-    const res = await fetch(`/api/events/${eventId}/banter/${id}`, { method: "DELETE" });
+  const res = await fetch(`/api/admin/events/${eventId}/banter/${id}`, { method: "DELETE" });
     if (res.ok) {
       fetchBanterAndPerformances();
       setErrors({});

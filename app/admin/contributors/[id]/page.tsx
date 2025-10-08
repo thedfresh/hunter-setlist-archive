@@ -45,7 +45,7 @@ export default function ContributorEditPage() {
     setSubmitting(true);
     setError(null);
     try {
-      const res = await fetch(`/api/contributors/${params.id}`, {
+      const res = await fetch(`/api/admin/contributors/${params.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
   body: JSON.stringify({ name, email, publicNotes, privateNotes }),
@@ -66,7 +66,7 @@ export default function ContributorEditPage() {
     if (!confirm("Are you sure you want to delete this contributor?")) return;
     setSubmitting(true);
     try {
-      const res = await fetch(`/api/contributors/${params.id}`, { method: "DELETE" });
+  const res = await fetch(`/api/admin/contributors/${params.id}`, { method: "DELETE" });
       if (res.ok) {
         router.push("/admin/contributors");
       } else {

@@ -29,7 +29,7 @@ export default function NewVenuePage() {
     }
     setSubmitting(true);
     try {
-      const res = await fetch("/api/venues", {
+      const res = await fetch("/api/admin/venues", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),

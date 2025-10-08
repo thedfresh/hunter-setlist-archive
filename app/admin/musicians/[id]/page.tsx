@@ -76,7 +76,7 @@ export default function MusicianDetailPage() {
     }
     setSubmitting(true);
     try {
-      const res = await fetch(`/api/musicians/${params.id}`, {
+      const res = await fetch(`/api/admin/musicians/${params.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -102,7 +102,7 @@ export default function MusicianDetailPage() {
     if (!confirm("Are you sure you want to delete this musician?")) return;
     setSubmitting(true);
     try {
-      const res = await fetch(`/api/musicians/${params.id}`, { method: "DELETE" });
+  const res = await fetch(`/api/admin/musicians/${params.id}`, { method: "DELETE" });
       if (res.ok) {
         router.push("/admin/musicians");
       } else {

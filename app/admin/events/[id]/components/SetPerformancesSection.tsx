@@ -36,12 +36,12 @@ const SetPerformancesSection: React.FC<SetPerformancesSectionProps> = ({ set, so
     updated[targetIdx].performanceOrder = tempOrder;
     // Update both in backend
     await Promise.all([
-      fetch(`/api/sets/${set.id}/performances/${updated[idx].id}`, {
+      fetch(`/api/admin/sets/${set.id}/performances/${updated[idx].id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updated[idx]),
       }),
-      fetch(`/api/sets/${set.id}/performances/${updated[targetIdx].id}`, {
+      fetch(`/api/admin/sets/${set.id}/performances/${updated[targetIdx].id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updated[targetIdx]),
@@ -53,7 +53,7 @@ const SetPerformancesSection: React.FC<SetPerformancesSectionProps> = ({ set, so
 
   async function handleDelete(performanceId: number) {
     if (!confirm("Delete this performance?")) return;
-    await fetch(`/api/sets/${set.id}/performances/${performanceId}`, {
+    await fetch(`/api/admin/sets/${set.id}/performances/${performanceId}`, {
       method: "DELETE",
     });
     setPerformances(performances.filter((p) => p.id !== performanceId));

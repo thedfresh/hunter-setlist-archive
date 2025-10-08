@@ -46,7 +46,7 @@ export default function NewMusicianPage() {
     }
     setSubmitting(true);
     try {
-      const res = await fetch("/api/musicians", {
+      const res = await fetch("/api/admin/musicians", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),

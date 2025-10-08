@@ -86,7 +86,7 @@ export default function SongsAdminPage() {
   // Handler to delete a song
   async function handleDeleteSong(id: number) {
     if (!confirm('Delete this song?')) return;
-    const res = await fetch(`/api/songs/${id}`, { method: 'DELETE' });
+  const res = await fetch(`/api/admin/songs/${id}`, { method: 'DELETE' });
     if (res.ok) setSongs(s => s.filter(song => song.id !== id));
     else alert('Failed to delete song.');
   }

@@ -65,7 +65,7 @@ export default function BandMembersSection({ bandId, bandMusicians }: BandMember
     if (!confirm("Remove this member from the band?")) return;
     setLoading(true);
     try {
-      const res = await fetch(`/api/bands/${bandId}/members/${memberId}`, { method: "DELETE" });
+  const res = await fetch(`/api/admin/bands/${bandId}/members/${memberId}`, { method: "DELETE" });
       if (res.ok) {
         setSuccess("Member removed.");
         refreshMembers();
@@ -91,7 +91,7 @@ export default function BandMembersSection({ bandId, bandMusicians }: BandMember
         publicNotes: addForm.publicNotes,
         privateNotes: addForm.privateNotes,
       };
-      const res = await fetch(`/api/bands/${bandId}/members`, {
+      const res = await fetch(`/api/admin/bands/${bandId}/members`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -133,7 +133,7 @@ export default function BandMembersSection({ bandId, bandMusicians }: BandMember
         publicNotes: editForm.publicNotes,
         privateNotes: editForm.privateNotes,
       };
-      const res = await fetch(`/api/bands/${bandId}/members/${editMember.id}`, {
+      const res = await fetch(`/api/admin/bands/${bandId}/members/${editMember.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),

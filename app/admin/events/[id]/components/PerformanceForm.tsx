@@ -87,13 +87,13 @@ function PerformanceForm({ setId, songs, musicians, instruments, performances, e
     };
     let res;
     if (editingPerformance) {
-      res = await fetch(`/api/sets/${setId}/performances/${editingPerformance.id}`, {
+      res = await fetch(`/api/admin/sets/${setId}/performances/${editingPerformance.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
     } else {
-      res = await fetch(`/api/sets/${setId}/performances`, {
+      res = await fetch(`/api/admin/sets/${setId}/performances`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),

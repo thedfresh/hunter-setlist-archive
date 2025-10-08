@@ -41,7 +41,7 @@ const LinksSection: React.FC<LinksSectionProps> = ({ entityType, entityId, reado
     async function fetchLinks() {
       setLoading(true);
       try {
-        const res = await fetch(`/api/links/${entityType}/${entityId}`);
+  const res = await fetch(`/api/links/${entityType}/${entityId}`);
         if (res.ok) {
           const data = await res.json();
           setLinks(data);
@@ -56,7 +56,7 @@ const LinksSection: React.FC<LinksSectionProps> = ({ entityType, entityId, reado
   // Fetch link types
   useEffect(() => {
     async function fetchLinkTypes() {
-      const res = await fetch("/api/link-types");
+  const res = await fetch("/api/link-types");
       if (res.ok) {
         setLinkTypes(await res.json());
       }
@@ -91,7 +91,7 @@ const LinksSection: React.FC<LinksSectionProps> = ({ entityType, entityId, reado
 
   async function handleDeleteForm(id: number) {
   if (!window.confirm("Delete this link?")) return;
-  await fetch(`/api/links/${entityType}/${id}`, { method: "DELETE" });
+  await fetch(`/api/admin/links/${entityType}/${id}`, { method: "DELETE" });
   setLinks((prev) => prev.filter((l) => l.id !== id));
   setShowForm(false);
   }
@@ -111,7 +111,7 @@ const LinksSection: React.FC<LinksSectionProps> = ({ entityType, entityId, reado
 
   async function handleDelete(id: number) {
   if (!window.confirm("Delete this link?")) return;
-  await fetch(`/api/links/${entityType}/${id}`, { method: "DELETE" });
+  await fetch(`/api/admin/links/${entityType}/${id}`, { method: "DELETE" });
   setLinks((prev) => prev.filter((l) => l.id !== id));
   }
 
@@ -133,13 +133,13 @@ const LinksSection: React.FC<LinksSectionProps> = ({ entityType, entityId, reado
     };
     let res;
     if (form.id) {
-      res = await fetch(`/api/links/${entityType}/${form.id}`, {
+      res = await fetch(`/api/admin/links/${entityType}/${form.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
     } else {
-      res = await fetch(`/api/links`, {
+      res = await fetch(`/api/admin/links`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -149,7 +149,7 @@ const LinksSection: React.FC<LinksSectionProps> = ({ entityType, entityId, reado
       setShowForm(false);
       setForm({ id: null, url: "", title: "", linkTypeId: "", description: "", isActive: true });
       // Refresh links
-      const updated = await fetch(`/api/links/${entityType}/${entityId}`);
+  const updated = await fetch(`/api/links/${entityType}/${entityId}`);
       setLinks(updated.ok ? await updated.json() : links);
     } else {
       setErrors({ form: "Save failed" });

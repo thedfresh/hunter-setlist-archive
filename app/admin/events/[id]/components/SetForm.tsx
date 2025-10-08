@@ -56,13 +56,13 @@ const SetForm: React.FC<SetFormProps> = ({ eventId, setTypes, sets, editingSet, 
     };
     let res;
     if (editingSet) {
-      res = await fetch(`/api/events/${eventId}/sets/${editingSet.id}`, {
+      res = await fetch(`/api/admin/events/${eventId}/sets/${editingSet.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
     } else {
-      res = await fetch(`/api/events/${eventId}/sets`, {
+      res = await fetch(`/api/admin/events/${eventId}/sets`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),

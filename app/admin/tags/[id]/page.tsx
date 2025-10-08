@@ -61,7 +61,7 @@ export default function EditTagPage() {
     setSubmitting(true);
     setError(null);
     try {
-      const res = await fetch(`/api/tags/${id}`, {
+      const res = await fetch(`/api/admin/tags/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
@@ -85,7 +85,7 @@ export default function EditTagPage() {
     if (!confirm("Are you sure you want to delete this tag?")) return;
     setSubmitting(true);
     try {
-      const res = await fetch(`/api/tags/${id}`, { method: "DELETE" });
+  const res = await fetch(`/api/admin/tags/${id}`, { method: "DELETE" });
       if (res.ok) {
         router.push("/admin/tags");
       } else {

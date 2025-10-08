@@ -320,7 +320,7 @@ export default function EditAlbumPage() {
     if (!confirm("Are you sure you want to delete this album?")) return;
     setSubmitting(true);
     try {
-      const res = await fetch(`/api/albums/${id}`, { method: "DELETE" });
+  const res = await fetch(`/api/admin/albums/${id}`, { method: "DELETE" });
       if (res.ok) {
         router.push("/admin/albums");
       } else {

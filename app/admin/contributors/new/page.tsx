@@ -22,7 +22,7 @@ export default function NewContributorPage() {
     setSubmitting(true);
     setError(null);
     try {
-      const res = await fetch("/api/contributors", {
+      const res = await fetch("/api/admin/contributors", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, email, publicNotes, privateNotes }),

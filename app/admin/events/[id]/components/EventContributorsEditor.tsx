@@ -44,7 +44,7 @@ const EventContributorsSection: React.FC<Props> = ({ eventId }) => {
     let contributorId = form.contributorId;
     // If creating new contributor
     if (form.isNew && form.contributorName) {
-      const res = await fetch("/api/contributors", {
+      const res = await fetch("/api/admin/contributors", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: form.contributorName }),
@@ -59,7 +59,7 @@ const EventContributorsSection: React.FC<Props> = ({ eventId }) => {
       }
     }
     if (!contributorId) return;
-    const res = await fetch(`/api/events/${eventId}/contributors${editingId ? `/${editingId}` : ""}`, {
+    const res = await fetch(`/api/admin/events/${eventId}/contributors${editingId ? `/${editingId}` : ""}`, {
       method: editingId ? "PUT" : "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -95,7 +95,7 @@ const EventContributorsSection: React.FC<Props> = ({ eventId }) => {
   };
 
   const handleDelete = async (id: number) => {
-    const res = await fetch(`/api/events/${eventId}/contributors/${id}`, { method: "DELETE" });
+  const res = await fetch(`/api/admin/events/${eventId}/contributors/${id}`, { method: "DELETE" });
     if (res.ok) setContributors(contributors.filter(c => c.id !== id));
   };
 

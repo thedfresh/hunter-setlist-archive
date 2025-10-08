@@ -95,7 +95,7 @@ export default function EditSongPage() {
     if (Object.keys(newErrors).length > 0) return;
     setSubmitting(true);
     try {
-      const res = await fetch(`/api/songs/${id}`, {
+      const res = await fetch(`/api/admin/songs/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -124,7 +124,7 @@ export default function EditSongPage() {
     if (!confirm("Are you sure you want to delete this song?")) return;
     setSubmitting(true);
     try {
-      const res = await fetch(`/api/songs/${id}`, { method: "DELETE" });
+  const res = await fetch(`/api/admin/songs/${id}`, { method: "DELETE" });
       if (res.ok) {
         router.push("/admin/songs");
       } else {

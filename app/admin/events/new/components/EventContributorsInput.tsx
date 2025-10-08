@@ -51,7 +51,7 @@ const EventContributorsInput: React.FC<Props> = ({ onContributorsChange }) => {
     if (form.isNew && form.contributorName) {
       // Create contributor via API and get real ID
       try {
-        const res = await fetch('/api/contributors', {
+        const res = await fetch('/api/admin/contributors', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ name: form.contributorName }),

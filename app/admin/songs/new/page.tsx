@@ -63,7 +63,7 @@ export default function NewSongPage() {
     if (Object.keys(newErrors).length > 0) return;
     setSubmitting(true);
     try {
-      const res = await fetch("/api/songs", {
+      const res = await fetch("/api/admin/songs", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

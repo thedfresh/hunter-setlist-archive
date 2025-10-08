@@ -46,7 +46,7 @@ export default function AddVenueModal({ isOpen, onClose, onVenueCreated }: AddVe
     setSubmitting(true);
     setApiError(null);
     try {
-      const res = await fetch("/api/venues", {
+      const res = await fetch("/api/admin/venues", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
