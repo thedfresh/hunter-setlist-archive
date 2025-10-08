@@ -26,11 +26,11 @@ const SiteHeader = () => (
           <Link href="/about" className="nav-link">About</Link>
         </nav>
         
-        <input 
+        {/* <input 
           type="text" 
           className="header-search-box" 
           placeholder="Search shows, songs, venues..."
-        />
+        /> */}
       </div>
     </div>
   </header>

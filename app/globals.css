@@ -23,7 +23,7 @@
   }
 
   .nav-bar {
-    @apply bg-white border-t-[3px] border-[#b8913d] border-b border-gray-200;
+    @apply bg-white border-t-[3px] ;
     @apply px-10 py-4 pr-10;
     @apply flex items-center justify-between gap-10;
   }
