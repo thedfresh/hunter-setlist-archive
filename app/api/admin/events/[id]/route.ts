@@ -13,6 +13,12 @@ export async function PUT(req: NextRequest, context: { params: Promise<Params> }
       return NextResponse.json({ error: 'Invalid input.' }, { status: 400 });
     }
     // Update event including etreeShowId
+    // Ensure sortDate is always a valid ISO string
+    let sortDateValue = data.sortDate;
+    if (typeof sortDateValue === 'string' && sortDateValue.length > 0 && !sortDateValue.endsWith('Z')) {
+      // Convert from datetime-local format to ISO string
+      sortDateValue = new Date(sortDateValue).toISOString();
+    }
     const event = await prisma.event.update({
       where: { id },
       data: {
@@ -23,7 +29,7 @@ export async function PUT(req: NextRequest, context: { params: Promise<Params> }
         showTiming: data.showTiming || null,
         // include slug field
         slug: data.slug || null,
-        sortDate: data.sortDate || null,
+        sortDate: sortDateValue,
         // relations: use connect/disconnect for foreign keys
         ...(data.venueId
           ? { venue: { connect: { id: Number(data.venueId) } } }
