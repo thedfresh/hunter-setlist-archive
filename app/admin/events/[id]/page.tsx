@@ -29,6 +29,7 @@ export default function EventEditPage() {
   const params = useParams();
   const id = params.id as string;
   const [eventIds, setEventIds] = useState<number[]>([]);
+  const [allEvents, setAllEvents] = useState<any[]>([]);
   const [event, setEvent] = useState<Event | null>(null);
   const [form, setForm] = useState({
     year: "",
@@ -161,7 +162,11 @@ export default function EventEditPage() {
           setError("Event not found.");
         }
         if (allData.events) {
-          setEventIds(allData.events.map((e: any) => e.id));
+          // Sort events by date using compareDates
+          const { compareDates } = await import('@/lib/dateSort');
+          const sorted = [...allData.events].sort(compareDates);
+          setAllEvents(sorted);
+          setEventIds(sorted.map((e: any) => e.id));
         }
       } catch {
         setError("Failed to load event.");
@@ -264,8 +269,8 @@ export default function EventEditPage() {
 
   // Previous/Next navigation
   const currentIndex = eventIds.findIndex(eid => String(eid) === id);
-  const nextId = currentIndex > 0 ? eventIds[currentIndex - 1] : null;
-  const prevId = currentIndex < eventIds.length - 1 ? eventIds[currentIndex + 1] : null;
+  const prevId = currentIndex > 0 ? eventIds[currentIndex - 1] : null;
+  const nextId = currentIndex < eventIds.length - 1 ? eventIds[currentIndex + 1] : null;
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
