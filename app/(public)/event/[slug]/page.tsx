@@ -28,11 +28,11 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
   if (event.primaryBand && event.primaryBand.isHunterBand === false) {
     cardClass = 'event-card-guest';
   } else {
-    const performer = event.primaryBand?.name || 'Solo Hunter';
+    const performer = event.primaryBand?.name || 'Robert Hunter';
     if (performer === 'Dinosaurs') cardClass = 'event-card-dinosaurs';
     else if (performer === 'Comfort') cardClass = 'event-card-comfort';
     else if (performer === 'Roadhog') cardClass = 'event-card-roadhog';
-    else if (performer === 'Solo Hunter') cardClass = 'event-card-solo';
+    else if (performer === 'Robert Hunter') cardClass = 'event-card-solo';
     else cardClass = 'event-card-special';
   }
 
@@ -47,7 +47,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
   const flattenedPerformances = event.sets.flatMap((s: any) => s.performances);
 
   return (
-    <main className={`event-card ${cardClass} p-6`}>
+    <main className={`event-card ${cardClass} p-6 mt-8`}>
       <EventHeader
         event={{
           year: event.year ?? 0,

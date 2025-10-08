@@ -51,17 +51,8 @@ const EventHeader: React.FC<EventHeaderProps> = ({ event, eventMusicians, adjace
 
   return (
     <>
-      <div className={`card-title mb-2 ${performerClass}`}>{performer}</div>
-      <div className="flex justify-between items-center card-subtitle mb-1">
-        <div className="font-bold text-base">
-          <span>{formatDateAmerican(event)}</span>
-          {venue && (
-            <>
-              <br className="leading-tight half-line" />
-              <span className="block leading-tight half-line text-base">{venue}</span>
-            </>
-          )}
-        </div>
+      <div className={`flex justify-between items-center mb-2`}>
+        <div className={`card-title ${performerClass}`}>{performer}</div>
         <div className="flex gap-2">
           <Link href={adjacent.prev ? `/event/${adjacent.prev.slug}` : '#'}>
             <button className="btn btn-secondary btn-small" disabled={!adjacent.prev}>
@@ -73,6 +64,17 @@ const EventHeader: React.FC<EventHeaderProps> = ({ event, eventMusicians, adjace
               Next
             </button>
           </Link>
+        </div>
+      </div>
+      <div className="flex justify-between items-start card-subtitle mb-1">
+        <div className="font-bold text-base">
+          <span>{formatDateAmerican(event)}</span>
+          {venue && (
+            <>
+              <br className="leading-tight half-line" />
+              <span className="block leading-tight half-line text-base">{venue}</span>
+            </>
+          )}
         </div>
       </div>
       {eventMusicians && eventMusicians.length > 0 && (
