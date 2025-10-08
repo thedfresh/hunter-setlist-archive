@@ -401,8 +401,8 @@ export default function EventEditPage() {
               />
             </div>
             {/* Sort Date Override */}
-            <div className="w-64">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Sort Date Override</label>
+            <div className="w-32">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Sort Date</label>
               <input
                 type="datetime-local"
                 name="sortDate"
@@ -447,7 +447,7 @@ export default function EventEditPage() {
                   }}
                   className="bg-blue-600 text-white px-3 py-1 rounded-md text-sm hover:bg-blue-700 focus:outline-none"
                 >
-                  Regenerate
+                  Gen
                 </button>
               </div>
             </div>
