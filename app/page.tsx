@@ -1,3 +1,9 @@
+
+'use client';
+
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+
 function Setlist({ sets }: { sets: any[] }) {
   if (!sets || sets.length === 0) return null;
   return (
@@ -16,9 +22,6 @@ function Setlist({ sets }: { sets: any[] }) {
     </div>
   );
 }
-
-import { getEventsOnThisDate } from '@/lib/queries/eventBrowseQueries';
-import Link from 'next/link';
 
 function formatEventDate(event: any) {
   let date = '';
@@ -44,11 +47,27 @@ function getCardClass(event: any) {
   return 'event-card-solo';
 }
 
-export default async function HomePage() {
-  const events = await getEventsOnThisDate();
+export default function HomePage() {
+  const [events, setEvents] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const now = new Date();
+    const month = now.getMonth() + 1;
+    const day = now.getDate();
+    fetch(`/api/events/on-date?month=${month}&day=${day}`)
+      .then(res => res.json())
+      .then(data => {
+        setEvents(data.events || []);
+        setLoading(false);
+      });
+  }, []);
+
   const today = new Date();
-  const month = today.toLocaleString('default', { month: 'long' });
-  const day = today.getDate();
+  const monthName = today.toLocaleString('default', { month: 'long' });
+  const dayNum = today.getDate();
+
+  if (loading) return <div>Loading...</div>;
 
   return (
     <div className="max-w-4xl mx-auto p-8">
