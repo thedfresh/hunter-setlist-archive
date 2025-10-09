@@ -7,7 +7,7 @@ interface PublicLayoutProps {
 
 export default function PublicLayout({ children }: PublicLayoutProps) {
   return (
-    <main className="mx-auto max-w-7xl px-4">
+    <main className="py-6">
       {children}
     </main>
   );

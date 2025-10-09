@@ -3,6 +3,7 @@
 import Link from "next/link";
 import React, { useState } from "react";
 import { compareSongTitles } from '@/lib/songSort';
+import { PageContainer } from '@/components/ui/PageContainer';
 
 type PageSize = number | "All";
 
@@ -112,7 +113,7 @@ export default function SongBrowsePage() {
     const d = new Date(dateStr);
     if (isNaN(d.getTime())) return dateStr;
     return d.toISOString().slice(0, 10);
-}
+  }
 
   function handlePageSizeChange(e: React.ChangeEvent<HTMLSelectElement>) {
     const val: PageSize = e.target.value === "All" ? "All" : parseInt(e.target.value, 10);
@@ -132,15 +133,15 @@ export default function SongBrowsePage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto py-10 px-4">
+    <PageContainer>
       <div className="page-header">
         <div className="page-title">Songs Performed</div>
-        <div className="page-subtitle">{total} songs found</div>
-        <p className="note-text">Note: song counts are exclusive of duplicate performances in a single show (i.e. Dire Wolf medleys) as well as 
-          performances flagged as studios, rehearsals, or soundchecks.
-        </p>
       </div>
       <div className="flex items-center justify-between mb-6 gap-4 flex-wrap">
+        <div className="page-subtitle">{total} songs found</div>
+        <p className="note-text">Note: song counts are exclusive of duplicate performances in a single show (i.e. Dire Wolf medleys) as well as
+          performances flagged as studios, rehearsals, or soundchecks.
+        </p>
         <div className="search-bar w-full sm:w-96">
           <input
             className="search-input-large"
@@ -236,9 +237,9 @@ export default function SongBrowsePage() {
                 {p}
               </button>
             ) :
-            (p === page - 2 || p === page + 2) ? (
-              <span key={p} className="page-ellipsis">...</span>
-            ) : null
+              (p === page - 2 || p === page + 2) ? (
+                <span key={p} className="page-ellipsis">...</span>
+              ) : null
           )}
           <button
             className="page-link"
@@ -249,6 +250,6 @@ export default function SongBrowsePage() {
           </button>
         </div>
       )}
-    </div>
+    </PageContainer>
   );
 }

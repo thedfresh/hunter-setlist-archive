@@ -47,7 +47,7 @@ const EventHeader: React.FC<EventHeaderProps> = ({ event, eventMusicians, adjace
   else if (performer === 'Comfort') performerClass = 'event-card-comfort';
   else if (performer === 'Roadhog') performerClass = 'event-card-roadhog';
   else if (performer === 'Robert Hunter') performerClass = 'event-card-solo';
-  else if (event.isNotHunterBand === false) performerClass = 'event-card-guest';
+  else if (event.isNotHunterBand === true) performerClass = 'event-card-guest';
   const venue = event.venue
     ? `${event.venue.name}${event.venue.city ? ', ' + event.venue.city : ''}${event.venue.stateProvince ? ', ' + event.venue.stateProvince : ''}`
     : '';

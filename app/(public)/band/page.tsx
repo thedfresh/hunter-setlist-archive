@@ -1,5 +1,6 @@
 
 import { getBandsBrowse } from '@/lib/queries/bandBrowseQueries';
+import { PageContainer } from '@/components/ui/PageContainer';
 import Link from 'next/link';
 
 // Helper to color band cards by performer
@@ -19,8 +20,11 @@ export default async function BandBrowsePage() {
   const guestBands = bands.filter((b: any) => !b.isHunterBand)
     .sort((a: any, b: any) => b._count.events - a._count.events);
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-6">Bands</h1>
+    <PageContainer>
+      <div className="page-header">
+        <div className="page-title">Bands</div>
+      </div>
+
       <h2 className="text-xl font-bold mt-4 mb-2">Hunter's Bands</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         {hunterBands.map((band: any) => (
@@ -67,6 +71,8 @@ export default async function BandBrowsePage() {
           </Link>
         ))}
       </div>
-    </div>
+    </PageContainer>
+
+
   );
 }

@@ -1,22 +1,19 @@
 import { getHunterPerformanceStats } from '@/lib/queries/eventBrowseQueries';
-import Link from 'next/link';
+import { PageContainer } from '@/components/ui/PageContainer';
 
 export default async function HunterHubPage() {
   const stats = await getHunterPerformanceStats();
-
- 
-
   return (
-    <div className="max-w-3xl mx-auto p-8">
-      <h1 className="text-2xl font-bold mb-8 text-center">Robert Hunter</h1>
-
+    <PageContainer variant="text">
+      <div className="page-header">
+        <div className="page-title">About Robert Hunter</div>
+      </div>
       <section className="mb-8">
-        <div className="section-header mb-2">Biography</div>
         <p>
           Content TK
         </p>
       </section>
 
-    </div>
+    </PageContainer>
   );
 }

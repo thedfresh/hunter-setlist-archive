@@ -1,8 +1,9 @@
+import { PageContainer } from '@/components/ui/PageContainer';
 import { getEventsBrowse } from '@/lib/queries/eventBrowseQueries';
 import Link from 'next/link';
 
 const FILTER_CATEGORIES = [
-  { key: 'all', label: 'All Shows', className: 'card', bandNames: [] },
+  { key: 'all', label: 'All Events', className: 'card', bandNames: [] },
   { key: 'solo', label: 'Solo Hunter', className: 'event-card-solo', bandNames: ['Robert Hunter'] },
   { key: 'roadhog', label: 'Roadhog', className: 'event-card-roadhog', bandNames: ['Roadhog'] },
   { key: 'comfort', label: 'Comfort', className: 'event-card-comfort', bandNames: ['Comfort'] },
@@ -164,7 +165,77 @@ export default async function EventBrowsePage({ searchParams }: { searchParams: 
       searchFilter = { venue: { city: { contains: search, mode: "insensitive" } } };
     } else if (searchType === "state") {
       searchFilter = { venue: { stateProvince: { contains: search, mode: "insensitive" } } };
+    } else if (searchType === "band") {
+      // Find the band by name to get its ID
+      const band = await prisma.band.findFirst({
+        where: { name: { equals: search, mode: 'insensitive' } }
+      });
+      if (band) {
+        searchFilter = { primaryBandId: band.id };
+      }
+    } else if (searchType === "musician") {
+      const musician = await prisma.musician.findFirst({
+        where: { name: { equals: search, mode: 'insensitive' } }
+      });
+      if (musician) {
+        searchFilter = {
+          OR: [
+            { eventMusicians: { some: { musicianId: musician.id } } },
+            { sets: { some: { setMusicians: { some: { musicianId: musician.id } } } } },
+            { sets: { some: { performances: { some: { performanceMusicians: { some: { musicianId: musician.id } } } } } } }
+          ]
+        };
+      }
+    } else if (searchType === "person-all") {
+      const [bands, musicians] = await Promise.all([
+        prisma.band.findMany({
+          where: { name: { equals: search, mode: 'insensitive' } }
+        }),
+        prisma.musician.findMany({
+          where: { name: { equals: search, mode: 'insensitive' } }
+        })
+      ]);
+
+      const bandIds = bands.map(b => b.id);
+      const musicianIds = musicians.map(m => m.id);
+
+      if (bandIds.length > 0 || musicianIds.length > 0) {
+        searchFilter = {
+          OR: [
+            ...(bandIds.length > 0 ? [{ primaryBandId: { in: bandIds } }] : []),
+            ...(musicianIds.length > 0 ? [
+              { eventMusicians: { some: { musicianId: { in: musicianIds } } } },
+              { sets: { some: { setMusicians: { some: { musicianId: { in: musicianIds } } } } } },
+              { sets: { some: { performances: { some: { performanceMusicians: { some: { musicianId: { in: musicianIds } } } } } } } },
+              { primaryBand: { bandMusicians: { some: { musicianId: { in: musicianIds } } } } }
+            ] : [])
+          ]
+        };
+      }
+    } else if (searchType === "person-band") {
+      const bandId = parseInt(searchParams.bandId || '0');
+      const musicianId = parseInt(searchParams.musicianId || '0');
+      if (bandId && musicianId) {
+        searchFilter = {
+          primaryBandId: bandId,
+          primaryBand: { bandMusicians: { some: { musicianId } } }
+        };
+      }
+    } else if (searchType === "person-guest") {
+      const musician = await prisma.musician.findFirst({
+        where: { name: { equals: search, mode: 'insensitive' } }
+      });
+      if (musician) {
+        searchFilter = {
+          OR: [
+            { eventMusicians: { some: { musicianId: musician.id } } },
+            { sets: { some: { setMusicians: { some: { musicianId: musician.id } } } } },
+            { sets: { some: { performances: { some: { performanceMusicians: { some: { musicianId: musician.id } } } } } } }
+          ]
+        };
+      }
     }
+
   }
 
   // Query counts for each filter category (unchanged)
@@ -177,22 +248,34 @@ export default async function EventBrowsePage({ searchParams }: { searchParams: 
   const guestCount = await prisma.event.count({ where: { primaryBand: { isHunterBand: false } } });
 
   const bandCounts = [
-    { key: 'all', label: 'All Shows', className: 'card', count: allCount },
+    { key: 'all', label: 'All Events', className: 'card', count: allCount },
     { key: 'solo', label: 'Solo Hunter', className: 'event-card-solo', count: soloCount },
     { key: 'roadhog', label: 'Roadhog', className: 'event-card-roadhog', count: roadhogCount },
     { key: 'comfort', label: 'Comfort', className: 'event-card-comfort', count: comfortCount },
     { key: 'dinosaurs', label: 'Dinosaurs', className: 'event-card-dinosaurs', count: dinosaursCount },
     { key: 'special', label: 'Ad-Hoc Bands', className: 'event-card-special', count: specialCount },
-    { key: 'guest', label: 'Guest Appearances', className: 'event-card-guest', count: guestCount }
+    { key: 'guest', label: 'Guest Spots', className: 'event-card-guest', count: guestCount }
   ];
 
   // Build where clause for events query
   const baseWhere = getBrowsableEventsWhere();
-  let where = (bandOrFilters.length > 0)
-    ? { ...baseWhere, OR: bandOrFilters }
-    : baseWhere;
-  if (searchFilter) {
-    where = { ...where, ...searchFilter };
+  let where: any;
+
+  if (searchFilter && searchFilter.OR) {
+    where = {
+      AND: [
+        baseWhere,
+        ...(bandOrFilters.length > 0 ? [{ OR: bandOrFilters }] : []),
+        searchFilter
+      ]
+    };
+  } else {
+    where = (bandOrFilters.length > 0)
+      ? { ...baseWhere, OR: bandOrFilters }
+      : baseWhere;
+    if (searchFilter) {
+      where = { ...where, ...searchFilter };
+    }
   }
 
   const { events, totalCount, currentPage, totalPages, pageSize } = await getEventsBrowse({ page, where });
@@ -228,44 +311,54 @@ export default async function EventBrowsePage({ searchParams }: { searchParams: 
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-6">Browse Events</h1>
-      {/* Band filter chips */}
-      <BandFilterChips bandCounts={bandCounts} selectedKeys={selectedTypes} />
-      {hasActiveSearch && (
-        <div className="mb-4 flex items-center gap-3 bg-blue-50 border border-blue-200 rounded px-4 py-2">
-          <span className="text-blue-700 font-medium">Showing results for: <span className="font-bold">{getSearchLabel(searchType)}: {search}</span></span>
-          <Link href={getClearSearchUrl(searchParams)} className="ml-2 px-2 py-1 text-xs bg-blue-100 rounded hover:bg-blue-200 text-blue-800 border border-blue-300">Clear</Link>
+    <PageContainer>
+      <div className="flex gap-10">
+        {/* Left sidebar - 180px to match nav offset */}
+        <div className="fixed left-10 top-[160px] w-[160px]">
+          <BandFilterChips bandCounts={bandCounts} selectedKeys={selectedTypes} />
         </div>
-      )}
-      <div className="grid grid-cols-1 gap-4">
-        {events.map((event: any) => (
-          <Link
-            key={event.id}
-            href={`/event/${event.slug}`}
-            className={`event-card ${getCardClass(event)} block p-6`}
-          >
-            {/* Display billing or band name, default to Robert Hunter */}
-            <div className="mb-2 text-sm font-medium text-gray-700">
-              {event.billing
-                ? event.billing
-                : event.primaryBand?.name
-                ? event.primaryBand.name
-                : 'Robert Hunter'}
+        {/* Main content */}
+        <div className="flex-1">
+          <div className="page-header">
+            <div className="page-title">Browse Events</div>
+          </div>      {/* Band filter chips */}
+
+          {hasActiveSearch && (
+            <div className="mb-4 flex items-center gap-3 bg-blue-50 border border-blue-200 rounded px-4 py-2">
+              <span className="text-blue-700 font-medium">Showing results for: <span className="font-bold">{getSearchLabel(searchType)}: {search}</span></span>
+              <Link href={getClearSearchUrl(searchParams)} className="ml-2 px-2 py-1 text-xs bg-blue-100 rounded hover:bg-blue-200 text-blue-800 border border-blue-300">Clear</Link>
             </div>
-            <div className="mb-4">
-              <div className="flex items-center gap-3 text-lg font-semibold">
-                <span>{formatEventDate(event)}</span>
-                <span className="text-gray-700 text-base font-normal">{event.venue?.name}{event.venue?.city ? `, ${event.venue.city}` : ''}{event.venue?.stateProvince ? `, ${event.venue.stateProvince}` : ''}</span>
-              </div>
-            </div>
-            <div className="space-y-4">
-              <Setlist sets={event.sets} />
-            </div>
-          </Link>
-        ))}
+          )}
+          <div className="grid grid-cols-1 gap-4">
+            {events.map((event: any) => (
+              <Link
+                key={event.id}
+                href={`/event/${event.slug}`}
+                className={`event-card ${getCardClass(event)} block p-6`}
+              >
+                {/* Display billing or band name, default to Robert Hunter */}
+                <div className="mb-2 text-sm font-medium text-gray-700">
+                  {event.billing
+                    ? event.billing
+                    : event.primaryBand?.name
+                      ? event.primaryBand.name
+                      : 'Robert Hunter'}
+                </div>
+                <div className="mb-4">
+                  <div className="flex items-center gap-3 text-lg font-semibold">
+                    <span>{formatEventDate(event)}</span>
+                    <span className="text-gray-700 text-base font-normal">{event.venue?.name}{event.venue?.city ? `, ${event.venue.city}` : ''}{event.venue?.stateProvince ? `, ${event.venue.stateProvince}` : ''}</span>
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  <Setlist sets={event.sets} />
+                </div>
+              </Link>
+            ))}
+          </div>
+          <Pagination currentPage={currentPage} totalPages={totalPages} searchParams={searchParams} />
+        </div>
       </div>
-      <Pagination currentPage={currentPage} totalPages={totalPages} searchParams={searchParams} />
-    </div>
+    </PageContainer>
   );
 }
