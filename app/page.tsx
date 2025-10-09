@@ -44,7 +44,7 @@ function getCardClass(event: any) {
   return 'event-card-solo';
 }
 
-export default async function BetaHomePage() {
+export default async function HomePage() {
   const events = await getEventsOnThisDate();
   const today = new Date();
   const month = today.toLocaleString('default', { month: 'long' });
