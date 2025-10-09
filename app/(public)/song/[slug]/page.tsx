@@ -102,6 +102,18 @@ export default async function SongDetailPage({ params }: { params: { slug: strin
               },
             },
           },
+          performances: {
+            include: {
+              song: {
+                select: {
+                  id: true,
+                  title: true,
+                  slug: true,
+                }
+              }
+            },
+            orderBy: { performanceOrder: 'asc' }
+          }
         },
       },
     },
