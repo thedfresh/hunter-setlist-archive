@@ -1,5 +1,6 @@
 import { getVenueBySlug } from '@/lib/queries/venueBrowseQueries';
 import { notFound } from 'next/navigation';
+import { PageContainer } from '@/components/ui/PageContainer';
 import Link from 'next/link';
 
 function getPerformerColorClass(name: string) {
@@ -50,8 +51,8 @@ export default async function VenueDetailPage({ params }: { params: { slug: stri
   const lastShow = sortedEvents[sortedEvents.length - 1];
 
   return (
-    <div className="max-w-3xl mx-auto p-6">
-      <div className="card p-6 mb-6">
+    <>
+      <PageContainer>
         <h1 className="text-2xl font-bold mb-2">{venue.name}</h1>
         <div className="text-gray-700 mb-2">
           {venue.city}{venue.city && venue.stateProvince ? ', ' : ''}{venue.stateProvince}
@@ -79,36 +80,36 @@ export default async function VenueDetailPage({ params }: { params: { slug: stri
             </ul>
           </div>
         )}
-      </div>
-      <div className="card p-6">
-        <div className="section-header mb-4">Shows at this Venue</div>
-        <div className="table-container">
-          <table className="table">
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Performer</th>
-              </tr>
-            </thead>
-            <tbody>
-              {sortedEvents.map((event: any) => (
-                <tr key={event.id}>
-                  <td>
-                    <Link href={`/event/${event.slug}`} className="link-internal">
-                      {formatEventDate(event)}
-                    </Link>
-                  </td>
-                  <td>
-                    <span className={getPerformerColorClass(event.primaryBand?.name || 'Solo')}>
-                      {event.primaryBand?.name || 'Solo'}
-                    </span>
-                  </td>
+        <div className="card p-6">
+          <div className="section-header mb-4">Shows at this Venue</div>
+          <div className="table-container">
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Performer</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {sortedEvents.map((event: any) => (
+                  <tr key={event.id}>
+                    <td>
+                      <Link href={`/event/${event.slug}`} className="link-internal">
+                        {formatEventDate(event)}
+                      </Link>
+                    </td>
+                    <td>
+                      <span className={getPerformerColorClass(event.primaryBand?.name || 'Solo')}>
+                        {event.primaryBand?.name || 'Solo'}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
-    </div>
+      </PageContainer>
+    </>
   );
 }

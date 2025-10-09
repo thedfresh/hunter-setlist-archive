@@ -1,5 +1,6 @@
 import { getBandBySlug } from '@/lib/queries/bandBrowseQueries';
 import { notFound } from 'next/navigation';
+import { PageContainer } from '@/components/ui/PageContainer';
 import Link from 'next/link';
 
 function formatEventDate(event: any) {
@@ -50,7 +51,7 @@ export default async function BandDetailPage(props: { params: { slug: string } }
   }
 
   return (
-    <div className="max-w-3xl mx-auto p-6">
+    <PageContainer>
       <div className="card p-6 mb-6">
         <h1 className="text-2xl font-bold mb-2">{band.name}</h1>
         {band.publicNotes && (
@@ -63,28 +64,30 @@ export default async function BandDetailPage(props: { params: { slug: string } }
           )}
         </div>
       </div>
-      <div className="card p-6 mb-6">
-        <div className="section-header mb-4">Members</div>
-        <ul className="list-disc pl-5 text-sm">
-          {band.bandMusicians.map((bm: any) => (
-            <li key={bm.musician.name}>
-              <span className="font-semibold">{bm.musician.name}</span>
-              {bm.musician.defaultInstruments && bm.musician.defaultInstruments.length > 0 && (
-                <span className="ml-2 text-gray-700">(
-                  {bm.musician.defaultInstruments.map((di: any, idx: number) => (
-                    <span key={di.instrument.displayName}>
-                      {di.instrument.displayName}
-                      {idx < bm.musician.defaultInstruments.length - 1 ? ", " : ""}
-                    </span>
-                  ))}
-                )</span>
-              )}
-              {/* {bm.joinedDate && <span className="ml-2 text-gray-500">(Joined: {renderDate(bm.joinedDate)})</span>}
+      {band.bandMusicians && band.bandMusicians.length > 0 && (
+        <div className="card p-6 mb-6">
+          <div className="section-header mb-4">Members</div>
+          <ul className="list-disc pl-5 text-sm">
+            {band.bandMusicians.map((bm: any) => (
+              <li key={bm.musician.name}>
+                <span className="font-semibold">{bm.musician.name}</span>
+                {bm.musician.defaultInstruments && bm.musician.defaultInstruments.length > 0 && (
+                  <span className="ml-2 text-gray-700">(
+                    {bm.musician.defaultInstruments.map((di: any, idx: number) => (
+                      <span key={di.instrument.displayName}>
+                        {di.instrument.displayName}
+                        {idx < bm.musician.defaultInstruments.length - 1 ? ", " : ""}
+                      </span>
+                    ))}
+                    )</span>
+                )}
+                {/* {bm.joinedDate && <span className="ml-2 text-gray-500">(Joined: {renderDate(bm.joinedDate)})</span>}
               {bm.leftDate && <span className="ml-2 text-gray-500">(Left: {renderDate(bm.leftDate)})</span>} */}
-            </li>
-          ))}
-        </ul>
-      </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
       <div className="card p-6">
         <div className="section-header mb-4">Shows</div>
         <div className="table-container">
@@ -114,6 +117,6 @@ export default async function BandDetailPage(props: { params: { slug: string } }
           </table>
         </div>
       </div>
-    </div>
+    </PageContainer>
   );
 }

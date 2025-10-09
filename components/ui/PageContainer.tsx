@@ -7,8 +7,10 @@ export function PageContainer({
 }) {
     if (variant === 'text') {
         return (
-            <div className="py-6 px-10 max-w-3xl mx-auto">
-                {children}
+            <div className="px-10 py-6">
+                <div className="ml-[180px] max-w-3xl">
+                    {children}
+                </div>
             </div>
         );
     }
