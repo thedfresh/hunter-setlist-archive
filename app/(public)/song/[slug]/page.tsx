@@ -74,7 +74,7 @@ export default async function SongDetailPage({ params }: { params: { slug: strin
       set: {
         event: getBrowsableEventsWhere(),
       },
-      isMedley: false,
+      // isMedley: false,
     },
     include: {
       set: {
