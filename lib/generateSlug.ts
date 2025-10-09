@@ -1,3 +1,8 @@
+
+/**
+ * ONLY used in admin interfaces to generate slugs when creating/editing records.
+ * Public pages should NEVER generate slugs - always use database slug field.
+ */
 // lib/generateSlug.ts
 
 

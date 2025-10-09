@@ -1,3 +1,4 @@
+import { getBrowsableEventsWhere, getCountableEventsWhere } from '@/lib/queryFilters';
 export type GetEventsBrowseParams = {
   page?: number;
   pageSize?: number;
@@ -12,14 +13,18 @@ export type GetEventsBrowseParams = {
 // Get Hunter performance stats for hub page
 export async function getHunterPerformanceStats() {
   // Total show count
-  const totalShows = await prisma.event.count();
+  const totalShows = await prisma.event.count({
+  where: getCountableEventsWhere()
+  });
 
   // First and last show (by date)
   const firstShow = await prisma.event.findFirst({
+  where: getCountableEventsWhere(),
     orderBy: { sortDate: 'asc' },
     select: { year: true, month: true, day: true, displayDate: true, sortDate: true }
   });
   const lastShow = await prisma.event.findFirst({
+  where: getCountableEventsWhere(),
     orderBy: { sortDate: 'desc' },
     select: { year: true, month: true, day: true, displayDate: true, sortDate: true }
   });
@@ -27,6 +32,7 @@ export async function getHunterPerformanceStats() {
   // Breakdown by performer type (primaryBand.name)
   const bandCounts = await prisma.event.groupBy({
     by: ['primaryBandId'],
+  where: getCountableEventsWhere(),
     _count: { _all: true },
   });
   // Get band names for each id
@@ -56,6 +62,7 @@ export async function getEventsOnThisDate() {
   const day = now.getDate();
   const events = await prisma.event.findMany({
     where: {
+      ...getBrowsableEventsWhere(),
       month,
       day,
     },
@@ -106,12 +113,12 @@ import { getPrismaDateOrderBy } from '@/lib/dateSort';
 // ...existing code...
 
 export async function getEventsBrowse({ page = 1, pageSize = 100, where = {} }: GetEventsBrowseParams) {
-  // Future: add filters to where
-
+  const baseWhere = getBrowsableEventsWhere();
+  const mergedWhere = { ...baseWhere, ...where };
   const [totalCount, events] = await Promise.all([
-    prisma.event.count({ where }),
+    prisma.event.count({ where: mergedWhere }),
     prisma.event.findMany({
-      where,
+      where: mergedWhere,
       include: {
         venue: true,
         primaryBand: true,

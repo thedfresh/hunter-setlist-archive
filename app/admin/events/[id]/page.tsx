@@ -48,8 +48,6 @@ export default function EventEditPage() {
     billing: "",
     etreeShowId: "",
     hunterParticipationUncertain: false,
-    isSpurious: false,
-    includeInStats: true,
     isUncertain: false,
     isPublic: true,
     verified: false,
@@ -150,8 +148,6 @@ export default function EventEditPage() {
             billing: data.event.billing || "",
             etreeShowId: data.event.etreeShowId || "",
             hunterParticipationUncertain: !!data.event.hunterParticipationUncertain,
-            isSpurious: !!data.event.isSpurious,
-            includeInStats: data.event.includeInStats !== false,
             isUncertain: !!data.event.isUncertain,
             isPublic: data.event.isPublic !== false, // default to true
             verified: !!data.event.verified,
@@ -341,26 +337,7 @@ export default function EventEditPage() {
               />
               <label className="text-sm text-gray-700">Hunter participation uncertain</label>
             </div>
-            <div className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                name="isSpurious"
-                checked={form.isSpurious}
-                onChange={e => setForm(f => ({ ...f, isSpurious: e.target.checked }))}
-                className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-              />
-              <label className="text-sm text-gray-700">Spurious</label>
-            </div>
-            <div className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                name="includeInStats"
-                checked={form.includeInStats}
-                onChange={e => setForm(f => ({ ...f, includeInStats: e.target.checked }))}
-                className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-              />
-              <label className="text-sm text-gray-700">Include in stats</label>
-            </div>
+            {/* Removed isSpurious and includeInStats checkboxes, now controlled by eventType */}
           </div>
           <div className="flex gap-2 items-end">  {/* Date row: year/month/day/displayDate/showTiming/slug */}
             <div className="w-24">

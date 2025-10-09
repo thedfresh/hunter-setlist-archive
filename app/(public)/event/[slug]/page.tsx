@@ -20,8 +20,14 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
     month: event.month,
     day: event.day,
     showTiming: event.showTiming,
-  slug: event.slug ?? undefined
+    slug: event.slug || undefined
   });
+
+  // Ensure adjacent.prev/next have slug: string, not null
+  const adjacentForHeader = {
+    prev: adjacent.prev && adjacent.prev.slug ? { slug: adjacent.prev.slug } : null,
+    next: adjacent.next && adjacent.next.slug ? { slug: adjacent.next.slug } : null,
+  };
 
   // Dynamic performer card class
   let cardClass = 'event-card-solo';
@@ -59,7 +65,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
           showTiming: event.showTiming,
           verified: event.verified,
         }}
-        adjacent={adjacent}
+        adjacent={adjacentForHeader}
       />
       { showNotesSection ? (
         <div className="notes-section mb-6">

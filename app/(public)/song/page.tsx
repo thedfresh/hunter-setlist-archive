@@ -12,6 +12,7 @@ import { useEffect } from "react";
 type Song = {
   id: number;
   title: string;
+  slug: string;
   performanceCount: number;
   firstPerformance?: { date: string; slug: string };
   lastPerformance?: { date: string; slug: string };
@@ -135,7 +136,9 @@ export default function SongBrowsePage() {
       <div className="page-header">
         <div className="page-title">Songs Performed</div>
         <div className="page-subtitle">{total} songs found</div>
-        <p className="note-text">Note: song counts are exclusive of duplicate performances in medleys.</p>
+        <p className="note-text">Note: song counts are exclusive of duplicate performances in a single show (i.e. Dire Wolf medleys) as well as 
+          performances flagged as studios, rehearsals, or soundchecks.
+        </p>
       </div>
       <div className="flex items-center justify-between mb-6 gap-4 flex-wrap">
         <div className="search-bar w-full sm:w-96">
@@ -178,16 +181,10 @@ export default function SongBrowsePage() {
           </thead>
           <tbody>
             {pagedSongs.map((song) => {
-              // Slugify the song title for the detail page
-              const slug = song.title
-                .toLowerCase()
-                .replace(/[^a-z0-9\s-]/g, "")
-                .replace(/\s+/g, "-")
-                .replace(/-+/g, "-");
               return (
                 <tr key={song.id}>
                   <td>
-                    <Link href={`/song/${slug}`} className="link-internal">
+                    <Link href={`/song/${song.slug}`} className="link-internal">
                       {song.title}
                     </Link>
                   </td>

@@ -1,27 +1,12 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getCountablePerformancesWhere } from '@/lib/queryFilters';
 
 export async function GET() {
   try {
     // Get all non-medley performances with event dates
     const performances = await prisma.performance.findMany({
-      where: { 
-        isMedley: false,
-        set: {
-          event: {
-            includeInStats: true
-          }
-        },
-        song: {
-          songTags: {
-            none: {
-              tag: {
-                name: "medley"
-              }
-            }
-          }
-        }
-      },
+      where: getCountablePerformancesWhere(),
       select: {
         songId: true,
         set: {
@@ -33,6 +18,13 @@ export async function GET() {
                 day: true,
                 displayDate: true,
                 showTiming: true,
+                slug: true,
+                eventType: true,
+              }
+            },
+            setType: {
+              select: {
+                displayName: true,
               }
             }
           }
@@ -44,15 +36,12 @@ export async function GET() {
     const songData = new Map();
     
     performances.forEach(perf => {
-      const event = perf.set.event;
-      if (!event.year) return;
+      const event = perf.set && perf.set.event;
+      if (!event || !event.year) return;
       const dateValue = event.year * 10000 + (event.month || 0) * 100 + (event.day || 0);
       const displayDate = event.displayDate || 
         `${event.year}${event.month ? '-' + String(event.month).padStart(2, '0') : ''}${event.day ? '-' + String(event.day).padStart(2, '0') : ''}`;
-      let slug = displayDate;
-      if (event.showTiming === "early" || event.showTiming === "late") {
-        slug += `-${event.showTiming}`;
-      }
+      let slug = event.slug;
       if (!songData.has(perf.songId)) {
         songData.set(perf.songId, {
           count: 0,
@@ -87,9 +76,9 @@ export async function GET() {
           lastPerformance = { date: sortedDates[sortedDates.length - 1].display, slug: sortedDates[sortedDates.length - 1].slug };
         }
         return {
-          ...song,
-          albums: song.songAlbums.map(sa => sa.album),
-          tags: song.songTags.map(st => st.tag),
+          id: song.id,
+          title: song.title,
+          slug: song.slug,
           performanceCount,
           firstPerformance,
           lastPerformance,

@@ -1,30 +1,33 @@
-export async function getVenueBySlug(slug: string) {
-  const venue = await prisma.venue.findFirst({
-    where: { slug },
-    include: {
-      links: true,
-      events: {
-        select: {
-          id: true,
-          year: true,
-          month: true,
-          day: true,
-          displayDate: true,
-          slug: true,
-          verified: true,
-          sortDate: true,
-          primaryBand: { select: { name: true } },
+import { getCountableEventsWhere, getBrowsableEventsWhere } from '@/lib/queryFilters';
+  export async function getVenueBySlug(slug: string) {
+    const venue = await prisma.venue.findFirst({
+      where: { slug },
+      include: {
+        links: true,
+        events: {
+          where: getBrowsableEventsWhere(),
+          select: {
+            id: true,
+            year: true,
+            month: true,
+            day: true,
+            displayDate: true,
+            slug: true,
+            verified: true,
+            sortDate: true,
+            primaryBand: { select: { name: true } },
+            eventType: { select: { name: true, includeInStats: true } },
+          },
+          orderBy: [
+            { sortDate: 'asc' },
+            { year: 'asc' },
+            { month: 'asc' },
+            { day: 'asc' },
+          ],
         },
-        orderBy: [
-          { sortDate: 'asc' },
-          { year: 'asc' },
-          { month: 'asc' },
-          { day: 'asc' },
-        ],
       },
-    },
-  });
-  return venue;
+    });
+    return venue;
 }
 import { prisma } from '@/lib/prisma';
 
@@ -35,9 +38,8 @@ export interface GetVenuesBrowseParams {
 
 export async function getVenuesBrowse(/* params: GetVenuesBrowseParams */) {
   // Future: add filters to where
-  const where = {};
   const venues = await prisma.venue.findMany({
-    where,
+    where: {},
     select: {
       id: true,
       slug: true,
@@ -47,7 +49,11 @@ export async function getVenuesBrowse(/* params: GetVenuesBrowseParams */) {
       stateProvince: true,
       publicNotes: true,
       _count: {
-        select: { events: true },
+        select: {
+          events: {
+            where: getCountableEventsWhere()
+          }
+        },
       },
     },
     orderBy: { name: 'asc' },

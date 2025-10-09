@@ -1,6 +1,5 @@
 import { getEventsBrowse } from '@/lib/queries/eventBrowseQueries';
 import Link from 'next/link';
-import { generateSlug } from '@/lib/eventSlug';
 
 const FILTER_CATEGORIES = [
   { key: 'all', label: 'All Shows', className: 'card', bandNames: [] },
@@ -110,7 +109,7 @@ function Pagination({ currentPage, totalPages, searchParams }: { currentPage: nu
 export default async function EventBrowsePage({ searchParams }: { searchParams: Record<string, string | undefined> }) {
   const page = parseInt(searchParams?.page || '1', 10) || 1;
   const prisma = (await import('@/lib/prisma')).prisma;
-  const { getAllEventsWhere } = await import('@/lib/queryDefaults');
+  const { getBrowsableEventsWhere } = await import('@/lib/queryFilters');
 
   // Parse selected types from searchParams.types
   const ALL_KEYS = FILTER_CATEGORIES.map((cat: { key: string }) => cat.key);
@@ -137,7 +136,7 @@ export default async function EventBrowsePage({ searchParams }: { searchParams: 
   }
 
   // Query counts for each filter category (unchanged)
-  const allCount = await prisma.event.count({ where: getAllEventsWhere() });
+  const allCount = await prisma.event.count({ where: getBrowsableEventsWhere() });
   const soloCount = await prisma.event.count({ where: { primaryBand: { name: 'Robert Hunter' } } });
   const roadhogCount = await prisma.event.count({ where: { primaryBand: { name: 'Roadhog' } } });
   const comfortCount = await prisma.event.count({ where: { primaryBand: { name: 'Comfort' } } });
@@ -156,7 +155,7 @@ export default async function EventBrowsePage({ searchParams }: { searchParams: 
   ];
 
   // Build where clause for events query
-  const baseWhere = getAllEventsWhere();
+  const baseWhere = getBrowsableEventsWhere();
   const where = (bandOrFilters.length > 0)
     ? { ...baseWhere, OR: bandOrFilters }
     : baseWhere;
@@ -182,7 +181,7 @@ export default async function EventBrowsePage({ searchParams }: { searchParams: 
         {events.map((event: any) => (
           <Link
             key={event.id}
-            href={`/event/${event.slug ?? generateSlug(event)}`}
+            href={`/event/${event.slug}`}
             className={`event-card ${getCardClass(event)} block p-6`}
           >
             {/* Display billing or band name, default to Robert Hunter */}

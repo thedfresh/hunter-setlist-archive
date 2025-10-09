@@ -1,7 +1,6 @@
 import { getVenueBySlug } from '@/lib/queries/venueBrowseQueries';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { generateSlug } from '@/lib/eventSlug';
 
 function getPerformerColorClass(name: string) {
   const n = name.toLowerCase();
@@ -95,7 +94,7 @@ export default async function VenueDetailPage({ params }: { params: { slug: stri
               {sortedEvents.map((event: any) => (
                 <tr key={event.id}>
                   <td>
-                    <Link href={`/event/${event.slug || generateSlug(event)}`} className="link-internal">
+                    <Link href={`/event/${event.slug}`} className="link-internal">
                       {formatEventDate(event)}
                     </Link>
                   </td>

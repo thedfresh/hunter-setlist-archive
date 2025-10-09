@@ -50,8 +50,7 @@ export async function PUT(req: NextRequest, context: { params: Promise<Params> }
         rawDataGdsets: data.rawDataGdsets || null,
         billing: data.billing || null,
         hunterParticipationUncertain: !!data.hunterParticipationUncertain,
-        isSpurious: !!data.isSpurious,
-        includeInStats: data.includeInStats !== false,
+  // Removed isSpurious and includeInStats; now controlled by eventType
         isUncertain: !!data.isUncertain,
         isPublic: data.isPublic !== false,
         verified: !!data.verified,

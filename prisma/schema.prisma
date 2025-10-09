@@ -121,9 +121,7 @@ model Event {
   primaryBandId                Int?               @map("primary_band_id")
   hunterParticipationUncertain Boolean            @default(false) @map("hunter_participation_uncertain")
   billing                      String?
-  isSpurious                   Boolean            @default(false) @map("is_spurious")
   publicNotes                  String?            @map("public_notes")
-  includeInStats               Boolean            @default(true) @map("include_in_stats")
   verified                     Boolean            @default(false)
   createdAt                    DateTime           @default(now()) @map("created_at")
   updatedAt                    DateTime           @default(now()) @updatedAt @map("updated_at")

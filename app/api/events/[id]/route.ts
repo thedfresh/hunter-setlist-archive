@@ -22,8 +22,6 @@ export async function GET(req: NextRequest, context: { params: Promise<{ id: str
           rawDataGdsets: event.rawDataGdsets ?? "",
           billing: event.billing ?? "",
           hunterParticipationUncertain: !!event.hunterParticipationUncertain,
-          isSpurious: !!event.isSpurious,
-          includeInStats: event.includeInStats !== false,
           verified: !!event.verified,
         }
       });

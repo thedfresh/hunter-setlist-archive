@@ -1,4 +1,6 @@
 import { prisma } from '@/lib/prisma';
+import { getBrowsableEventsWhere } from '@/lib/queryFilters';
+import { getCountablePerformancesWhere } from '@/lib/queryFilters';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 
@@ -26,6 +28,7 @@ export default async function SongDetailPage({ params }: { params: { slug: strin
       songTags: { include: { tag: true } },
       links: true,
       performances: {
+        where: getCountablePerformancesWhere(),
         include: {
           set: {
             include: {
@@ -38,7 +41,7 @@ export default async function SongDetailPage({ params }: { params: { slug: strin
                   day: true,
                   displayDate: true,
                   showTiming: true,
-                  includeInStats: true,
+                  eventType: { select: { name: true, includeInStats: true } },
                   venue: {
                     select: {
                       id: true,
@@ -64,16 +67,56 @@ export default async function SongDetailPage({ params }: { params: { slug: strin
     },
   });
 
+  // Separate query for performance date list (includes studios/errata)
+  const performanceDates = await prisma.performance.findMany({
+    where: {
+      song: { slug },
+      set: {
+        event: getBrowsableEventsWhere(),
+      },
+      isMedley: false,
+    },
+    include: {
+      set: {
+        include: {
+          event: {
+            select: {
+              id: true,
+              slug: true,
+              year: true,
+              month: true,
+              day: true,
+              displayDate: true,
+              showTiming: true,
+              eventType: { select: { name: true, includeInStats: true } },
+              venue: {
+                select: {
+                  id: true,
+                  slug: true,
+                  name: true,
+                  context: true,
+                  city: true,
+                  stateProvince: true,
+                  country: true,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+
   if (!song) return notFound();
 
   // Compute performance stats
-  // For stats, filter out medleys, but for display, include all
+  // For stats, filter out medleys only (query already filters by event type)
   const filteredPerformances = song.performances.filter(
-    (p: any) => !p.isMedley && p.set?.event?.includeInStats
+    (p: any) => !p.isMedley
   );
   const totalPerformed = filteredPerformances.length;
   // For display, include all performances, but sort by event date and set order
-  const sortedByDate = [...song.performances].sort((a: any, b: any) => {
+  const sortedByDate = [...performanceDates].sort((a: any, b: any) => {
     const aDate = new Date(a.set.event.year || 0, (a.set.event.month || 1) - 1, a.set.event.day || 1);
     const bDate = new Date(b.set.event.year || 0, (b.set.event.month || 1) - 1, b.set.event.day || 1);
     if (aDate.getTime() !== bDate.getTime()) return aDate.getTime() - bDate.getTime();
@@ -204,6 +247,8 @@ export default async function SongDetailPage({ params }: { params: { slug: strin
                       showDateVenue = false;
                     }
                   }
+                  // Add indicator for studio/errata events
+                  const isNonCountable = perf.set.event.eventType && perf.set.event.eventType.includeInStats === false;
                   return (
                     <tr key={perf.id} className="border-t">
                       <td className="px-2 py-1">
@@ -212,6 +257,9 @@ export default async function SongDetailPage({ params }: { params: { slug: strin
                             {formatDate(perf.set.event)}
                           </Link>
                         ) : ''}
+                        {showDateVenue && isNonCountable && (
+                          <span className="ml-2 px-2 py-0.5 rounded bg-yellow-100 text-yellow-800 text-xs font-semibold align-middle">Studio</span>
+                        )}
                       </td>
                       <td className="px-2 py-1">
                         {showDateVenue && perf.set.event.venue ? (
