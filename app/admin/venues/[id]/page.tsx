@@ -3,6 +3,16 @@ import React, { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 
+type Event = {
+  id: number;
+  year?: number;
+  month?: number;
+  day?: number;
+  displayDate?: string;
+  slug?: string;
+  primaryBand?: { name: string };
+};
+
 type Venue = {
   id: number;
   name: string;
@@ -12,6 +22,7 @@ type Venue = {
   country?: string;
   isUncertain?: boolean;
   createdAt: string;
+  events?: Event[];
 };
 
 export default function VenueEditPage() {
@@ -232,6 +243,34 @@ export default function VenueEditPage() {
           Delete Venue
         </button>
         {deleteError && <p className="text-red-500 text-sm mt-2">{deleteError}</p>}
+
+        {/* List of events at this venue */}
+        {venue.events && venue.events.length > 0 && (
+          <div className="mt-8">
+            <h2 className="text-lg font-semibold mb-2">Events at this Venue</h2>
+            <table className="table w-full">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Band</th>
+                  <th>Link</th>
+                </tr>
+              </thead>
+              <tbody>
+                {venue.events.map((event) => (
+                  <tr key={event.id}>
+                    <td>{event.displayDate || `${event.year ?? ''}-${event.month ?? ''}-${event.day ?? ''}`}</td>
+                    <td>{event.primaryBand?.name || ''}</td>
+                    <td>
+                      <Link href={`/event/${event.slug}`} className="text-blue-600 hover:underline">View</Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
         <p className="mt-6 text-gray-500 text-xs">Created: {new Date(venue.createdAt).toLocaleString()}</p>
       </div>
     </div>

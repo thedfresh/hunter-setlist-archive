@@ -11,7 +11,28 @@ export async function GET(req: NextRequest, { params }: { params: Params }) {
   try {
     const id = Number(params.id);
     if (!id) return NextResponse.json({ error: 'Invalid venue id.' }, { status: 400 });
-    const venue = await prisma.venue.findUnique({ where: { id } });
+    const venue = await prisma.venue.findUnique({
+      where: { id },
+      include: {
+        events: {
+          select: {
+            id: true,
+            year: true,
+            month: true,
+            day: true,
+            displayDate: true,
+            slug: true,
+            primaryBand: { select: { name: true } },
+          },
+          orderBy: [
+            { sortDate: 'asc' },
+            { year: 'asc' },
+            { month: 'asc' },
+            { day: 'asc' },
+          ],
+        }
+      }
+    });
     if (!venue) return NextResponse.json({ error: 'Venue not found.' }, { status: 404 });
     return NextResponse.json({ venue });
   } catch (error) {

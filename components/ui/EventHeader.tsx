@@ -11,6 +11,7 @@ interface EventHeaderProps {
     primaryBand?: { name: string } | null;
     showTiming?: string | null;
     verified?: boolean;
+    isNotHunterBand?: boolean;
   };
   eventMusicians?: Array<{ musician: { name: string }; instrument: { name: string } }>;
   adjacent: {
@@ -41,10 +42,12 @@ function formatDateAmerican(event: EventHeaderProps['event']) {
 
 const EventHeader: React.FC<EventHeaderProps> = ({ event, eventMusicians, adjacent }) => {
   const performer = event.primaryBand?.name || 'Robert Hunter';
-  let performerClass = 'event-card-solo';
+  let performerClass = 'event-card-special';
   if (performer === 'Dinosaurs') performerClass = 'event-card-dinosaurs';
   else if (performer === 'Comfort') performerClass = 'event-card-comfort';
   else if (performer === 'Roadhog') performerClass = 'event-card-roadhog';
+  else if (performer === 'Robert Hunter') performerClass = 'event-card-solo';
+  else if (event.isNotHunterBand === false) performerClass = 'event-card-guest';
   const venue = event.venue
     ? `${event.venue.name}${event.venue.city ? ', ' + event.venue.city : ''}${event.venue.stateProvince ? ', ' + event.venue.stateProvince : ''}`
     : '';

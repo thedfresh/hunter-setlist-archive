@@ -4,7 +4,16 @@ export async function getBandBySlug(slug: string) {
     include: {
       bandMusicians: {
         include: {
-          musician: { select: { name: true } },
+          musician: {
+            select: {
+              name: true,
+              defaultInstruments: {
+                select: {
+                  instrument: { select: { displayName: true } }
+                }
+              }
+            }
+          },
         },
         orderBy: [
           { joinedDate: 'asc' },
@@ -19,12 +28,14 @@ export async function getBandBySlug(slug: string) {
           displayDate: true,
           slug: true,
           verified: true,
+          sortDate: true,
           venue: { select: { name: true, city: true, stateProvince: true } },
         },
         orderBy: [
-          { year: 'desc' },
-          { month: 'desc' },
-          { day: 'desc' },
+          { sortDate: 'asc' },
+          { year: 'asc' },
+          { month: 'asc' },
+          { day: 'asc' },
         ],
       },
     },

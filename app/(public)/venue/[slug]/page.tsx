@@ -28,12 +28,24 @@ export default async function VenueDetailPage({ params }: { params: { slug: stri
   const venue = await getVenueBySlug(slug);
   if (!venue) return notFound();
 
-  const events = venue.events || [];
+  type EventType = {
+    id: number;
+    year: number | null;
+    month: number | null;
+    day: number | null;
+    displayDate: string | null;
+    slug: string | null;
+    verified: boolean;
+    sortDate?: string | Date | null;
+    primaryBand?: { name: string } | null;
+  };
+
+  const events: EventType[] = venue.events || [];
   const totalShows = events.length;
   const sortedEvents = [...events].sort((a, b) => {
-    const aDate = new Date(a.year || 0, (a.month || 1) - 1, a.day || 1);
-    const bDate = new Date(b.year || 0, (b.month || 1) - 1, b.day || 1);
-    return aDate.getTime() - bDate.getTime();
+    const aSort = a.sortDate ? (typeof a.sortDate === 'string' ? new Date(a.sortDate) : a.sortDate) : new Date(a.year || 0, (a.month || 1) - 1, a.day || 1);
+    const bSort = b.sortDate ? (typeof b.sortDate === 'string' ? new Date(b.sortDate) : b.sortDate) : new Date(b.year || 0, (b.month || 1) - 1, b.day || 1);
+    return aSort.getTime() - bSort.getTime();
   });
   const firstShow = sortedEvents[0];
   const lastShow = sortedEvents[sortedEvents.length - 1];
@@ -77,11 +89,10 @@ export default async function VenueDetailPage({ params }: { params: { slug: stri
               <tr>
                 <th>Date</th>
                 <th>Performer</th>
-                <th>Verified</th>
               </tr>
             </thead>
             <tbody>
-              {events.map((event: any) => (
+              {sortedEvents.map((event: any) => (
                 <tr key={event.id}>
                   <td>
                     <Link href={`/event/${event.slug || generateSlug(event)}`} className="link-internal">
@@ -92,9 +103,6 @@ export default async function VenueDetailPage({ params }: { params: { slug: stri
                     <span className={getPerformerColorClass(event.primaryBand?.name || 'Solo')}>
                       {event.primaryBand?.name || 'Solo'}
                     </span>
-                  </td>
-                  <td>
-                    {event.verified && <span className="badge-verified">Verified</span>}
                   </td>
                 </tr>
               ))}

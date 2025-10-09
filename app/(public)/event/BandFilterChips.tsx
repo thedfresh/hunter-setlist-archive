@@ -36,11 +36,12 @@ export function BandFilterChips({ bandCounts, selectedKeys }: {
       router.push('/event');
       return;
     }
-    // Build types param
-    const params = new URLSearchParams(searchParams.toString());
-    params.delete('bands'); // Remove old param if present
-    params.set('types', newKeys.join(","));
-    router.push(`/event?${params.toString()}`);
+  // Build types param
+  const params = new URLSearchParams(searchParams.toString());
+  params.delete('bands'); // Remove old param if present
+  params.set('types', newKeys.join(","));
+  params.delete('page'); // Reset paging to first page
+  router.push(`/event?${params.toString()}`);
   }
 
   return (
@@ -48,16 +49,15 @@ export function BandFilterChips({ bandCounts, selectedKeys }: {
       {bandCounts.map(b => {
         const active = selectedKeys.includes(b.key);
         return (
-        <>
-          <div
-            key={b.key}
-            className={`card px-3 py-1 text-xs font-semibold cursor-pointer transition hover:scale-105 ${b.className} ${active ? "" : "opacity-40 grayscale"}`}
-            onClick={(e) => handleChipClick(b.key, e)}
-          >
-            {b.label} ({b.count})
-          </div>
-          {b.key === 'all' && <div key="break" className="basis-full h-0" />}
-          </>
+          <React.Fragment key={b.key}>
+            <div
+              className={`card px-3 py-1 text-xs font-semibold cursor-pointer transition hover:scale-105 ${b.className} ${active ? "" : "opacity-40 grayscale"}`}
+              onClick={(e) => handleChipClick(b.key, e)}
+            >
+              {b.label} ({b.count})
+            </div>
+            {b.key === 'all' && <div key={`break-${b.key}`} className="basis-full h-0" />}
+          </React.Fragment>
         );
       })}
     </div>

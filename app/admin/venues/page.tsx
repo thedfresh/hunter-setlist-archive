@@ -11,6 +11,7 @@ type Venue = {
   country?: string;
   isUncertain?: boolean;
   createdAt: string;
+  _count?: { events: number };
 };
 
 export default function VenuesAdminPage() {
@@ -18,6 +19,8 @@ export default function VenuesAdminPage() {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [sortKey, setSortKey] = useState<string>("name");
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
 
   useEffect(() => {
     async function fetchVenues() {
@@ -42,6 +45,34 @@ export default function VenuesAdminPage() {
     v.name.toLowerCase().includes(search.toLowerCase()) ||
     (v.context && v.context.toLowerCase().includes(search.toLowerCase()))
   );
+
+  function handleSort(key: string) {
+    if (sortKey === key) {
+      setSortDir(sortDir === "asc" ? "desc" : "asc");
+    } else {
+      setSortKey(key);
+      setSortDir("asc");
+    }
+  }
+
+  const sorted = [...filtered].sort((a, b) => {
+    let aVal: any, bVal: any;
+    if (sortKey === "name") {
+      aVal = a.name.toLowerCase();
+      bVal = b.name.toLowerCase();
+    } else if (sortKey === "location") {
+      aVal = [a.city, a.stateProvince, a.country].filter(Boolean).join(", ").toLowerCase();
+      bVal = [b.city, b.stateProvince, b.country].filter(Boolean).join(", ").toLowerCase();
+    } else if (sortKey === "showCount") {
+      aVal = a._count?.events ?? 0;
+      bVal = b._count?.events ?? 0;
+    } else {
+      return 0;
+    }
+    if (aVal < bVal) return sortDir === "asc" ? -1 : 1;
+    if (aVal > bVal) return sortDir === "asc" ? 1 : -1;
+    return 0;
+  });
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
@@ -72,14 +103,15 @@ export default function VenuesAdminPage() {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-gray-100">
-                <th className="py-2 px-4 font-semibold">Name</th>
-                <th className="py-2 px-4 font-semibold">Location</th>
+                <th className="py-2 px-4 font-semibold cursor-pointer" onClick={() => handleSort("name")}>Name{sortKey === "name" ? (sortDir === "asc" ? " ▲" : " ▼") : ""}</th>
+                <th className="py-2 px-4 font-semibold cursor-pointer" onClick={() => handleSort("location")}>Location{sortKey === "location" ? (sortDir === "asc" ? " ▲" : " ▼") : ""}</th>
+                <th className="py-2 px-4 font-semibold cursor-pointer" onClick={() => handleSort("showCount")}>Show Count{sortKey === "showCount" ? (sortDir === "asc" ? " ▲" : " ▼") : ""}</th>
                 <th className="py-2 px-4 font-semibold">Uncertain?</th>
                 <th className="py-2 px-4 font-semibold">Actions</th>
               </tr>
             </thead>
             <tbody>
-              {filtered.map((v) => (
+              {sorted.map((v) => (
                 <tr key={v.id} className="border-b">
                   <td className="py-2 px-4">
                     {v.name}
@@ -88,6 +120,7 @@ export default function VenuesAdminPage() {
                   <td className="py-2 px-4">
                     {[v.city, v.stateProvince, v.country].filter(Boolean).join(", ")}
                   </td>
+                  <td className="py-2 px-4">{v._count?.events ?? 0}</td>
                   <td className="py-2 px-4">{v.isUncertain ? "Yes" : "No"}</td>
                   <td className="py-2 px-4">
                     <Link href={`/admin/venues/${v.id}`}>
@@ -103,3 +136,4 @@ export default function VenuesAdminPage() {
     </div>
   );
 }
+// ...existing code...

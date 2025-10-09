@@ -34,7 +34,22 @@ function sortVenues(venues: any[], sortKey: string, sortDir: 'asc' | 'desc') {
 export default function VenueTableClient({ venues }: { venues: any[] }) {
   const [sortKey, setSortKey] = useState('name');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
-  const sortedVenues = sortVenues(venues, sortKey, sortDir);
+  const [search, setSearch] = useState("");
+
+  // Filter venues by all relevant fields
+  const filteredVenues = search.trim() === ""
+    ? venues
+    : venues.filter(v => {
+        const q = search.trim().toLowerCase();
+        return (
+          v.name?.toLowerCase().includes(q) ||
+          v.context?.toLowerCase().includes(q) ||
+          v.city?.toLowerCase().includes(q) ||
+          v.stateProvince?.toLowerCase().includes(q) ||
+          v.country?.toLowerCase().includes(q)
+        );
+      });
+  const sortedVenues = sortVenues(filteredVenues, sortKey, sortDir);
 
   function handleSort(colKey: string) {
     if (sortKey === colKey) {
@@ -45,38 +60,61 @@ export default function VenueTableClient({ venues }: { venues: any[] }) {
     }
   }
 
+  function handleSearchChange(e: React.ChangeEvent<HTMLInputElement>) {
+    setSearch(e.target.value);
+  }
+
   return (
-    <div className="table-container">
-      <table className="table">
-        <thead>
-          <tr>
-            {columns.map(col => (
-              <th
-                key={col.key}
-                className="sortable cursor-pointer"
-                onClick={() => handleSort(col.key)}
-              >
-                {col.label}
-                {sortKey === col.key ? (sortDir === 'asc' ? ' ▲' : ' ▼') : ''}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {sortedVenues.map((venue: any) => (
-            <tr key={venue.id}>
-              <td>
-                <Link href={`/venue/${venue.slug}`} className="link-internal">
-                  {venue.name} {venue.context ? `(${venue.context})` : null}
-                </Link>
-              </td>
-              <td>{venue.city || ''}</td>
-              <td>{venue.stateProvince || ''}</td>
-              <td>{venue._count.events}</td>
+    <div>
+      <div className="flex items-center justify-between mb-6 gap-4 flex-wrap">
+        <div className="search-bar w-full sm:w-96">
+          <input
+            className="search-input-large"
+            placeholder="Search venues..."
+            value={search}
+            onChange={handleSearchChange}
+          />
+          <span className="search-icon-large">
+            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <circle cx="11" cy="11" r="7" strokeWidth="2" />
+              <line x1="16.5" y1="16.5" x2="21" y2="21" strokeWidth="2" strokeLinecap="round" />
+            </svg>
+          </span>
+        </div>
+      </div>
+      <div className="results-count mb-4">Filtered venues: <strong>{sortedVenues.length}</strong></div>
+      <div className="table-container">
+        <table className="table">
+          <thead>
+            <tr>
+              {columns.map(col => (
+                <th
+                  key={col.key}
+                  className="sortable cursor-pointer"
+                  onClick={() => handleSort(col.key)}
+                >
+                  {col.label}
+                  {sortKey === col.key ? (sortDir === 'asc' ? ' ▲' : ' ▼') : ''}
+                </th>
+              ))}
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {sortedVenues.map((venue: any) => (
+              <tr key={venue.id}>
+                <td>
+                  <Link href={`/venue/${venue.slug}`} className="link-internal">
+                    {venue.name} {venue.context ? `(${venue.context})` : null}
+                  </Link>
+                </td>
+                <td>{venue.city || ''}</td>
+                <td>{venue.stateProvince || ''}</td>
+                <td>{venue._count.events}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
