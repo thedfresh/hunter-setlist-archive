@@ -76,7 +76,7 @@ export default function EventEditPage() {
       if (res.ok) {
         const data = await res.json();
         const { banter, performances } = data;
-        
+
         // Extract performances from banter, or fetch separately if needed
         const perfMap: { [id: number]: any } = {};
         if (Array.isArray(banter)) {
@@ -243,7 +243,7 @@ export default function EventEditPage() {
     if (!confirm("Are you sure you want to delete this event?")) return;
     setSubmitting(true);
     try {
-  const res = await fetch(`/api/admin/events/${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/admin/events/${id}`, { method: "DELETE" });
       if (res.ok) {
         router.push("/admin/events");
       } else {
@@ -296,16 +296,16 @@ export default function EventEditPage() {
         <form className="space-y-6" onSubmit={handleSubmit}>
 
           {/* isPublic and isUncertain Checkboxes */}
-            <div className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                name="verified"
-                checked={form.verified}
-                onChange={e => setForm(f => ({ ...f, verified: e.target.checked }))}
-                className="h-4 w-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
-              />
-              <label className="text-sm text-gray-700">Verified</label>
-            </div>
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              name="verified"
+              checked={form.verified}
+              onChange={e => setForm(f => ({ ...f, verified: e.target.checked }))}
+              className="h-4 w-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
+            />
+            <label className="text-sm text-gray-700">Verified</label>
+          </div>
           <div className="flex flex-wrap gap-6 items-center">
             <div className="flex items-center gap-2">
               <input
@@ -395,7 +395,7 @@ export default function EventEditPage() {
             </div>
             <div className="w-32">
               <label className="block text-sm font-medium text-gray-700 mb-1">Set Timing</label>
-                <select
+              <select
                 name="showTiming"
                 value={form.showTiming}
                 onChange={e => setForm(f => ({ ...f, showTiming: e.target.value }))}
@@ -405,8 +405,8 @@ export default function EventEditPage() {
                 <option value="Early">Early</option>
                 <option value="Late">Late</option>
               </select>
-            </div>  {/* Set Timing field */}
-            <div className="w-248">  {/* Slug Field with regenerate button */}
+            </div>
+            <div className="w-48">
               <label className="block text-sm font-medium text-gray-700 mb-1">Slug (URL)</label>
               <div className="flex items-center gap-2">
                 <input
@@ -476,54 +476,54 @@ export default function EventEditPage() {
                 {bands.map(b => (
                   <option key={b.id} value={b.id}>{b.name}</option>
                 ))}
-                </select>
+              </select>
             </div>
           </div>
           <div>
-          <div className="flex gap-4">
-            <div className="w-2/3">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Venue</label>
-              <select
-                name="venueId"
-                value={form.venueId}
-                onChange={e => setForm(f => ({ ...f, venueId: e.target.value }))}
-                className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
-              >
-                <option value="">Select venue</option>
-                {venues.map(v => (
-                  <option key={v.id} value={v.id}>{v.name}{v.context ? ` (${v.context})` : ""}{v.city ? `, ${v.city}` : ""}{v.stateProvince ? `, ${v.stateProvince}` : ""}{v.country ? `, ${v.country}` : ""}</option>
-                ))}
-              </select>
-            </div>
-            <div className="w-1/3">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Billing (opener/headliner)</label>
-              <input
-                type="text"
-                name="billing"
-                value={form.billing}
-                onChange={e => setForm(f => ({ ...f, billing: e.target.value }))}
-                className="w-full border rounded-md px-4 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
-                placeholder="e.g. Hunter opening for Garcia Band"
-              />
-            </div>
-            <div className="w-1/3">
-              <label className="block text-sm font-medium text-gray-700 mb-1">etree Show ID</label>
-              <input
-                type="text"
-                name="etreeShowId"
-                value={form.etreeShowId}
-                onChange={e => setForm(f => ({ ...f, etreeShowId: e.target.value }))}
-                className="w-full border rounded-md px-4 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
-                placeholder="e.g. 12345"
-              />
+            <div className="flex gap-4">
+              <div className="w-2/3">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Venue</label>
+                <select
+                  name="venueId"
+                  value={form.venueId}
+                  onChange={e => setForm(f => ({ ...f, venueId: e.target.value }))}
+                  className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
+                >
+                  <option value="">Select venue</option>
+                  {venues.map(v => (
+                    <option key={v.id} value={v.id}>{v.name}{v.context ? ` (${v.context})` : ""}{v.city ? `, ${v.city}` : ""}{v.stateProvince ? `, ${v.stateProvince}` : ""}{v.country ? `, ${v.country}` : ""}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="w-1/3">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Billing (opener/headliner)</label>
+                <input
+                  type="text"
+                  name="billing"
+                  value={form.billing}
+                  onChange={e => setForm(f => ({ ...f, billing: e.target.value }))}
+                  className="w-full border rounded-md px-4 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
+                  placeholder="e.g. Hunter opening for Garcia Band"
+                />
+              </div>
+              <div className="w-1/3">
+                <label className="block text-sm font-medium text-gray-700 mb-1">etree Show ID</label>
+                <input
+                  type="text"
+                  name="etreeShowId"
+                  value={form.etreeShowId}
+                  onChange={e => setForm(f => ({ ...f, etreeShowId: e.target.value }))}
+                  className="w-full border rounded-md px-4 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
+                  placeholder="e.g. 12345"
+                />
+              </div>
             </div>
           </div>
+          {/* Event Musicians Section */}
+          <div className="mb-6">
+            <EventMusiciansSection eventId={Number(id)} />
           </div>
-                    {/* Event Musicians Section */}
-                    <div className="mb-6">
-                      <EventMusiciansSection eventId={Number(id)} />
-                    </div>
-                    {/* Notes + Raw Data Section (collapsible, collapsed by default) */}
+          {/* Notes + Raw Data Section (collapsible, collapsed by default) */}
           <div className="mb-6">
             <button type="button" className="text-sm text-blue-600 font-semibold mb-2" onClick={() => setShowNotes(v => !v)}>
               {showNotes ? "▼" : "►"} Notes & Raw Data
@@ -668,7 +668,7 @@ export default function EventEditPage() {
                             songs={songs}
                             musicians={musicians}
                             instruments={instruments}
-                            onPerformancesChanged={() => {}}
+                            onPerformancesChanged={() => { }}
                           />
                         </td>
                       </tr>
@@ -689,7 +689,7 @@ export default function EventEditPage() {
             <ShowBanterSection eventId={event.id} />
           )}
         </div>
-         {/* Performance management for each set (removed duplicate) */}
+        {/* Performance management for each set (removed duplicate) */}
         {showSetForm && (
           <SetForm
             eventId={id}

@@ -50,12 +50,15 @@ export default function SongBrowsePage() {
     }
     let aVal: any = a[sortKey];
     let bVal: any = b[sortKey];
-    // For dates, sort as strings (YYYY-MM-DD)
+    // For dates, sort by parsed date value
     if (sortKey === "firstPerformance" || sortKey === "lastPerformance") {
-      aVal = aVal || "";
-      bVal = bVal || "";
-      if (aVal < bVal) return sortDirection === "asc" ? -1 : 1;
-      if (aVal > bVal) return sortDirection === "asc" ? 1 : -1;
+      const aDate = aVal?.date ? new Date(aVal.date) : null;
+      const bDate = bVal?.date ? new Date(bVal.date) : null;
+      if (!aDate && !bDate) return 0;
+      if (!aDate) return sortDirection === "asc" ? 1 : -1;
+      if (!bDate) return sortDirection === "asc" ? -1 : 1;
+      if (aDate.getTime() < bDate.getTime()) return sortDirection === "asc" ? -1 : 1;
+      if (aDate.getTime() > bDate.getTime()) return sortDirection === "asc" ? 1 : -1;
       return 0;
     }
     // For numbers
@@ -110,6 +113,18 @@ export default function SongBrowsePage() {
   // Format date as YYYY-MM-DD
   function formatDate(dateStr?: string | null) {
     if (!dateStr) return "—";
+    // Try to parse year, month, day from dateStr
+    const match = dateStr.match(/^(\d{4})(?:-(\d{2}))?(?:-(\d{2}))?/);
+    if (match) {
+      const year = match[1];
+      let month = match[2];
+      let day = match[3];
+      // If month/day are '01', treat as missing and display 'xx'
+      if (!month || month === '01') month = 'xx';
+      if (!day || day === '01') day = 'xx';
+      return `${year}-${month}-${day}`;
+    }
+    // Fallback to original logic
     const d = new Date(dateStr);
     if (isNaN(d.getTime())) return dateStr;
     return d.toISOString().slice(0, 10);

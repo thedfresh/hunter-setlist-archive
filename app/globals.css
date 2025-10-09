@@ -25,12 +25,11 @@
 
   .nav-bar {
     @apply px-10 py-4;
-    @apply flex items-center justify-between gap-10;
   }
 
   .nav-bar-content {
     @apply flex items-center justify-between gap-10 flex-1;
-    @apply ml-[180px];
+    @apply ml-[180px] max-w-6xl;
   }
 
   .main-nav {
