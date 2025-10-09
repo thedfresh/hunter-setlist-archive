@@ -1,8 +1,12 @@
-import { PageContainer } from '@/components/ui/PageContainer';
-import { searchEvents } from '@/lib/queries/eventSearchQueries';
-import Link from 'next/link';
+'use client';
 
+import { PageContainer } from '@/components/ui/PageContainer';
+import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
+import { useEffect, useState, Suspense } from 'react';
 import { BandFilterChips } from './BandFilterChips';
+
+export const dynamic = 'force-dynamic';
 
 function formatEventDate(event: any) {
   let date = '';
@@ -55,14 +59,11 @@ function Setlist({ sets }: { sets: any[] }) {
   );
 }
 
-function Pagination({ currentPage, totalPages, searchParams }: { currentPage: number; totalPages: number; searchParams: Record<string, string | undefined> }) {
+function Pagination({ currentPage, totalPages, searchParams }: { currentPage: number; totalPages: number; searchParams: Record<string, string> }) {
   const pageLinks = [];
   for (let i = 1; i <= totalPages; i++) {
-    const params = new URLSearchParams();
+    const params = new URLSearchParams(searchParams);
     params.set('page', i.toString());
-    if (searchParams.types) {
-      params.set('types', searchParams.types);
-    }
     pageLinks.push(
       <Link
         key={i}
@@ -73,17 +74,12 @@ function Pagination({ currentPage, totalPages, searchParams }: { currentPage: nu
       </Link>
     );
   }
-  // Previous/Next links
-  const prevParams = new URLSearchParams();
+
+  const prevParams = new URLSearchParams(searchParams);
   prevParams.set('page', (currentPage - 1).toString());
-  if (searchParams.types) {
-    prevParams.set('types', searchParams.types);
-  }
-  const nextParams = new URLSearchParams();
+  const nextParams = new URLSearchParams(searchParams);
   nextParams.set('page', (currentPage + 1).toString());
-  if (searchParams.types) {
-    nextParams.set('types', searchParams.types);
-  }
+
   return (
     <div className="pagination mt-6 flex gap-2 items-center justify-center">
       <Link href={`/event?${prevParams.toString()}`} className="page-link" aria-disabled={currentPage === 1} tabIndex={currentPage === 1 ? -1 : 0}>
@@ -97,31 +93,45 @@ function Pagination({ currentPage, totalPages, searchParams }: { currentPage: nu
   );
 }
 
-export default async function EventBrowsePage({ searchParams }: { searchParams: Record<string, string | undefined> }) {
-  const results = await searchEvents(searchParams);
-  const {
-    events,
-    bandCounts,
-    totalCount,
-    currentPage,
-    totalPages,
-    pageSize,
-    selectedTypes,
-    search,
-    searchType
-  } = results;
+function EventBrowsePageContent() {
+  const searchParamsHook = useSearchParams();
+  const [results, setResults] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
-  // Color legend for each artist
-  const legend = [
-    { label: 'Robert Hunter', className: 'event-card-solo' },
-    { label: 'Roadhog', className: 'event-card-roadhog' },
-    { label: 'Comfort', className: 'event-card-comfort' },
-    { label: 'Dinosaurs', className: 'event-card-dinosaurs' },
-    { label: 'Ad-Hoc Bands', className: 'event-card-special' },
-    { label: 'Guest Appearances', className: 'event-card-guest' },
-  ];
+  useEffect(() => {
+    const params = Object.fromEntries(searchParamsHook.entries());
 
-  // --- ACTIVE SEARCH DISPLAY ---
+    fetch(`/api/events/search?${new URLSearchParams(params)}`)
+      .then(res => res.json())
+      .then(data => {
+        setResults(data);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error('Failed to load events:', err);
+        setLoading(false);
+      });
+  }, [searchParamsHook]);
+
+  if (loading) {
+    return (
+      <PageContainer>
+        <div className="text-center py-12">Loading events...</div>
+      </PageContainer>
+    );
+  }
+
+  if (!results) {
+    return (
+      <PageContainer>
+        <div className="text-center py-12 text-red-600">Failed to load events</div>
+      </PageContainer>
+    );
+  }
+
+  const { events, bandCounts, currentPage, totalPages, selectedTypes, search, searchType } = results;
+  const searchParamsObj = Object.fromEntries(searchParamsHook.entries());
+
   const hasActiveSearch = !!(search && searchType);
 
   function getSearchLabel(type: string) {
@@ -132,34 +142,32 @@ export default async function EventBrowsePage({ searchParams }: { searchParams: 
     return "Search";
   }
 
-  // --- CLEAR SEARCH BUTTON ---
-  function getClearSearchUrl(params: Record<string, string | undefined>) {
+  function getClearSearchUrl(params: Record<string, string>) {
     const newParams = { ...params };
     delete newParams.search;
     delete newParams.searchType;
-    const urlParams = new URLSearchParams(newParams as Record<string, string>);
+    const urlParams = new URLSearchParams(newParams);
     return `/event?${urlParams.toString()}`;
   }
 
   return (
     <PageContainer>
       <div className="flex gap-10">
-        {/* Left sidebar - 180px to match nav offset */}
         <div className="fixed left-10 top-[160px] w-[160px]">
           <BandFilterChips bandCounts={bandCounts} selectedKeys={selectedTypes} />
         </div>
-        {/* Main content */}
         <div className="flex-1">
           <div className="page-header">
             <div className="page-title">Browse Events</div>
-          </div>      {/* Band filter chips */}
+          </div>
 
           {hasActiveSearch && (
             <div className="mb-4 flex items-center gap-3 bg-blue-50 border border-blue-200 rounded px-4 py-2">
               <span className="text-blue-700 font-medium">Showing results for: <span className="font-bold">{getSearchLabel(searchType)}: {search}</span></span>
-              <Link href={getClearSearchUrl(searchParams)} className="ml-2 px-2 py-1 text-xs bg-blue-100 rounded hover:bg-blue-200 text-blue-800 border border-blue-300">Clear</Link>
+              <Link href={getClearSearchUrl(searchParamsObj)} className="ml-2 px-2 py-1 text-xs bg-blue-100 rounded hover:bg-blue-200 text-blue-800 border border-blue-300">Clear</Link>
             </div>
           )}
+
           <div className="grid grid-cols-1 gap-4">
             {events.map((event: any) => (
               <Link
@@ -167,18 +175,15 @@ export default async function EventBrowsePage({ searchParams }: { searchParams: 
                 href={`/event/${event.slug}`}
                 className={`event-card ${getCardClass(event)} block p-6`}
               >
-                {/* Display billing or band name, default to Robert Hunter */}
                 <div className="mb-2 text-sm font-medium text-gray-700">
-                  {event.billing
-                    ? event.billing
-                    : event.primaryBand?.name
-                      ? event.primaryBand.name
-                      : 'Robert Hunter'}
+                  {event.billing ? event.billing : event.primaryBand?.name ? event.primaryBand.name : 'Robert Hunter'}
                 </div>
                 <div className="mb-4">
                   <div className="flex items-center gap-3 text-lg font-semibold">
                     <span>{formatEventDate(event)}</span>
-                    <span className="text-gray-700 text-base font-normal">{event.venue?.name}{event.venue?.city ? `, ${event.venue.city}` : ''}{event.venue?.stateProvince ? `, ${event.venue.stateProvince}` : ''}</span>
+                    <span className="text-gray-700 text-base font-normal">
+                      {event.venue?.name}{event.venue?.city ? `, ${event.venue.city}` : ''}{event.venue?.stateProvince ? `, ${event.venue.stateProvince}` : ''}
+                    </span>
                   </div>
                 </div>
                 <div className="space-y-4">
@@ -187,9 +192,22 @@ export default async function EventBrowsePage({ searchParams }: { searchParams: 
               </Link>
             ))}
           </div>
-          <Pagination currentPage={currentPage} totalPages={totalPages} searchParams={searchParams} />
+
+          <Pagination currentPage={currentPage} totalPages={totalPages} searchParams={searchParamsObj} />
         </div>
       </div>
     </PageContainer>
+  );
+}
+
+export default function EventBrowsePage() {
+  return (
+    <Suspense fallback={
+      <PageContainer>
+        <div className="text-center py-12">Loading...</div>
+      </PageContainer>
+    }>
+      <EventBrowsePageContent />
+    </Suspense>
   );
 }

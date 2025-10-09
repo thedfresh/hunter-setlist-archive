@@ -11,8 +11,8 @@ import { PageContainer } from '@/components/ui/PageContainer';
 import { fetchEventBySlug, fetchAdjacentEvents } from '@/lib/eventQueries';
 
 
-export default async function EventDetailPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params;
+export default async function EventDetailPage({ params }: { params: { slug: string } }) {
+  const { slug } = params;
   const event = await fetchEventBySlug(slug);
   if (!event) notFound();
   const adjacent = await fetchAdjacentEvents({

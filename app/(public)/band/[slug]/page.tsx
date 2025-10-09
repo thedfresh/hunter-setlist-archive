@@ -14,8 +14,7 @@ function formatEventDate(event: any) {
   return '';
 }
 
-export default async function BandDetailPage(props: { params: { slug: string } }) {
-  const params = await Promise.resolve(props.params); // Ensure params is awaited for Next.js
+export default async function BandDetailPage({ params }: { params: { slug: string } }) {
   const { slug } = params;
   const band = await getBandBySlug(slug);
   if (!band) return notFound();
