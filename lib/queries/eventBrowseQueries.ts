@@ -14,17 +14,17 @@ export type GetEventsBrowseParams = {
 export async function getHunterPerformanceStats() {
   // Total show count
   const totalShows = await prisma.event.count({
-  where: getCountableEventsWhere()
+    where: getCountableEventsWhere()
   });
 
   // First and last show (by date)
   const firstShow = await prisma.event.findFirst({
-  where: getCountableEventsWhere(),
+    where: getCountableEventsWhere(),
     orderBy: { sortDate: 'asc' },
     select: { year: true, month: true, day: true, displayDate: true, sortDate: true }
   });
   const lastShow = await prisma.event.findFirst({
-  where: getCountableEventsWhere(),
+    where: getCountableEventsWhere(),
     orderBy: { sortDate: 'desc' },
     select: { year: true, month: true, day: true, displayDate: true, sortDate: true }
   });
@@ -32,7 +32,7 @@ export async function getHunterPerformanceStats() {
   // Breakdown by performer type (primaryBand.name)
   const bandCounts = await prisma.event.groupBy({
     by: ['primaryBandId'],
-  where: getCountableEventsWhere(),
+    where: getCountableEventsWhere(),
     _count: { _all: true },
   });
   // Get band names for each id
@@ -113,12 +113,13 @@ import { getPrismaDateOrderBy } from '@/lib/dateSort';
 // ...existing code...
 
 export async function getEventsBrowse({ page = 1, pageSize = 100, where = {} }: GetEventsBrowseParams) {
-  const baseWhere = getBrowsableEventsWhere();
-  const mergedWhere = { ...baseWhere, ...where };
+  // Don't spread - use the where clause as-is since it's already built correctly
+  const finalWhere = Object.keys(where).length > 0 ? where : getBrowsableEventsWhere();
+
   const [totalCount, events] = await Promise.all([
-    prisma.event.count({ where: mergedWhere }),
+    prisma.event.count({ where: finalWhere }),
     prisma.event.findMany({
-      where: mergedWhere,
+      where: finalWhere,
       include: {
         venue: true,
         primaryBand: true,

@@ -23,7 +23,14 @@ export async function GET(req: NextRequest) {
     if (dateType === 'year') {
         const yearNum = parseInt(query);
         if (!isNaN(yearNum)) {
-            const count = await prisma.event.count({ where: { ...getBrowsableEventsWhere(), year: yearNum } });
+            const count = await prisma.event.count({
+                where: {
+                    AND: [
+                        getBrowsableEventsWhere(),
+                        { year: yearNum }
+                    ]
+                }
+            });
             if (count > 0) {
                 suggestions.push({
                     type: 'year',
@@ -37,7 +44,14 @@ export async function GET(req: NextRequest) {
         const yearNum = parseInt(yearStr);
         const monthNum = parseInt(monthStr);
         if (!isNaN(yearNum) && !isNaN(monthNum)) {
-            const count = await prisma.event.count({ where: { ...getBrowsableEventsWhere(), year: yearNum, month: monthNum } });
+            const count = await prisma.event.count({
+                where: {
+                    AND: [
+                        getBrowsableEventsWhere(),
+                        { year: yearNum, month: monthNum }
+                    ]
+                }
+            });
             if (count > 0) {
                 // Format: "March 1997 (4 shows)"
                 const monthName = new Date(yearNum, monthNum - 1, 1).toLocaleString('default', { month: 'long' });
@@ -54,7 +68,14 @@ export async function GET(req: NextRequest) {
         const monthNum = parseInt(monthStr);
         const dayNum = parseInt(dayStr);
         if (!isNaN(yearNum) && !isNaN(monthNum) && !isNaN(dayNum)) {
-            const event = await prisma.event.findFirst({ where: { ...getBrowsableEventsWhere(), year: yearNum, month: monthNum, day: dayNum } });
+            const event = await prisma.event.findFirst({
+                where: {
+                    AND: [
+                        getBrowsableEventsWhere(),
+                        { year: yearNum, month: monthNum, day: dayNum }
+                    ]
+                }
+            });
             if (event) {
                 // Format: "March 2, 1997"
                 const monthName = new Date(yearNum, monthNum - 1, 1).toLocaleString('default', { month: 'long' });
@@ -82,7 +103,12 @@ export async function GET(req: NextRequest) {
 
         for (const v of venues) {
             const count = await prisma.event.count({
-                where: { ...getBrowsableEventsWhere(), venueId: v.id }
+                where: {
+                    AND: [
+                        getBrowsableEventsWhere(),
+                        { venueId: v.id }
+                    ]
+                }
             });
             if (count > 0) {
                 suggestions.push({
@@ -141,8 +167,6 @@ export async function GET(req: NextRequest) {
             nameMap.get(key)!.musicians.push(musician);
         }
 
-        // Replace the entire "for (const [name, { bands, musicians }] of nameMap)" loop
-        // Starting around line 128 with this:
         for (const [name, { bands, musicians }] of nameMap) {
             const bandIds = bands.map(b => b.id);
             const musicianIds = musicians.map(m => m.id);
@@ -150,15 +174,19 @@ export async function GET(req: NextRequest) {
 
             const totalCount = await prisma.event.count({
                 where: {
-                    ...getBrowsableEventsWhere(),
-                    OR: [
-                        ...(bandIds.length > 0 ? [{ primaryBandId: { in: bandIds } }] : []),
-                        ...(musicianIds.length > 0 ? [
-                            { eventMusicians: { some: { musicianId: { in: musicianIds } } } },
-                            { sets: { some: { setMusicians: { some: { musicianId: { in: musicianIds } } } } } },
-                            { sets: { some: { performances: { some: { performanceMusicians: { some: { musicianId: { in: musicianIds } } } } } } } },
-                            { primaryBand: { bandMusicians: { some: { musicianId: { in: musicianIds } } } } }
-                        ] : [])
+                    AND: [
+                        getBrowsableEventsWhere(),
+                        {
+                            OR: [
+                                ...(bandIds.length > 0 ? [{ primaryBandId: { in: bandIds } }] : []),
+                                ...(musicianIds.length > 0 ? [
+                                    { eventMusicians: { some: { musicianId: { in: musicianIds } } } },
+                                    { sets: { some: { setMusicians: { some: { musicianId: { in: musicianIds } } } } } },
+                                    { sets: { some: { performances: { some: { performanceMusicians: { some: { musicianId: { in: musicianIds } } } } } } } },
+                                    { primaryBand: { bandMusicians: { some: { musicianId: { in: musicianIds } } } } }
+                                ] : [])
+                            ]
+                        }
                     ]
                 }
             });
@@ -175,8 +203,10 @@ export async function GET(req: NextRequest) {
 
             const asPrimaryBand = bandIds.length > 0 ? await prisma.event.count({
                 where: {
-                    ...getBrowsableEventsWhere(),
-                    primaryBandId: { in: bandIds }
+                    AND: [
+                        getBrowsableEventsWhere(),
+                        { primaryBandId: { in: bandIds } }
+                    ]
                 }
             }) : 0;
 
@@ -202,9 +232,13 @@ export async function GET(req: NextRequest) {
                 for (const bm of bandMemberships) {
                     const bandShowCount = await prisma.event.count({
                         where: {
-                            ...getBrowsableEventsWhere(),
-                            primaryBandId: bm.band.id,
-                            primaryBand: { bandMusicians: { some: { musicianId: bm.musicianId } } }
+                            AND: [
+                                getBrowsableEventsWhere(),
+                                {
+                                    primaryBandId: bm.band.id,
+                                    primaryBand: { bandMusicians: { some: { musicianId: bm.musicianId } } }
+                                }
+                            ]
                         }
                     });
 
@@ -218,13 +252,18 @@ export async function GET(req: NextRequest) {
                         });
                     }
                 }
+
                 const guestCount = await prisma.event.count({
                     where: {
-                        ...getBrowsableEventsWhere(),
-                        OR: [
-                            { eventMusicians: { some: { musicianId: { in: musicianIds } } } },
-                            { sets: { some: { setMusicians: { some: { musicianId: { in: musicianIds } } } } } },
-                            { sets: { some: { performances: { some: { performanceMusicians: { some: { musicianId: { in: musicianIds } } } } } } } }
+                        AND: [
+                            getBrowsableEventsWhere(),
+                            {
+                                OR: [
+                                    { eventMusicians: { some: { musicianId: { in: musicianIds } } } },
+                                    { sets: { some: { setMusicians: { some: { musicianId: { in: musicianIds } } } } } },
+                                    { sets: { some: { performances: { some: { performanceMusicians: { some: { musicianId: { in: musicianIds } } } } } } } }
+                                ]
+                            }
                         ]
                     }
                 });
@@ -237,13 +276,8 @@ export async function GET(req: NextRequest) {
                         musicianIds
                     });
                 }
-
             }
-
         }
-
-
-
     }
 
     // Limit to 10 suggestions, filter out duplicates
