@@ -13,7 +13,7 @@ export const FILTER_CATEGORIES = [
     { key: 'guest', label: 'Guest Appearances', className: 'event-card-guest', bandNames: [] }
 ];
 
-export async function searchEvents({ searchParams }: { searchParams: Record<string, string | undefined> }) {
+export async function searchEvents(searchParams: Record<string, string | undefined>) {
     const page = parseInt(searchParams?.page || '1', 10) || 1;
 
     // Parse selected types from searchParams.types

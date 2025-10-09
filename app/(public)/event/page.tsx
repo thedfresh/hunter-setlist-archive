@@ -98,7 +98,7 @@ function Pagination({ currentPage, totalPages, searchParams }: { currentPage: nu
 }
 
 export default async function EventBrowsePage({ searchParams }: { searchParams: Record<string, string | undefined> }) {
-  const results = await searchEvents({ searchParams });
+  const results = await searchEvents(searchParams);
   const {
     events,
     bandCounts,
