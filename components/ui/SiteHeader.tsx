@@ -37,8 +37,31 @@ const SiteHeader = () => {
       fetch(`/api/events/search-suggestions?q=${encodeURIComponent(query)}`)
         .then((res) => res.ok ? res.json() : [])
         .then((data) => {
-          //console.log('Suggestions received:', data);
-          setSuggestions(data.suggestions || [])
+          const breakdown = data.suggestions || [];
+          const filteredBreakdown = breakdown.filter((option: any) => {
+            // Keep "all appearances", "Band", and "guest" options
+            if (option.type === 'person-all' ||
+              option.type === 'person-primary' ||
+              option.type === 'person-guest' ||
+              option.type === 'band') {
+              return true;
+            }
+
+            // For band membership options (person-band), check if person name matches band name
+            if (option.type === 'person-band') {
+              // Extract person name (before "with") and band name (after "with")
+              const parts = option.label.match(/^(.+?) with (.+?) \(/);
+              if (parts) {
+                const personName = parts[1].toLowerCase().trim();
+                const bandName = parts[2].toLowerCase().trim();
+                const keep = personName !== bandName;
+                return keep;
+              }
+              return true; // Keep if we can't parse the label
+            }
+            return true;
+          });
+          setSuggestions(filteredBreakdown);
         })
         .catch(() => setSuggestions([]));
     }, 100);

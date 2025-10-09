@@ -238,17 +238,6 @@ export async function GET(req: NextRequest) {
                     });
                 }
 
-                const shouldShowAll = !(asPrimaryBand > 0 && asPrimaryBand === totalCount);
-
-                if (shouldShowAll) {
-                    suggestions.push({
-                        type: 'person-all',
-                        value: displayName,
-                        label: `${displayName} (${totalCount} appearances)`,
-                        bandIds,
-                        musicianIds
-                    });
-                }
             }
 
         }

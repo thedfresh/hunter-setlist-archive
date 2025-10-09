@@ -187,6 +187,7 @@ export default async function EventBrowsePage({ searchParams }: { searchParams: 
         };
       }
     } else if (searchType === "person-all") {
+
       const [bands, musicians] = await Promise.all([
         prisma.band.findMany({
           where: { name: { equals: search, mode: 'insensitive' } }
@@ -258,24 +259,35 @@ export default async function EventBrowsePage({ searchParams }: { searchParams: 
   ];
 
   // Build where clause for events query
+  // Build where clause for events query
   const baseWhere = getBrowsableEventsWhere();
   let where: any;
 
-  if (searchFilter && searchFilter.OR) {
-    where = {
-      AND: [
-        baseWhere,
-        ...(bandOrFilters.length > 0 ? [{ OR: bandOrFilters }] : []),
-        searchFilter
-      ]
-    };
-  } else {
-    where = (bandOrFilters.length > 0)
-      ? { ...baseWhere, OR: bandOrFilters }
-      : baseWhere;
-    if (searchFilter) {
-      where = { ...where, ...searchFilter };
+  // Determine if we need AND logic
+  const needsAnd = (bandOrFilters.length > 0 && searchFilter) || (searchFilter && searchFilter.OR);
+
+  if (needsAnd) {
+    // Use AND to combine multiple conditions
+    const conditions: any[] = [baseWhere];
+
+    if (bandOrFilters.length > 0) {
+      conditions.push({ OR: bandOrFilters });
     }
+
+    if (searchFilter) {
+      conditions.push(searchFilter);
+    }
+
+    where = { AND: conditions };
+  } else if (bandOrFilters.length > 0) {
+    // Only band filters, no search
+    where = { ...baseWhere, OR: bandOrFilters };
+  } else if (searchFilter) {
+    // Only search filter, no band filters
+    where = { ...baseWhere, ...searchFilter };
+  } else {
+    // No filters at all
+    where = baseWhere;
   }
 
   const { events, totalCount, currentPage, totalPages, pageSize } = await getEventsBrowse({ page, where });
