@@ -249,12 +249,6 @@ export async function GET(req: NextRequest) {
                         musicianIds
                     });
                 }
-                console.log('Person:', displayName);
-                console.log('Total count:', totalCount);
-                console.log('As primary band:', asPrimaryBand);
-                console.log('Has guest appearances:', guestCount);
-                console.log('Band memberships count:', bandMemberships.length);
-                console.log('Should show all?', !(asPrimaryBand > 0 && asPrimaryBand === totalCount));
             }
 
         }

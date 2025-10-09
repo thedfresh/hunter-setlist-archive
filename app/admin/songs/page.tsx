@@ -43,7 +43,6 @@ export default function SongsAdminPage() {
         const res = await fetch("/api/songs");
         const data = await res.json();
         if (res.ok && data.songs) {
-          console.log('Songs API response:', data.songs);
           setSongs(data.songs);
         } else {
           setError("Failed to load songs");
@@ -87,7 +86,7 @@ export default function SongsAdminPage() {
   // Handler to delete a song
   async function handleDeleteSong(id: number) {
     if (!confirm('Delete this song?')) return;
-  const res = await fetch(`/api/admin/songs/${id}`, { method: 'DELETE' });
+    const res = await fetch(`/api/admin/songs/${id}`, { method: 'DELETE' });
     if (res.ok) setSongs(s => s.filter(song => song.id !== id));
     else alert('Failed to delete song.');
   }
@@ -178,7 +177,7 @@ export default function SongsAdminPage() {
                   <td className="py-2 px-4">{song.inBoxOfRain ? "Yes" : "No"}</td>
                   <td className="py-2 px-4">{song.performanceCount > 0 ? song.performanceCount : ""}</td>
                   <td className="py-2 px-4">
-                    <Link href={`/admin/songs/${song.id}`}> 
+                    <Link href={`/admin/songs/${song.id}`}>
                       <button className="bg-gray-200 text-gray-800 text-sm py-1 px-2 rounded hover:bg-gray-300 transition mr-1">Edit</button>
                     </Link>
                     <button
