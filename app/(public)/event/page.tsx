@@ -135,6 +135,38 @@ export default async function EventBrowsePage({ searchParams }: { searchParams: 
     }
   }
 
+  // --- SEARCH FILTER LOGIC ---
+  const search = searchParams.search || "";
+  const searchType = searchParams.searchType || "";
+  let searchFilter: any = null;
+  if (search && searchType) {
+    if (searchType === "year") {
+      const yearNum = parseInt(search);
+      if (!isNaN(yearNum)) searchFilter = { year: yearNum };
+    } else if (searchType === "yearMonth") {
+      const [yearStr, monthStr] = search.split('-');
+      const yearNum = parseInt(yearStr);
+      const monthNum = parseInt(monthStr);
+      if (!isNaN(yearNum) && !isNaN(monthNum)) {
+        searchFilter = { year: yearNum, month: monthNum };
+      }
+    } else if (searchType === "date") {
+      const [yearStr, monthStr, dayStr] = search.split('-');
+      const yearNum = parseInt(yearStr);
+      const monthNum = parseInt(monthStr);
+      const dayNum = parseInt(dayStr);
+      if (!isNaN(yearNum) && !isNaN(monthNum) && !isNaN(dayNum)) {
+        searchFilter = { year: yearNum, month: monthNum, day: dayNum };
+      }
+    } else if (searchType === "venue") {
+      searchFilter = { venue: { name: { contains: search, mode: "insensitive" } } };
+    } else if (searchType === "city") {
+      searchFilter = { venue: { city: { contains: search, mode: "insensitive" } } };
+    } else if (searchType === "state") {
+      searchFilter = { venue: { stateProvince: { contains: search, mode: "insensitive" } } };
+    }
+  }
+
   // Query counts for each filter category (unchanged)
   const allCount = await prisma.event.count({ where: getBrowsableEventsWhere() });
   const soloCount = await prisma.event.count({ where: { primaryBand: { name: 'Robert Hunter' } } });
@@ -156,9 +188,12 @@ export default async function EventBrowsePage({ searchParams }: { searchParams: 
 
   // Build where clause for events query
   const baseWhere = getBrowsableEventsWhere();
-  const where = (bandOrFilters.length > 0)
+  let where = (bandOrFilters.length > 0)
     ? { ...baseWhere, OR: bandOrFilters }
     : baseWhere;
+  if (searchFilter) {
+    where = { ...where, ...searchFilter };
+  }
 
   const { events, totalCount, currentPage, totalPages, pageSize } = await getEventsBrowse({ page, where });
 
@@ -172,11 +207,37 @@ export default async function EventBrowsePage({ searchParams }: { searchParams: 
     { label: 'Guest Appearances', className: 'event-card-guest' },
   ];
 
+  // --- ACTIVE SEARCH DISPLAY ---
+  const hasActiveSearch = !!(search && searchType);
+
+  function getSearchLabel(type: string) {
+    if (type === "year") return "Year";
+    if (type === "venue") return "Venue";
+    if (type === "city") return "City";
+    if (type === "state") return "State";
+    return "Search";
+  }
+
+  // --- CLEAR SEARCH BUTTON ---
+  function getClearSearchUrl(params: Record<string, string | undefined>) {
+    const newParams = { ...params };
+    delete newParams.search;
+    delete newParams.searchType;
+    const urlParams = new URLSearchParams(newParams as Record<string, string>);
+    return `/event?${urlParams.toString()}`;
+  }
+
   return (
     <div className="max-w-4xl mx-auto p-6">
       <h1 className="text-2xl font-bold mb-6">Browse Events</h1>
       {/* Band filter chips */}
       <BandFilterChips bandCounts={bandCounts} selectedKeys={selectedTypes} />
+      {hasActiveSearch && (
+        <div className="mb-4 flex items-center gap-3 bg-blue-50 border border-blue-200 rounded px-4 py-2">
+          <span className="text-blue-700 font-medium">Showing results for: <span className="font-bold">{getSearchLabel(searchType)}: {search}</span></span>
+          <Link href={getClearSearchUrl(searchParams)} className="ml-2 px-2 py-1 text-xs bg-blue-100 rounded hover:bg-blue-200 text-blue-800 border border-blue-300">Clear</Link>
+        </div>
+      )}
       <div className="grid grid-cols-1 gap-4">
         {events.map((event: any) => (
           <Link
@@ -204,7 +265,7 @@ export default async function EventBrowsePage({ searchParams }: { searchParams: 
           </Link>
         ))}
       </div>
-  <Pagination currentPage={currentPage} totalPages={totalPages} searchParams={searchParams} />
+      <Pagination currentPage={currentPage} totalPages={totalPages} searchParams={searchParams} />
     </div>
   );
 }
