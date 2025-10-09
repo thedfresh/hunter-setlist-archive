@@ -261,33 +261,51 @@ export default async function EventBrowsePage({ searchParams }: { searchParams: 
   // Build where clause for events query
   // Build where clause for events query
   const baseWhere = getBrowsableEventsWhere();
+
   let where: any;
 
-  // Determine if we need AND logic
-  const needsAnd = (bandOrFilters.length > 0 && searchFilter) || (searchFilter && searchFilter.OR);
-
-  if (needsAnd) {
-    // Use AND to combine multiple conditions
-    const conditions: any[] = [baseWhere];
-
-    if (bandOrFilters.length > 0) {
-      conditions.push({ OR: bandOrFilters });
-    }
-
-    if (searchFilter) {
-      conditions.push(searchFilter);
-    }
-
-    where = { AND: conditions };
-  } else if (bandOrFilters.length > 0) {
-    // Only band filters, no search
-    where = { ...baseWhere, OR: bandOrFilters };
-  } else if (searchFilter) {
-    // Only search filter, no band filters
-    where = { ...baseWhere, ...searchFilter };
-  } else {
-    // No filters at all
+  // Case 1: No filters at all
+  if (bandOrFilters.length === 0 && !searchFilter) {
     where = baseWhere;
+  }
+  // Case 2: Only band filters
+  else if (bandOrFilters.length > 0 && !searchFilter) {
+    where = {
+      AND: [
+        baseWhere,
+        { OR: bandOrFilters }
+      ]
+    };
+  }
+  // Case 3: Only search filter (no band filters)
+  else if (!bandOrFilters.length && searchFilter) {
+    if (searchFilter.OR) {
+      // Search filter has OR, wrap in AND with baseWhere
+      where = {
+        AND: [
+          baseWhere,
+          searchFilter
+        ]
+      };
+    } else {
+      // Simple search filter, wrap in AND with baseWhere
+      where = {
+        AND: [
+          baseWhere,
+          searchFilter
+        ]
+      };
+    }
+  }
+  // Case 4: Both band filters AND search filter
+  else {
+    where = {
+      AND: [
+        baseWhere,
+        { OR: bandOrFilters },
+        searchFilter
+      ]
+    };
   }
 
   const { events, totalCount, currentPage, totalPages, pageSize } = await getEventsBrowse({ page, where });
