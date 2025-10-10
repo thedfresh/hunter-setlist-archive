@@ -6,7 +6,7 @@ import { useEffect, useState, Suspense } from 'react';
 import { BandFilterChips } from './BandFilterChips';
 import Link from 'next/link';
 import Pagination from '@/components/ui/Pagination'
-import EventCard from '@/components/ui/EventCard';
+import EventCard from '@/components/ui/events/EventCard';
 
 export const dynamic = 'force-dynamic';
 

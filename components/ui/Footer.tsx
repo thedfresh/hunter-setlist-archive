@@ -3,7 +3,7 @@ import Link from 'next/link';
 
 const Footer: React.FC = () => {
     return (
-        <footer className="bg-gray-100 text-gray-600 py-4 w-full">
+        <footer className="bg-gray-100 text-gray-600 py-4 w-full border-t border-gray-600">
             <div className="container mx-auto flex flex-wrap justify-center items-center gap-2 text-sm">
                 <span>© 2025 Robert Hunter Performance Archive</span>
                 <span className="mx-2">|</span>

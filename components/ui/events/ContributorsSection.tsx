@@ -12,7 +12,7 @@ const ContributorsSection: React.FC<ContributorsSectionProps> = ({ contributors 
   if (!contributors || contributors.length === 0) return null;
   return (
     <div className="notes-section">
-      <div className="notes-title font-semibold mb-1">Contributors</div>
+      <div className="notes-title">Contributors</div>
       {contributors.map((c) => (
         <div className="notes-content" key={c.id}>
           {c.description} {c.contributor.name}

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import Setlist from '@/components/ui/Setlist';
+import Setlist from '@/components/ui/events/Setlist';
 import { formatEventDate } from '@/lib/formatters/dateFormatter';
 import { getPerformerCardClass } from '@/lib/utils/performerStyles';
 

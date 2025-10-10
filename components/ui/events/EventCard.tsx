@@ -85,20 +85,24 @@ const EventCard: React.FC<EventCardProps> = ({
 
     // Sets
     const setsSection = (
-        <div className={`px-4 py-3 rounded ${variant === 'browse'
+        <div className={`px-4 pt-1 pb-6 rounded ${variant === 'browse'
             ? 'bg-white/50'
             : `bg-white/50 border border-gray-200`
             }`}>
-            <Setlist sets={event.sets} />
+            <Setlist
+                sets={event.sets}
+                showFootnotes={variant === 'detail'}
+                showSongLinks={variant === 'detail'}
+                eventPrimaryBandId={event.primaryBandId}
+            />
         </div>
     );
 
-    // ShowContext (tighter spacing)
-    const showContextSection = (
-        <div className="mt-2">
-            <ShowContext event={event} showPublicNotes={true} />
-        </div>
-    );
+    const hasShowContext = event.eventMusicians?.length > 0 ||
+        event.sets?.some((s: any) => s.bandId && s.bandId !== event.primaryBandId && s.band) ||
+        event.sets?.some((s: any) => s.setMusicians && s.setMusicians.length > 0) ||
+        event.publicNotes;
+
 
     // Detail-only sections
     const prevNextNav = showPrevNext && (
@@ -115,23 +119,33 @@ const EventCard: React.FC<EventCardProps> = ({
             </Link>
         </div>
     );
+
+    const showContextSection = hasShowContext ? (
+        <div>
+            <ShowContext event={event} showPublicNotes={true} />
+        </div>
+    ) : null;
+
     const performanceNotes = showPerformanceNotes && (
-        <div className="my-4">
+        <div>
             <PerformanceNotes performances={event.sets?.flatMap((s: any) => s.performances) ?? []} />
         </div>
     );
+
     const stageTalk = showStageTalk && (
-        <div className="my-4">
+        <div>
             <StageTalk sets={event.sets ?? []} />
         </div>
     );
+
     const recordings = showRecordings && (
-        <div className="my-4">
+        <div>
             <RecordingsSection recordings={event.recordings ?? []} />
         </div>
     );
+
     const contributors = showContributors && (
-        <div className="my-4">
+        <div>
             <ContributorsSection contributors={
                 (event.eventContributors || [])
                     .filter((c: any) => c.contributor && c.description != null)
@@ -152,9 +166,11 @@ const EventCard: React.FC<EventCardProps> = ({
                 {dateVenue}
                 {billingSection}
                 {setsSection}
-                <div className="event-detail-sections">
-                    {showContextSection}
-                </div>
+                {showContextSection && (
+                    <div className="event-detail-sections mt-6">
+                        {showContextSection}
+                    </div>
+                )}
             </div>
         );
     }
@@ -166,12 +182,18 @@ const EventCard: React.FC<EventCardProps> = ({
             {dateVenue}
             {billingSection}
             {setsSection}
-            <div className="event-detail-sections">
+            <div className="event-detail-sections mt-6">
                 {showContextSection}
                 {performanceNotes}
-                {stageTalk}
-                {recordings}
-                {contributors}
+                <div className="grid grid-cols-2 gap-6 mt-4">
+                    <div className="space-y-4">
+                        {recordings}
+                        {contributors}
+                    </div>
+                    <div>
+                        {stageTalk}
+                    </div>
+                </div>
             </div>
         </div>
     );

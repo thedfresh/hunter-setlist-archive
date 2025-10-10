@@ -4,6 +4,20 @@
 
 @layer components {
 
+  /* Make the page a flex container */
+  body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  main {
+    flex: 1;
+  }
+
+  footer {
+    /* stays at bottom */
+  }
 
   /* ============================================
     SITE HEADER - Option 1 Design
@@ -1100,18 +1114,14 @@
   }
 
   /* Notes sections */
-
-  /* Add border only to sections that come after another section */
-  .event-detail-sections>div+div .notes-section {
-    @apply border-t border-gray-200;
-  }
-
   .notes-section {
-    @apply mt-5 pt-5;
+    @apply mt-3;
+    /* Less top margin (was mt-5) */
   }
 
   .notes-title {
-    @apply text-sm font-semibold text-gray-900 mb-2;
+    @apply text-sm font-semibold text-gray-900 mb-3;
+    /* More bottom margin (was mb-2) */
   }
 
   .notes-content {
@@ -1125,10 +1135,6 @@
   /* ============================================
     RECORDINGS DISPLAY
     ============================================ */
-
-  .recording-section {
-    @apply mt-5 pt-5 border-t border-gray-200;
-  }
 
   .recording-item {
     @apply mb-4 text-xs text-gray-600 leading-relaxed;

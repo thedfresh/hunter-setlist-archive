@@ -25,8 +25,8 @@ const badgeClass = (type?: string | null) => {
 const RecordingsSection: React.FC<RecordingsSectionProps> = ({ recordings }) => {
   if (!recordings || recordings.length === 0) return null;
   return (
-    <div className="recording-section mt-5">
-      <div className="notes-title font-semibold mb-1">Recordings</div>
+    <div className="notes-section">
+      <div className="notes-title">Recordings</div>
       {recordings.map((rec) => (
         <div className="recording-item mb-1" key={rec.id}>
           {/* {rec.lmaIdentifier && (

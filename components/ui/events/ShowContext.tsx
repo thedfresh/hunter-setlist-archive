@@ -22,11 +22,11 @@ const ShowContext: React.FC<ShowContextProps> = ({
     const hasPublicNotes = showPublicNotes && !!event.publicNotes;
     const showNotesSection = hasEventMusicians || hasBandContext || hasSetMusicians || hasPublicNotes;
 
-    if (!showNotesSection) return <div className="mt-6"></div>;
+    if (!showNotesSection) return null;
 
     return (
-        <div className="pt-2">
-            <div className="notes-title font-semibold mb-1">Show Notes</div>
+        <div className="notes-section">
+            <div className="notes-title">Show Notes</div>
             {/* Event-level musicians */}
             {hasEventMusicians && (
                 <div className="text-xs text-gray-700 mb-2">

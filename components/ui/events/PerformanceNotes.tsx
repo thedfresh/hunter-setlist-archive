@@ -51,8 +51,8 @@ const PerformanceNotes: React.FC<PerformanceNotesProps> = ({ performances }) => 
 
   // 4. Render
   return (
-    <div className="notes-section pt-5 border-t mt-8">
-      <div className="notes-title font-semibold mb-1">Performance Notes</div>
+    <div className="notes-section">
+      <div className="notes-title">Performance Notes</div>
       {Array.from(noteMap.entries()).map(([note, num]) => (
         <div className="notes-content" key={num}>
           [{num}] {note}

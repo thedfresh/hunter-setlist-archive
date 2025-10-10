@@ -40,7 +40,7 @@ const StageTalk: React.FC<StageTalkProps> = ({ sets }) => {
 
   return (
     <div className="notes-section">
-      <div className="notes-title font-semibold mb-1">Stage Talk</div>
+      <div className="notes-title">Stage Talk</div>
       {banterEntries.map((entry, idx) => (
         <div className="notes-content mb-3" key={idx}>
           <div className="banter-label font-semibold">

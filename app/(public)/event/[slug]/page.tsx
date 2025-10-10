@@ -1,4 +1,4 @@
-import EventCard from '@/components/ui/EventCard';
+import EventCard from '@/components/ui/events/EventCard';
 import { getEventBySlugWithNavigation } from '@/lib/queries/eventDetailQueries';
 import { notFound } from 'next/navigation';
 import { PageContainer } from '@/components/ui/PageContainer';
