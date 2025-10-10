@@ -81,11 +81,9 @@ export default async function VenueDetailPage({ params }: { params: { slug: stri
                       </Link>
                     </td>
                     <td>
-                      {event.performers?.map((p: any) => (
-                        <span key={p.name} className={getPerformerTextClass(p.name)}>
-                          {p.name}
-                        </span>
-                      ))}
+                      <span className={getPerformerTextClass(event.primaryBand?.name || 'Robert Hunter')}>
+                        {event.primaryBand?.name || 'Robert Hunter'}
+                      </span>
                     </td>
                   </tr>
                 ))}

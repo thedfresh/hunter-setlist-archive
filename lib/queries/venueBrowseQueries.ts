@@ -1,33 +1,33 @@
 import { getCountableEventsWhere, getBrowsableEventsWhere } from '@/lib/queryFilters';
-  export async function getVenueBySlug(slug: string) {
-    const venue = await prisma.venue.findFirst({
-      where: { slug },
-      include: {
-        links: true,
-        events: {
-          where: getBrowsableEventsWhere(),
-          select: {
-            id: true,
-            year: true,
-            month: true,
-            day: true,
-            displayDate: true,
-            slug: true,
-            verified: true,
-            sortDate: true,
-            primaryBand: { select: { name: true } },
-            eventType: { select: { name: true, includeInStats: true } },
-          },
-          orderBy: [
-            { sortDate: 'asc' },
-            { year: 'asc' },
-            { month: 'asc' },
-            { day: 'asc' },
-          ],
+export async function getVenueBySlug(slug: string) {
+  const venue = await prisma.venue.findFirst({
+    where: { slug },
+    include: {
+      links: true,
+      events: {
+        where: getBrowsableEventsWhere(),
+        select: {
+          id: true,
+          year: true,
+          month: true,
+          day: true,
+          displayDate: true,
+          slug: true,
+          verified: true,
+          sortDate: true,
+          primaryBand: { select: { name: true } },
+          eventType: { select: { name: true, includeInStats: true } },
         },
+        orderBy: [
+          { sortDate: 'asc' },
+          { year: 'asc' },
+          { month: 'asc' },
+          { day: 'asc' },
+        ],
       },
-    });
-    return venue;
+    },
+  });
+  return venue;
 }
 import { prisma } from '@/lib/prisma';
 
