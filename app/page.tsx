@@ -64,11 +64,7 @@ export default function HomePage() {
                 >
                   <div className="mb-1 text-base font-semibold text-gray-700">{event.primaryBand?.name || 'Robert Hunter'}</div>
                   <div className="mb-2 flex items-center gap-3 text-lg font-semibold">
-                    <span>{getEventDisplayDate(event)}
-                      {event.showTiming && (['early', 'late'].includes(event.showTiming.toLowerCase())) && (
-                        <span> ({event.showTiming.charAt(0).toUpperCase() + event.showTiming.slice(1).toLowerCase()})</span>
-                      )}
-                    </span>
+                    <span>{getEventDisplayDate(event)}</span>
                     <span className="text-gray-700 text-base font-normal">
                       {event.venue?.name}
                       {event.venue?.city ? `, ${event.venue.city}` : ''}
