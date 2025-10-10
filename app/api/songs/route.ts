@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getCountablePerformancesWhere } from '@/lib/queryFilters';
+import { getCountablePerformancesWhere, getBrowsableEventsWhere } from '@/lib/queryFilters';
+import { formatEventDate } from '@/lib/formatters/dateFormatter';
 
 export async function GET() {
   try {
-    // Get all non-medley performances with event dates
-    const performances = await prisma.performance.findMany({
+    // Query countable performances for counts
+    const countablePerformances = await prisma.performance.findMany({
       where: getCountablePerformancesWhere(),
       select: {
         songId: true,
@@ -20,6 +21,7 @@ export async function GET() {
                 showTiming: true,
                 slug: true,
                 eventType: true,
+                sortDate: true,
               }
             },
             setType: {
@@ -32,25 +34,58 @@ export async function GET() {
       }
     });
 
-    // Group by songId
-    const songData = new Map();
-    
-    performances.forEach(perf => {
+    // Query browsable performances for first/last dates (includes studios)
+    const browsablePerformances = await prisma.performance.findMany({
+      where: {
+        set: {
+          event: getBrowsableEventsWhere(),
+        },
+        isMedley: false,
+      },
+      select: {
+        songId: true,
+        set: {
+          select: {
+            event: {
+              select: {
+                sortDate: true,
+                year: true,
+                month: true,
+                day: true,
+                displayDate: true,
+                showTiming: true,
+                slug: true,
+              }
+            }
+          }
+        }
+      }
+    });
+
+    // Group countable performances by songId for counts
+    const songCountData = new Map();
+    countablePerformances.forEach(perf => {
       const event = perf.set && perf.set.event;
       if (!event || !event.year) return;
-      const dateValue = event.year * 10000 + (event.month || 0) * 100 + (event.day || 0);
-      const displayDate = event.displayDate || 
-        `${event.year}${event.month ? '-' + String(event.month).padStart(2, '0') : ''}${event.day ? '-' + String(event.day).padStart(2, '0') : ''}`;
-      let slug = event.slug;
-      if (!songData.has(perf.songId)) {
-        songData.set(perf.songId, {
-          count: 0,
-          dates: []
-        });
+      if (!songCountData.has(perf.songId)) {
+        songCountData.set(perf.songId, { count: 0 });
       }
-      const data = songData.get(perf.songId);
-      data.count++;
-      data.dates.push({ value: dateValue, display: displayDate, slug });
+      songCountData.get(perf.songId).count++;
+    });
+
+    // Group browsable performances by songId for first/last dates
+    const songDateData = new Map();
+    browsablePerformances.forEach(perf => {
+      const event = perf.set && perf.set.event;
+      if (!event || !event.year) return;
+      if (!songDateData.has(perf.songId)) {
+        songDateData.set(perf.songId, []);
+      }
+      songDateData.get(perf.songId).push({
+        sortDate: event.sortDate,
+        display: formatEventDate(event), // Correctly formatted
+        slug: event.slug
+      });
     });
 
     // Fetch all songs
@@ -65,15 +100,23 @@ export async function GET() {
 
     return NextResponse.json({
       songs: songs.map(song => {
-        const data = songData.get(song.id);
-        let performanceCount = 0;
+        const countData = songCountData.get(song.id);
+        const dateData = songDateData.get(song.id) || [];
+        let performanceCount = countData ? countData.count : 0;
         let firstPerformance = null;
         let lastPerformance = null;
-        if (data && data.dates.length > 0) {
-          const sortedDates = data.dates.sort((a: { value: number; display: string; slug: string }, b: { value: number; display: string; slug: string }) => a.value - b.value);
-          performanceCount = data.count;
-          firstPerformance = { date: sortedDates[0].display, slug: sortedDates[0].slug };
-          lastPerformance = { date: sortedDates[sortedDates.length - 1].display, slug: sortedDates[sortedDates.length - 1].slug };
+        if (dateData.length > 0) {
+          const sortedDates = dateData.sort((a: { sortDate: string }, b: { sortDate: string }) => new Date(a.sortDate).getTime() - new Date(b.sortDate).getTime());
+          firstPerformance = {
+            date: sortedDates[0].display,
+            slug: sortedDates[0].slug,
+            sortDate: sortedDates[0].sortDate,
+          };
+          lastPerformance = {
+            date: sortedDates[sortedDates.length - 1].display,
+            slug: sortedDates[sortedDates.length - 1].slug,
+            sortDate: sortedDates[sortedDates.length - 1].sortDate,
+          };
         }
         return {
           id: song.id,

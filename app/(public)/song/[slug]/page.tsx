@@ -1,144 +1,35 @@
-import { prisma } from '@/lib/prisma';
-import { getBrowsableEventsWhere } from '@/lib/queryFilters';
-import { getCountablePerformancesWhere } from '@/lib/queryFilters';
 import { notFound } from 'next/navigation';
 import { PageContainer } from '@/components/ui/PageContainer';
 import Link from 'next/link';
-
-
-
-function formatDate(event: any) {
-  if (!event) return '';
-  const { year, month, day } = event;
-  if (!year) return '';
-  const mm = month ? String(month).padStart(2, '0') : '??';
-  const dd = day ? String(day).padStart(2, '0') : '??';
-  let timing = '';
-  if (event?.showTiming?.toLowerCase() === 'early') timing = ' (Early)';
-  else if (event?.showTiming?.toLowerCase() === 'late') timing = ' (Late)';
-  return `${year}-${mm}-${dd}${timing}`;
-}
+import { formatEventDate } from '@/lib/formatters/dateFormatter';
+import { getSongWithPerformances } from '@/lib/queryBuilders/songQueries';
 
 export default async function SongDetailPage({ params }: { params: { slug: string } }) {
   const { slug } = params;
 
-  const song = await prisma.song.findFirst({
-    where: { slug },
-    include: {
-      songAlbums: { include: { album: true } },
-      songTags: { include: { tag: true } },
-      links: true,
-      performances: {
-        where: getCountablePerformancesWhere(),
-        include: {
-          set: {
-            include: {
-              event: {
-                select: {
-                  id: true,
-                  slug: true,
-                  year: true,
-                  month: true,
-                  day: true,
-                  displayDate: true,
-                  showTiming: true,
-                  eventType: { select: { name: true, includeInStats: true } },
-                  venue: {
-                    select: {
-                      id: true,
-                      slug: true,
-                      name: true,
-                      context: true,
-                      city: true,
-                      stateProvince: true,
-                      country: true,
-                    },
-                  },
-                },
-              },
-              performances: {
-                include: {
-                  song: true,
-                },
-              },
-            },
-          },
-        },
-      },
-    },
-  });
-
-  // Separate query for performance date list (includes studios/errata)
-  const performanceDates = await prisma.performance.findMany({
-    where: {
-      song: { slug },
-      set: {
-        event: getBrowsableEventsWhere(),
-      },
-      // isMedley: false,
-    },
-    include: {
-      set: {
-        include: {
-          event: {
-            select: {
-              id: true,
-              slug: true,
-              year: true,
-              month: true,
-              day: true,
-              displayDate: true,
-              showTiming: true,
-              eventType: { select: { name: true, includeInStats: true } },
-              venue: {
-                select: {
-                  id: true,
-                  slug: true,
-                  name: true,
-                  context: true,
-                  city: true,
-                  stateProvince: true,
-                  country: true,
-                },
-              },
-            },
-          },
-          performances: {
-            include: {
-              song: {
-                select: {
-                  id: true,
-                  title: true,
-                  slug: true,
-                }
-              }
-            },
-            orderBy: { performanceOrder: 'asc' }
-          }
-        },
-      },
-    },
-  });
+  // Use reusable query function
+  const song = await getSongWithPerformances(slug);
 
   if (!song) return notFound();
 
   // Compute performance stats
   // For stats, filter out medleys only (query already filters by event type)
-  const filteredPerformances = song.performances.filter(
-    (p: any) => !p.isMedley
+  const filteredPerformances = song.performances.filter((p: any) =>
+    !p.isMedley && p.set?.event?.eventType?.includeInStats !== false
   );
   const totalPerformed = filteredPerformances.length;
   // For display, include all performances, but sort by event date and set order
-  const sortedByDate = [...performanceDates].sort((a: any, b: any) => {
-    const aDate = new Date(a.set.event.year || 0, (a.set.event.month || 1) - 1, a.set.event.day || 1);
-    const bDate = new Date(b.set.event.year || 0, (b.set.event.month || 1) - 1, b.set.event.day || 1);
-    if (aDate.getTime() !== bDate.getTime()) return aDate.getTime() - bDate.getTime();
-    // If same event, order by set position and performanceOrder
+  const sortedByDate = [...song.performances].sort((a: any, b: any) => {
+    const aVal = a.set?.event;
+    const bVal = b.set?.event;
+    const aDate = aVal?.sortDate ? new Date(aVal.sortDate) : null;
+    const bDate = bVal?.sortDate ? new Date(bVal.sortDate) : null;
+    if (aDate && bDate && aDate.getTime() !== bDate.getTime()) return aDate.getTime() - bDate.getTime();
     if (a.set.position !== b.set.position) return a.set.position - b.set.position;
     return a.performanceOrder - b.performanceOrder;
   });
-  const firstPerf = filteredPerformances.length > 0 ? sortedByDate.find((p: any) => !p.isMedley) : undefined;
-  const lastPerf = filteredPerformances.length > 0 ? [...sortedByDate].reverse().find((p: any) => !p.isMedley) : undefined;
+  const firstPerf = sortedByDate.length > 0 ? sortedByDate[0] : undefined;
+  const lastPerf = sortedByDate.length > 0 ? sortedByDate[sortedByDate.length - 1] : undefined;
 
   return (
     <PageContainer>
@@ -180,7 +71,7 @@ export default async function SongDetailPage({ params }: { params: { slug: strin
             First Performance:{' '}
             {firstPerf ? (
               <Link href={`/event/${firstPerf.set.event.slug}`} className="link-internal">
-                {formatDate(firstPerf.set.event)}
+                {formatEventDate(firstPerf.set.event)}
               </Link>
             ) : '—'}
           </div>
@@ -188,7 +79,7 @@ export default async function SongDetailPage({ params }: { params: { slug: strin
             Last Performance:{' '}
             {lastPerf ? (
               <Link href={`/event/${lastPerf.set.event.slug}`} className="link-internal">
-                {formatDate(lastPerf.set.event)}
+                {formatEventDate(lastPerf.set.event)}
               </Link>
             ) : '—'}
           </div>
@@ -266,7 +157,7 @@ export default async function SongDetailPage({ params }: { params: { slug: strin
                     <td className="px-2 py-1">
                       {showDateVenue ? (
                         <Link href={`/event/${perf.set.event.slug}`} className="link-internal">
-                          {formatDate(perf.set.event)}
+                          {formatEventDate(perf.set.event)}
                         </Link>
                       ) : ''}
                       {showDateVenue && isNonCountable && (

@@ -15,8 +15,8 @@ type Song = {
   title: string;
   slug: string;
   performanceCount: number;
-  firstPerformance?: { date: string; slug: string };
-  lastPerformance?: { date: string; slug: string };
+  firstPerformance?: { date: string; slug: string; sortDate: string };
+  lastPerformance?: { date: string; slug: string; sortDate: string };
 };
 
 
@@ -50,10 +50,10 @@ export default function SongBrowsePage() {
     }
     let aVal: any = a[sortKey];
     let bVal: any = b[sortKey];
-    // For dates, sort by parsed date value
+    // For dates, sort by sortDate value
     if (sortKey === "firstPerformance" || sortKey === "lastPerformance") {
-      const aDate = aVal?.date ? new Date(aVal.date) : null;
-      const bDate = bVal?.date ? new Date(bVal.date) : null;
+      const aDate = aVal?.sortDate ? new Date(aVal.sortDate) : null;
+      const bDate = bVal?.sortDate ? new Date(bVal.sortDate) : null;
       if (!aDate && !bDate) return 0;
       if (!aDate) return sortDirection === "asc" ? 1 : -1;
       if (!bDate) return sortDirection === "asc" ? -1 : 1;
@@ -109,26 +109,6 @@ export default function SongBrowsePage() {
     }
     fetchSongs();
   }, []);
-
-  // Format date as YYYY-MM-DD
-  function formatDate(dateStr?: string | null) {
-    if (!dateStr) return "—";
-    // Try to parse year, month, day from dateStr
-    const match = dateStr.match(/^(\d{4})(?:-(\d{2}))?(?:-(\d{2}))?/);
-    if (match) {
-      const year = match[1];
-      let month = match[2];
-      let day = match[3];
-      // If month/day are '01', treat as missing and display 'xx'
-      if (!month || month === '01') month = 'xx';
-      if (!day || day === '01') day = 'xx';
-      return `${year}-${month}-${day}`;
-    }
-    // Fallback to original logic
-    const d = new Date(dateStr);
-    if (isNaN(d.getTime())) return dateStr;
-    return d.toISOString().slice(0, 10);
-  }
 
   function handlePageSizeChange(e: React.ChangeEvent<HTMLSelectElement>) {
     const val: PageSize = e.target.value === "All" ? "All" : parseInt(e.target.value, 10);
@@ -208,19 +188,19 @@ export default function SongBrowsePage() {
                   <td>
                     {song.firstPerformance?.slug ? (
                       <a href={`/event/${song.firstPerformance.slug}`} className="link-internal">
-                        {formatDate(song.firstPerformance.date)}
+                        {song.firstPerformance.date}
                       </a>
                     ) : (
-                      <span>{formatDate(song.firstPerformance?.date)}</span>
+                      <span>{song.firstPerformance?.date}</span>
                     )}
                   </td>
                   <td>
                     {song.lastPerformance?.slug ? (
                       <a href={`/event/${song.lastPerformance.slug}`} className="link-internal">
-                        {formatDate(song.lastPerformance.date)}
+                        {song.lastPerformance.date}
                       </a>
                     ) : (
-                      <span>{formatDate(song.lastPerformance?.date)}</span>
+                      <span>{song.lastPerformance?.date}</span>
                     )}
                   </td>
                 </tr>
