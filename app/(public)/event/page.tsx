@@ -7,6 +7,7 @@ import { BandFilterChips } from './BandFilterChips';
 import Link from 'next/link';
 import Pagination from '@/components/ui/Pagination'
 import EventCard from '@/components/ui/events/EventCard';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
 
 export const dynamic = 'force-dynamic';
 
@@ -33,7 +34,9 @@ function EventBrowsePageContent() {
   if (loading) {
     return (
       <PageContainer>
-        <div className="text-center py-12">Loading events...</div>
+        <div className="flex items-center justify-center py-12">
+          <LoadingSpinner />
+        </div>
       </PageContainer>
     );
   }

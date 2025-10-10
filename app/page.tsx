@@ -5,6 +5,8 @@ import Link from 'next/link';
 import Setlist from '@/components/ui/events/Setlist';
 import { formatEventDate } from '@/lib/formatters/dateFormatter';
 import { getPerformerCardClass } from '@/lib/utils/performerStyles';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import { PageContainer } from '@/components/ui/PageContainer';
 
 function getEventDisplayDate(e: any) {
   return e.displayDate || formatEventDate(e);
@@ -30,10 +32,16 @@ export default function HomePage() {
   const monthName = today.toLocaleString('default', { month: 'long' });
   const dayNum = today.getDate();
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) {
+    return (
+      <PageContainer variant="text">
+        <LoadingSpinner />
+      </PageContainer>
+    );
+  }
 
   return (
-    <div className="max-w-4xl mx-auto p-8">
+    <PageContainer variant="text">
       <section className="mb-10">
         <h1 className="text-3xl font-bold mb-4  text-center">Robert Hunter Performance Archive 2.0</h1>
         <p className="text-sm text-gray-700 mb-2">
@@ -78,6 +86,6 @@ export default function HomePage() {
           </>
         )}
       </section>
-    </div>
+    </PageContainer>
   );
 }

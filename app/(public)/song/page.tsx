@@ -4,6 +4,7 @@ import Link from "next/link";
 import React, { useState, useEffect } from "react";
 import { compareSongTitles } from '@/lib/utils/songSort';
 import { PageContainer } from '@/components/ui/PageContainer';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
 
 type Song = {
   id: number;
@@ -95,82 +96,87 @@ export default function SongBrowsePage() {
     fetchSongs();
   }, []);
 
-  if (loading) {
-    return <div className="max-w-4xl mx-auto py-10 px-4">Loading songs…</div>;
-  }
   if (error) {
     return <div className="max-w-4xl mx-auto py-10 px-4 text-red-600">Error: {error}</div>;
   }
 
   return (
     <PageContainer>
-      <div className="page-header">
-        <div className="page-title">Songs Performed</div>
-      </div>
-      <div className="flex items-center justify-between mb-6 gap-4 flex-wrap">
-        <div className="page-subtitle">{total} songs found</div>
-        <p className="note-text">Note: song counts are exclusive of duplicate performances in a single show (i.e. Dire Wolf medleys) as well as
-          performances flagged as studios, rehearsals, or soundchecks.
-        </p>
-        <div className="search-bar w-full sm:w-96">
-          <input
-            className="search-input-large"
-            placeholder="Search songs..."
-            value={search}
-            onChange={handleSearchChange}
-          />
-          <span className="search-icon-large">
-            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <circle cx="11" cy="11" r="7" strokeWidth="2" />
-              <line x1="16.5" y1="16.5" x2="21" y2="21" strokeWidth="2" strokeLinecap="round" />
-            </svg>
-          </span>
+      {loading ? (
+        <div className="flex items-center justify-center py-12">
+          <LoadingSpinner />
         </div>
-      </div>
-      <div className="table-container">
-        <table className="table">
-          <thead>
-            <tr>
-              <th className="sortable cursor-pointer" onClick={() => handleSort("title")}>Song Title {sortKey === "title" && (sortDirection === "asc" ? "▲" : "▼")}</th>
-              <th className="sortable cursor-pointer" onClick={() => handleSort("performanceCount")}>Times Played {sortKey === "performanceCount" && (sortDirection === "asc" ? "▲" : "▼")}</th>
-              <th className="sortable cursor-pointer" onClick={() => handleSort("firstPerformance")}>First {sortKey === "firstPerformance" && (sortDirection === "asc" ? "▲" : "▼")}</th>
-              <th className="sortable cursor-pointer" onClick={() => handleSort("lastPerformance")}>Last {sortKey === "lastPerformance" && (sortDirection === "asc" ? "▲" : "▼")}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sortedSongs.map((song) => {
-              return (
-                <tr key={song.id}>
-                  <td>
-                    <Link href={`/song/${song.slug}`} className="link-internal">
-                      {song.title}
-                    </Link>
-                  </td>
-                  <td>{song.performanceCount}</td>
-                  <td>
-                    {song.firstPerformance?.slug ? (
-                      <a href={`/event/${song.firstPerformance.slug}`} className="link-internal">
-                        {song.firstPerformance.date}
-                      </a>
-                    ) : (
-                      <span>{song.firstPerformance?.date}</span>
-                    )}
-                  </td>
-                  <td>
-                    {song.lastPerformance?.slug ? (
-                      <a href={`/event/${song.lastPerformance.slug}`} className="link-internal">
-                        {song.lastPerformance.date}
-                      </a>
-                    ) : (
-                      <span>{song.lastPerformance?.date}</span>
-                    )}
-                  </td>
+      ) : (
+        <>
+          <div className="page-header">
+            <div className="page-title">Songs Performed</div>
+          </div>
+          <div className="flex items-center justify-between mb-6 gap-4 flex-wrap">
+            <div className="page-subtitle">{total} songs found</div>
+            <p className="note-text">Note: song counts are exclusive of duplicate performances in a single show (i.e. Dire Wolf medleys) as well as
+              performances flagged as studios, rehearsals, or soundchecks.
+            </p>
+            <div className="search-bar w-full sm:w-96">
+              <input
+                className="search-input-large"
+                placeholder="Search songs..."
+                value={search}
+                onChange={handleSearchChange}
+              />
+              <span className="search-icon-large">
+                <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <circle cx="11" cy="11" r="7" strokeWidth="2" />
+                  <line x1="16.5" y1="16.5" x2="21" y2="21" strokeWidth="2" strokeLinecap="round" />
+                </svg>
+              </span>
+            </div>
+          </div>
+          <div className="table-container">
+            <table className="table">
+              <thead>
+                <tr>
+                  <th className="sortable cursor-pointer" onClick={() => handleSort("title")}>Song Title {sortKey === "title" && (sortDirection === "asc" ? "▲" : "▼")}</th>
+                  <th className="sortable cursor-pointer" onClick={() => handleSort("performanceCount")}>Times Played {sortKey === "performanceCount" && (sortDirection === "asc" ? "▲" : "▼")}</th>
+                  <th className="sortable cursor-pointer" onClick={() => handleSort("firstPerformance")}>First {sortKey === "firstPerformance" && (sortDirection === "asc" ? "▲" : "▼")}</th>
+                  <th className="sortable cursor-pointer" onClick={() => handleSort("lastPerformance")}>Last {sortKey === "lastPerformance" && (sortDirection === "asc" ? "▲" : "▼")}</th>
                 </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+              </thead>
+              <tbody>
+                {sortedSongs.map((song) => {
+                  return (
+                    <tr key={song.id}>
+                      <td>
+                        <Link href={`/song/${song.slug}`} className="link-internal">
+                          {song.title}
+                        </Link>
+                      </td>
+                      <td>{song.performanceCount}</td>
+                      <td>
+                        {song.firstPerformance?.slug ? (
+                          <a href={`/event/${song.firstPerformance.slug}`} className="link-internal">
+                            {song.firstPerformance.date}
+                          </a>
+                        ) : (
+                          <span>{song.firstPerformance?.date}</span>
+                        )}
+                      </td>
+                      <td>
+                        {song.lastPerformance?.slug ? (
+                          <a href={`/event/${song.lastPerformance.slug}`} className="link-internal">
+                            {song.lastPerformance.date}
+                          </a>
+                        ) : (
+                          <span>{song.lastPerformance?.date}</span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </>
+      )}
     </PageContainer>
   );
 }
