@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation';
 import { PageContainer } from '@/components/ui/PageContainer';
 import Link from 'next/link';
 import { formatEventDate } from '@/lib/formatters/dateFormatter';
-import { getSongWithPerformances } from '@/lib/queryBuilders/songQueries';
+import { getSongWithPerformances } from '@/lib/queries/songQueries';
 
 export default async function SongDetailPage({ params }: { params: { slug: string } }) {
   const { slug } = params;

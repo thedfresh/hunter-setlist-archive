@@ -29,7 +29,7 @@ export async function POST(req: Request) {
       sortDate = new Date(); // fallback, should not happen
     }
     // Generate slug
-    const { generateSlug } = await import('@/lib/eventSlug');
+    const { generateSlug } = await import('@/lib/utils/eventSlug');
     const slug = generateSlug({ year, month, day, showTiming });
     // Transaction: create event and contributors
     const result = await prisma.$transaction(async (tx) => {

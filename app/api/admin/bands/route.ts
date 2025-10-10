@@ -8,7 +8,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Band name is required.' }, { status: 400 });
     }
     // Generate slug
-    const { generateSlugFromName } = require("@/lib/generateSlug");
+    const { generateSlugFromName } = require("@/lib/utils/generateSlug");
     const slug = generateSlugFromName(data.name);
     const band = await prisma.band.create({
       data: {

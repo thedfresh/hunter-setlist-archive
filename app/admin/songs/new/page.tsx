@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { generateSlugFromName } from '@/lib/generateSlug';
+import { generateSlugFromName } from '@/lib/utils/generateSlug';
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 

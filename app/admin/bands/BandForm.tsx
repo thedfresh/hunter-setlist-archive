@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { generateSlugFromName } from '@/lib/generateSlug';
+import { generateSlugFromName } from '@/lib/utils/generateSlug';
 
 interface BandFormProps {
   band?: any;

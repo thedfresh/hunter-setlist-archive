@@ -8,7 +8,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Song title is required.' }, { status: 400 });
     }
     // Generate unique slug
-    const { generateSlugFromName } = require("@/lib/generateSlug");
+    const { generateSlugFromName } = require("@/lib/utils/generateSlug");
     let baseSlug = generateSlugFromName(data.title);
     let slug = baseSlug;
     let suffix = 2;

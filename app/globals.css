@@ -1082,6 +1082,7 @@
     SETLIST DISPLAY (Detail Page)
     ============================================ */
 
+
   .set-section {
     @apply mt-5;
   }
@@ -1099,12 +1100,18 @@
   }
 
   /* Notes sections */
+
+  /* Add border only to sections that come after another section */
+  .event-detail-sections>div+div .notes-section {
+    @apply border-t border-gray-200;
+  }
+
   .notes-section {
-    @apply mt-5 pt-5 border-t border-gray-200;
+    @apply mt-5 pt-5;
   }
 
   .notes-title {
-    @apply text-base font-semibold text-gray-900 mb-2;
+    @apply text-sm font-semibold text-gray-900 mb-2;
   }
 
   .notes-content {

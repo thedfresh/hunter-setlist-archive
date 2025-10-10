@@ -2,7 +2,7 @@
 import { useRouter, useParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { Event, Set } from '@/lib/types';
-import { generateSlug } from '@/lib/eventSlug';
+import { generateSlug } from '@/lib/utils/eventSlug';
 import SetPerformancesSection from "./components/SetPerformancesSection";
 import SetMusiciansSection from "./components/SetMusiciansSection";
 import EventMusiciansSection from "./components/EventMusiciansSection";
@@ -159,7 +159,7 @@ export default function EventEditPage() {
         }
         if (allData.events) {
           // Sort events by date using compareDates
-          const { compareDates } = await import('@/lib/dateSort');
+          const { compareDates } = await import('@/lib/utils/dateSort');
           const sorted = [...allData.events].sort(compareDates);
           setAllEvents(sorted);
           setEventIds(sorted.map((e: any) => e.id));

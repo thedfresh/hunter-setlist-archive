@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
-import { compareSongTitles } from '@/lib/songSort';
+import { compareSongTitles } from '@/lib/utils/songSort';
 import { PageContainer } from '@/components/ui/PageContainer';
 
 type Song = {

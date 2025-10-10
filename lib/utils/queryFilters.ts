@@ -3,9 +3,9 @@
  * Shows everything public (including Studio Sessions and Errata with indicators)
  */
 export function getBrowsableEventsWhere() {
-  return {
-    isPublic: true
-  };
+    return {
+        isPublic: true
+    };
 }
 
 /**
@@ -13,12 +13,12 @@ export function getBrowsableEventsWhere() {
  * Excludes Studio Sessions and Errata from counts
  */
 export function getCountableEventsWhere() {
-  return {
-    isPublic: true,
-    eventType: {
-      includeInStats: true
-    }
-  };
+    return {
+        isPublic: true,
+        eventType: {
+            includeInStats: true
+        }
+    };
 }
 
 /**
@@ -26,18 +26,18 @@ export function getCountableEventsWhere() {
  * Excludes medleys, soundcheck sets, studio sessions, and errata
  */
 export function getCountablePerformancesWhere() {
-  return {
-    isMedley: false,
-    set: {
-      setType: {
-        includeInStats: true
-      },
-      event: {
-        isPublic: true,
-        eventType: {
-          includeInStats: true
+    return {
+        isMedley: false,
+        set: {
+            setType: {
+                includeInStats: true
+            },
+            event: {
+                isPublic: true,
+                eventType: {
+                    includeInStats: true
+                }
+            }
         }
-      }
-    }
-  };
+    };
 }

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { compareSongTitles } from '@/lib/songSort';
+import { compareSongTitles } from '@/lib/utils/songSort';
 
 function PerformanceForm({ setId, songs, musicians, instruments, performances, editingPerformance, onClose, onSaved }: any) {
   const [form, setForm] = useState({
@@ -372,17 +372,17 @@ function PerformanceForm({ setId, songs, musicians, instruments, performances, e
             <button
               type="submit"
               className="bg-blue-600 text-white text-xs py-1 px-2 rounded hover:bg-blue-700 transition"
-               disabled={submitting}
-             >
-               {submitting ? "Saving..." : "Save"}
-             </button>
+              disabled={submitting}
+            >
+              {submitting ? "Saving..." : "Save"}
+            </button>
             <button
               type="button"
               className="bg-gray-200 text-gray-800 text-xs py-1 px-2 rounded hover:bg-gray-300 transition"
-               onClick={onClose}
-             >
-               Cancel
-             </button>
+              onClick={onClose}
+            >
+              Cancel
+            </button>
           </div>
         </form>
       </div>

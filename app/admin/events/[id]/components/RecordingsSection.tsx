@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { recordingLinkPatterns } from '@/lib/recordingLinks';
+import { recordingLinkPatterns } from '@/lib/utils/recordingLinks';
 
 interface Recording {
   id: number;
@@ -50,7 +50,7 @@ const RecordingsSection: React.FC<Props> = ({ eventId }) => {
         const [recTypesRes, contribRes, recsRes] = await Promise.all([
           fetch("/api/recording-types"),
           fetch("/api/contributors"),
-    fetch(`/api/events/${eventId}/recordings`),
+          fetch(`/api/events/${eventId}/recordings`),
         ]);
         const recTypes = await recTypesRes.json();
         if (!recTypes.recordingTypes || !Array.isArray(recTypes.recordingTypes)) {
@@ -90,14 +90,14 @@ const RecordingsSection: React.FC<Props> = ({ eventId }) => {
   }
 
   function handleAdd() {
-  setEditing(null);
-  setForm({ typeId: "", description: "", url: "", lmaIdentifier: "", losslessLegsId: "",   youtubeVideoId: "", shnId: "", taper: "", lengthMinutes: "", contributorId: "", publicNotes: "", privateNotes: "" });
+    setEditing(null);
+    setForm({ typeId: "", description: "", url: "", lmaIdentifier: "", losslessLegsId: "", youtubeVideoId: "", shnId: "", taper: "", lengthMinutes: "", contributorId: "", publicNotes: "", privateNotes: "" });
     setShowForm(true);
   }
 
   async function handleDelete(id: number) {
     if (!confirm("Delete this recording?")) return;
-  await fetch(`/api/admin/events/${eventId}/recordings/${id}`, { method: "DELETE" });
+    await fetch(`/api/admin/events/${eventId}/recordings/${id}`, { method: "DELETE" });
     setRecordings(recs => recs.filter(r => r.id !== id));
   }
 
@@ -141,10 +141,10 @@ const RecordingsSection: React.FC<Props> = ({ eventId }) => {
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
           <h2 className="font-bold text-lg">Recordings</h2>
-           <button className="bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded hover:bg-blue-200 border border-blue-200 mr-1" onClick={handleAdd}>Add</button>
+          <button className="bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded hover:bg-blue-200 border border-blue-200 mr-1" onClick={handleAdd}>Add</button>
         </div>
       </div>
-  <table className="w-full text-left border-collapse mb-4">
+      <table className="w-full text-left border-collapse mb-4">
         <thead>
           <tr className="bg-gray-100">
             <th className="py-2 px-4 font-semibold">Type</th>

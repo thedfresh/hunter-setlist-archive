@@ -1,4 +1,4 @@
-import { getBrowsableEventsWhere, getCountableEventsWhere } from '@/lib/queryFilters';
+import { getBrowsableEventsWhere, getCountableEventsWhere } from '@/lib/utils/queryFilters';
 export type GetEventsBrowseParams = {
   page?: number;
   pageSize?: number;
@@ -109,8 +109,7 @@ export async function getEventsOnThisDate() {
   return events;
 }
 import { prisma } from '@/lib/prisma';
-import { getPrismaDateOrderBy } from '@/lib/dateSort';
-// ...existing code...
+import { getPrismaDateOrderBy } from '@/lib/utils/dateSort';
 
 export async function getEventsBrowse({ page = 1, pageSize = 100, where = {} }: GetEventsBrowseParams) {
   // Don't spread - use the where clause as-is since it's already built correctly
@@ -123,17 +122,52 @@ export async function getEventsBrowse({ page = 1, pageSize = 100, where = {} }: 
       include: {
         venue: true,
         primaryBand: true,
+        eventMusicians: {
+          include: {
+            musician: true,
+            instrument: true,
+          }
+        },
         sets: {
           include: {
             setType: true,
+            band: true,
+            setMusicians: {
+              include: {
+                musician: true,
+                instrument: true,
+              }
+            },
             performances: {
               include: {
                 song: true,
+                performanceMusicians: {
+                  include: {
+                    musician: true,
+                    instrument: true,
+                  }
+                },
               },
               orderBy: { performanceOrder: 'asc' },
             },
           },
           orderBy: { position: 'asc' },
+        },
+        recordings: {
+          include: {
+            recordingType: true,
+            contributor: true,
+          },
+        },
+        eventContributors: {
+          include: {
+            contributor: true,
+          },
+        },
+        links: {
+          include: {
+            linkType: true,
+          },
         },
       },
       orderBy: { sortDate: 'asc' },
@@ -152,3 +186,5 @@ export async function getEventsBrowse({ page = 1, pageSize = 100, where = {} }: 
     pageSize,
   };
 }
+
+// Get event by slug with navigation (prev/next) events

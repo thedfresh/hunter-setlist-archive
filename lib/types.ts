@@ -36,6 +36,7 @@ export type Event = {
   primaryBandId?: number;
   notes?: string;
   createdAt: string;
+  slug?: string;
 };
 
 export type Set = {

@@ -13,18 +13,16 @@ export async function GET(req: NextRequest, context: { params: Promise<{ id: str
     if (!event) return NextResponse.json({ error: 'Event not found.' }, { status: 404 });
     // Ensure all fields are present in response, include etreeShowId
     const e: any = event;
-      return NextResponse.json({
-        event: {
-          ...(event as any),
-          sortDate: event.sortDate ? event.sortDate.toISOString() : null,
-          etreeShowId: e.etreeShowId || "",
-          rawData: event.rawData ?? "",
-          rawDataGdsets: event.rawDataGdsets ?? "",
-          billing: event.billing ?? "",
-          hunterParticipationUncertain: !!event.hunterParticipationUncertain,
-          verified: !!event.verified,
-        }
-      });
+    return NextResponse.json({
+      event: {
+        ...(event as any),
+        sortDate: event.sortDate ? event.sortDate.toISOString() : null,
+        etreeShowId: e.etreeShowId || "",
+        billing: event.billing ?? "",
+        hunterParticipationUncertain: !!event.hunterParticipationUncertain,
+        verified: !!event.verified,
+      }
+    });
   } catch (error) {
     console.error('GET /api/events/[id] error:', error);
     return NextResponse.json({ error: 'Failed to fetch event.', details: String(error) }, { status: 500 });

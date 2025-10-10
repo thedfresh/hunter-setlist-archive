@@ -16,7 +16,7 @@ type FormState = {
 };
 "use client";
 import React, { useState, useEffect } from 'react';
-import { generateSlug } from '@/lib/eventSlug';
+import { generateSlug } from '@/lib/utils/eventSlug';
 import EventContributorsInput, { EventContributor } from './components/EventContributorsInput';
 import AddVenueModal from './components/AddVenueModal';
 import { useRouter } from 'next/navigation';

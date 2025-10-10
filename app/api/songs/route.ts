@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getCountablePerformancesWhere, getBrowsableEventsWhere } from '@/lib/queryFilters';
+import { getCountablePerformancesWhere, getBrowsableEventsWhere } from '@/lib/utils/queryFilters';
 import { formatEventDate } from '@/lib/formatters/dateFormatter';
 
 export async function GET() {

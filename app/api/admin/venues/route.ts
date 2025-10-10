@@ -11,7 +11,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Venue name is required.' }, { status: 400 });
     }
     // Generate slug
-    const { generateVenueSlug } = require("@/lib/generateSlug");
+    const { generateVenueSlug } = require("@/lib/utils/generateSlug");
     const slug = generateVenueSlug(data.name, data.city, data.stateProvince);
     const venue = await prisma.venue.create({
       data: {

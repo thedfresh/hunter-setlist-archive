@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getBrowsableEventsWhere } from '@/lib/queryFilters';
+import { getBrowsableEventsWhere } from '@/lib/utils/queryFilters';
 import { prisma } from '@/lib/prisma';
 import { Prisma } from '@prisma/client';
 

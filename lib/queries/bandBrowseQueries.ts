@@ -1,4 +1,4 @@
-import { getCountableEventsWhere } from '@/lib/queryFilters';
+import { getCountableEventsWhere } from '@/lib/utils/queryFilters';
 export async function getBandBySlug(slug: string) {
   const band = await prisma.band.findFirst({
     where: { slug },

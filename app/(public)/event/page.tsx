@@ -1,32 +1,19 @@
 'use client';
 
 import { PageContainer } from '@/components/ui/PageContainer';
-import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useState, Suspense } from 'react';
 import { BandFilterChips } from './BandFilterChips';
-import { formatEventDate } from '@/lib/formatters/dateFormatter';
-import { getPerformerCardClass } from '@/lib/utils/performerStyles';
+import Link from 'next/link';
 import Pagination from '@/components/ui/Pagination'
-
-import Setlist from '@/components/ui/Setlist';
+import EventCard from '@/components/ui/EventCard';
 
 export const dynamic = 'force-dynamic';
-
-function getEventDisplayDate(event: any) {
-  if (event.displayDate) return event.displayDate;
-  return formatEventDate(event);
-}
-
-
-
 
 function EventBrowsePageContent() {
   const searchParamsHook = useSearchParams();
   const [results, setResults] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-
-
 
   useEffect(() => {
     const params = Object.fromEntries(searchParamsHook.entries());
@@ -62,6 +49,9 @@ function EventBrowsePageContent() {
   const { events, bandCounts, currentPage, totalPages, selectedTypes, search, searchType } = results;
   const searchParamsObj = Object.fromEntries(searchParamsHook.entries());
 
+  // Explicitly type events array
+  const typedEvents = events as import('@/lib/types').Event[];
+
   const hasActiveSearch = !!(search && searchType);
 
   function getSearchLabel(type: string) {
@@ -94,31 +84,17 @@ function EventBrowsePageContent() {
           {hasActiveSearch && (
             <div className="mb-4 flex items-center gap-3 bg-blue-50 border border-blue-200 rounded px-4 py-2">
               <span className="text-blue-700 font-medium">Showing results for: <span className="font-bold">{getSearchLabel(searchType)}: {search}</span></span>
-              <Link href={getClearSearchUrl(searchParamsObj)} className="ml-2 px-2 py-1 text-xs bg-blue-100 rounded hover:bg-blue-200 text-blue-800 border border-blue-300">Clear</Link>
+              <Link href={getClearSearchUrl(searchParamsObj)} className="block transition-transform hover:-translate-y-1">Clear</Link>
             </div>
           )}
 
           <div className="grid grid-cols-1 gap-4">
-            {events.map((event: any) => (
-              <Link
-                key={event.id}
-                href={`/event/${event.slug}`}
-                className={`event-card ${getPerformerCardClass(event)} block p-6`}
-              >
-                <div className="mb-2 text-sm font-medium text-gray-700">
-                  {event.billing ? event.billing : event.primaryBand?.name || 'Robert Hunter'}
-                </div>
-                <div className="mb-4">
-                  <div className="flex items-center gap-3 text-lg font-semibold">
-                    <span>{getEventDisplayDate(event)}</span>
-                    <span className="text-gray-700 text-base font-normal">
-                      {event.venue?.name}{event.venue?.city ? `, ${event.venue.city}` : ''}{event.venue?.stateProvince ? `, ${event.venue.stateProvince}` : ''}
-                    </span>
-                  </div>
-                </div>
-                <div className="space-y-4">
-                  <Setlist sets={event.sets} />
-                </div>
+            {typedEvents.map(event => (
+              <Link key={event.id} href={`/event/${event.slug}`}>
+                <EventCard
+                  event={event}
+                  variant="browse"
+                />
               </Link>
             ))}
           </div>

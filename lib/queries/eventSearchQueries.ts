@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma';
-import { getBrowsableEventsWhere } from '@/lib/queryFilters';
+import { getBrowsableEventsWhere } from '@/lib/utils/queryFilters';
 import { getEventsBrowse } from './eventBrowseQueries';
 
 // Filter categories for event search

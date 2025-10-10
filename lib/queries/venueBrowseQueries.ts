@@ -1,4 +1,5 @@
-import { getCountableEventsWhere, getBrowsableEventsWhere } from '@/lib/queryFilters';
+import { prisma } from '@/lib/prisma';
+import { getCountableEventsWhere, getBrowsableEventsWhere } from '@/lib/utils/queryFilters';
 export async function getVenueBySlug(slug: string) {
   const venue = await prisma.venue.findFirst({
     where: { slug },
@@ -29,7 +30,6 @@ export async function getVenueBySlug(slug: string) {
   });
   return venue;
 }
-import { prisma } from '@/lib/prisma';
 
 export interface GetVenuesBrowseParams {
   state?: string;

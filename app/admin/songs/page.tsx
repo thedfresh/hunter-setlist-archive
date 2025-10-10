@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { compareSongTitles } from '@/lib/songSort';
+import { compareSongTitles } from '@/lib/utils/songSort';
 import Link from "next/link";
 
 type Song = {
