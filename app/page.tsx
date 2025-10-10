@@ -1,8 +1,9 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { formatEventDate } from '@/lib/formatters/dateFormatter';
+import { getPerformerCardClass } from '@/lib/utils/performerStyles';
 
 function Setlist({ sets }: { sets: any[] }) {
   if (!sets || sets.length === 0) return null;
@@ -23,28 +24,8 @@ function Setlist({ sets }: { sets: any[] }) {
   );
 }
 
-function formatEventDate(event: any) {
-  let date = '';
-  if (event.displayDate) date = event.displayDate;
-  else if (event.year && event.month && event.day) {
-    const mm = String(event.month).padStart(2, '0');
-    const dd = String(event.day).padStart(2, '0');
-    date = `${event.year}-${mm}-${dd}`;
-  } else if (event.year) date = String(event.year);
-  return date;
-}
-
-function getPerformerName(event: any) {
-  return event.primaryBand?.name || 'Solo';
-}
-
-function getCardClass(event: any) {
-  const name = getPerformerName(event).toLowerCase();
-  if (name.includes('roadhog')) return 'event-card-roadhog';
-  if (name.includes('comfort')) return 'event-card-comfort';
-  if (name.includes('dinosaurs')) return 'event-card-dinosaurs';
-  if (name.includes('special')) return 'event-card-special';
-  return 'event-card-solo';
+function getEventDisplayDate(e: any) {
+  return e.displayDate || formatEventDate(e);
 }
 
 export default function HomePage() {
@@ -74,16 +55,16 @@ export default function HomePage() {
       <section className="mb-10">
         <h1 className="text-3xl font-bold mb-4  text-center">Robert Hunter Performance Archive 2.0</h1>
         <p className="text-sm text-gray-700 mb-2">
-            Hello, and welcome to the resurrected Robert Hunter Performance Archive!  I originaly built this site in the late '90s as a way to 
-            document and share Hunter performances from circulating tapes and contemporary tours.  I stopped updating the site after his 1998 tour,
-            and by the mid-2000s the site was no longer online.  In 2025 I developed a plan to rebuild and modernize the site
-            leveraging modern technology to create a searchable database of known performances.</p> 
-        <p className="text-sm text-gray-700 mb-2">There is still a tremendous amount of work 
-            to do - corrections, additions, new recordings and sources - but I hope this early version of the site is a useful resource and a 
-            good start.  If you have information, recordings, or corrections to contribute, please email me at 
-            <a href="mailto:dfresh@gmail.com" className="link-internal">dfresh@gmail.com</a>.  Enjoy exploring the legacy of Robert Hunter!
+          Hello, and welcome to the resurrected Robert Hunter Performance Archive!  I originaly built this site in the late '90s as a way to
+          document and share Hunter performances from circulating tapes and contemporary tours.  I stopped updating the site after his 1998 tour,
+          and by the mid-2000s the site was no longer online.  In 2025 I developed a plan to rebuild and modernize the site
+          leveraging modern technology to create a searchable database of known performances.</p>
+        <p className="text-sm text-gray-700 mb-2">There is still a tremendous amount of work
+          to do - corrections, additions, new recordings and sources - but I hope this early version of the site is a useful resource and a
+          good start.  If you have information, recordings, or corrections to contribute, please email me at
+          <a href="mailto:dfresh@gmail.com" className="link-internal">dfresh@gmail.com</a>.  Enjoy exploring the legacy of Robert Hunter!
         </p>
-        <p className="text-sm text-gray-700"> 
+        <p className="text-sm text-gray-700">
         </p>
       </section>
       <section>
@@ -96,12 +77,12 @@ export default function HomePage() {
               <Link
                 key={event.id}
                 href={`/event/${event.slug}`}
-                className={`event-card ${getCardClass(event)} block py-3 px-6`}
+                className={`event-card ${getPerformerCardClass(event)} block py-3 px-6`}
               >
-                <div className="mb-1 text-base font-semibold text-gray-700">{getPerformerName(event)}</div>
+                <div className="mb-1 text-base font-semibold text-gray-700">{event.primaryBand?.name || 'Robert Hunter'}</div>
                 <div className="mb-2 flex items-center gap-3 text-lg font-semibold">
-                  <span>{formatEventDate(event)}
-                    {event.showTiming && (['early','late'].includes(event.showTiming.toLowerCase())) && (
+                  <span>{getEventDisplayDate(event)}
+                    {event.showTiming && (['early', 'late'].includes(event.showTiming.toLowerCase())) && (
                       <span> ({event.showTiming.charAt(0).toUpperCase() + event.showTiming.slice(1).toLowerCase()})</span>
                     )}
                   </span>

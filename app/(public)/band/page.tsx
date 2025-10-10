@@ -1,16 +1,11 @@
-
 import { getBandsBrowse } from '@/lib/queries/bandBrowseQueries';
 import { PageContainer } from '@/components/ui/PageContainer';
 import Link from 'next/link';
+import { getPerformerCardClass } from '@/lib/utils/performerStyles';
 
-// Helper to color band cards by performer
-function getBandCardClass(bandName: string): string {
-  const name = bandName.toLowerCase();
-  if (name === 'robert hunter') return 'event-card-solo';
-  if (name.includes('roadhog')) return 'event-card-roadhog';
-  if (name.includes('comfort')) return 'event-card-comfort';
-  if (name.includes('dinosaurs')) return 'event-card-dinosaurs';
-  return 'event-card-special'; // Ghosts and other bands
+// Helper to adapt band name for card class
+function getBandCardClassFromName(bandName: string): string {
+  return getPerformerCardClass({ primaryBand: { name: bandName, isHunterBand: true } });
 }
 
 export default async function BandBrowsePage() {
@@ -31,7 +26,7 @@ export default async function BandBrowsePage() {
           <Link
             key={band.id}
             href={`/band/${band.slug}`}
-            className={`event-card ${getBandCardClass(band.name)} block p-6 hover:shadow-md transition-shadow duration-150`}
+            className={`event-card ${getBandCardClassFromName(band.name)} block p-6 hover:shadow-md transition-shadow duration-150`}
           >
             <div className="flex flex-row gap-6">
               <div className="basis-1/3 min-w-[120px]">

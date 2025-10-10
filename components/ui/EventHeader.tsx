@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
+import { getPerformerCardClass } from '@/lib/utils/performerStyles';
 
 interface EventHeaderProps {
   event: {
@@ -42,12 +43,12 @@ function formatDateAmerican(event: EventHeaderProps['event']) {
 
 const EventHeader: React.FC<EventHeaderProps> = ({ event, eventMusicians, adjacent }) => {
   const performer = event.primaryBand?.name || 'Robert Hunter';
-  let performerClass = 'event-card-special';
-  if (performer === 'Dinosaurs') performerClass = 'event-card-dinosaurs';
-  else if (performer === 'Comfort') performerClass = 'event-card-comfort';
-  else if (performer === 'Roadhog') performerClass = 'event-card-roadhog';
-  else if (performer === 'Robert Hunter') performerClass = 'event-card-solo';
-  else if (event.isNotHunterBand === true) performerClass = 'event-card-guest';
+  const performerClass = getPerformerCardClass({
+    primaryBand: event.primaryBand ? {
+      name: event.primaryBand.name,
+      isHunterBand: !event.isNotHunterBand
+    } : { name: 'Robert Hunter', isHunterBand: true }
+  });
   const venue = event.venue
     ? `${event.venue.name}${event.venue.city ? ', ' + event.venue.city : ''}${event.venue.stateProvince ? ', ' + event.venue.stateProvince : ''}`
     : '';

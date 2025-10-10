@@ -2,26 +2,8 @@ import { getVenueBySlug } from '@/lib/queries/venueBrowseQueries';
 import { notFound } from 'next/navigation';
 import { PageContainer } from '@/components/ui/PageContainer';
 import Link from 'next/link';
-
-function getPerformerColorClass(name: string) {
-  const n = name.toLowerCase();
-  if (n.includes('roadhog')) return 'text-[#a67c00]';
-  if (n.includes('comfort')) return 'text-[#4a6617]';
-  if (n.includes('dinosaurs')) return 'text-[#0891b2]';
-  if (n.includes('special')) return 'text-[#5a3d5c]';
-  return 'text-[#8b6914]'; // solo
-}
-
-function formatEventDate(event: any) {
-  if (event.displayDate) return event.displayDate;
-  if (event.year && event.month && event.day) {
-    const mm = String(event.month).padStart(2, '0');
-    const dd = String(event.day).padStart(2, '0');
-    return `${event.year}-${mm}-${dd}`;
-  }
-  if (event.year) return String(event.year);
-  return '';
-}
+import { getPerformerTextClass } from '@/lib/utils/performerStyles';
+import { formatEventDate } from '@/lib/formatters/dateFormatter';
 
 export default async function VenueDetailPage({ params }: { params: { slug: string } }) {
   const { slug } = params;
@@ -99,9 +81,11 @@ export default async function VenueDetailPage({ params }: { params: { slug: stri
                       </Link>
                     </td>
                     <td>
-                      <span className={getPerformerColorClass(event.primaryBand?.name || 'Solo')}>
-                        {event.primaryBand?.name || 'Solo'}
-                      </span>
+                      {event.performers?.map((p: any) => (
+                        <span key={p.name} className={getPerformerTextClass(p.name)}>
+                          {p.name}
+                        </span>
+                      ))}
                     </td>
                   </tr>
                 ))}

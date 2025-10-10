@@ -147,15 +147,22 @@ export async function searchEvents(searchParams: Record<string, string | undefin
     const specialCount = await prisma.event.count({ where: { primaryBand: { isHunterBand: true, name: { notIn: ['Robert Hunter', 'Roadhog', 'Comfort', 'Dinosaurs'] } } } });
     const guestCount = await prisma.event.count({ where: { primaryBand: { isHunterBand: false } } });
 
-    const bandCounts = [
-        { key: 'all', label: 'All Events', className: 'card', count: allCount },
-        { key: 'solo', label: 'Solo Hunter', className: 'event-card-solo', count: soloCount },
-        { key: 'roadhog', label: 'Roadhog', className: 'event-card-roadhog', count: roadhogCount },
-        { key: 'comfort', label: 'Comfort', className: 'event-card-comfort', count: comfortCount },
-        { key: 'dinosaurs', label: 'Dinosaurs', className: 'event-card-dinosaurs', count: dinosaursCount },
-        { key: 'special', label: 'Ad-Hoc Bands', className: 'event-card-special', count: specialCount },
-        { key: 'guest', label: 'Guest Spots', className: 'event-card-guest', count: guestCount }
-    ];
+    // Deduplicate bandCounts by building from FILTER_CATEGORIES
+    const keyToCount: Record<string, number> = {
+        all: allCount,
+        solo: soloCount,
+        roadhog: roadhogCount,
+        comfort: comfortCount,
+        dinosaurs: dinosaursCount,
+        special: specialCount,
+        guest: guestCount
+    };
+    const bandCounts = FILTER_CATEGORIES.map(cat => ({
+        key: cat.key,
+        label: cat.label,
+        className: cat.className,
+        count: keyToCount[cat.key] ?? 0
+    }));
 
     // Build where clause for events query
     const baseWhere = getBrowsableEventsWhere();

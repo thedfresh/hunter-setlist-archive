@@ -1,4 +1,4 @@
-
+import { getPerformerCardClass } from '@/lib/utils/performerStyles';
 import { notFound } from 'next/navigation';
 import React from 'react';
 import EventHeader from '@/components/ui/EventHeader';
@@ -30,17 +30,7 @@ export default async function EventDetailPage({ params }: { params: { slug: stri
   };
 
   // Dynamic performer card class
-  let cardClass = 'event-card-solo';
-  if (event.primaryBand && event.primaryBand.isHunterBand === false) {
-    cardClass = 'event-card-guest';
-  } else {
-    const performer = event.primaryBand?.name || 'Robert Hunter';
-    if (performer === 'Dinosaurs') cardClass = 'event-card-dinosaurs';
-    else if (performer === 'Comfort') cardClass = 'event-card-comfort';
-    else if (performer === 'Roadhog') cardClass = 'event-card-roadhog';
-    else if (performer === 'Robert Hunter') cardClass = 'event-card-solo';
-    else cardClass = 'event-card-special';
-  }
+  const cardClass = getPerformerCardClass(event);
 
   // Determine if Show Notes section should be shown
   const hasEventMusicians = event.eventMusicians && event.eventMusicians.length > 0;

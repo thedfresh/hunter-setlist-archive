@@ -5,37 +5,14 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useState, Suspense } from 'react';
 import { BandFilterChips } from './BandFilterChips';
+import { formatEventDate } from '@/lib/formatters/dateFormatter';
+import { getPerformerCardClass } from '@/lib/utils/performerStyles';
 
 export const dynamic = 'force-dynamic';
 
-function formatEventDate(event: any) {
-  let date = '';
-  if (event.displayDate) date = event.displayDate;
-  else if (event.year && event.month && event.day) {
-    const mm = String(event.month).padStart(2, '0');
-    const dd = String(event.day).padStart(2, '0');
-    date = `${event.year}-${mm}-${dd}`;
-  } else if (event.year) date = String(event.year);
-  if (event.showTiming && (event.showTiming.toLowerCase() === 'early' || event.showTiming.toLowerCase() === 'late')) {
-    date += ` (${event.showTiming.charAt(0).toUpperCase() + event.showTiming.slice(1).toLowerCase()})`;
-  }
-  return date;
-}
-
-function getPerformerName(event: any) {
-  return event.primaryBand?.name || 'Solo';
-}
-
-function getCardClass(event: any) {
-  if (event.primaryBand && event.primaryBand.isHunterBand === false) {
-    return 'event-card-guest';
-  }
-  const name = getPerformerName(event).toLowerCase();
-  if (name === 'robert hunter' || name === 'solo') return 'event-card-solo';
-  if (name.includes('roadhog')) return 'event-card-roadhog';
-  if (name.includes('comfort')) return 'event-card-comfort';
-  if (name.includes('dinosaurs')) return 'event-card-dinosaurs';
-  return 'event-card-special';
+function getEventDisplayDate(event: any) {
+  if (event.displayDate) return event.displayDate;
+  return formatEventDate(event);
 }
 
 function Setlist({ sets }: { sets: any[] }) {
@@ -97,6 +74,8 @@ function EventBrowsePageContent() {
   const searchParamsHook = useSearchParams();
   const [results, setResults] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+
+
 
   useEffect(() => {
     const params = Object.fromEntries(searchParamsHook.entries());
@@ -173,14 +152,14 @@ function EventBrowsePageContent() {
               <Link
                 key={event.id}
                 href={`/event/${event.slug}`}
-                className={`event-card ${getCardClass(event)} block p-6`}
+                className={`event-card ${getPerformerCardClass(event)} block p-6`}
               >
                 <div className="mb-2 text-sm font-medium text-gray-700">
-                  {event.billing ? event.billing : event.primaryBand?.name ? event.primaryBand.name : 'Robert Hunter'}
+                  {event.billing ? event.billing : event.primaryBand?.name || 'Robert Hunter'}
                 </div>
                 <div className="mb-4">
                   <div className="flex items-center gap-3 text-lg font-semibold">
-                    <span>{formatEventDate(event)}</span>
+                    <span>{getEventDisplayDate(event)}</span>
                     <span className="text-gray-700 text-base font-normal">
                       {event.venue?.name}{event.venue?.city ? `, ${event.venue.city}` : ''}{event.venue?.stateProvince ? `, ${event.venue.stateProvince}` : ''}
                     </span>
