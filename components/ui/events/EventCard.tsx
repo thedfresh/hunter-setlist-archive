@@ -63,7 +63,7 @@ const EventCard: React.FC<EventCardProps> = ({
     );
 
     const dateVenue = (
-        <div className="mb-2">
+        <div className={variant === 'detail' ? 'my-4' : 'mb-2'}>
             <div className="flex items-center gap-3 text-lg font-semibold">
                 <span>{event.displayDate || formatEventDate(event)}</span>
                 <span className="text-gray-700 text-base font-normal">
@@ -168,7 +168,13 @@ const EventCard: React.FC<EventCardProps> = ({
                 {setsSection}
                 {showContextSection && (
                     <div className="event-detail-sections mt-6">
-                        {showContextSection}
+                        <ShowContext
+                            event={event}
+                            showPublicNotes={false}
+                            showEventMusicians={true}
+                            showSetMusicians={true}
+                            showSetBandContext={true}
+                        />
                     </div>
                 )}
             </div>
