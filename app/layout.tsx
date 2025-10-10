@@ -17,9 +17,9 @@ export const metadata: Metadata = {
     type: 'website',
     images: [
       {
-        url: '/images/og-default.jpg',
-        width: 1200,
-        height: 630,
+        url: '/images/og-default.png',
+        width: 200,
+        height: 184,
         alt: 'Robert Hunter Performance Archive',
       },
     ],
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Robert Hunter Performance Archive',
     description: 'Comprehensive documentation of 600+ Robert Hunter performances spanning his complete musical career. Search setlists, venues, and recordings from the Grateful Dead lyricist\'s solo work and collaborations.',
-    images: ['/images/og-default.jpg'],
+    images: ['/images/og-default.png'],
   },
 }
 
