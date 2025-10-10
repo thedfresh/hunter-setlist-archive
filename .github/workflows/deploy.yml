@@ -20,12 +20,13 @@ jobs:
           git restore .
           git pull origin main
           npm install --omit=dev
-          sudo -u postgres psql -c "DROP DATABASE IF EXISTS hunter_archive WITH (FORCE);" -c "CREATE DATABASE hunter_archive;" -c "GRANT ALL PRIVILEGES ON DATABASE hunter_archive TO hunter_admin;"
-          sudo -u postgres psql -d hunter_archive -c "GRANT ALL PRIVILEGES ON SCHEMA public TO hunter_admin; ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO hunter_admin; ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO hunter_admin;"
-          source .env && npx prisma db push --accept-data-loss
-          source .env && psql "$DATABASE_URL" -f /root/hunter-dump.sql
-          sudo -u postgres psql -d hunter_archive -c "GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO hunter_admin; GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO hunter_admin;"
+          # sudo -u postgres psql -c "DROP DATABASE IF EXISTS hunter_archive WITH (FORCE);" -c "CREATE DATABASE hunter_archive;" -c "GRANT ALL PRIVILEGES ON DATABASE hunter_archive TO hunter_admin;"
+          # sudo -u postgres psql -d hunter_archive -c "GRANT ALL PRIVILEGES ON SCHEMA public TO hunter_admin; ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO hunter_admin; ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO hunter_admin;"
+          # source .env && npx prisma db push --accept-data-loss
+          # source .env && psql "$DATABASE_URL" -f /root/hunter-dump.sql
+          # sudo -u postgres psql -d hunter_archive -c "GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO hunter_admin; GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO hunter_admin;"
           export $(cat .env | xargs) && npm run build
-          pm2 delete hunter-archive 2>/dev/null || true
-          export $(cat .env | xargs) && pm2 start npm --name "hunter-archive" -- start
+          # pm2 delete hunter-archive 2>/dev/null || true
+          # export $(cat .env | xargs) && pm2 start npm --name "hunter-archive" -- start
+          export $(cat .env | xargs) && pm2 reload hunter-archive || (pm2 start npm --name "hunter-archive" -- start)
           pm2 save
