@@ -2,52 +2,27 @@ import { getBandBySlug } from '@/lib/queries/bandBrowseQueries';
 import { notFound } from 'next/navigation';
 import { PageContainer } from '@/components/ui/PageContainer';
 import Link from 'next/link';
-
-function formatEventDate(event: any) {
-  if (event.displayDate) return event.displayDate;
-  if (event.year && event.month && event.day) {
-    const mm = String(event.month).padStart(2, '0');
-    const dd = String(event.day).padStart(2, '0');
-    return `${event.year}-${mm}-${dd}`;
-  }
-  if (event.year) return String(event.year);
-  return '';
-}
+import { formatEventDate } from '@/lib/formatters/dateFormatter';
 
 export default async function BandDetailPage({ params }: { params: { slug: string } }) {
   const { slug } = params;
   const band = await getBandBySlug(slug);
   if (!band) return notFound();
 
-  type EventType = {
-    id: number;
-    year: number | null;
-    month: number | null;
-    day: number | null;
-    displayDate: string | null;
-    slug: string | null;
-    verified: boolean;
-    sortDate?: string | Date | null;
-    venue?: { name: string; city?: string | null; stateProvince?: string | null } | null;
-  };
-
-  const events: EventType[] = band.events || [];
+  const events: any[] = band.events || [];
   const totalShows = events.length;
-  // Sort by sortDate if available, fallback to year/month/day
-  const sortedEvents = [...events].sort((a, b) => {
-    const aSort = a.sortDate ? (typeof a.sortDate === 'string' ? new Date(a.sortDate) : a.sortDate) : new Date(a.year || 0, (a.month || 1) - 1, a.day || 1);
-    const bSort = b.sortDate ? (typeof b.sortDate === 'string' ? new Date(b.sortDate) : b.sortDate) : new Date(b.year || 0, (b.month || 1) - 1, b.day || 1);
-    return aSort.getTime() - bSort.getTime(); // ascending: earliest to latest
-  });
-  const firstShow = sortedEvents[0];
-  const lastShow = sortedEvents[sortedEvents.length - 1];
 
-  function renderDate(val: any) {
-    if (!val) return null;
-    if (typeof val === 'string') return val;
-    if (val instanceof Date) return val.toISOString().slice(0, 10);
-    return String(val);
-  }
+  // Simplified event sorting using sortDate
+  const sortedEvents = [...events].sort((a, b) => {
+    const aDate = a.sortDate ? new Date(a.sortDate) : null;
+    const bDate = b.sortDate ? new Date(b.sortDate) : null;
+    if (!aDate || !bDate) return 0;
+    return aDate.getTime() - bDate.getTime();
+  });
+
+  // First/last show using sortedEvents
+  const firstShow = sortedEvents.length > 0 ? sortedEvents[0] : null;
+  const lastShow = sortedEvents.length > 0 ? sortedEvents[sortedEvents.length - 1] : null;
 
   return (
     <PageContainer>

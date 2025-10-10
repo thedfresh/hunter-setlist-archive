@@ -27,6 +27,40 @@ This document guides AI coding agents to be productive in the Hunter Setlist Arc
 - **Component Organization:** Place feature-specific components in `components/` subfolders within entity directories
 - **Styling:** Use Tailwind utility classes; global styles in `app/globals.css`
 
+Add to the "Project Conventions & Patterns" section of the Copilot instructions:
+
+## Server-Side Architecture (CRITICAL)
+
+### All Data Logic Must Be Server-Side
+- **NEVER put Prisma queries in client components** - causes Symbol serialization errors in production
+- **All database queries go in API routes** (`app/api/`) or server components only
+- **Client components fetch from API routes**, never directly from Prisma
+- **Extract reusable query logic** into `lib/queryBuilders/` functions
+
+### Reusable Function Pattern
+When implementing features that query the database:
+
+1. **Query Builders** (`lib/queryBuilders/`):
+   - Extract common Prisma queries into reusable functions
+   - Example: `songQueries.ts` has `getSongWithPerformances()`, `getAllSongsWithPerformanceStats()`
+   - Use these in both API routes and server components
+
+2. **Formatters** (`lib/formatters/`):
+   - All data formatting logic goes here
+   - Example: `dateFormatter.ts` has `formatEventDate()`
+   - Import and use consistently across all pages
+
+3. **Filters** (`lib/queryFilters.ts`):
+   - Reusable Prisma where clauses
+   - Example: `getCountablePerformancesWhere()`, `getBrowsableEventsWhere()`
+   - Use these to ensure consistent filtering logic
+
+### Anti-Pattern to Avoid
+```typescript
+// ❌ WRONG - Client component with Prisma query
+"use client";
+const data = await prisma.song.findMany(...);
+
 ## Schema Changes  
 - **Update Schema:** Edit `prisma/schema.prisma` 
 - **Apply Changes:** `npx prisma db push` (database not managed by migrations)
