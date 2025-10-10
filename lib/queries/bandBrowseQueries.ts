@@ -19,7 +19,7 @@ export async function getBandBySlug(slug: string) {
         orderBy: [{ joinedDate: 'asc' }],
       },
       events: {
-  where: getCountableEventsWhere(),
+        where: getCountableEventsWhere(),
         select: {
           id: true,
           year: true,
@@ -53,11 +53,26 @@ export async function getBandsBrowse() {
       displayName: true,
       isHunterBand: true,
       publicNotes: true,
+      bandMusicians: {
+        select: {
+          id: true,
+          musician: {
+            select: {
+              name: true,
+              defaultInstruments: {
+                select: {
+                  instrument: { select: { displayName: true } }
+                }
+              }
+            }
+          }
+        }
+      },
       _count: {
         select: {
-            events: {
-              where: getCountableEventsWhere()
-            },
+          events: {
+            where: getCountableEventsWhere()
+          },
           bandMusicians: true,
         },
       },

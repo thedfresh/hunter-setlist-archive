@@ -22,7 +22,7 @@ interface EventSetlistProps {
     setMusicians?: SetMusician[];
     performances: Array<{
       id: number;
-      song: { title: string } | null;
+      song: { title: string; slug?: string } | null;
       performanceOrder: number;
       seguesInto?: boolean;
       isTruncatedStart?: boolean;
@@ -90,7 +90,13 @@ const EventSetlist: React.FC<EventSetlistProps> = ({ sets, eventPrimaryBandId })
                   const songObjs: { str: string; truncatedStart: boolean; truncatedEnd: boolean; seguesInto?: boolean }[] = [];
                   for (let j = 0; j < perfs.length; j++) {
                     const perf = perfs[j];
-                    let songStr = perf.song!.title;
+                    let songStr = '';
+                    // Song title as link if slug exists
+                    if (perf.song?.slug) {
+                      songStr = `<a href='/song/${perf.song.slug}' class='link-internal'>${perf.song.title}</a>`;
+                    } else {
+                      songStr = perf.song!.title;
+                    }
                     const truncatedStart = !!perf.isTruncatedStart;
                     const truncatedEnd = !!perf.isTruncatedEnd;
                     if (truncatedStart) songStr = ` //${songStr}`;

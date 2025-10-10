@@ -33,19 +33,29 @@ export default async function BandBrowsePage() {
             href={`/band/${band.slug}`}
             className={`event-card ${getBandCardClass(band.name)} block p-6 hover:shadow-md transition-shadow duration-150`}
           >
-            <div className="text-lg font-semibold mb-2">{band.name}</div>
-            {band.displayName && <div className="text-sm text-gray-500 mb-1">{band.displayName}</div>}
-            <div className="flex gap-6 text-sm mb-2">
-              <span>Shows: <strong>{band._count.events}</strong></span>
-              {band._count.bandMusicians > 0 && (
-                <span>Members: <strong>{band._count.bandMusicians}</strong></span>
-              )}
-            </div>
-            {band.publicNotes && (
-              <div className="text-xs text-gray-600 mt-2">
-                {band.publicNotes.length > 150 ? band.publicNotes.slice(0, 150) + '\u2026' : band.publicNotes}
+            <div className="flex flex-row gap-6">
+              <div className="basis-1/3 min-w-[120px]">
+                <div className="text-lg font-semibold mb-2">{band.name}</div>
+                {band.displayName && <div className="text-sm text-gray-500 mb-1">{band.displayName}</div>}
+                <div className="flex gap-6 text-sm mb-2">
+                  <span>Shows: <strong>{band._count.events}</strong></span>
+                </div>
               </div>
-            )}
+              <div className="basis-2/3 border-l pl-6">
+                {band.bandMusicians && band.bandMusicians.length > 0 ? (
+                  <ul className="text-sm text-gray-700">
+                    {band.bandMusicians.map((bm: any) => (
+                      <li key={bm.id} className="mb-1">
+                        {bm.musician?.name}
+                        {bm.musician?.defaultInstruments && bm.musician.defaultInstruments.length > 0 && (
+                          <span className="text-xs text-gray-500"> — {bm.musician.defaultInstruments.map((di: any) => di.instrument.displayName).join(', ')}</span>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                ) : ('')}
+              </div>
+            </div>
           </Link>
         ))}
       </div>
@@ -57,17 +67,34 @@ export default async function BandBrowsePage() {
             href={`/band/${band.slug}`}
             className={`event-card event-card-guest block p-6 hover:shadow-md transition-shadow duration-150`}
           >
-            <div className="text-lg font-semibold mb-2">{band.name}</div>
-            {band.displayName && <div className="text-sm text-gray-500 mb-1">{band.displayName}</div>}
-            <div className="flex gap-6 text-sm mb-2">
-              <span>Shows: <strong>{band._count.events}</strong></span>
-              <span>Members: <strong>{band._count.bandMusicians}</strong></span>
-            </div>
-            {band.publicNotes && (
-              <div className="text-xs text-gray-600 mt-2">
-                {band.publicNotes.length > 150 ? band.publicNotes.slice(0, 150) + '\u2026' : band.publicNotes}
+            <div className="flex flex-row gap-6">
+              <div className="basis-1/3 min-w-[120px]">
+                <div className="text-lg font-semibold mb-2">{band.name}</div>
+                {band.displayName && <div className="text-sm text-gray-500 mb-1">{band.displayName}</div>}
+                <div className="flex gap-6 text-sm mb-2">
+                  <span>Shows: <strong>{band._count.events}</strong></span>
+                </div>
+                {band.publicNotes && (
+                  <div className="text-xs text-gray-600 mt-2">
+                    {band.publicNotes.length > 150 ? band.publicNotes.slice(0, 150) + '\u2026' : band.publicNotes}
+                  </div>
+                )}
               </div>
-            )}
+              <div className="basis-2/3 border-l pl-6">
+                {band.bandMusicians && band.bandMusicians.length > 0 ? (
+                  <ul className="text-sm text-gray-700">
+                    {band.bandMusicians.map((bm: any) => (
+                      <li key={bm.id} className="mb-1">
+                        {bm.musician?.name}
+                        {bm.musician?.defaultInstruments && bm.musician.defaultInstruments.length > 0 && (
+                          <span className="text-xs text-gray-500"> — {bm.musician.defaultInstruments.map((di: any) => di.instrument.displayName).join(', ')}</span>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                ) : ('')}
+              </div>
+            </div>
           </Link>
         ))}
       </div>

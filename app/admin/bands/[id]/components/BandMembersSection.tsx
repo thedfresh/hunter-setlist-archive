@@ -41,7 +41,7 @@ export default function BandMembersSection({ bandId, bandMusicians }: BandMember
       if (res.ok && data.musicians) {
         setMusicians(data.musicians);
       }
-    } catch {}
+    } catch { }
   }
 
   async function refreshMembers() {
@@ -65,7 +65,7 @@ export default function BandMembersSection({ bandId, bandMusicians }: BandMember
     if (!confirm("Remove this member from the band?")) return;
     setLoading(true);
     try {
-  const res = await fetch(`/api/admin/bands/${bandId}/members/${memberId}`, { method: "DELETE" });
+      const res = await fetch(`/api/admin/bands/${bandId}/members/${memberId}`, { method: "DELETE" });
       if (res.ok) {
         setSuccess("Member removed.");
         refreshMembers();
@@ -179,8 +179,8 @@ export default function BandMembersSection({ bandId, bandMusicians }: BandMember
             ) : members.map(member => (
               <tr key={member.id} className="border-t">
                 <td className="px-4 py-2 font-semibold text-gray-800">{member.musician?.name || "Unknown"}</td>
-                <td className="px-4 py-2">{member.joinedDate ? new Date(member.joinedDate).toLocaleDateString() : ""}</td>
-                <td className="px-4 py-2">{member.leftDate ? new Date(member.leftDate).toLocaleDateString() : ""}</td>
+                <td className="px-4 py-2">{member.joinedDate ? new Date(member.joinedDate).toLocaleDateString('en-US', { timeZone: 'UTC' }) : ""}</td>
+                <td className="px-4 py-2">{member.leftDate ? new Date(member.leftDate).toLocaleDateString('en-US', { timeZone: 'UTC' }) : ""}</td>
                 <td className="px-4 py-2">{member.publicNotes || ""}</td>
                 <td className="px-4 py-2 flex gap-2">
                   <button

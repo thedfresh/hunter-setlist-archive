@@ -7,9 +7,15 @@ export async function POST(req: Request) {
     if (!data.title || typeof data.title !== 'string') {
       return NextResponse.json({ error: 'Song title is required.' }, { status: 400 });
     }
-    // Generate slug
+    // Generate unique slug
     const { generateSlugFromName } = require("@/lib/generateSlug");
-    const slug = generateSlugFromName(data.title);
+    let baseSlug = generateSlugFromName(data.title);
+    let slug = baseSlug;
+    let suffix = 2;
+    while (await prisma.song.findUnique({ where: { slug } })) {
+      slug = `${baseSlug}-${suffix}`;
+      suffix++;
+    }
     const song = await prisma.song.create({
       data: {
         title: data.title,

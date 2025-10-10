@@ -12,12 +12,15 @@ export async function POST(req: Request, { params }: { params: Params }) {
     if (data.joinedDate && data.leftDate && new Date(data.leftDate) < new Date(data.joinedDate)) {
       return NextResponse.json({ error: 'leftDate must be after joinedDate.' }, { status: 400 });
     }
+    // Convert dates to UTC
+    const joinedDateUTC = data.joinedDate ? new Date(data.joinedDate + 'T00:00:00.000Z') : null;
+    const leftDateUTC = data.leftDate ? new Date(data.leftDate + 'T00:00:00.000Z') : null;
     const member = await prisma.bandMusician.create({
       data: {
         bandId,
         musicianId: data.musicianId,
-        joinedDate: data.joinedDate ? new Date(data.joinedDate) : null,
-        leftDate: data.leftDate ? new Date(data.leftDate) : null,
+        joinedDate: joinedDateUTC,
+        leftDate: leftDateUTC,
         publicNotes: typeof data.publicNotes === 'string' ? data.publicNotes : undefined,
         privateNotes: typeof data.privateNotes === 'string' ? data.privateNotes : undefined,
       },
