@@ -388,23 +388,23 @@
 
   /* Performer text colors */
   .text-hunter-solo-primary {
-    color: #b8913d;
+    @apply text-[#b8913d];
   }
 
   .text-hunter-roadhog-primary {
-    color: #d4a017;
+    @apply text-[#d4a017];
   }
 
   .text-hunter-comfort-primary {
-    color: #6b8e23;
+    @apply text-[#6b8e23];
   }
 
   .text-hunter-dinosaurs-primary {
-    color: #00d9ff;
+    @apply text-[#00d9ff];
   }
 
   .text-hunter-special-primary {
-    color: #7d5a80;
+    @apply text-[#7d5a80];
   }
 
   /* Card content sections */

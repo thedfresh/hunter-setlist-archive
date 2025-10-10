@@ -5,6 +5,13 @@ module.exports = {
     './pages/**/*.{js,ts,jsx,tsx}',
     './components/**/*.{js,ts,jsx,tsx}',
   ],
+  safelist: [
+    'text-hunter-solo-primary',
+    'text-hunter-roadhog-primary',
+    'text-hunter-comfort-primary',
+    'text-hunter-dinosaurs-primary',
+    'text-hunter-special-primary',
+  ],
   theme: {
     extend: {
       colors: {
