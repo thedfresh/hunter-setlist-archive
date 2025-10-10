@@ -62,8 +62,9 @@ export type EventForAdjacent = {
 export async function fetchAdjacentEvents(event: EventForAdjacent & { slug?: string }) {
   // Fetch all events sorted chronologically by sortDate
   const all = await prisma.event.findMany({
+    where: { isPublic: { not: false } },
     orderBy: [{ sortDate: 'asc' }],
-    select: { year: true, month: true, day: true, showTiming: true, slug: true, sortDate: true },
+    select: { year: true, month: true, day: true, showTiming: true, slug: true, sortDate: true, isPublic: true },
   });
   // Use only the actual slug
   const targetSlug = event.slug;
@@ -71,7 +72,7 @@ export async function fetchAdjacentEvents(event: EventForAdjacent & { slug?: str
   const prev = idx > 0 ? all[idx - 1] : null;
   const next = idx >= 0 && idx < all.length - 1 ? all[idx + 1] : null;
   return {
-  prev: prev ? { ...prev, slug: prev.slug } : null,
-  next: next ? { ...next, slug: next.slug } : null,
+    prev: prev ? { ...prev, slug: prev.slug } : null,
+    next: next ? { ...next, slug: next.slug } : null,
   };
 }
