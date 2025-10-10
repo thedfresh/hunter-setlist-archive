@@ -8,9 +8,6 @@ export default async function VenueBrowsePage() {
   const venues = await getVenuesBrowse();
   return (
     <PageContainer>
-      <div className="page-header">
-        <div className="page-title">Venues</div>
-      </div>
       <VenueTableClient venues={venues} />
     </PageContainer>
   );

@@ -40,15 +40,15 @@ export default function VenueTableClient({ venues }: { venues: any[] }) {
   const filteredVenues = search.trim() === ""
     ? venues
     : venues.filter(v => {
-        const q = search.trim().toLowerCase();
-        return (
-          v.name?.toLowerCase().includes(q) ||
-          v.context?.toLowerCase().includes(q) ||
-          v.city?.toLowerCase().includes(q) ||
-          v.stateProvince?.toLowerCase().includes(q) ||
-          v.country?.toLowerCase().includes(q)
-        );
-      });
+      const q = search.trim().toLowerCase();
+      return (
+        v.name?.toLowerCase().includes(q) ||
+        v.context?.toLowerCase().includes(q) ||
+        v.city?.toLowerCase().includes(q) ||
+        v.stateProvince?.toLowerCase().includes(q) ||
+        v.country?.toLowerCase().includes(q)
+      );
+    });
   const sortedVenues = sortVenues(filteredVenues, sortKey, sortDir);
 
   function handleSort(colKey: string) {
@@ -65,8 +65,12 @@ export default function VenueTableClient({ venues }: { venues: any[] }) {
   }
 
   return (
-    <div>
+    <>
+      <div className="page-header">
+        <div className="page-title">Venues</div>
+      </div>
       <div className="flex items-center justify-between mb-6 gap-4 flex-wrap">
+        <div className="page-subtitle w-full">{sortedVenues.length} venues found</div>
         <div className="search-bar w-full sm:w-96">
           <input
             className="search-input-large"
@@ -82,7 +86,6 @@ export default function VenueTableClient({ venues }: { venues: any[] }) {
           </span>
         </div>
       </div>
-      <div className="results-count mb-4">Filtered venues: <strong>{sortedVenues.length}</strong></div>
       <div className="table-container">
         <table className="table">
           <thead>
@@ -115,6 +118,6 @@ export default function VenueTableClient({ venues }: { venues: any[] }) {
           </tbody>
         </table>
       </div>
-    </div>
+    </>
   );
 }

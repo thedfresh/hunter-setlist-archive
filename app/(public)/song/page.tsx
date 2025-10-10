@@ -1,14 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { compareSongTitles } from '@/lib/songSort';
 import { PageContainer } from '@/components/ui/PageContainer';
-
-type PageSize = number | "All";
-
-
-import { useEffect } from "react";
 
 type Song = {
   id: number;
@@ -19,7 +14,6 @@ type Song = {
   lastPerformance?: { date: string; slug: string; sortDate: string };
 };
 
-
 type SortKey = "title" | "performanceCount" | "firstPerformance" | "lastPerformance";
 type SortDirection = "asc" | "desc";
 
@@ -27,13 +21,9 @@ export default function SongBrowsePage() {
   const [songs, setSongs] = useState<Song[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [pageSize, setPageSize] = useState<PageSize>(100);
-  const [page, setPage] = useState(1);
   const [sortKey, setSortKey] = useState<SortKey>("title");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
   const [search, setSearch] = useState("");
-  const pageSizes: PageSize[] = [25, 50, 100, 200, 250, "All"];
-  const showAll = pageSize === "All";
 
   // Filter songs by search string
   const filteredSongs = search.trim() === ""
@@ -41,7 +31,7 @@ export default function SongBrowsePage() {
     : songs.filter(song => song.title.toLowerCase().includes(search.trim().toLowerCase()));
   const total = filteredSongs.length;
 
-  // Sort songs before paging
+  // Sort songs before rendering
   const sortedSongs = [...filteredSongs].sort((a, b) => {
     if (sortKey === "title") {
       return sortDirection === "asc"
@@ -74,14 +64,10 @@ export default function SongBrowsePage() {
     return 0;
   });
 
-  const pagedSongs = showAll
-    ? sortedSongs
-    : sortedSongs.slice((page - 1) * (pageSize as number), page * (pageSize as number));
   function handleSearchChange(e: React.ChangeEvent<HTMLInputElement>) {
     setSearch(e.target.value);
-    setPage(1);
   }
-  const totalPages = showAll ? 1 : Math.ceil(total / (pageSize as number));
+
   function handleSort(key: SortKey) {
     if (sortKey === key) {
       setSortDirection(sortDirection === "asc" ? "desc" : "asc");
@@ -89,7 +75,6 @@ export default function SongBrowsePage() {
       setSortKey(key);
       setSortDirection("asc");
     }
-    setPage(1);
   }
 
   useEffect(() => {
@@ -109,16 +94,6 @@ export default function SongBrowsePage() {
     }
     fetchSongs();
   }, []);
-
-  function handlePageSizeChange(e: React.ChangeEvent<HTMLSelectElement>) {
-    const val: PageSize = e.target.value === "All" ? "All" : parseInt(e.target.value, 10);
-    setPageSize(val);
-    setPage(1);
-  }
-
-  function handlePageChange(newPage: number) {
-    setPage(newPage);
-  }
 
   if (loading) {
     return <div className="max-w-4xl mx-auto py-10 px-4">Loading songs…</div>;
@@ -151,19 +126,6 @@ export default function SongBrowsePage() {
             </svg>
           </span>
         </div>
-        {/* <div className="filter-chips mb-2"> ...filters here... </div> */}
-        <div className="flex items-center gap-4 mt-4 sm:mt-0">
-          <select
-            className="select w-auto ml-2"
-            value={pageSize}
-            onChange={handlePageSizeChange}
-            aria-label="Page size"
-          >
-            {pageSizes.map((size) => (
-              <option key={size} value={size}>{size === "All" ? "All" : size}</option>
-            ))}
-          </select>
-        </div>
       </div>
       <div className="table-container">
         <table className="table">
@@ -176,7 +138,7 @@ export default function SongBrowsePage() {
             </tr>
           </thead>
           <tbody>
-            {pagedSongs.map((song) => {
+            {sortedSongs.map((song) => {
               return (
                 <tr key={song.id}>
                   <td>
@@ -209,42 +171,6 @@ export default function SongBrowsePage() {
           </tbody>
         </table>
       </div>
-      {/* Pagination controls */}
-      {!showAll && totalPages > 1 && (
-        <div className="pagination">
-          <button
-            className="page-link"
-            onClick={() => handlePageChange(page - 1)}
-            disabled={page === 1}
-          >
-            {'<'}
-          </button>
-          {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) =>
-            (p === page || p === 1 || p === totalPages || Math.abs(p - page) <= 1) ? (
-              <button
-                key={p}
-                className={
-                  "page-link" + (p === page ? " page-link-active" : "")
-                }
-                onClick={() => handlePageChange(p)}
-                disabled={p === page}
-              >
-                {p}
-              </button>
-            ) :
-              (p === page - 2 || p === page + 2) ? (
-                <span key={p} className="page-ellipsis">...</span>
-              ) : null
-          )}
-          <button
-            className="page-link"
-            onClick={() => handlePageChange(page + 1)}
-            disabled={page === totalPages}
-          >
-            {'>'}
-          </button>
-        </div>
-      )}
     </PageContainer>
   );
 }

@@ -7,6 +7,9 @@ import { useEffect, useState, Suspense } from 'react';
 import { BandFilterChips } from './BandFilterChips';
 import { formatEventDate } from '@/lib/formatters/dateFormatter';
 import { getPerformerCardClass } from '@/lib/utils/performerStyles';
+import Pagination from '@/components/ui/Pagination'
+
+import Setlist from '@/components/ui/Setlist';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,60 +18,8 @@ function getEventDisplayDate(event: any) {
   return formatEventDate(event);
 }
 
-function Setlist({ sets }: { sets: any[] }) {
-  if (!sets || sets.length === 0) {
-    return <div className="text-gray-500 text-sm italic">No known setlist</div>;
-  }
-  return (
-    <div className="text-sm leading-loose text-gray-800 setlist space-y-2">
-      {sets.map((set, i) => (
-        <div key={set.id} className="space-y-2">
-          <span className="font-semibold">{set.setType?.displayName || `Set ${i + 1}`}:</span>{' '}
-          {set.performances.map((perf: any, idx: number) => (
-            <span key={perf.id}>
-              {perf.song?.title ? perf.song.title : '—'}
-              {perf.seguesInto ? ' > ' : (idx < set.performances.length - 1 ? ', ' : '')}
-            </span>
-          ))}
-        </div>
-      ))}
-    </div>
-  );
-}
 
-function Pagination({ currentPage, totalPages, searchParams }: { currentPage: number; totalPages: number; searchParams: Record<string, string> }) {
-  const pageLinks = [];
-  for (let i = 1; i <= totalPages; i++) {
-    const params = new URLSearchParams(searchParams);
-    params.set('page', i.toString());
-    pageLinks.push(
-      <Link
-        key={i}
-        href={`/event?${params.toString()}`}
-        className={`page-link${i === currentPage ? ' page-link-active' : ''}`}
-      >
-        {i}
-      </Link>
-    );
-  }
 
-  const prevParams = new URLSearchParams(searchParams);
-  prevParams.set('page', (currentPage - 1).toString());
-  const nextParams = new URLSearchParams(searchParams);
-  nextParams.set('page', (currentPage + 1).toString());
-
-  return (
-    <div className="pagination mt-6 flex gap-2 items-center justify-center">
-      <Link href={`/event?${prevParams.toString()}`} className="page-link" aria-disabled={currentPage === 1} tabIndex={currentPage === 1 ? -1 : 0}>
-        Previous
-      </Link>
-      {pageLinks}
-      <Link href={`/event?${nextParams.toString()}`} className="page-link" aria-disabled={currentPage === totalPages} tabIndex={currentPage === totalPages ? -1 : 0}>
-        Next
-      </Link>
-    </div>
-  );
-}
 
 function EventBrowsePageContent() {
   const searchParamsHook = useSearchParams();
@@ -172,7 +123,7 @@ function EventBrowsePageContent() {
             ))}
           </div>
 
-          <Pagination currentPage={currentPage} totalPages={totalPages} searchParams={searchParamsObj} />
+          <Pagination currentPage={currentPage} totalPages={totalPages} searchParams={searchParamsObj} basePath='/event' />
         </div>
       </div>
     </PageContainer>
