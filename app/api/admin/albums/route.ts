@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
@@ -18,6 +19,7 @@ export async function POST(req: Request) {
         publicNotes: data.notes || null,
       },
     });
+    revalidatePath('/api/albums')
     return NextResponse.json({ album }, { status: 201 });
   } catch {
     return NextResponse.json({ error: 'Failed to create album.' }, { status: 500 });

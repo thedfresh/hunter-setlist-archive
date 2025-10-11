@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { prisma } from '@/lib/prisma';
 type Params = { id: string };
 
@@ -28,6 +29,7 @@ export async function POST(req: Request, { params }: { params: Params }) {
         musician: true,
       },
     });
+    revalidatePath('/api/bands')
     return NextResponse.json({ member }, { status: 201 });
   } catch (error) {
     console.error('POST /api/admin/bands/[id]/members error:', error);

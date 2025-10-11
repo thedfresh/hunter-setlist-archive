@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { revalidatePath } from 'next/cache';
 
 export async function POST(req: Request, { params }: { params: { id: string } }) {
   const eventId = Number(params.id);
@@ -17,6 +18,8 @@ export async function POST(req: Request, { params }: { params: { id: string } })
         publicNotes: body.publicNotes || '',
       },
     });
+    revalidatePath('/api/events');
+    revalidatePath('/event');
     return NextResponse.json({ eventMusician }, { status: 201 });
   } catch (err) {
     return NextResponse.json({ error: 'Failed to add event musician' }, { status: 500 });

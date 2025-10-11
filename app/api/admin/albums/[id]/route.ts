@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
+import { revalidatePath } from 'next/cache';
 
 const prisma = new PrismaClient();
 type Params = { id: string };
@@ -21,6 +22,7 @@ export async function PUT(req: Request, { params }: { params: Promise<Params> })
         publicNotes: data.notes || null,
       },
     });
+    revalidatePath('/api/albums')
     return NextResponse.json({ album });
   } catch {
     return NextResponse.json({ error: 'Failed to update album.' }, { status: 500 });
@@ -31,6 +33,7 @@ export async function DELETE(req: Request, { params }: { params: Promise<Params>
   try {
     const { id } = await params;
     await prisma.album.delete({ where: { id: Number(id) } });
+    revalidatePath('/api/albums')
     return NextResponse.json({ success: true });
   } catch {
     return NextResponse.json({ error: 'Failed to delete album.' }, { status: 500 });

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
+import { revalidatePath } from 'next/cache';
 
 const prisma = new PrismaClient();
 type Params = { id: string };
@@ -41,6 +42,7 @@ export async function PUT(req: Request, { params }: { params: Params }) {
       });
     }
     // External links (not updating here for brevity)
+    revalidatePath('/api/songs')
     return NextResponse.json({ song }, { status: 200 });
   } catch {
     return NextResponse.json({ error: "Failed to update song." }, { status: 500 });
@@ -59,6 +61,7 @@ export async function DELETE(req: Request, context: { params: Promise<Params> })
     await prisma.songAlbum.deleteMany({ where: { songId } });
     await prisma.songTag.deleteMany({ where: { songId } });
     await prisma.link.deleteMany({ where: { songId } });
+    revalidatePath('/api/songs')
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error deleting song:', error);

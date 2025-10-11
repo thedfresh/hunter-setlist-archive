@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from 'next/cache';
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
@@ -24,5 +25,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       bandId: data.bandId ?? null,
     },
   });
+  revalidatePath('/api/events');
+  revalidatePath('/event');
   return NextResponse.json({ set }, { status: 201 });
 }

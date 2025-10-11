@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { revalidatePath } from 'next/cache';
 
 // PUT: Update banter
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string; banterId: string }> }) {
@@ -24,6 +25,8 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       where: { id: parseInt(banterId) },
       data: { banterText, isBeforeSong, isVerbatim },
     });
+    revalidatePath('/api/events');
+    revalidatePath('/event');
     return NextResponse.json(updatedBanter);
   } catch (error) {
     return NextResponse.json({ error: "Failed to update banter" }, { status: 500 });
@@ -46,6 +49,8 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
       return NextResponse.json({ error: "Banter not found for event" }, { status: 404 });
     }
     await prisma.showBanter.delete({ where: { id: parseInt(banterId) } });
+    revalidatePath('/api/events');
+    revalidatePath('/event');
     return NextResponse.json({ success: true });
   } catch (error) {
     return NextResponse.json({ error: "Failed to delete banter" }, { status: 500 });

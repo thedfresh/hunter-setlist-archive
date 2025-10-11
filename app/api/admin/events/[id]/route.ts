@@ -1,3 +1,4 @@
+import { revalidatePath } from 'next/cache';
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
@@ -50,12 +51,14 @@ export async function PUT(req: NextRequest, context: { params: Promise<Params> }
         rawDataGdsets: data.rawDataGdsets || null,
         billing: data.billing || null,
         hunterParticipationUncertain: !!data.hunterParticipationUncertain,
-  // Removed isSpurious and includeInStats; now controlled by eventType
+        // Removed isSpurious and includeInStats; now controlled by eventType
         isUncertain: !!data.isUncertain,
         isPublic: data.isPublic !== false,
         verified: !!data.verified,
       } as any,
     });
+    revalidatePath('/api/events');
+    revalidatePath('/event');
     return NextResponse.json({ event });
   } catch (error) {
     console.error('PUT /api/events/[id] error:', error);
@@ -69,6 +72,8 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<Par
     const id = Number(paramId);
     if (!id) return NextResponse.json({ error: 'Invalid event id.' }, { status: 400 });
     await prisma.event.delete({ where: { id } });
+    revalidatePath('/api/events');
+    revalidatePath('/event');
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('DELETE /api/events/[id] error:', error);

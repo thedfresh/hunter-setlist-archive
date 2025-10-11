@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
+import { revalidatePath } from 'next/cache';
 const prisma = new PrismaClient();
 
 
@@ -54,5 +55,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ setId: 
       },
     }),
   ]);
+  revalidatePath('/api/events');
+  revalidatePath('/event');
   return NextResponse.json({ performance: perf }, { status: 201 });
 }

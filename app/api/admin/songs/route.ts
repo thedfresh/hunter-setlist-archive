@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from 'next/cache';
 import { prisma } from "@/lib/prisma";
 
 export async function POST(req: Request) {
@@ -28,6 +29,7 @@ export async function POST(req: Request) {
         slug,
       },
     });
+    revalidatePath('/api/songs')
     return NextResponse.json({ song }, { status: 201 });
   } catch (error) {
     console.error('Error in POST /api/songs:', error);

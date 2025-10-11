@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
-
+import { revalidatePath } from 'next/cache';
 const prisma = new PrismaClient();
 
 export async function PUT(req: Request, { params }: { params: { setId: string; id: string } }) {
@@ -20,6 +20,8 @@ export async function PUT(req: Request, { params }: { params: { setId: string; i
         instrument: true,
       },
     });
+    revalidatePath('/api/events');
+    revalidatePath('/event');
     return NextResponse.json({ musician: updated });
   } catch (error) {
     return NextResponse.json({ error: "Failed to update set musician." }, { status: 500 });
@@ -30,6 +32,8 @@ export async function DELETE(req: Request, { params }: { params: { setId: string
   const setMusicianId = Number(params.id);
   try {
     await prisma.setMusician.delete({ where: { id: setMusicianId } });
+    revalidatePath('/api/events');
+    revalidatePath('/event');
     return NextResponse.json({ success: true });
   } catch (error) {
     return NextResponse.json({ error: "Failed to delete set musician." }, { status: 500 });

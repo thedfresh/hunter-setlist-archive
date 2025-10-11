@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
+import { revalidatePath } from 'next/cache';
 
 const prisma = new PrismaClient();
 type Params = { id: string };
@@ -19,6 +20,7 @@ export async function PUT(req: Request, { params }: { params: Params }) {
           description: data.description || null,
         },
       });
+      revalidatePath('/api/tags')
       return NextResponse.json({ tag });
     } catch (err: any) {
       if (err.code === 'P2002') {
@@ -34,6 +36,7 @@ export async function PUT(req: Request, { params }: { params: Params }) {
 export async function DELETE(req: Request, { params }: { params: Params }) {
   try {
     await prisma.tag.delete({ where: { id: Number(params.id) } });
+    revalidatePath('/api/tags')
     return NextResponse.json({ success: true });
   } catch {
     return NextResponse.json({ error: 'Failed to delete tag.' }, { status: 500 });

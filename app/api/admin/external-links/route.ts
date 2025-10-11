@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
@@ -29,6 +30,8 @@ export async function POST(req: Request) {
       },
       include: { link: true },
     });
+    revalidatePath('/api/events');
+    revalidatePath('/event');
     return NextResponse.json({ association }, { status: 201 });
   } catch {
     return NextResponse.json({ error: 'Failed to create external link.' }, { status: 500 });

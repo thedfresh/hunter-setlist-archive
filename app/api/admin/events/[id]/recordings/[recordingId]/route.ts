@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { revalidatePath } from 'next/cache';
 
 export async function PUT(
   req: Request,
@@ -10,7 +11,7 @@ export async function PUT(
     const eventId = Number(id);
     const recId = Number(recordingId);
     const data = await req.json();
-  if (!eventId || isNaN(eventId) || !recId || isNaN(recId)) {
+    if (!eventId || isNaN(eventId) || !recId || isNaN(recId)) {
       return NextResponse.json({ error: "Invalid event or recording ID." }, { status: 400 });
     }
     const updated = await prisma.recording.update({
@@ -35,6 +36,8 @@ export async function PUT(
         privateNotes: data.privateNotes || null,
       } as any,
     });
+    revalidatePath('/api/events');
+    revalidatePath('/event');
     return NextResponse.json(updated);
   } catch (error) {
     console.error("Error updating recording:", error);
@@ -50,6 +53,8 @@ export async function DELETE(req: Request, context: { params: { id: string; reco
       return NextResponse.json({ error: "Invalid recording ID." }, { status: 400 });
     }
     await prisma.recording.delete({ where: { id: recordingId } });
+    revalidatePath('/api/events');
+    revalidatePath('/event');
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error deleting recording:", error);

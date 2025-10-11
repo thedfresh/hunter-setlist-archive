@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from 'next/cache';
 import { prisma } from "@/lib/prisma";
 
 
@@ -22,6 +23,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         banterText,
       },
     });
+    revalidatePath('/api/events');
+    revalidatePath('/event');
     return NextResponse.json(newBanter);
   } catch (error) {
     return NextResponse.json({ error: "Failed to create banter" }, { status: 500 });

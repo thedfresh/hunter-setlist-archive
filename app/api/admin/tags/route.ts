@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
@@ -16,6 +17,7 @@ export async function POST(req: Request) {
           description: data.description || null,
         },
       });
+      revalidatePath('/api/tags')
       return NextResponse.json({ tag }, { status: 201 });
     } catch (err: any) {
       if (err.code === 'P2002') {

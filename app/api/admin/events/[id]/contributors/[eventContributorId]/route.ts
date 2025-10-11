@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
+import { revalidatePath } from 'next/cache';
 
 const prisma = new PrismaClient();
 
@@ -19,6 +20,8 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string, 
       data: { contributorId, description, publicNotes, privateNotes },
       include: { contributor: true },
     });
+    revalidatePath('/api/events');
+    revalidatePath('/event');
     return NextResponse.json({
       id: updated.id,
       contributorId: updated.contributorId,
@@ -39,6 +42,8 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
   }
   try {
     await prisma.eventContributor.delete({ where: { id: eventContributorId } });
+    revalidatePath('/api/events');
+    revalidatePath('/event');
     return NextResponse.json({ success: true });
   } catch (err) {
     return NextResponse.json({ error: 'Failed to delete event contributor', details: String(err) }, { status: 500 });

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from 'next/cache';
 import { prisma } from "@/lib/prisma";
 
 import type { NextRequest } from "next/server";
@@ -19,6 +20,7 @@ export async function POST(req: NextRequest) {
         recordingId: data.entityType === "recording" ? data.entityId : undefined,
       },
     });
+    revalidatePath('/event');
     return NextResponse.json(created);
   } catch (error) {
     return NextResponse.json({ error: "Failed to create link" }, { status: 500 });

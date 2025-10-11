@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { revalidatePath } from 'next/cache';
 
 export async function PUT(
   req: Request,
@@ -31,19 +32,23 @@ export async function PUT(
           url: body.url,
           title: body.title || "",
           description: body.description || "",
-          linkType: body.linkType || "",
+          linkTypeId: body.linkTypeId ?? undefined,
           isActive: body.isActive !== undefined ? !!body.isActive : true,
         },
+        include: { linkType: true },
       });
-      return NextResponse.json({ link: {
-        id: updatedLink.id,
-        url: updatedLink.url,
-        title: updatedLink.title || "",
-        description: updatedLink.description || "",
-        linkType: updatedLink.linkType || "",
-        isActive: updatedLink.isActive,
-        isPublic: updatedLink.isPublic,
-      } });
+      revalidatePath('/event');
+      return NextResponse.json({
+        link: {
+          id: updatedLink.id,
+          url: updatedLink.url,
+          title: updatedLink.title || "",
+          description: updatedLink.description || "",
+          linkType: updatedLink.linkType?.name || "",
+          isActive: updatedLink.isActive,
+          isPublic: updatedLink.isPublic,
+        }
+      });
     } catch (error) {
       console.error("PUT /links: Prisma update failed", { linkId, body, error });
       return NextResponse.json({ error: "Failed to update link." }, { status: 500 });

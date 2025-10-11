@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { revalidatePath } from 'next/cache';
 
 export async function PUT(req: Request, { params }: { params: { id: string; musicianId: string } }) {
   const body = await req.json();
@@ -14,6 +15,8 @@ export async function PUT(req: Request, { params }: { params: { id: string; musi
         privateNotes: body.privateNotes,
       },
     });
+    revalidatePath('/api/events');
+    revalidatePath('/event');
     return NextResponse.json({ eventMusician: updated });
   } catch (err) {
     return NextResponse.json({ error: 'Failed to update event musician' }, { status: 500 });

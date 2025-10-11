@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { prisma } from '@/lib/prisma';
 
 export async function POST(req: Request) {
@@ -74,6 +75,8 @@ export async function POST(req: Request) {
       }
       return event;
     });
+    revalidatePath('/api/events');
+    revalidatePath('/event');
     return NextResponse.json({ event: result }, { status: 201 });
   } catch (error) {
     console.error('Event creation error:', error);

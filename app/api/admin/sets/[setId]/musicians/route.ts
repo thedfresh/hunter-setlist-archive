@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
+import { revalidatePath } from 'next/cache';
 
 const prisma = new PrismaClient();
 
@@ -24,6 +25,8 @@ export async function POST(req: Request, { params }: { params: { setId: string }
         instrument: true,
       },
     });
+    revalidatePath('/api/events');
+    revalidatePath('/event');
     return NextResponse.json({ musician: setMusician }, { status: 201 });
   } catch (error) {
     return NextResponse.json({ error: "Failed to create set musician." }, { status: 500 });

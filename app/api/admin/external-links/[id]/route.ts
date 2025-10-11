@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
+import { revalidatePath } from 'next/cache';
 
 const prisma = new PrismaClient();
 type Params = { id: string };
@@ -31,6 +32,8 @@ export async function PUT(req: Request, { params }: { params: Params }) {
       },
       include: { link: true },
     });
+    revalidatePath('/api/events');
+    revalidatePath('/event');
     return NextResponse.json({ association });
   } catch {
     return NextResponse.json({ error: 'Failed to update link association.' }, { status: 500 });
@@ -44,6 +47,8 @@ export async function DELETE(req: Request, { params }: { params: Params }) {
     if (!association) return NextResponse.json({ error: 'Link association not found.' }, { status: 404 });
     await prisma.linkAssociation.delete({ where: { id: Number(params.id) } });
     await prisma.externalLink.delete({ where: { id: association.linkId } });
+    revalidatePath('/api/events');
+    revalidatePath('/event');
     return NextResponse.json({ success: true });
   } catch {
     return NextResponse.json({ error: 'Failed to delete link association.' }, { status: 500 });

@@ -1,3 +1,7 @@
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { revalidatePath } from 'next/cache';
+
 export async function PUT(
   req: Request,
   context: { params: { recordingId: string; linkId?: string } }
@@ -33,16 +37,18 @@ export async function PUT(
         },
         include: { linkType: true },
       });
-      return NextResponse.json({ link: {
-        id: updatedLink.id,
-        url: updatedLink.url,
-        title: updatedLink.title || "",
-        description: updatedLink.description || "",
-  linkTypeId: updatedLink.linkTypeId,
-  linkType: updatedLink.linkType ? updatedLink.linkType.name : "",
-        isActive: updatedLink.isActive,
-        isPublic: updatedLink.isPublic,
-      } });
+      return NextResponse.json({
+        link: {
+          id: updatedLink.id,
+          url: updatedLink.url,
+          title: updatedLink.title || "",
+          description: updatedLink.description || "",
+          linkTypeId: updatedLink.linkTypeId,
+          linkType: updatedLink.linkType ? updatedLink.linkType.name : "",
+          isActive: updatedLink.isActive,
+          isPublic: updatedLink.isPublic,
+        }
+      });
     } catch (error) {
       console.error("PUT /links: Prisma update failed", { linkId, body, error });
       return NextResponse.json({ error: "Failed to update link." }, { status: 500 });
@@ -98,23 +104,23 @@ export async function POST(
       },
       include: { linkType: true },
     });
-    return NextResponse.json({ link: {
-      id: newLink.id,
-      url: newLink.url,
-      title: newLink.title || "",
-      description: newLink.description || "",
-  linkTypeId: newLink.linkTypeId,
-  linkType: newLink.linkType ? newLink.linkType.name : "",
-      isActive: newLink.isActive,
-      isPublic: newLink.isPublic,
-    } });
+    return NextResponse.json({
+      link: {
+        id: newLink.id,
+        url: newLink.url,
+        title: newLink.title || "",
+        description: newLink.description || "",
+        linkTypeId: newLink.linkTypeId,
+        linkType: newLink.linkType ? newLink.linkType.name : "",
+        isActive: newLink.isActive,
+        isPublic: newLink.isPublic,
+      }
+    });
   } catch (error) {
     console.error("Error creating link:", error);
     return NextResponse.json({ error: "Failed to create link." }, { status: 500 });
   }
 }
-import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
 
 export async function GET(
   req: Request,

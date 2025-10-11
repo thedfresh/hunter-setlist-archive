@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { revalidatePath } from 'next/cache';
 type Params = { id: string; memberId: string };
 
 export async function PUT(req: Request, { params }: { params: Params }) {
@@ -28,6 +29,7 @@ export async function PUT(req: Request, { params }: { params: Params }) {
         musician: true,
       },
     });
+    revalidatePath('/api/bands')
     return NextResponse.json({ member });
   } catch (error) {
     console.error('PUT /api/bands/[id]/members/[memberId] error:', error);
@@ -40,6 +42,7 @@ export async function DELETE(req: Request, { params }: { params: Params }) {
     const memberId = Number(params.memberId);
     if (!memberId) return NextResponse.json({ error: 'Invalid member id.' }, { status: 400 });
     await prisma.bandMusician.delete({ where: { id: memberId } });
+    revalidatePath('/api/bands')
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('DELETE /api/bands/[id]/members/[memberId] error:', error);

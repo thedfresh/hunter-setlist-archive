@@ -1,7 +1,7 @@
 
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
-
+import { revalidatePath } from 'next/cache';
 import type { NextRequest } from 'next/server';
 type Params = { id: string };
 
@@ -24,6 +24,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<Params
         privateNotes: typeof data.privateNotes === 'string' ? data.privateNotes : undefined,
       },
     });
+    revalidatePath('/api/contributors')
     return NextResponse.json({ contributor });
   } catch (error) {
     console.error('PUT /api/contributors/[id] error:', error);
@@ -37,6 +38,7 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<Par
     const id = Number(paramId);
     if (!id) return NextResponse.json({ error: 'Invalid contributor id.' }, { status: 400 });
     await prisma.contributor.delete({ where: { id } });
+    revalidatePath('/api/contributors')
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('DELETE /api/contributors/[id] error:', error);

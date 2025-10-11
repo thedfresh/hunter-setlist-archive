@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
+import { revalidatePath } from 'next/cache';
 const prisma = new PrismaClient();
 
 export async function PUT(req: Request, { params }: { params: { setId: string; performanceId: string } }) {
@@ -53,13 +54,13 @@ export async function PUT(req: Request, { params }: { params: { setId: string; p
     // shift others
     newOrder < oldOrder
       ? prisma.performance.updateMany({
-          where: { setId, performanceOrder: { gte: newOrder, lt: oldOrder } },
-          data: { performanceOrder: { increment: 1 } },
-        })
+        where: { setId, performanceOrder: { gte: newOrder, lt: oldOrder } },
+        data: { performanceOrder: { increment: 1 } },
+      })
       : prisma.performance.updateMany({
-          where: { setId, performanceOrder: { lte: newOrder, gt: oldOrder } },
-          data: { performanceOrder: { decrement: 1 } },
-        }),
+        where: { setId, performanceOrder: { lte: newOrder, gt: oldOrder } },
+        data: { performanceOrder: { decrement: 1 } },
+      }),
     // update this performance
     prisma.performance.update({
       where: { id: performanceId },
@@ -67,6 +68,8 @@ export async function PUT(req: Request, { params }: { params: { setId: string; p
       include: { song: true, performanceMusicians: { include: { musician: true, instrument: true } } },
     }),
   ]);
+  revalidatePath('/api/events');
+  revalidatePath('/event');
   return NextResponse.json({ performance: perf });
 }
 
@@ -74,5 +77,7 @@ export async function DELETE(req: Request, { params }: { params: { setId: string
   const performanceId = Number(params.performanceId);
   await prisma.performanceMusician.deleteMany({ where: { performanceId } });
   await prisma.performance.delete({ where: { id: performanceId } });
+  revalidatePath('/api/events');
+  revalidatePath('/event');
   return NextResponse.json({ success: true });
 }
