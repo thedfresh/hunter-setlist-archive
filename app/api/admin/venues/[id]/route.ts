@@ -1,7 +1,7 @@
 
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
-
+import { revalidatePath } from 'next/cache';
 import type { NextRequest } from 'next/server';
 type Params = { id: string };
 
@@ -28,6 +28,7 @@ export async function PUT(req: NextRequest, { params }: { params: Params }) {
         isUncertain: !!data.isUncertain,
       },
     });
+    revalidatePath('/api/venues');
     return NextResponse.json({ venue });
   } catch (error) {
     console.error('PUT /api/venues/[id] error:', error);
@@ -40,6 +41,7 @@ export async function DELETE(req: NextRequest, { params }: { params: Params }) {
     const id = Number(params.id);
     if (!id) return NextResponse.json({ error: 'Invalid venue id.' }, { status: 400 });
     await prisma.venue.delete({ where: { id } });
+    revalidatePath('/api/venues');
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('DELETE /api/venues/[id] error:', error);

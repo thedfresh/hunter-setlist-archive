@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
-
+import { revalidatePath } from 'next/cache';
 const prisma = new PrismaClient();
 
 export async function POST(req: Request) {
@@ -26,6 +26,7 @@ export async function POST(req: Request) {
         slug,
       },
     });
+    revalidatePath('/api/venues');
     return NextResponse.json({ venue }, { status: 201 });
   } catch (error) {
     // FIX: Actually log the error so we can see it
