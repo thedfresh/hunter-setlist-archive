@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma';
 import type { NextRequest } from 'next/server';
 type Params = { id: string };
 
+export const dynamic = 'force-dynamic';
 export async function GET(req: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
     const { id: paramId } = await context.params;

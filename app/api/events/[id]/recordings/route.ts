@@ -1,17 +1,18 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+export const dynamic = 'force-dynamic';
 
 export async function GET(
   req: Request,
   context: { params: { id: string } }
 ) {
   try {
-  const { params } = context;
-  const eventId = Number(params.id);
+    const { params } = context;
+    const eventId = Number(params.id);
     if (!eventId || isNaN(eventId)) {
       return NextResponse.json({ error: "Invalid event ID." }, { status: 400 });
     }
-  const recordings = await prisma.recording.findMany({
+    const recordings = await prisma.recording.findMany({
       where: { eventId },
       include: {
         recordingType: true,

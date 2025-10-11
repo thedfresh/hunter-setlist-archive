@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { searchEvents } from '@/lib/queries/eventSearchQueries';
+export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
     const searchParams = Object.fromEntries(request.nextUrl.searchParams);

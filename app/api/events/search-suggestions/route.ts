@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getBrowsableEventsWhere } from '@/lib/utils/queryFilters';
 import { prisma } from '@/lib/prisma';
 import { Prisma } from '@prisma/client';
+export const dynamic = 'force-dynamic';
 
 // Helper: detect date patterns
 function detectDateType(query: string) {

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCountablePerformancesWhere, getBrowsableEventsWhere } from '@/lib/utils/queryFilters';
 import { formatEventDate } from '@/lib/formatters/dateFormatter';
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
