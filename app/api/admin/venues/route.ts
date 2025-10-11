@@ -28,6 +28,12 @@ export async function POST(req: Request) {
     });
     return NextResponse.json({ venue }, { status: 201 });
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to create venue.' }, { status: 500 });
+    // FIX: Actually log the error so we can see it
+    console.error('POST /api/admin/venues error:', error);
+    // FIX: Return the actual error message for debugging
+    return NextResponse.json({
+      error: 'Failed to create venue.',
+      details: error instanceof Error ? error.message : String(error)
+    }, { status: 500 });
   }
 }
