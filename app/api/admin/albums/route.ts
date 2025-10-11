@@ -15,7 +15,7 @@ export async function POST(req: Request) {
         artist: data.artist || null,
         releaseYear: data.releaseYear ? Number(data.releaseYear) : null,
         isOfficial: !!data.isOfficial,
-        notes: data.notes || null,
+        publicNotes: data.notes || null,
       },
     });
     return NextResponse.json({ album }, { status: 201 });

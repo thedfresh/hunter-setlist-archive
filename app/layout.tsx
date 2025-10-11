@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { ToastProvider } from '../components/ui/ToastProvider';
 import { Inter } from 'next/font/google'
 import Footer from '../components/ui/Footer'
 
@@ -40,11 +41,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.className} flex flex-col min-h-screen`}>
-        <SiteHeader />
-        <main className="flex-1">
-          {children}
-        </main>
-        <Footer />
+        <ToastProvider>
+          <SiteHeader />
+          <main className="flex-1">
+            {children}
+          </main>
+          <Footer />
+        </ToastProvider>
       </body>
     </html>
   )

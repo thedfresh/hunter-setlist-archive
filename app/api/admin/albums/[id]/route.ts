@@ -18,7 +18,7 @@ export async function PUT(req: Request, { params }: { params: Promise<Params> })
         artist: data.artist || null,
         releaseYear: data.releaseYear ? Number(data.releaseYear) : null,
         isOfficial: !!data.isOfficial,
-        notes: data.notes || null,
+        publicNotes: data.notes || null,
       },
     });
     return NextResponse.json({ album });
