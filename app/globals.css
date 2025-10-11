@@ -1307,4 +1307,17 @@
   .admin-content-wrapper {
     @apply max-w-[1400px];
   }
+
+  /* Admin stats summary */
+  .admin-stats {
+    @apply flex gap-6 mb-6 pb-4 border-b border-gray-200;
+  }
+
+  .admin-stat-item {
+    @apply flex items-center gap-2 text-sm text-gray-600;
+  }
+
+  .admin-stat-value {
+    @apply font-semibold text-gray-900;
+  }
 }
