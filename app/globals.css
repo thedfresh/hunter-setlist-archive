@@ -1233,5 +1233,78 @@
     @apply text-base text-gray-700 leading-relaxed mb-6 mt-2;
   }
 
+  /* ============================================
+   ADMIN LAYOUT
+   ============================================ */
 
+  /* Admin sidebar */
+  .admin-sidebar {
+    @apply w-[280px] bg-[#f5f1e8] border-r border-[#d4c5a9];
+    @apply flex flex-col flex-shrink-0;
+  }
+
+  .admin-sidebar-header {
+    @apply px-6 py-8 border-b border-[#d4c5a9];
+  }
+
+  .admin-title {
+    @apply text-xl font-semibold text-gray-800 mb-1;
+  }
+
+  .admin-subtitle {
+    @apply text-xs text-gray-600;
+  }
+
+  /* Admin navigation */
+  .admin-nav {
+    @apply flex-1 py-5 overflow-y-auto;
+  }
+
+  .admin-nav-list {
+    @apply list-none;
+  }
+
+  .admin-nav-item {
+    @apply mx-4 mb-1;
+  }
+
+  .admin-nav-link {
+    @apply block px-5 py-3 rounded-lg text-sm font-medium;
+    @apply text-gray-700 no-underline transition-all;
+    @apply hover:bg-[#ebe6dc] hover:text-[#b8913d];
+  }
+
+  .admin-nav-link-active {
+    @apply bg-[#b8913d] text-white font-semibold;
+  }
+
+  /* Admin nav sections */
+  .admin-nav-divider {
+    @apply border-0 border-t border-[#d4c5a9] mx-5 my-4;
+  }
+
+  .admin-nav-section-title {
+    @apply px-9 py-2 text-[11px] font-semibold;
+    @apply text-gray-600 uppercase tracking-wide;
+  }
+
+  /* Admin sidebar footer */
+  .admin-sidebar-footer {
+    @apply px-6 py-5 border-t border-[#d4c5a9];
+  }
+
+  .admin-footer-link {
+    @apply inline-flex items-center gap-2;
+    @apply text-sm text-gray-600 no-underline transition-colors;
+    @apply hover:text-[#b8913d];
+  }
+
+  /* Admin main content */
+  .admin-main {
+    @apply flex-1 bg-[#fefefe] p-12 overflow-y-auto;
+  }
+
+  .admin-content-wrapper {
+    @apply max-w-[1400px];
+  }
 }

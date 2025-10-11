@@ -1,12 +1,9 @@
-import type { Metadata } from 'next'
-import { ToastProvider } from '../components/ui/ToastProvider';
-import { Inter } from 'next/font/google'
-import Footer from '../components/ui/Footer'
+import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
+import ClientLayoutShell from './ClientLayoutShell';
+import './globals.css';
 
-import './globals.css'
-import SiteHeader from '../components/ui/SiteHeader';
-
-const inter = Inter({ subsets: ['latin'] })
+const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   title: 'The Robert Hunter Performance Archive',
@@ -31,24 +28,14 @@ export const metadata: Metadata = {
     description: 'Comprehensive documentation of 600+ Robert Hunter performances spanning his complete musical career. Search setlists, venues, and recordings from the Grateful Dead lyricist\'s solo work and collaborations.',
     images: ['https://stillunsung.com/images/og-default.png'],
   },
-}
+};
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <body className={`${inter.className} flex flex-col min-h-screen`}>
-        <ToastProvider>
-          <SiteHeader />
-          <main className="flex-1">
-            {children}
-          </main>
-          <Footer />
-        </ToastProvider>
+        <ClientLayoutShell>{children}</ClientLayoutShell>
       </body>
     </html>
-  )
+  );
 }
