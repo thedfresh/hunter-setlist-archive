@@ -24,9 +24,17 @@ export async function POST(req: Request) {
         originalArtist: data.originalArtist || null,
         lyricsBy: data.lyricsBy || null,
         musicBy: data.musicBy || null,
-        publicNotes: data.publicNotes || null,
+        publicNotes: data.publicNotes || data.notes || null,
         privateNotes: data.privateNotes || null,
         slug,
+        isUncertain: !!data.isUncertain,
+        inBoxOfRain: !!data.inBoxOfRain,
+        songAlbums: data.albumIds && Array.isArray(data.albumIds)
+          ? { create: data.albumIds.map((albumId: number) => ({ albumId })) }
+          : undefined,
+        songTags: data.tagIds && Array.isArray(data.tagIds)
+          ? { create: data.tagIds.map((tagId: number) => ({ tagId })) }
+          : undefined,
       },
     });
     revalidatePath('/api/songs')

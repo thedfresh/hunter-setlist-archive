@@ -13,19 +13,21 @@ export async function PUT(req: Request, { params }: { params: Params }) {
       return NextResponse.json({ error: "Title is required." }, { status: 400 });
     }
     // Update song
+    const updateData: any = {
+      title: data.title,
+      alternateTitle: data.alternateTitle || null,
+      originalArtist: data.originalArtist || null,
+      lyricsBy: data.lyricsBy || null,
+      musicBy: data.musicBy || null,
+      publicNotes: data.publicNotes || null,
+      privateNotes: data.privateNotes || null,
+      isUncertain: !!data.isUncertain,
+      inBoxOfRain: !!data.inBoxOfRain,
+    };
+    // leadVocalsId removed
     const song = await prisma.song.update({
       where: { id: Number(params.id) },
-      data: {
-        title: data.title,
-        alternateTitle: data.alternateTitle || null,
-        originalArtist: data.originalArtist || null,
-        lyricsBy: data.lyricsBy || null,
-        musicBy: data.musicBy || null,
-        publicNotes: data.publicNotes || null,
-        privateNotes: data.privateNotes || null,
-        isUncertain: !!data.isUncertain,
-        inBoxOfRain: !!data.inBoxOfRain,
-      },
+      data: updateData,
     });
     // Many-to-many: songAlbums
     await prisma.songAlbum.deleteMany({ where: { songId: song.id } });

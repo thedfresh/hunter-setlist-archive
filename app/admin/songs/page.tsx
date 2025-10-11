@@ -98,7 +98,7 @@ export default function SongsAdminPage() {
       <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-8">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold text-gray-800">Songs</h1>
-          <Link href="/admin/songs/new">
+          <Link href="/admin/songs/add">
             <button className="bg-blue-600 text-white font-semibold py-2 px-4 rounded-md shadow hover:bg-blue-700 transition">Add Song</button>
           </Link>
         </div>

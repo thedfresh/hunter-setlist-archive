@@ -9,14 +9,13 @@ export default function AdminIndex() {
     { name: 'Tags', path: '/admin/tags' },
     { name: 'Albums', path: '/admin/albums' },
     { name: 'Songs', path: '/admin/songs' },
-    { name: 'External Links', path: '/admin/external-links' },
     { name: 'Bands', path: '/admin/bands' },
   ];
 
   return (
     <main className="max-w-xl mx-auto py-12 px-4">
       <div className="mb-4 text-center">
-  <Link href="/admin" className="text-blue-600 hover:underline font-semibold">Home</Link>
+        <Link href="/admin" className="text-blue-600 hover:underline font-semibold">Home</Link>
       </div>
       <h1 className="text-3xl font-bold mb-8 text-center">Admin Dashboard</h1>
       <ul className="space-y-4">
