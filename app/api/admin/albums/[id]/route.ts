@@ -19,7 +19,8 @@ export async function PUT(req: Request, { params }: { params: Promise<Params> })
         artist: data.artist || null,
         releaseYear: data.releaseYear ? Number(data.releaseYear) : null,
         isOfficial: !!data.isOfficial,
-        publicNotes: data.notes || null,
+        publicNotes: data.publicNotes || null,
+        privateNotes: data.privateNotes || null,
       },
     });
     revalidatePath('/api/albums')

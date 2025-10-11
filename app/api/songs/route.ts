@@ -126,6 +126,7 @@ export async function GET() {
           performanceCount,
           firstPerformance,
           lastPerformance,
+          songAlbums: song.songAlbums,
         };
       }),
     });

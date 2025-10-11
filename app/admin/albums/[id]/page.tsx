@@ -59,158 +59,7 @@ function AssociatedSongs({ albumId }: { albumId: number }) {
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 
-// Inline AlbumLinks component for managing links for this album
-function AlbumLinks({ albumId }: { albumId: number }) {
-  const [links, setLinks] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({
-    url: "",
-    title: "",
-    description: "",
-    linkType: "website",
-    isPublic: true,
-  });
-  const [submitting, setSubmitting] = useState(false);
-  const [formError, setFormError] = useState<string | null>(null);
-  useEffect(() => {
-    async function fetchLinks() {
-      setLoading(true);
-      setError(null);
-      try {
-        const res = await fetch(`/api/external-links`);
-        const data = await res.json();
-        if (res.ok && data.links) {
-          setLinks(data.links.filter((l: any) => l.entityType === "album" && l.entityId === albumId));
-        } else {
-          setError("Failed to load links.");
-        }
-      } catch {
-        setError("Failed to load links.");
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchLinks();
-  }, [albumId]);
-
-  async function handleAddLink(e: React.FormEvent) {
-    e.preventDefault();
-    setFormError(null);
-    if (!form.url.trim() || !form.linkType) {
-      setFormError("URL and Link Type are required.");
-      return;
-    }
-    setSubmitting(true);
-    try {
-      const res = await fetch("/api/external-links", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          url: form.url,
-          title: form.title,
-          description: form.description,
-          entityType: "album",
-          entityId: albumId,
-          linkType: form.linkType,
-          isPublic: form.isPublic,
-        }),
-      });
-      if (res.ok) {
-        setShowForm(false);
-        setForm({ url: "", title: "", description: "", linkType: "website", isPublic: true });
-        // Refresh links
-        const data = await res.json();
-        setLinks(l => [...l, data.association]);
-      } else {
-        const data = await res.json();
-        setFormError(data.error || "Failed to add link.");
-      }
-    } catch {
-      setFormError("Failed to add link.");
-    } finally {
-      setSubmitting(false);
-    }
-  }
-
-  return (
-    <div>
-      {loading ? (
-        <div className="text-center py-4">Loading links...</div>
-      ) : error ? (
-        <div className="text-center text-red-500 py-4">{error}</div>
-      ) : (
-        <>
-          <table className="w-full text-left border-collapse mb-4">
-            <thead>
-              <tr className="bg-gray-100">
-                <th className="py-2 px-4 font-semibold">Title</th>
-                <th className="py-2 px-4 font-semibold">URL</th>
-                <th className="py-2 px-4 font-semibold">Type</th>
-                <th className="py-2 px-4 font-semibold">Public?</th>
-                <th className="py-2 px-4 font-semibold">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {links.length === 0 ? (
-                <tr><td colSpan={5} className="text-center py-4 text-gray-500">No links for this album.</td></tr>
-              ) : (
-                links.map(l => (
-                  <tr key={l.id} className="border-b">
-                    <td className="py-2 px-4">{l.link.title || <span className="text-gray-400 italic">—</span>}</td>
-                    <td className="py-2 px-4"><a href={l.link.url} target="_blank" className="text-blue-600 underline">{l.link.url}</a></td>
-                    <td className="py-2 px-4">{l.linkType}</td>
-                    <td className="py-2 px-4">{l.isPublic ? "Yes" : "No"}</td>
-                    <td className="py-2 px-4">
-                      <Link href={`/admin/external-links/${l.id}`}>
-                        <button className="bg-gray-200 text-gray-800 font-semibold py-1 px-3 rounded-md shadow hover:bg-gray-300 transition">Edit</button>
-                      </Link>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-          {showForm ? (
-            <form className="space-y-4 mb-4" onSubmit={handleAddLink}>
-              <div>
-                <label className="block font-semibold mb-1">URL<span className="text-red-500">*</span></label>
-                <input name="url" type="url" value={form.url} onChange={e => setForm(f => ({ ...f, url: e.target.value }))} required className="w-full border rounded-md px-3 py-2" />
-              </div>
-              <div>
-                <label className="block font-semibold mb-1">Title</label>
-                <input name="title" type="text" value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} className="w-full border rounded-md px-3 py-2" />
-              </div>
-              <div>
-                <label className="block font-semibold mb-1">Description</label>
-                <textarea name="description" value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} rows={2} className="w-full border rounded-md px-3 py-2" />
-              </div>
-              <div>
-                <label className="block font-semibold mb-1">Link Type<span className="text-red-500">*</span></label>
-                <select name="linkType" value={form.linkType} onChange={e => setForm(f => ({ ...f, linkType: e.target.value }))} required className="w-full border rounded-md px-3 py-2">
-                  <option value="website">Website</option>
-                  <option value="lyrics">Lyrics</option>
-                  <option value="chords">Chords</option>
-                  <option value="video">Video</option>
-                </select>
-              </div>
-              <div className="flex items-center">
-                <input name="isPublic" type="checkbox" checked={form.isPublic} onChange={e => setForm(f => ({ ...f, isPublic: e.target.checked }))} className="mr-2" />
-                <label className="font-semibold">Public?</label>
-              </div>
-              {formError && <div className="text-red-500 text-center mb-2">{formError}</div>}
-              <button type="submit" disabled={submitting} className="w-full bg-blue-600 text-white font-semibold py-2 px-4 rounded-md shadow hover:bg-blue-700 transition">{submitting ? "Adding..." : "Add Link"}</button>
-              <button type="button" onClick={() => setShowForm(false)} className="w-full mt-2 bg-gray-200 text-gray-800 font-semibold py-2 px-4 rounded-md shadow hover:bg-gray-300 transition">Cancel</button>
-            </form>
-          ) : (
-            <button onClick={() => setShowForm(true)} className="bg-green-600 text-white font-semibold py-2 px-4 rounded-md shadow hover:bg-green-700 transition">Add New Link</button>
-          )}
-        </>
-      )}
-    </div>
-  );
-}
+// AlbumLinks removed
 
 type Album = {
   id: number;
@@ -233,7 +82,8 @@ export default function EditAlbumPage() {
     artist: "",
     releaseYear: "",
     isOfficial: true,
-    notes: "",
+    publicNotes: "",
+    privateNotes: "",
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -257,7 +107,8 @@ export default function EditAlbumPage() {
             artist: data.album.artist || "",
             releaseYear: data.album.releaseYear ? String(data.album.releaseYear) : "",
             isOfficial: !!data.album.isOfficial,
-            notes: data.album.notes || "",
+            publicNotes: data.album.publicNotes || "",
+            privateNotes: data.album.privateNotes || "",
           });
         } else {
           setError("Album not found.");
@@ -296,12 +147,14 @@ export default function EditAlbumPage() {
     setSubmitting(true);
     setError(null);
     try {
-      const res = await fetch(`/api/albums/${id}`, {
+      const res = await fetch(`/api/admin/albums/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...form,
           releaseYear: form.releaseYear ? Number(form.releaseYear) : null,
+          publicNotes: form.publicNotes,
+          privateNotes: form.privateNotes,
         }),
       });
       if (res.ok) {
@@ -320,7 +173,7 @@ export default function EditAlbumPage() {
     if (!confirm("Are you sure you want to delete this album?")) return;
     setSubmitting(true);
     try {
-  const res = await fetch(`/api/admin/albums/${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/admin/albums/${id}`, { method: "DELETE" });
       if (res.ok) {
         router.push("/admin/albums");
       } else {
@@ -406,16 +259,27 @@ export default function EditAlbumPage() {
               <option value="false">Bootleg/Compilation</option>
             </select>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
-            <textarea
-              name="notes"
-              value={form.notes}
-              onChange={e => setForm(f => ({ ...f, notes: e.target.value }))}
-              className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
-              rows={3}
-              placeholder="Optional notes..."
-            />
+          <div className="flex gap-4">
+            <div className="w-1/2">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Public Notes</label>
+              <textarea
+                name="publicNotes"
+                value={form.publicNotes}
+                onChange={e => setForm(f => ({ ...f, publicNotes: e.target.value }))}
+                className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
+                rows={2}
+              />
+            </div>
+            <div className="w-1/2">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Private Notes</label>
+              <textarea
+                name="privateNotes"
+                value={form.privateNotes}
+                onChange={e => setForm(f => ({ ...f, privateNotes: e.target.value }))}
+                className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
+                rows={2}
+              />
+            </div>
           </div>
           {error && <p className="text-red-500 text-xs mb-2">{error}</p>}
           {success && <p className="text-green-600 text-sm mb-2">Album updated successfully!</p>}
@@ -428,11 +292,7 @@ export default function EditAlbumPage() {
           </button>
         </form>
         <hr className="my-8" />
-        {/* External Links Section */}
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold mb-4 text-gray-700">External Links</h2>
-          <AlbumLinks albumId={album.id} />
-        </div>
+        {/* External Links Section removed */}
         {/* Associated Songs Section */}
         <AssociatedSongs albumId={album.id} />
         <button
