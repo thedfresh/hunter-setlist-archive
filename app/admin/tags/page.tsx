@@ -1,96 +1,171 @@
 "use client";
-import React, { useEffect, useState } from "react";
-import Link from "next/link";
-
-type Tag = {
-  id: number;
-  name: string;
-  description?: string;
-  createdAt: string;
-};
+import { useState, useEffect } from 'react';
+import Modal from '@/components/ui/Modal';
+import TagForm from '@/components/admin/TagForm';
+import { useToast } from '@/lib/hooks/useToast';
 
 export default function TagsPage() {
-  const [tags, setTags] = useState<Tag[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [search, setSearch] = useState("");
+    const [tags, setTags] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [sortKey, setSortKey] = useState<'name' | 'uses'>('name');
+    const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
+    const [modalOpen, setModalOpen] = useState(false);
+    const [editingId, setEditingId] = useState<number | null>(null);
+    const { showSuccess, showError } = useToast();
 
-  useEffect(() => {
-    async function fetchTags() {
-      try {
-        const res = await fetch("/api/tags");
-        const data = await res.json();
-        if (res.ok && data.tags) {
-          setTags(data.tags);
-        } else {
-          setError("Failed to load tags.");
+    useEffect(() => {
+        refreshTags();
+    }, []);
+
+    async function refreshTags() {
+        setLoading(true);
+        try {
+            const res = await fetch('/api/tags', { cache: 'no-store' });
+            if (!res.ok) throw new Error('Failed to fetch');
+            const data = await res.json();
+            setTags(data.tags || []);
+        } catch (error) {
+            setTags([]);
+        } finally {
+            setLoading(false);
         }
-      } catch {
-        setError("Failed to load tags.");
-      } finally {
-        setLoading(false);
-      }
     }
-    fetchTags();
-  }, []);
 
-  const filtered = tags.filter(t =>
-    t.name.toLowerCase().includes(search.toLowerCase()) ||
-    (t.description || "").toLowerCase().includes(search.toLowerCase())
-  );
+    function handleSort(key: 'name' | 'uses') {
+        if (sortKey === key) {
+            setSortDir(sortDir === 'asc' ? 'desc' : 'asc');
+        } else {
+            setSortKey(key);
+            setSortDir('asc');
+        }
+    }
 
-  return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <div className="max-w-2xl w-full bg-white rounded-xl shadow-lg p-8">
-        <div className="mb-4 text-center">
-          <Link href="/admin" className="text-blue-600 hover:underline font-semibold">Home</Link>
+    function openAddModal() {
+        setEditingId(0);
+        setModalOpen(true);
+    }
+    function openEditModal(id: number) {
+        setEditingId(id);
+        setModalOpen(true);
+    }
+
+    async function handleDelete(id: number) {
+        if (!confirm('Are you sure you want to delete this tag?')) return;
+        try {
+            const res = await fetch(`/api/admin/tags/${id}`, { method: 'DELETE' });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'Delete failed');
+            showSuccess('Tag deleted');
+            await refreshTags();
+        } catch (error: any) {
+            showError(error?.message || 'Failed to delete tag');
+        }
+    }
+
+    const sorted = [...tags].sort((a, b) => {
+        let aVal, bVal;
+        if (sortKey === 'uses') {
+            aVal = a._count?.songTags ?? 0;
+            bVal = b._count?.songTags ?? 0;
+        } else {
+            aVal = a.name?.toLowerCase?.() ?? '';
+            bVal = b.name?.toLowerCase?.() ?? '';
+        }
+        if (aVal < bVal) return sortDir === 'asc' ? -1 : 1;
+        if (aVal > bVal) return sortDir === 'asc' ? 1 : -1;
+        return 0;
+    });
+
+    function truncate(text: string, max: number) {
+        if (!text) return '';
+        return text.length > max ? text.slice(0, max) + '…' : text;
+    }
+
+    return (
+        <div>
+            <div className="page-header flex items-center justify-between">
+                <h1 className="page-title">Tags</h1>
+                <button
+                    className="btn btn-primary btn-medium"
+                    onClick={openAddModal}
+                >
+                    <span>+</span>
+                    <span>Add Tag</span>
+                </button>
+            </div>
+            <div className="admin-stats">
+                <div className="admin-stat-item">
+                    <span className="admin-stat-value">{tags.length}</span>
+                    <span>Total Tags</span>
+                </div>
+            </div>
+            {loading ? (
+                <div className="loading-state">
+                    <div className="spinner"></div>
+                    <div className="loading-text">Loading tags...</div>
+                </div>
+            ) : tags.length > 0 ? (
+                <div className="table-container">
+                    <table className="table">
+                        <thead>
+                            <tr>
+                                <th className="sortable" onClick={() => handleSort('name')}>
+                                    Name {sortKey === 'name' && (sortDir === 'asc' ? '▲' : '▼')}
+                                </th>
+                                <th>Description</th>
+                                <th className="sortable" onClick={() => handleSort('uses')}>
+                                    Uses {sortKey === 'uses' && (sortDir === 'asc' ? '▲' : '▼')}
+                                </th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {sorted.map((tag) => (
+                                <tr key={tag.id}>
+                                    <td>{tag.name}</td>
+                                    <td>{truncate(tag.description, 60)}</td>
+                                    <td>{tag._count?.songTags ?? 0}</td>
+                                    <td>
+                                        <div className="table-actions">
+                                            <button
+                                                className="btn btn-secondary btn-small"
+                                                onClick={() => openEditModal(tag.id)}
+                                            >
+                                                Edit
+                                            </button>
+                                            <button
+                                                onClick={() => handleDelete(tag.id)}
+                                                className="btn btn-danger btn-small"
+                                            >
+                                                Delete
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            ) : (
+                <div className="empty-state">
+                    <div className="empty-title">No tags found</div>
+                </div>
+            )}
+            <Modal
+                isOpen={modalOpen}
+                onClose={() => setModalOpen(false)}
+                title={editingId === 0 ? 'Add Tag' : 'Edit Tag'}
+            >
+                <TagForm
+                    tagId={editingId || 0}
+                    onSuccess={async () => {
+                        setModalOpen(false);
+                        showSuccess(editingId === 0 ? 'Tag added' : 'Tag updated');
+                        await refreshTags();
+                    }}
+                    onCancel={() => setModalOpen(false)}
+                />
+            </Modal>
         </div>
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-gray-800">Tags</h1>
-          <Link href="/admin/tags/new">
-            <button className="bg-blue-600 text-white font-semibold py-2 px-4 rounded-md shadow hover:bg-blue-700 transition">Add Tag</button>
-          </Link>
-        </div>
-        <input
-          type="text"
-          placeholder="Search tags..."
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          className="w-full border rounded-md px-3 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
-        />
-        {loading ? (
-          <div className="text-center py-8">Loading tags...</div>
-        ) : error ? (
-          <div className="text-center text-red-500 py-8">{error}</div>
-        ) : filtered.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">No tags found.</div>
-        ) : (
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-gray-100">
-                <th className="py-2 px-4 font-semibold">Name</th>
-                <th className="py-2 px-4 font-semibold">Description</th>
-                <th className="py-2 px-4 font-semibold">Created</th>
-                <th className="py-2 px-4 font-semibold">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map(tag => (
-                <tr key={tag.id} className="border-b">
-                  <td className="py-2 px-4">{tag.name}</td>
-                  <td className="py-2 px-4">{tag.description || <span className="text-gray-400 italic">—</span>}</td>
-                  <td className="py-2 px-4">{new Date(tag.createdAt).toLocaleDateString()}</td>
-                  <td className="py-2 px-4">
-                    <Link href={`/admin/tags/${tag.id}`}>
-                      <button className="bg-gray-200 text-gray-800 font-semibold py-1 px-3 rounded-md shadow hover:bg-gray-300 transition">View/Edit</button>
-                    </Link>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
-    </div>
-  );
+    );
 }
