@@ -1,40 +1,39 @@
-import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
-import { revalidatePath } from 'next/cache';
-const prisma = new PrismaClient();
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { revalidatePath } from "next/cache";
+import { generateVenueSlug } from "@/lib/utils/generateSlug";
 
 export async function POST(req: Request) {
-  try {
-    const data = await req.json();
-    // Basic validation
-    if (!data.name || typeof data.name !== 'string') {
-      return NextResponse.json({ error: 'Venue name is required.' }, { status: 400 });
+    try {
+        const body = await req.json();
+        const { name, city, stateProvince, country, isUncertain = false, publicNotes, privateNotes, context } = body;
+        if (!name || typeof name !== "string" || name.trim() === "") {
+            return NextResponse.json({ error: "Name is required" }, { status: 400 });
+        }
+        const slug = body.slug?.trim() || generateVenueSlug(name, city, stateProvince);
+        try {
+            const venue = await prisma.venue.create({
+                data: {
+                    name: name.trim(),
+                    slug,
+                    city: city?.trim() || null,
+                    stateProvince: stateProvince?.trim() || null,
+                    country: country?.trim() || null,
+                    isUncertain: !!isUncertain,
+                    publicNotes: publicNotes?.trim() || null,
+                    privateNotes: privateNotes?.trim() || null,
+                    context: context?.trim() || null,
+                },
+            });
+            revalidatePath('/admin/venues');
+            return NextResponse.json(venue, { status: 201 });
+        } catch (error: any) {
+            if (error?.code === 'P2002' && error?.meta?.target?.includes('slug')) {
+                return NextResponse.json({ error: 'Slug must be unique' }, { status: 400 });
+            }
+            return NextResponse.json({ error: error?.message || 'Failed to create venue' }, { status: 500 });
+        }
+    } catch (error: any) {
+        return NextResponse.json({ error: error?.message || 'Failed to create venue' }, { status: 500 });
     }
-    // Generate slug
-    const { generateVenueSlug } = require("@/lib/utils/generateSlug");
-    const slug = generateVenueSlug(data.name, data.city, data.stateProvince);
-    const venue = await prisma.venue.create({
-      data: {
-        name: data.name,
-        context: data.context || null,
-        city: data.city || null,
-        stateProvince: data.stateProvince || null,
-        country: data.country || null,
-        isUncertain: !!data.isUncertain,
-        publicNotes: data.publicNotes || null,
-        privateNotes: data.privateNotes || null,
-        slug,
-      },
-    });
-    revalidatePath('/api/venues');
-    return NextResponse.json({ venue }, { status: 201 });
-  } catch (error) {
-    // FIX: Actually log the error so we can see it
-    console.error('POST /api/admin/venues error:', error);
-    // FIX: Return the actual error message for debugging
-    return NextResponse.json({
-      error: 'Failed to create venue.',
-      details: error instanceof Error ? error.message : String(error)
-    }, { status: 500 });
-  }
 }
