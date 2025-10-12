@@ -1,24 +1,24 @@
-import { NextResponse } from 'next/server';
-import { revalidatePath } from 'next/cache';
+import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { revalidatePath } from "next/cache";
 
 export async function POST(req: Request) {
-  try {
-    const data = await req.json();
-    if (!data.name || typeof data.name !== 'string') {
-      return NextResponse.json({ error: 'Contributor name is required.' }, { status: 400 });
+    try {
+        const { name, email, publicNotes, privateNotes } = await req.json();
+        if (!name || typeof name !== 'string' || name.trim() === '') {
+            return NextResponse.json({ error: 'Name is required' }, { status: 400 });
+        }
+        const contributor = await prisma.contributor.create({
+            data: {
+                name: name.trim(),
+                email: email?.trim() || null,
+                publicNotes: publicNotes?.trim() || null,
+                privateNotes: privateNotes?.trim() || null,
+            },
+        });
+        revalidatePath('/admin/contributors');
+        return NextResponse.json(contributor, { status: 201 });
+    } catch (error: any) {
+        return NextResponse.json({ error: error?.message || 'Failed to create contributor' }, { status: 500 });
     }
-    const contributor = await prisma.contributor.create({
-      data: {
-        name: data.name,
-        email: typeof data.email === 'string' ? data.email : undefined,
-        publicNotes: typeof data.publicNotes === 'string' ? data.publicNotes : undefined,
-        privateNotes: typeof data.privateNotes === 'string' ? data.privateNotes : undefined,
-      },
-    });
-    return NextResponse.json({ contributor }, { status: 201 });
-  } catch (error) {
-    console.error('POST /api/contributors error:', error);
-    return NextResponse.json({ error: 'Failed to create contributor.', details: String(error) }, { status: 500 });
-  }
 }
