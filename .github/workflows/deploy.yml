@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=none
 name: Deploy to DigitalOcean
 
 on:

@@ -78,8 +78,12 @@ export async function getSongWithPerformances(slug: string) {
                     set: { event: getBrowsableEventsWhere() }
                 },
                 include: {
+                    song: { select: { id: true, title: true, slug: true } },
                     set: {
                         include: {
+                            performances: {
+                                include: { song: { select: { id: true, title: true, slug: true } } }
+                            },
                             event: {
                                 select: {
                                     id: true,
