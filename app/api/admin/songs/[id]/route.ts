@@ -1,72 +1,97 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
-import { revalidatePath } from 'next/cache';
+import { prisma } from "@/lib/prisma";
+import { revalidatePath } from "next/cache";
+import { generateSlugFromName } from "@/lib/utils/generateSlug";
 
-const prisma = new PrismaClient();
-type Params = { id: string };
-
-
-export async function PUT(req: Request, { params }: { params: Params }) {
-  try {
-    const data = await req.json();
-    if (!data.title || typeof data.title !== "string") {
-      return NextResponse.json({ error: "Title is required." }, { status: 400 });
+export async function GET(_req: Request, { params }: { params: { id: string } }) {
+    try {
+        const id = Number(params.id);
+        if (!id) return NextResponse.json({ error: 'Invalid ID' }, { status: 400 });
+        const song = await prisma.song.findUnique({
+            where: { id },
+            include: {
+                _count: {
+                    select: {
+                        performances: true,
+                        songAlbums: true,
+                        songTags: true,
+                    }
+                },
+                songAlbums: true,
+                songTags: true,
+            },
+        });
+        if (!song) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+        return NextResponse.json(song);
+    } catch (error: any) {
+        return NextResponse.json({ error: error?.message || 'Failed to fetch song' }, { status: 500 });
     }
-    // Update song
-    const updateData: any = {
-      title: data.title,
-      alternateTitle: data.alternateTitle || null,
-      originalArtist: data.originalArtist || null,
-      lyricsBy: data.lyricsBy || null,
-      musicBy: data.musicBy || null,
-      publicNotes: data.publicNotes || null,
-      privateNotes: data.privateNotes || null,
-      isUncertain: !!data.isUncertain,
-      inBoxOfRain: !!data.inBoxOfRain,
-    };
-    // leadVocalsId removed
-    const song = await prisma.song.update({
-      where: { id: Number(params.id) },
-      data: updateData,
-    });
-    // Many-to-many: songAlbums
-    await prisma.songAlbum.deleteMany({ where: { songId: song.id } });
-    if (data.albumIds?.length) {
-      await prisma.songAlbum.createMany({
-        data: data.albumIds.map((albumId: number) => ({ songId: song.id, albumId })),
-      });
-    }
-    // Many-to-many: songTags
-    await prisma.songTag.deleteMany({ where: { songId: song.id } });
-    if (data.tagIds?.length) {
-      await prisma.songTag.createMany({
-        data: data.tagIds.map((tagId: number) => ({ songId: song.id, tagId })),
-      });
-    }
-    // External links (not updating here for brevity)
-    revalidatePath('/api/songs')
-    return NextResponse.json({ song }, { status: 200 });
-  } catch {
-    return NextResponse.json({ error: "Failed to update song." }, { status: 500 });
-  }
 }
 
-export async function DELETE(req: Request, context: { params: Promise<Params> }) {
-  try {
-    const { id: paramId } = await context.params;
-    const songId = Number(paramId);
-    if (!songId || isNaN(songId)) {
-      return NextResponse.json({ error: 'Invalid song id.' }, { status: 400 });
+export async function PUT(req: Request, { params }: { params: { id: string } }) {
+    try {
+        const id = Number(params.id);
+        if (!id) return NextResponse.json({ error: 'Invalid ID' }, { status: 400 });
+        const body = await req.json();
+        const { title, slug, alternateTitle, originalArtist, lyricsBy, musicBy, isUncertain = false, inBoxOfRain = false, publicNotes, privateNotes } = body;
+        if (!title || typeof title !== "string" || title.trim() === "") {
+            return NextResponse.json({ error: "Title is required" }, { status: 400 });
+        }
+        const finalSlug = slug?.trim() || generateSlugFromName(title);
+        try {
+            const updated = await prisma.song.update({
+                where: { id },
+                data: {
+                    title: title.trim(),
+                    slug: finalSlug,
+                    alternateTitle: alternateTitle?.trim() || null,
+                    originalArtist: originalArtist?.trim() || null,
+                    lyricsBy: lyricsBy?.trim() || null,
+                    musicBy: musicBy?.trim() || null,
+                    isUncertain: !!isUncertain,
+                    inBoxOfRain: !!inBoxOfRain,
+                    publicNotes: publicNotes?.trim() || null,
+                    privateNotes: privateNotes?.trim() || null,
+                },
+            });
+            revalidatePath('/admin/songs');
+            return NextResponse.json(updated);
+        } catch (error: any) {
+            if (error?.code === 'P2002' && error?.meta?.target?.includes('slug')) {
+                return NextResponse.json({ error: 'Slug must be unique' }, { status: 400 });
+            }
+            return NextResponse.json({ error: error?.message || 'Failed to update song' }, { status: 500 });
+        }
+    } catch (error: any) {
+        return NextResponse.json({ error: error?.message || 'Failed to update song' }, { status: 500 });
     }
-    // Delete song and related entries
-    await prisma.song.delete({ where: { id: songId } });
-    await prisma.songAlbum.deleteMany({ where: { songId } });
-    await prisma.songTag.deleteMany({ where: { songId } });
-    await prisma.link.deleteMany({ where: { songId } });
-    revalidatePath('/api/songs')
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error('Error deleting song:', error);
-    return NextResponse.json({ error: 'Failed to delete song.' }, { status: 500 });
-  }
+}
+
+export async function DELETE(_req: Request, { params }: { params: { id: string } }) {
+    try {
+        const id = Number(params.id);
+        if (!id) return NextResponse.json({ error: 'Invalid ID' }, { status: 400 });
+        const song = await prisma.song.findUnique({
+            where: { id },
+            include: {
+                _count: {
+                    select: {
+                        performances: true,
+                        songAlbums: true,
+                        songTags: true,
+                    }
+                }
+            },
+        });
+        if (!song) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+        const totalUsage = (song._count.performances ?? 0) + (song._count.songAlbums ?? 0) + (song._count.songTags ?? 0);
+        if (totalUsage > 0) {
+            return NextResponse.json({ error: `Cannot delete - has ${totalUsage} usages` }, { status: 400 });
+        }
+        await prisma.song.delete({ where: { id } });
+        revalidatePath('/admin/songs');
+        return NextResponse.json({ success: true });
+    } catch (error: any) {
+        return NextResponse.json({ error: error?.message || 'Failed to delete song' }, { status: 500 });
+    }
 }

@@ -123,6 +123,8 @@ export async function GET() {
           id: song.id,
           title: song.title,
           slug: song.slug,
+          alternateTitle: song.alternateTitle ?? '',
+          inBoxOfRain: song.inBoxOfRain ?? false,
           performanceCount,
           firstPerformance,
           lastPerformance,

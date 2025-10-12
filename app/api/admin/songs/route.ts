@@ -1,46 +1,40 @@
 import { NextResponse } from "next/server";
-import { revalidatePath } from 'next/cache';
 import { prisma } from "@/lib/prisma";
+import { revalidatePath } from "next/cache";
+import { generateSlugFromName } from "@/lib/utils/generateSlug";
 
 export async function POST(req: Request) {
-  try {
-    const data = await req.json();
-    if (!data.title || typeof data.title !== 'string') {
-      return NextResponse.json({ error: 'Song title is required.' }, { status: 400 });
+    try {
+        const body = await req.json();
+        const { title, slug, alternateTitle, originalArtist, lyricsBy, musicBy, isUncertain = false, inBoxOfRain = false, publicNotes, privateNotes } = body;
+        if (!title || typeof title !== "string" || title.trim() === "") {
+            return NextResponse.json({ error: "Title is required" }, { status: 400 });
+        }
+        const finalSlug = slug?.trim() || generateSlugFromName(title);
+        try {
+            const song = await prisma.song.create({
+                data: {
+                    title: title.trim(),
+                    slug: finalSlug,
+                    alternateTitle: alternateTitle?.trim() || null,
+                    originalArtist: originalArtist?.trim() || null,
+                    lyricsBy: lyricsBy?.trim() || null,
+                    musicBy: musicBy?.trim() || null,
+                    isUncertain: !!isUncertain,
+                    inBoxOfRain: !!inBoxOfRain,
+                    publicNotes: publicNotes?.trim() || null,
+                    privateNotes: privateNotes?.trim() || null,
+                },
+            });
+            revalidatePath('/admin/songs');
+            return NextResponse.json(song, { status: 201 });
+        } catch (error: any) {
+            if (error?.code === 'P2002' && error?.meta?.target?.includes('slug')) {
+                return NextResponse.json({ error: 'Slug must be unique' }, { status: 400 });
+            }
+            return NextResponse.json({ error: error?.message || 'Failed to create song' }, { status: 500 });
+        }
+    } catch (error: any) {
+        return NextResponse.json({ error: error?.message || 'Failed to create song' }, { status: 500 });
     }
-    // Generate unique slug
-    const { generateSlugFromName } = require("@/lib/utils/generateSlug");
-    let baseSlug = generateSlugFromName(data.title);
-    let slug = baseSlug;
-    let suffix = 2;
-    while (await prisma.song.findUnique({ where: { slug } })) {
-      slug = `${baseSlug}-${suffix}`;
-      suffix++;
-    }
-    const song = await prisma.song.create({
-      data: {
-        title: data.title,
-        alternateTitle: data.alternateTitle || null,
-        originalArtist: data.originalArtist || null,
-        lyricsBy: data.lyricsBy || null,
-        musicBy: data.musicBy || null,
-        publicNotes: data.publicNotes || data.notes || null,
-        privateNotes: data.privateNotes || null,
-        slug,
-        isUncertain: !!data.isUncertain,
-        inBoxOfRain: !!data.inBoxOfRain,
-        songAlbums: data.albumIds && Array.isArray(data.albumIds)
-          ? { create: data.albumIds.map((albumId: number) => ({ albumId })) }
-          : undefined,
-        songTags: data.tagIds && Array.isArray(data.tagIds)
-          ? { create: data.tagIds.map((tagId: number) => ({ tagId })) }
-          : undefined,
-      },
-    });
-    revalidatePath('/api/songs')
-    return NextResponse.json({ song }, { status: 201 });
-  } catch (error) {
-    console.error('Error in POST /api/songs:', error);
-    return NextResponse.json({ error: 'Failed to create song.' }, { status: 500 });
-  }
 }

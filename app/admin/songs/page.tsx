@@ -1,196 +1,161 @@
 "use client";
-import React, { useEffect, useState } from "react";
-import { compareSongTitles } from '@/lib/utils/songSort';
-import Link from "next/link";
+import { useEffect, useState } from "react";
+import Modal from "@/components/ui/Modal";
+import SongForm from "@/components/admin/SongForm";
+import { useToast } from "@/lib/hooks/useToast";
 
-type Song = {
-  id: number;
-  title: string;
-  originalArtist?: string;
-  isUncertain: boolean;
-  inBoxOfRain: boolean;
-  leadVocals?: { id: number; name: string } | null;
-  albums?: { id: number; title: string }[];
-  tags?: { id: number; name: string }[];
-  createdAt: string;
-  performanceCount: number;
-};
+function fetchSongs() {
+    return fetch("/api/songs").then(res => res.json());
+}
 
 export default function SongsAdminPage() {
-  const [songs, setSongs] = useState<Song[]>([]);
-  const [search, setSearch] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [showOnlyUncertain, setShowOnlyUncertain] = useState(false);
-  const [showOnlyNoPerformances, setShowOnlyNoPerformances] = useState(false);
-  const [showOnlyWithPerformances, setShowOnlyWithPerformances] = useState(false);
-  // Sorting state: field and order
-  const [sortField, setSortField] = useState<'title' | 'performanceCount'>('title');
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
-  // Change sort field or toggle order
-  function changeSort(field: 'title' | 'performanceCount') {
-    if (field === sortField) {
-      setSortOrder(o => (o === 'asc' ? 'desc' : 'asc'));
-    } else {
-      setSortField(field);
-      setSortOrder(field === 'title' ? 'asc' : 'desc');
-    }
-  }
+    // Use 'any' for now, or import Song type if available
+    const [songs, setSongs] = useState<any[]>([]);
+    const [sortKey, setSortKey] = useState('title');
+    const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+    const [loading, setLoading] = useState(true);
+    const [modalOpen, setModalOpen] = useState(false);
+    const [editingId, setEditingId] = useState(0);
+    const { showToast } = useToast();
 
-  useEffect(() => {
-    async function fetchSongs() {
-      try {
-        const res = await fetch("/api/songs");
-        const data = await res.json();
-        if (res.ok && data.songs) {
-          setSongs(data.songs);
-        } else {
-          setError("Failed to load songs");
+    const refreshSongs = async () => {
+        setLoading(true);
+        try {
+            const data = await fetchSongs();
+            setSongs(data.songs || []);
+        } catch {
+            showToast("Failed to load songs", "error");
+        } finally {
+            setLoading(false);
         }
-      } catch {
-        setError("Failed to load songs");
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchSongs();
-  }, []);
+    };
 
-  const filtered = songs.filter(song => {
-    // Match search term
-    const matchesSearch =
-      song.title.toLowerCase().includes(search.toLowerCase()) ||
-      (song.originalArtist || "").toLowerCase().includes(search.toLowerCase());
-    if (!matchesSearch) return false;
-    // Show only uncertain songs if toggled
-    if (showOnlyUncertain && !song.isUncertain) return false;
-    // Show only songs with no performances if toggled
-    if (showOnlyNoPerformances && song.performanceCount > 0) return false;
-    // Show only songs with performances if toggled
-    if (showOnlyWithPerformances && song.performanceCount === 0) return false;
-    return true;
-  });
+    // Sorting logic
+    const sortedSongs = [...songs].sort((a, b) => {
+        let aVal, bVal;
+        if (sortKey === 'title') {
+            aVal = a.title?.toLowerCase() || '';
+            bVal = b.title?.toLowerCase() || '';
+        } else if (sortKey === 'performanceCount') {
+            aVal = a.performanceCount ?? 0;
+            bVal = b.performanceCount ?? 0;
+        } else {
+            aVal = a[sortKey] ?? '';
+            bVal = b[sortKey] ?? '';
+        }
+        if (aVal < bVal) return sortOrder === 'asc' ? -1 : 1;
+        if (aVal > bVal) return sortOrder === 'asc' ? 1 : -1;
+        return 0;
+    });
 
-  // Apply sorting to filtered list
-  const displayed = [...filtered].sort((a, b) => {
-    if (sortField === 'title') {
-      return sortOrder === 'asc'
-        ? compareSongTitles(a, b)
-        : compareSongTitles(b, a);
-    } else {
-      return sortOrder === 'asc'
-        ? a.performanceCount - b.performanceCount
-        : b.performanceCount - a.performanceCount;
+    function handleSort(key: string) {
+        if (sortKey === key) {
+            setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+        } else {
+            setSortKey(key);
+            setSortOrder('asc');
+        }
     }
-  });
-  // Handler to delete a song
-  async function handleDeleteSong(id: number) {
-    if (!confirm('Delete this song?')) return;
-    const res = await fetch(`/api/admin/songs/${id}`, { method: 'DELETE' });
-    if (res.ok) setSongs(s => s.filter(song => song.id !== id));
-    else alert('Failed to delete song.');
-  }
-  return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="mb-4 text-center">
-        <Link href="/admin" className="text-blue-600 hover:underline font-semibold">Home</Link>
-      </div>
-      <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-8">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-gray-800">Songs</h1>
-          <Link href="/admin/songs/add">
-            <button className="bg-blue-600 text-white font-semibold py-2 px-4 rounded-md shadow hover:bg-blue-700 transition">Add Song</button>
-          </Link>
+
+    useEffect(() => {
+        refreshSongs();
+    }, []);
+
+    function openAddModal() {
+        setEditingId(0);
+        setModalOpen(true);
+    }
+    function openEditModal(id: number) {
+        setEditingId(id);
+        setModalOpen(true);
+    }
+    function handleSuccess() {
+        setModalOpen(false);
+        refreshSongs();
+        showToast("Song saved", "success");
+    }
+    function handleCancel() {
+        setModalOpen(false);
+    }
+    async function handleDelete(id: number, usageCount: number) {
+        if (usageCount > 0) {
+            showToast(`Cannot delete - has ${usageCount} usages`, "error");
+            return;
+        }
+        if (!confirm("Are you sure you want to delete this song?")) return;
+        try {
+            const res = await fetch(`/api/admin/songs/${id}`, { method: "DELETE" });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || "Delete failed");
+            showToast("Song deleted", "success");
+            refreshSongs();
+        } catch (err: any) {
+            showToast(err?.message || "Failed to delete song", "error");
+        }
+    }
+
+    return (
+        <div className="page-container">
+            <div className="page-header flex items-center justify-between">
+                <h1 className="page-title">Songs</h1>
+                <button className="btn btn-primary btn-medium" onClick={openAddModal}>
+                    <span>+</span>
+                    <span>Add Song</span>
+                </button>
+            </div>
+            <div className="admin-stats">
+                <div className="admin-stat-item">
+                    <span className="admin-stat-value">{songs.length}</span>
+                    <span>Total Songs</span>
+                </div>
+            </div>
+            {loading ? (
+                <div className="loading-state">
+                    <div className="spinner"></div>
+                    <div className="loading-text">Loading songs...</div>
+                </div>
+            ) : songs.length > 0 ? (
+                <div className="table-container">
+                    <table className="table">
+                        <thead>
+                            <tr>
+                                <th className="cursor-pointer" onClick={() => handleSort('title')}>
+                                    Title {sortKey === 'title' ? (sortOrder === 'asc' ? '▲' : '▼') : ''}
+                                </th>
+                                <th>Alternate Title</th>
+                                <th className="cursor-pointer" onClick={() => handleSort('performanceCount')}>
+                                    Performances {sortKey === 'performanceCount' ? (sortOrder === 'asc' ? '▲' : '▼') : ''}
+                                </th>
+                                <th>Box of Rain</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {sortedSongs.map((song: any) => (
+                                <tr key={song.id}>
+                                    <td>{song.title}</td>
+                                    <td>{song.alternateTitle ?? song.alternate_title ?? ''}</td>
+                                    <td>{song.performanceCount ?? song._count?.performances ?? 0}</td>
+                                    <td className="text-center">{song.inBoxOfRain ?? song.in_box_of_rain ? "✔️" : "❌"}</td>
+                                    <td className="text-center flex gap-2 justify-center">
+                                        <button className="btn btn-secondary btn-small" onClick={() => openEditModal(song.id)}>Edit</button>
+                                        <button className="btn btn-danger btn-small" onClick={() => handleDelete(song.id, (song._count?.performances ?? 0) + (song._count?.songAlbums ?? 0) + (song._count?.songTags ?? 0))}>Delete</button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            ) : (
+                <div className="empty-state">No songs found</div>
+            )}
+            <Modal
+                isOpen={modalOpen}
+                onClose={handleCancel}
+                title={editingId === 0 ? "Add Song" : "Edit Song"}
+            >
+                <SongForm songId={editingId} onSuccess={handleSuccess} onCancel={handleCancel} />
+            </Modal>
         </div>
-        <input
-          type="text"
-          placeholder="Search songs..."
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          className="w-full border rounded-md px-3 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
-        />
-        <div className="mb-4 flex items-center gap-4">
-          <label className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              checked={showOnlyUncertain}
-              onChange={e => setShowOnlyUncertain(e.target.checked)}
-              className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-            />
-            <span className="text-sm text-gray-700">Show only uncertain songs</span>
-          </label>
-          <label className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              checked={showOnlyNoPerformances}
-              onChange={e => setShowOnlyNoPerformances(e.target.checked)}
-              className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-            />
-            <span className="text-sm text-gray-700">Show only songs with no performances</span>
-          </label>
-          <label className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              checked={showOnlyWithPerformances}
-              onChange={e => setShowOnlyWithPerformances(e.target.checked)}
-              className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-            />
-            <span className="text-sm text-gray-700">Show only songs with performances</span>
-          </label>
-        </div>
-        <div className="mb-4 text-sm text-gray-600">
-          Showing {displayed.length} {displayed.length === 1 ? 'song' : 'songs'}
-        </div>
-        {loading ? (
-          <div className="text-center py-8">Loading songs...</div>
-        ) : error ? (
-          <div className="text-center text-red-500 py-8">{error}</div>
-        ) : filtered.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">No songs found.</div>
-        ) : (
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-gray-100">
-                <th
-                  className="py-2 px-4 font-semibold cursor-pointer"
-                  onClick={() => changeSort('title')}
-                >
-                  Title
-                  {sortField === 'title' && (sortOrder === 'asc' ? ' ▲' : ' ▼')}
-                </th>
-                <th className="py-2 px-4 font-semibold">Uncertain?</th>
-                <th className="py-2 px-4 font-semibold">Box of Rain?</th>
-                <th
-                  className="py-2 px-4 font-semibold cursor-pointer"
-                  onClick={() => changeSort('performanceCount')}
-                >
-                  Performances {sortField === 'performanceCount' ? (sortOrder === 'asc' ? '▲' : '▼') : null}
-                </th>
-                <th className="py-2 px-4 font-semibold">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {displayed.map(song => (
-                <tr key={song.id} className="border-b">
-                  <td className="py-2 px-4">{song.title}</td>
-                  <td className="py-2 px-4">{song.isUncertain ? "Yes" : "No"}</td>
-                  <td className="py-2 px-4">{song.inBoxOfRain ? "Yes" : "No"}</td>
-                  <td className="py-2 px-4">{song.performanceCount > 0 ? song.performanceCount : ""}</td>
-                  <td className="py-2 px-4">
-                    <Link href={`/admin/songs/${song.id}`}>
-                      <button className="bg-gray-200 text-gray-800 text-sm py-1 px-2 rounded hover:bg-gray-300 transition mr-1">Edit</button>
-                    </Link>
-                    <button
-                      className="bg-red-200 text-red-800 text-sm py-1 px-2 rounded hover:bg-red-300 transition"
-                      onClick={() => handleDeleteSong(song.id)}
-                    >Delete</button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
-    </div>
-  );
+    );
 }
