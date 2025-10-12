@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+import { generateSlugFromName } from '@/lib/utils/generateSlug';
+
 
 interface AlbumFormProps {
     albumId: number;
@@ -8,6 +10,8 @@ interface AlbumFormProps {
 
 export default function AlbumForm({ albumId, onSuccess, onCancel }: AlbumFormProps) {
     const [title, setTitle] = useState('');
+    const [slug, setSlug] = useState('');
+    const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
     const [artist, setArtist] = useState('');
     const [releaseYear, setReleaseYear] = useState('');
     const [isOfficial, setIsOfficial] = useState(true);
@@ -23,6 +27,7 @@ export default function AlbumForm({ albumId, onSuccess, onCancel }: AlbumFormPro
                 .then(res => res.json())
                 .then(data => {
                     setTitle(data.title || '');
+                    setSlug(data.slug || '');
                     setArtist(data.artist || '');
                     setReleaseYear(data.releaseYear ? String(data.releaseYear) : '');
                     setIsOfficial(data.isOfficial ?? true);
@@ -33,6 +38,8 @@ export default function AlbumForm({ albumId, onSuccess, onCancel }: AlbumFormPro
                 .finally(() => setLoading(false));
         } else {
             setTitle('');
+            setSlug('');
+            setSlugManuallyEdited(false);
             setArtist('');
             setReleaseYear('');
             setIsOfficial(true);
@@ -41,6 +48,12 @@ export default function AlbumForm({ albumId, onSuccess, onCancel }: AlbumFormPro
             setError('');
         }
     }, [albumId]);
+
+    useEffect(() => {
+        if (!slugManuallyEdited && title) {
+            setSlug(generateSlugFromName(title));
+        }
+    }, [title, slugManuallyEdited]);
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
@@ -58,6 +71,7 @@ export default function AlbumForm({ albumId, onSuccess, onCancel }: AlbumFormPro
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         title: title.trim(),
+                        slug: slug.trim(),
                         artist: artist.trim(),
                         releaseYear: releaseYear ? Number(releaseYear) : null,
                         isOfficial,
@@ -70,7 +84,11 @@ export default function AlbumForm({ albumId, onSuccess, onCancel }: AlbumFormPro
             if (!res.ok) throw new Error(data.error || 'Save failed');
             onSuccess();
         } catch (err: any) {
-            setError(err?.message || 'Failed to save');
+            if (err?.message?.toLowerCase().includes('slug')) {
+                setError('Slug must be unique');
+            } else {
+                setError(err?.message || 'Failed to save');
+            }
         } finally {
             setLoading(false);
         }
@@ -78,64 +96,98 @@ export default function AlbumForm({ albumId, onSuccess, onCancel }: AlbumFormPro
 
     return (
         <form onSubmit={handleSubmit}>
-            <label className="form-label form-label-required" htmlFor="title">Title</label>
-            <input
-                id="title"
-                className="input"
-                value={title}
-                onChange={e => setTitle(e.target.value)}
-                disabled={loading}
-                required
-            />
-            <label className="form-label mt-4" htmlFor="artist">Artist</label>
-            <input
-                id="artist"
-                className="input"
-                value={artist}
-                onChange={e => setArtist(e.target.value)}
-                disabled={loading}
-            />
-            <label className="form-label mt-4" htmlFor="releaseYear">Release Year</label>
-            <input
-                id="releaseYear"
-                className="input"
-                type="number"
-                placeholder="YYYY"
-                value={releaseYear}
-                onChange={e => setReleaseYear(e.target.value)}
-                disabled={loading}
-            />
-            <label className="checkbox-label mt-4">
+            <div className="form-group">
+                <label className="form-label form-label-required" htmlFor="title">Title</label>
                 <input
-                    type="checkbox"
-                    className="checkbox-input"
-                    checked={isOfficial}
-                    onChange={e => setIsOfficial(e.target.checked)}
+                    id="title"
+                    className="input"
+                    value={title}
+                    onChange={e => setTitle(e.target.value)}
+                    disabled={loading}
+                    required
+                />
+            </div>
+
+            <div className="form-group">
+                <label className="form-label" htmlFor="slug">Slug (URL-friendly identifier)</label>
+                <input
+                    id="slug"
+                    className="input"
+                    value={slug}
+                    onChange={e => {
+                        setSlug(e.target.value);
+                        setSlugManuallyEdited(true);
+                    }}
                     disabled={loading}
                 />
-                Official Release
-            </label>
-            <label className="form-label mt-4" htmlFor="publicNotes">Public Notes</label>
-            <textarea
-                id="publicNotes"
-                className="textarea"
-                placeholder="Public notes (visible on site)"
-                value={publicNotes}
-                onChange={e => setPublicNotes(e.target.value)}
-                disabled={loading}
-                rows={3}
-            />
-            <label className="form-label mt-4" htmlFor="privateNotes">Private Notes</label>
-            <textarea
-                id="privateNotes"
-                className="textarea"
-                placeholder="Private notes (admin only)"
-                value={privateNotes}
-                onChange={e => setPrivateNotes(e.target.value)}
-                disabled={loading}
-                rows={3}
-            />
+                <p className="form-help">Auto-generated from title, but you can customize it</p>
+            </div>
+
+            <div className="form-group">
+                <label className="form-label" htmlFor="artist">Artist</label>
+                <input
+                    id="artist"
+                    className="input"
+                    value={artist}
+                    onChange={e => setArtist(e.target.value)}
+                    disabled={loading}
+                />
+            </div>
+
+            <div className="form-group">
+                <label className="form-label" htmlFor="releaseYear">Release Year</label>
+                <input
+                    id="releaseYear"
+                    className="input"
+                    type="number"
+                    placeholder="YYYY"
+                    value={releaseYear}
+                    onChange={e => setReleaseYear(e.target.value)}
+                    disabled={loading}
+                />
+            </div>
+
+            <div className="form-group">
+                <label className="checkbox-label">
+                    <input
+                        type="checkbox"
+                        className="checkbox-input"
+                        checked={isOfficial}
+                        onChange={e => setIsOfficial(e.target.checked)}
+                        disabled={loading}
+                    />
+                    Official Release
+                </label>
+            </div>
+
+            <div className="form-group">
+                <label className="form-label" htmlFor="publicNotes">Public Notes</label>
+                <textarea
+                    id="publicNotes"
+                    className="textarea"
+                    placeholder="Public notes (visible on site)"
+                    value={publicNotes}
+                    onChange={e => setPublicNotes(e.target.value)}
+                    disabled={loading}
+                    rows={3}
+                />
+            </div>
+
+            <div className="form-group">
+                <label className="form-label" htmlFor="privateNotes">Private Notes</label>
+                <textarea
+                    id="privateNotes"
+                    className="textarea"
+                    placeholder="Private notes (admin only)"
+                    value={privateNotes}
+                    onChange={e => setPrivateNotes(e.target.value)}
+                    disabled={loading}
+                    rows={3}
+                />
+            </div>
+
             {error && <div className="form-error mb-4">{error}</div>}
+
             <div className="flex gap-3 justify-end mt-6">
                 <button type="button" className="btn btn-secondary btn-medium" onClick={onCancel} disabled={loading}>
                     Cancel

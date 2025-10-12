@@ -21,7 +21,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
     try {
         const id = Number(params.id);
         if (!id) return NextResponse.json({ error: 'Invalid ID' }, { status: 400 });
-        const { title, artist, releaseYear, isOfficial = true, publicNotes, privateNotes } = await req.json();
+        const { title, slug, artist, releaseYear, isOfficial = true, publicNotes, privateNotes } = await req.json();
         if (!title || typeof title !== 'string' || title.trim() === '') {
             return NextResponse.json({ error: 'Title is required' }, { status: 400 });
         }
@@ -29,6 +29,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
             where: { id },
             data: {
                 title: title.trim(),
+                slug: slug?.trim() || null,
                 artist: artist?.trim() || null,
                 releaseYear: releaseYear ? Number(releaseYear) : null,
                 isOfficial: typeof isOfficial === 'boolean' ? isOfficial : true,
@@ -39,6 +40,9 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
         revalidatePath('/admin/albums');
         return NextResponse.json(updated);
     } catch (error: any) {
+        if (error?.code === 'P2002' && error?.meta?.target?.includes('slug')) {
+            return NextResponse.json({ error: 'Slug must be unique' }, { status: 400 });
+        }
         return NextResponse.json({ error: error?.message || 'Failed to update album' }, { status: 500 });
     }
 }

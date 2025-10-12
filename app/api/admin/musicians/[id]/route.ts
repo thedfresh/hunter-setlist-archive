@@ -21,7 +21,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
     try {
         const id = Number(params.id);
         if (!id) return NextResponse.json({ error: 'Invalid ID' }, { status: 400 });
-        const { name, isUncertain = false, publicNotes, privateNotes } = await req.json();
+        const { name, slug, isUncertain = false, publicNotes, privateNotes } = await req.json();
         if (!name || typeof name !== 'string' || name.trim() === '') {
             return NextResponse.json({ error: 'Name is required' }, { status: 400 });
         }
@@ -29,6 +29,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
             where: { id },
             data: {
                 name: name.trim(),
+                slug: slug?.trim() || null,
                 isUncertain: typeof isUncertain === 'boolean' ? isUncertain : false,
                 publicNotes: publicNotes?.trim() || null,
                 privateNotes: privateNotes?.trim() || null,
@@ -37,6 +38,9 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
         revalidatePath('/admin/musicians');
         return NextResponse.json(updated);
     } catch (error: any) {
+        if (error?.code === 'P2002' && error?.meta?.target?.includes('slug')) {
+            return NextResponse.json({ error: 'Slug must be unique' }, { status: 400 });
+        }
         return NextResponse.json({ error: error?.message || 'Failed to update musician' }, { status: 500 });
     }
 }
