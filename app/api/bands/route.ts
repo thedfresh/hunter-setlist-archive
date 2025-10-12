@@ -12,6 +12,7 @@ export async function GET() {
             musician: true,
           },
         },
+        _count: { select: { events: true } }
       },
     });
     return NextResponse.json({ bands });

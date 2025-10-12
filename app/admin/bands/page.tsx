@@ -1,171 +1,179 @@
 "use client";
-import React, { useEffect, useState } from "react";
-import Link from "next/link";
-import BandForm from "./BandForm";
+import { useState, useEffect } from 'react';
+import Modal from '@/components/ui/Modal';
+import BandForm from '@/components/admin/BandForm';
+import { useToast } from '@/lib/hooks/useToast';
+import { useRouter } from 'next/navigation';
 
-export default function BandListPage() {
-  const [bands, setBands] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [showForm, setShowForm] = useState(false);
-  const [editingBand, setEditingBand] = useState<any | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [deleteId, setDeleteId] = useState<number | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
+export default function BandsPage() {
+    const [bands, setBands] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [sortKey, setSortKey] = useState<'name' | 'members' | 'shows'>('name');
+    const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
+    const [modalOpen, setModalOpen] = useState(false);
+    const [editingId, setEditingId] = useState<number | null>(null);
+    const { showSuccess, showError } = useToast();
+    const router = useRouter();
 
-  useEffect(() => {
-    fetchBands();
-  }, []);
+    useEffect(() => {
+        refreshBands();
+    }, []);
 
-  async function fetchBands() {
-    setLoading(true);
-    try {
-      const res = await fetch("/api/bands");
-      const data = await res.json();
-      if (res.ok && data.bands) {
-  setBands(data.bands);
-      } else {
-        setError(data.error || "Failed to fetch bands.");
-      }
-    } catch {
-      setError("Failed to fetch bands.");
-    } finally {
-      setLoading(false);
+    async function refreshBands() {
+        setLoading(true);
+        try {
+            const res = await fetch('/api/bands', { cache: 'no-store' });
+            if (!res.ok) throw new Error('Failed to fetch');
+            const data = await res.json();
+            setBands(data.bands || []);
+        } catch (error) {
+            setBands([]);
+        } finally {
+            setLoading(false);
+        }
     }
-  }
 
-  function handleAdd() {
-    setEditingBand(null);
-    setShowForm(true);
-  }
-
-  function handleEdit(band: any) {
-    setEditingBand(band);
-    setShowForm(true);
-  }
-
-  async function handleDelete(id: number) {
-    if (!confirm("Are you sure you want to delete this band?")) return;
-    try {
-  const res = await fetch(`/api/admin/bands/${id}`, { method: "DELETE" });
-      if (res.ok) {
-        setSuccess("Band deleted.");
-        fetchBands();
-      } else {
-        setError("Failed to delete band.");
-      }
-    } catch {
-      setError("Failed to delete band.");
+    function handleSort(key: 'name' | 'members' | 'shows') {
+        if (sortKey === key) {
+            setSortDir(sortDir === 'asc' ? 'desc' : 'asc');
+        } else {
+            setSortKey(key);
+            setSortDir('asc');
+        }
     }
-  }
 
-  function handleFormClose() {
-    setShowForm(false);
-    setEditingBand(null);
-  }
+    function openAddModal() {
+        setEditingId(0);
+        setModalOpen(true);
+    }
+    function openEditModal(id: number) {
+        setEditingId(id);
+        setModalOpen(true);
+    }
 
-  function handleFormSaved() {
-    setShowForm(false);
-    setEditingBand(null);
-    fetchBands();
-    setSuccess("Band saved.");
-  }
+    async function handleDelete(id: number) {
+        if (!confirm('Are you sure you want to delete this band?')) return;
+        try {
+            const res = await fetch(`/api/admin/bands/${id}`, { method: 'DELETE' });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'Delete failed');
+            showSuccess('Band deleted');
+            await refreshBands();
+        } catch (error: any) {
+            showError(error?.message || 'Failed to delete band');
+        }
+    }
 
-  return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-3xl mx-auto bg-white rounded-xl shadow-lg p-8">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-gray-800">Bands</h1>
-          <button
-            className="bg-blue-600 text-white font-semibold py-2 px-4 rounded-md shadow hover:bg-blue-700 transition"
-            onClick={handleAdd}
-          >
-            Add New Band
-          </button>
+    const sorted = [...bands].sort((a, b) => {
+        let aVal, bVal;
+        if (sortKey === 'members') {
+            aVal = a.bandMusicians?.length ?? 0;
+            bVal = b.bandMusicians?.length ?? 0;
+        } else if (sortKey === 'shows') {
+            aVal = a._count?.events ?? 0;
+            bVal = b._count?.events ?? 0;
+        } else {
+            aVal = a.name?.toLowerCase?.() ?? '';
+            bVal = b.name?.toLowerCase?.() ?? '';
+        }
+        if (aVal < bVal) return sortDir === 'asc' ? -1 : 1;
+        if (aVal > bVal) return sortDir === 'asc' ? 1 : -1;
+        return 0;
+    });
+
+    return (
+        <div>
+            <div className="page-header flex items-center justify-between">
+                <h1 className="page-title">Bands</h1>
+                <button
+                    className="btn btn-primary btn-medium"
+                    onClick={openAddModal}
+                >
+                    <span>+</span>
+                    <span>Add Band</span>
+                </button>
+            </div>
+            <div className="admin-stats">
+                <div className="admin-stat-item">
+                    <span className="admin-stat-value">{bands.length}</span>
+                    <span>Total Bands</span>
+                </div>
+            </div>
+            {loading ? (
+                <div className="loading-state">
+                    <div className="spinner"></div>
+                    <div className="loading-text">Loading bands...</div>
+                </div>
+            ) : bands.length > 0 ? (
+                <div className="table-container">
+                    <table className="table">
+                        <thead>
+                            <tr>
+                                <th className="sortable" onClick={() => handleSort('name')}>
+                                    Name {sortKey === 'name' && (sortDir === 'asc' ? '▲' : '▼')}
+                                </th>
+                                <th className="sortable" onClick={() => handleSort('members')}>
+                                    Members {sortKey === 'members' && (sortDir === 'asc' ? '▲' : '▼')}
+                                </th>
+                                <th className="sortable" onClick={() => handleSort('shows')}>
+                                    Shows {sortKey === 'shows' && (sortDir === 'asc' ? '▲' : '▼')}
+                                </th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {sorted.map((band) => (
+                                <tr key={band.id}>
+                                    <td>{band.name}</td>
+                                    <td>{band.bandMusicians?.length ?? 0}</td>
+                                    <td>{band._count?.events ?? 0}</td>
+                                    <td>
+                                        <div className="table-actions flex gap-2">
+                                            <button
+                                                className="btn btn-secondary btn-small"
+                                                onClick={() => router.push(`/admin/bands/${band.id}`)}
+                                            >
+                                                View/Edit
+                                            </button>
+                                            <button
+                                                className="btn btn-secondary btn-small"
+                                                onClick={() => openEditModal(band.id)}
+                                            >
+                                                Edit Info
+                                            </button>
+                                            <button
+                                                onClick={() => handleDelete(band.id)}
+                                                className="btn btn-danger btn-small"
+                                            >
+                                                Delete
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            ) : (
+                <div className="empty-state">
+                    <div className="empty-title">No bands found</div>
+                </div>
+            )}
+            <Modal
+                isOpen={modalOpen}
+                onClose={() => setModalOpen(false)}
+                title={editingId === 0 ? 'Add Band' : 'Edit Band Info'}
+            >
+                <BandForm
+                    bandId={editingId || 0}
+                    onSuccess={async () => {
+                        setModalOpen(false);
+                        showSuccess(editingId === 0 ? 'Band added' : 'Band info updated');
+                        await refreshBands();
+                    }}
+                    onCancel={() => setModalOpen(false)}
+                />
+            </Modal>
         </div>
-        {error && <div className="text-red-500 mb-4">{error}</div>}
-        {success && <div className="text-green-600 mb-4">{success}</div>}
-        {loading ? (
-          <div className="text-center py-8">Loading bands...</div>
-        ) : (
-          <>
-            <h2 className="text-xl font-bold mt-4 mb-2">Hunter Bands</h2>
-            <table className="w-full border rounded-md overflow-hidden mb-8">
-              <thead>
-                <tr className="bg-gray-100">
-                  <th className="text-left px-4 py-2">Name</th>
-                  <th className="text-left px-4 py-2">Display Name</th>
-                  <th className="text-left px-4 py-2">Member Count</th>
-                  <th className="text-left px-4 py-2">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {bands.filter(b => b.isHunterBand).map(band => (
-                  <tr key={band.id} className="border-t">
-                    <td className="px-4 py-2 font-semibold text-gray-800">{band.name}</td>
-                    <td className="px-4 py-2">{band.displayName || <span className="text-gray-400">—</span>}</td>
-                    <td className="px-4 py-2">{band.bandMusicians?.length || 0}</td>
-                    <td className="px-4 py-2 flex gap-2">
-                      <Link
-                        href={`/admin/bands/${band.id}`}
-                        className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 text-sm"
-                      >
-                        Edit
-                      </Link>
-                      <button
-                        className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 text-sm"
-                        onClick={() => handleDelete(band.id)}
-                      >
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            <h2 className="text-xl font-bold mt-4 mb-2">Hunter as Guest</h2>
-            <table className="w-full border rounded-md overflow-hidden">
-              <thead>
-                <tr className="bg-gray-100">
-                  <th className="text-left px-4 py-2">Name</th>
-                  <th className="text-left px-4 py-2">Display Name</th>
-                  <th className="text-left px-4 py-2">Member Count</th>
-                  <th className="text-left px-4 py-2">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {bands.filter(b => !b.isHunterBand).map(band => (
-                  <tr key={band.id} className="border-t">
-                    <td className="px-4 py-2 font-semibold text-gray-800">{band.name}</td>
-                    <td className="px-4 py-2">{band.displayName || <span className="text-gray-400">—</span>}</td>
-                    <td className="px-4 py-2">{band.bandMusicians?.length || 0}</td>
-                    <td className="px-4 py-2 flex gap-2">
-                      <Link
-                        href={`/admin/bands/${band.id}`}
-                        className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 text-sm"
-                      >
-                        Edit
-                      </Link>
-                      <button
-                        className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 text-sm"
-                        onClick={() => handleDelete(band.id)}
-                      >
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </>
-        )}
-        {showForm && (
-          <BandForm
-            band={editingBand}
-            onClose={handleFormClose}
-            onSaved={handleFormSaved}
-          />
-        )}
-      </div>
-    </div>
-  );
+    );
 }

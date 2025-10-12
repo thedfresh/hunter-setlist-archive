@@ -1,111 +1,166 @@
 "use client";
-import React, { useState, useEffect } from "react";
-import Link from "next/link";
-
-type Musician = {
-  id: number;
-  name: string;
-  isUncertain: boolean;
-  createdAt: string;
-  defaultInstruments?: { instrument: { id: number; name: string } }[];
-};
+import { useState, useEffect } from 'react';
+import Modal from '@/components/ui/Modal';
+import MusicianForm from '@/components/admin/MusicianForm';
+import { useToast } from '@/lib/hooks/useToast';
 
 export default function MusiciansPage() {
-  const [musicians, setMusicians] = useState<Musician[]>([]);
-  const [search, setSearch] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+    const [musicians, setMusicians] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [sortKey, setSortKey] = useState<'name' | 'appearances'>('name');
+    const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
+    const [modalOpen, setModalOpen] = useState(false);
+    const [editingId, setEditingId] = useState<number | null>(null);
+    const { showSuccess, showError } = useToast();
 
-  useEffect(() => {
-    async function fetchMusicians() {
-      try {
-        const res = await fetch("/api/musicians");
-        const data = await res.json();
-        if (res.ok && data.musicians) {
-          setMusicians(data.musicians);
-        } else {
-          setError("Failed to load musicians");
+    useEffect(() => {
+        refreshMusicians();
+    }, []);
+
+    async function refreshMusicians() {
+        setLoading(true);
+        try {
+            const res = await fetch('/api/musicians', { cache: 'no-store' });
+            if (!res.ok) throw new Error('Failed to fetch');
+            const data = await res.json();
+            setMusicians(data.musicians || []);
+        } catch (error) {
+            setMusicians([]);
+        } finally {
+            setLoading(false);
         }
-      } catch {
-        setError("Failed to load musicians");
-      } finally {
-        setLoading(false);
-      }
     }
-    fetchMusicians();
-  }, []);
 
-  const filtered = musicians.filter((m: Musician) =>
-    m.name.toLowerCase().includes(search.toLowerCase())
-  );
+    function handleSort(key: 'name' | 'appearances') {
+        if (sortKey === key) {
+            setSortDir(sortDir === 'asc' ? 'desc' : 'asc');
+        } else {
+            setSortKey(key);
+            setSortDir('asc');
+        }
+    }
 
-  // Add Home link above main content
+    function openAddModal() {
+        setEditingId(0);
+        setModalOpen(true);
+    }
+    function openEditModal(id: number) {
+        setEditingId(id);
+        setModalOpen(true);
+    }
 
-  return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="mb-4 text-center">
-        <Link href="/admin" className="text-blue-600 hover:underline font-semibold">Home</Link>
-      </div>
-      <div className="max-w-3xl mx-auto bg-white rounded-xl shadow-lg p-8">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-gray-800">Musicians</h1>
-          <Link href="/admin/musicians/new">
-            <button className="bg-blue-600 text-white font-semibold py-2 px-4 rounded-md shadow hover:bg-blue-700 transition">Add Musician</button>
-          </Link>
+    async function handleDelete(id: number) {
+        if (!confirm('Are you sure you want to delete this musician?')) return;
+        try {
+            const res = await fetch(`/api/admin/musicians/${id}`, { method: 'DELETE' });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'Delete failed');
+            showSuccess('Musician deleted');
+            await refreshMusicians();
+        } catch (error: any) {
+            showError(error?.message || 'Failed to delete musician');
+        }
+    }
+
+    const sorted = [...musicians].sort((a, b) => {
+        let aVal, bVal;
+        if (sortKey === 'appearances') {
+            aVal = (a._count?.eventMusicians ?? 0) + (a._count?.performanceMusicians ?? 0) + (a._count?.bandMusicians ?? 0);
+            bVal = (b._count?.eventMusicians ?? 0) + (b._count?.performanceMusicians ?? 0) + (b._count?.bandMusicians ?? 0);
+        } else {
+            aVal = a.name?.toLowerCase?.() ?? '';
+            bVal = b.name?.toLowerCase?.() ?? '';
+        }
+        if (aVal < bVal) return sortDir === 'asc' ? -1 : 1;
+        if (aVal > bVal) return sortDir === 'asc' ? 1 : -1;
+        return 0;
+    });
+
+    return (
+        <div>
+            <div className="page-header flex items-center justify-between">
+                <h1 className="page-title">Musicians</h1>
+                <button
+                    className="btn btn-primary btn-medium"
+                    onClick={openAddModal}
+                >
+                    <span>+</span>
+                    <span>Add Musician</span>
+                </button>
+            </div>
+            <div className="admin-stats">
+                <div className="admin-stat-item">
+                    <span className="admin-stat-value">{musicians.length}</span>
+                    <span>Total Musicians</span>
+                </div>
+            </div>
+            {loading ? (
+                <div className="loading-state">
+                    <div className="spinner"></div>
+                    <div className="loading-text">Loading musicians...</div>
+                </div>
+            ) : musicians.length > 0 ? (
+                <div className="table-container">
+                    <table className="table">
+                        <thead>
+                            <tr>
+                                <th className="sortable" onClick={() => handleSort('name')}>
+                                    Name {sortKey === 'name' && (sortDir === 'asc' ? '▲' : '▼')}
+                                </th>
+                                <th>Uncertain</th>
+                                <th className="sortable" onClick={() => handleSort('appearances')}>
+                                    Appearances {sortKey === 'appearances' && (sortDir === 'asc' ? '▲' : '▼')}
+                                </th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {sorted.map((musician) => (
+                                <tr key={musician.id}>
+                                    <td>{musician.name}</td>
+                                    <td>{musician.isUncertain ? '✔️' : '❌'}</td>
+                                    <td>{(musician._count?.eventMusicians ?? 0) + (musician._count?.performanceMusicians ?? 0) + (musician._count?.bandMusicians ?? 0)}</td>
+                                    <td>
+                                        <div className="table-actions">
+                                            <button
+                                                className="btn btn-secondary btn-small"
+                                                onClick={() => openEditModal(musician.id)}
+                                            >
+                                                Edit
+                                            </button>
+                                            <button
+                                                onClick={() => handleDelete(musician.id)}
+                                                className="btn btn-danger btn-small"
+                                            >
+                                                Delete
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            ) : (
+                <div className="empty-state">
+                    <div className="empty-title">No musicians found</div>
+                </div>
+            )}
+            <Modal
+                isOpen={modalOpen}
+                onClose={() => setModalOpen(false)}
+                title={editingId === 0 ? 'Add Musician' : 'Edit Musician'}
+            >
+                <MusicianForm
+                    musicianId={editingId || 0}
+                    onSuccess={async () => {
+                        setModalOpen(false);
+                        showSuccess(editingId === 0 ? 'Musician added' : 'Musician updated');
+                        await refreshMusicians();
+                    }}
+                    onCancel={() => setModalOpen(false)}
+                />
+            </Modal>
         </div>
-        <input
-          type="text"
-          placeholder="Search musicians..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="w-full border rounded-md px-3 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
-        />
-        {loading ? (
-          <div className="text-center py-8">Loading musicians...</div>
-        ) : error ? (
-          <div className="text-center text-red-500 py-8">{error}</div>
-        ) : filtered.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">No musicians found.</div>
-        ) : (
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-gray-100">
-                <th className="py-2 px-4 font-semibold">Name</th>
-                <th className="py-2 px-4 font-semibold">Uncertain?</th>
-                <th className="py-2 px-4 font-semibold">Created</th>
-                <th className="py-2 px-4 font-semibold">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((m) => (
-                <tr key={m.id} className="border-b">
-                  <td className="py-2 px-4">
-                    <div className="flex flex-col gap-1">
-                      <span>{m.name}</span>
-                      {m.defaultInstruments && m.defaultInstruments.length > 0 && (
-                        <div className="flex flex-wrap gap-1 mt-1">
-                          {m.defaultInstruments.map(di => (
-                            <span key={di.instrument.id} className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
-                              {di.instrument.name}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </td>
-                  <td className="py-2 px-4">{m.isUncertain ? "Yes" : "No"}</td>
-                  <td className="py-2 px-4">{new Date(m.createdAt).toLocaleDateString()}</td>
-                  <td className="py-2 px-4">
-                    <Link href={`/admin/musicians/${m.id}`}>
-                      <button className="bg-gray-200 text-gray-800 font-semibold py-1 px-3 rounded-md shadow hover:bg-gray-300 transition">View/Edit</button>
-                    </Link>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
-    </div>
-  );
+    );
 }

@@ -1,47 +1,24 @@
-import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import { revalidatePath } from 'next/cache';
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { revalidatePath } from "next/cache";
 
 export async function POST(req: Request) {
-  try {
-    const data = await req.json();
-    if (!data.name || typeof data.name !== 'string') {
-      return NextResponse.json({ error: 'Musician name is required.' }, { status: 400 });
-    }
-    const { name, isUncertain, publicNotes, privateNotes, defaultInstrumentIds } = data;
-    // Step 1: Create musician
-    const musician = await prisma.musician.create({
-      data: {
-        name,
-        isUncertain: !!isUncertain,
-        publicNotes: typeof publicNotes === 'string' ? publicNotes : undefined,
-        privateNotes: typeof privateNotes === 'string' ? privateNotes : undefined,
-      },
-    });
-
-    // Step 2: Create MusicianDefaultInstrument records
-    if (defaultInstrumentIds && Array.isArray(defaultInstrumentIds) && defaultInstrumentIds.length > 0) {
-      try {
-        await prisma.musicianDefaultInstrument.createMany({
-          data: defaultInstrumentIds.map((instrumentId: number) => ({
-            musicianId: musician.id,
-            instrumentId
-          }))
+    try {
+        const { name, isUncertain = false, publicNotes, privateNotes } = await req.json();
+        if (!name || typeof name !== 'string' || name.trim() === '') {
+            return NextResponse.json({ error: 'Name is required' }, { status: 400 });
+        }
+        const musician = await prisma.musician.create({
+            data: {
+                name: name.trim(),
+                isUncertain: typeof isUncertain === 'boolean' ? isUncertain : false,
+                publicNotes: publicNotes?.trim() || null,
+                privateNotes: privateNotes?.trim() || null,
+            },
         });
-      } catch (err) {
-        console.error('Error linking instruments to musician:', err);
-      }
+        revalidatePath('/admin/musicians');
+        return NextResponse.json(musician, { status: 201 });
+    } catch (error: any) {
+        return NextResponse.json({ error: error?.message || 'Failed to create musician' }, { status: 500 });
     }
-
-    // Fetch musician and their default instruments for response
-    const defaultInstruments = await prisma.musicianDefaultInstrument.findMany({
-      where: { musicianId: musician.id },
-      include: { instrument: true }
-    });
-    revalidatePath('/api/musicians')
-    return NextResponse.json({ musician: { ...musician, defaultInstruments } }, { status: 201 });
-  } catch (error) {
-    console.error('POST /api/musicians error:', error);
-    return NextResponse.json({ error: 'Failed to create musician.', details: String(error) }, { status: 500 });
-  }
 }

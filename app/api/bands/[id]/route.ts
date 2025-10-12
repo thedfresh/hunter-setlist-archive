@@ -16,6 +16,7 @@ export async function GET(req: Request, { params }: { params: Params }) {
             musician: true,
           },
         },
+        _count: { select: { events: true } }
       },
     });
     if (!band) return NextResponse.json({ error: 'Band not found.' }, { status: 404 });
