@@ -3,10 +3,10 @@ import { useToast } from "@/lib/hooks/useToast";
 import Modal from "@/components/ui/Modal";
 import SetForm from "@/components/admin/SetForm";
 import PerformanceEditor from "@/components/admin/PerformanceEditor";
-import { Edit2, Trash2, GripVertical } from 'lucide-react';
+import { Edit2, Trash2, GripVertical, Plus } from 'lucide-react';
 import { DndContext, closestCenter, DragEndEvent } from '@dnd-kit/core';
-import { SortableContext, verticalListSortingStrategy, useSortable, arrayMove } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
+import { SortableContext, verticalListSortingStrategy, useSortable, arrayMove } from '@dnd-kit/sortable'; import { CSS } from '@dnd-kit/utilities';
+import SetMusicianForm from "@/components/admin/SetMusicianForm";
 
 interface SetsSectionProps {
     eventId: number;
@@ -30,6 +30,7 @@ export default function SetsSection({ eventId }: SetsSectionProps) {
     const [editingSetId, setEditingSetId] = useState<number | null>(null);
     const [perfModalOpen, setPerfModalOpen] = useState(false);
     const [editingPerformance, setEditingPerformance] = useState<{ setId: number; perfId: number | null } | null>(null);
+    // Removed set dragging state
     const { showSuccess, showError } = useToast();
 
     const refreshSets = async () => {
@@ -95,53 +96,88 @@ export default function SetsSection({ eventId }: SetsSectionProps) {
         }
     };
 
-    const handleSetDragEnd = async (event: DragEndEvent) => {
+
+
+    const handleDragEnd = async (event: DragEndEvent) => {
         const { active, over } = event;
-        if (!over || active.id === over.id) return;
+        if (!over) return;
 
-        const oldIndex = sets.findIndex(s => s.id === active.id);
-        const newIndex = sets.findIndex(s => s.id === over.id);
+        const sourceSet = sets.find(s => s.performances?.some((p: any) => p.id === active.id));
+        if (!sourceSet) return;
 
-        const reorderedSets = [...sets];
-        const [movedSet] = reorderedSets.splice(oldIndex, 1);
-        reorderedSets.splice(newIndex, 0, movedSet);
+        const targetSet = sets.find(s => s.performances?.some((p: any) => p.id === over.id));
+        if (!targetSet) return;
 
-        setSets(reorderedSets);
+        const sourcePerfs = sourceSet.performances || [];
+        const oldIndex = sourcePerfs.findIndex((p: any) => p.id === active.id);
 
-        try {
-            const setIds = reorderedSets.map(s => s.id);
-            const res = await fetch(`/api/admin/events/${eventId}/sets/reorder`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ setIds })
-            });
-            if (!res.ok) throw new Error();
-            showSuccess('Sets reordered');
-        } catch {
-            showError('Error reordering sets');
-            refreshSets();
+        if (sourceSet.id === targetSet.id) {
+            const newIndex = sourcePerfs.findIndex((p: any) => p.id === over.id);
+            const reordered = arrayMove(sourcePerfs, oldIndex, newIndex);
+
+            try {
+                const performanceIds = reordered.map((p: any) => p.id);
+                const res = await fetch(`/api/admin/events/${eventId}/sets/${sourceSet.id}/performances/reorder`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ performanceIds })
+                });
+                if (!res.ok) throw new Error();
+                await refreshSets();
+            } catch {
+                showError('Failed to reorder');
+                await refreshSets();
+            }
+        } else {
+            const targetPerfs = targetSet.performances || [];
+            const targetIndex = targetPerfs.findIndex((p: any) => p.id === over.id);
+
+            try {
+                const res = await fetch(`/api/admin/events/${eventId}/sets/${sourceSet.id}/performances/move`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        performanceId: active.id,
+                        targetSetId: targetSet.id,
+                        targetPosition: targetIndex + 1
+                    })
+                });
+                if (!res.ok) throw new Error();
+                showSuccess('Performance moved');
+                await refreshSets();
+            } catch {
+                showError('Failed to move performance');
+                await refreshSets();
+            }
         }
     };
+
+    // Only performances are sortable, not sets
+    const allPerformanceIds = sets.flatMap(s => (s.performances || []).map((p: any) => p.id));
 
     return (
         <section className="mb-8">
             <details open={sets.length > 0}>
-                <summary className="text-lg font-medium select-none cursor-pointer flex items-center">
-                    <button className="btn btn-primary btn-small mr-4" onClick={handleAddSet} type="button">
-                        + Add Set
+                <summary className="text-lg font-medium select-none cursor-pointer flex items-center justify-between">
+                    <span>Sets & Performances ({sets.length})</span>
+                    <button className="btn btn-primary btn-medium" onClick={handleAddSet} type="button">
+                        Add Set
                     </button>
-                    Sets & Performances ({sets.length})
                 </summary>
                 {loading ? (
                     <div className="mt-4">Loading sets...</div>
                 ) : sets.length === 0 ? (
                     <div className="mt-4 text-gray-500">No sets yet. Add a set to begin.</div>
                 ) : (
-                    <DndContext collisionDetection={closestCenter} onDragEnd={handleSetDragEnd}>
-                        <SortableContext items={sets.map(s => s.id)} strategy={verticalListSortingStrategy}>
+                    <DndContext
+                        collisionDetection={closestCenter}
+                        // Removed onDragStart handler
+                        onDragEnd={handleDragEnd}
+                    >
+                        <SortableContext items={allPerformanceIds} strategy={verticalListSortingStrategy}>
                             <div className="mt-4 grid grid-cols-3 gap-4">
                                 {sets.map(set => (
-                                    <SortableSetCard
+                                    <SetCard
                                         key={set.id}
                                         set={set}
                                         eventId={eventId}
@@ -154,6 +190,7 @@ export default function SetsSection({ eventId }: SetsSectionProps) {
                                 ))}
                             </div>
                         </SortableContext>
+                        {/* Removed DragOverlay for sets */}
                     </DndContext>
                 )}
             </details>
@@ -190,7 +227,7 @@ export default function SetsSection({ eventId }: SetsSectionProps) {
     );
 }
 
-function SortableSetCard({
+function SetCard({
     set,
     eventId,
     onEditSet,
@@ -207,49 +244,47 @@ function SortableSetCard({
     onEditPerformance: (setId: number, perfId: number) => void;
     onDeletePerformance: (setId: number, perfId: number) => void;
 }) {
-    const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: set.id });
-    const [localPerformances, setLocalPerformances] = useState(set.performances || []);
-
-    const style = {
-        transform: CSS.Transform.toString(transform),
-        transition,
-        opacity: isDragging ? 0.5 : 1
-    };
+    const { showSuccess, showError } = useToast();
+    const [setMusicians, setSetMusicians] = useState<any[]>([]);
+    const [musiciansLoading, setMusiciansLoading] = useState(false);
+    const [musicianModalOpen, setMusicianModalOpen] = useState(false);
+    const [editingMusicianId, setEditingMusicianId] = useState<number | null>(null);
 
     useEffect(() => {
-        setLocalPerformances(set.performances || []);
-    }, [set.performances]);
+        refreshSetMusicians();
+        // eslint-disable-next-line
+    }, [set.id]);
 
-    const handlePerformanceDragEnd = async (event: DragEndEvent) => {
-        const { active, over } = event;
-        if (!over || active.id === over.id) return;
-
-        const oldIndex = localPerformances.findIndex((p: any) => p.id === active.id);
-        const newIndex = localPerformances.findIndex((p: any) => p.id === over.id);
-
-        const reordered = arrayMove(localPerformances, oldIndex, newIndex);
-        setLocalPerformances(reordered);
-
+    async function refreshSetMusicians() {
+        setMusiciansLoading(true);
         try {
-            const performanceIds = reordered.map((p: any) => p.id);
-            const res = await fetch(`/api/admin/events/${eventId}/sets/${set.id}/performances/reorder`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ performanceIds })
+            const res = await fetch(`/api/admin/events/${eventId}/sets/${set.id}/musicians`);
+            const data = await res.json();
+            setSetMusicians(data.setMusicians || []);
+        } catch {
+            showError("Failed to load set musicians");
+        } finally {
+            setMusiciansLoading(false);
+        }
+    }
+
+    async function handleDeleteSetMusician(musicianId: number) {
+        if (!window.confirm("Remove this musician from this set?")) return;
+        try {
+            const res = await fetch(`/api/admin/events/${eventId}/sets/${set.id}/musicians/${musicianId}`, {
+                method: "DELETE"
             });
             if (!res.ok) throw new Error();
-        } catch (err) {
-            console.error('Failed to reorder performances', err);
-            setLocalPerformances(set.performances || []);
+            showSuccess("Set musician removed");
+            refreshSetMusicians();
+        } catch {
+            showError("Failed to delete set musician");
         }
-    };
+    }
 
     return (
-        <div ref={setNodeRef} style={style} className={`border rounded-lg p-4 ${isDragging ? 'border-blue-500 border-2 shadow-lg' : ''}`}>
+        <div className="border rounded-lg p-4">
             <div className="flex items-center gap-3 mb-2">
-                <button type="button" {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing p-1 hover:bg-gray-100 rounded">
-                    <GripVertical className="w-4 h-4 text-gray-400" />
-                </button>
                 <div className="flex-1">
                     <span className="font-semibold mr-2">{set.setType?.displayName || set.setType?.name}</span>
                     {set.band && <span className="text-gray-600 mr-2">{set.band.name}</span>}
@@ -270,29 +305,88 @@ function SortableSetCard({
                     {set.privateNotes && <span>Private: {set.privateNotes}</span>}
                 </div>
             )}
-            <DndContext collisionDetection={closestCenter} onDragEnd={handlePerformanceDragEnd}>
-                <SortableContext items={localPerformances.map((p: any) => p.id)} strategy={verticalListSortingStrategy}>
-                    <div className="mt-4 space-y-2">
-                        {localPerformances.length > 0 ? (
-                            localPerformances.map((perf: any) => (
-                                <SortablePerformance
-                                    key={perf.id}
-                                    perf={perf}
-                                    setId={set.id}
-                                    onEdit={onEditPerformance}
-                                    onDelete={onDeletePerformance}
-                                />
-                            ))
-                        ) : (
-                            <div className="text-gray-400">No performances in this set.</div>
-                        )}
-                        <button className="btn btn-primary btn-small mt-2" onClick={() => onAddPerformance(set.id)} type="button">
-                            + Add Performance
+            <details open={setMusicians.length > 0} className="mb-4 bg-gray-50 border border-gray-200 rounded px-3 py-2">
+                <summary className="text-sm font-medium select-none cursor-pointer flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                        <span>Set Musicians ({setMusicians.length})</span>
+                        <button
+                            className="btn btn-secondary btn-small !bg-green-50 !text-green-700 hover:!bg-green-100"
+                            onClick={(e) => { e.preventDefault(); setEditingMusicianId(null); setMusicianModalOpen(true); }}
+                            type="button"
+                        >
+                            <Plus className="w-3 h-3" />
                         </button>
                     </div>
-                </SortableContext>
-            </DndContext>
+                </summary>
+                {/* rest stays the same */}
+                <div className="mt-2">
+                    {musiciansLoading ? (
+                        <div className="text-sm text-gray-500">Loading...</div>
+                    ) : setMusicians.length === 0 ? (
+                        <div className="text-sm text-gray-400">No set musicians</div>
+                    ) : (
+                        <div className="space-y-1">
+                            {setMusicians.map((sm: any) => (
+                                <div key={sm.id} className="flex items-center justify-between text-sm py-1">
+                                    <span>
+                                        {sm.musician?.name}
+                                        {sm.instrument && <span className="text-gray-500">, {sm.instrument.displayName}</span>}
+                                    </span>
+                                    <div className="flex gap-2">
+                                        <button
+                                            className="btn btn-secondary btn-small"
+                                            onClick={() => { setEditingMusicianId(sm.musicianId); setMusicianModalOpen(true); }}
+                                            type="button"
+                                        >
+                                            <Edit2 className="w-4 h-4" />
+                                        </button>
+                                        <button
+                                            className="btn btn-danger btn-small !bg-red-100 !text-red-700 hover:!bg-red-200"
+                                            onClick={() => handleDeleteSetMusician(sm.musicianId)}
+                                            type="button"
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            </details>
+            <div className="mt-4 space-y-2">
+                {set.performances && set.performances.length > 0 ? (
+                    set.performances.map((perf: any) => (
+                        <SortablePerformance
+                            key={perf.id}
+                            perf={perf}
+                            setId={set.id}
+                            onEdit={onEditPerformance}
+                            onDelete={onDeletePerformance}
+                        />
+                    ))
+                ) : (
+                    <div className="text-gray-400">No performances in this set.</div>
+                )}
+                <button className="btn btn-primary btn-small mt-2" onClick={() => onAddPerformance(set.id)} type="button">
+                    + Add Performance
+                </button>
+            </div>
+            <Modal isOpen={musicianModalOpen} onClose={() => setMusicianModalOpen(false)} title={editingMusicianId ? "Edit Set Musician" : "Add Set Musician"}>
+                <SetMusicianForm
+                    eventId={eventId}
+                    setId={set.id}
+                    musicianId={editingMusicianId ?? undefined}
+                    onSuccess={() => {
+                        setMusicianModalOpen(false);
+                        showSuccess("Set musician saved");
+                        refreshSetMusicians();
+                    }}
+                    onCancel={() => setMusicianModalOpen(false)}
+                />
+            </Modal>
         </div>
+
     );
 }
 
@@ -307,7 +401,7 @@ function SortablePerformance({
     onEdit: (setId: number, perfId: number) => void;
     onDelete: (setId: number, perfId: number) => void;
 }) {
-    const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: perf.id });
+    const { attributes, listeners, setNodeRef, transform, transition, isDragging, isOver } = useSortable({ id: perf.id });
 
     const style = {
         transform: CSS.Transform.toString(transform),
@@ -316,12 +410,16 @@ function SortablePerformance({
     };
 
     return (
-        <div ref={setNodeRef} style={style} className={`flex items-center justify-between gap-2 ${isDragging ? 'bg-blue-50' : ''}`}>
+        <div
+            ref={setNodeRef}
+            style={style}
+            className={`flex items-center justify-between gap-2 rounded p-1 ${isDragging ? 'bg-blue-100 border-2 border-blue-500' : ''} ${isOver ? 'border-t-2 border-blue-400' : ''}`}
+        >
             <div className="flex items-center gap-2 flex-wrap flex-1 min-w-0">
                 <button type="button" {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing p-1 hover:bg-gray-100 rounded flex-shrink-0">
                     <GripVertical className="w-3 h-3 text-gray-400" />
                 </button>
-                <span className="whitespace-nowrap">{renderPerformanceDisplay(perf)}</span>
+                {renderPerformanceDisplay(perf)}
                 {perf.publicNotes && <span className="ml-1">📝</span>}
                 {perf.isMedley && <span className="ml-1">🎵</span>}
                 {perf.performanceMusicians && perf.performanceMusicians.length > 0 && (
