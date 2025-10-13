@@ -5,6 +5,7 @@ import { formatEventDate } from "@/lib/formatters/dateFormatter";
 import { getPerformerCardClass } from "@/lib/utils/performerStyles";
 import Breadcrumbs from "@/components/admin/Breadcrumbs";
 import EventMetadataForm from "@/components/admin/EventMetadataForm";
+import EventMusiciansSection from "@/components/admin/EventMusiciansSection";
 
 export default function EventDetailPage() {
     const params = useParams();
@@ -74,10 +75,14 @@ export default function EventDetailPage() {
             </div>
 
             {eventIdNumeric && (
-                <EventMetadataForm
-                    eventId={eventIdNumeric}
-                    onSaveSuccess={loadEventData}
-                />
+                <>
+                    <EventMetadataForm
+                        eventId={eventIdNumeric}
+                        onSaveSuccess={loadEventData}
+                    />
+                    <hr className="my-8" />
+                    <EventMusiciansSection eventId={eventIdNumeric} />
+                </>
             )}
         </div>
     );
