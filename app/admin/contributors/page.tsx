@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import Modal from '@/components/ui/Modal';
 import ContributorForm from '@/components/admin/ContributorForm';
 import { useToast } from '@/lib/hooks/useToast';
+import { Plus } from "lucide-react";
 
 export default function ContributorsPage() {
     const [contributors, setContributors] = useState<any[]>([]);
@@ -78,14 +79,13 @@ export default function ContributorsPage() {
 
     return (
         <div>
-            <div className="page-header flex items-center justify-between">
+            <div className="page-header flex items-center gap-3">
                 <h1 className="page-title">Contributors</h1>
                 <button
-                    className="btn btn-primary btn-medium"
+                    className="btn btn-secondary btn-small !bg-green-50 !text-green-700 hover:!bg-green-100"
                     onClick={openAddModal}
                 >
-                    <span>+</span>
-                    <span>Add Contributor</span>
+                    <Plus className="w-3 h-3" />
                 </button>
             </div>
             <div className="admin-stats">
@@ -111,7 +111,7 @@ export default function ContributorsPage() {
                                 <th className="sortable" onClick={() => handleSort('contributions')}>
                                     Contributions {sortKey === 'contributions' && (sortDir === 'asc' ? '▲' : '▼')}
                                 </th>
-                                <th>Actions</th>
+                                <th></th>
                             </tr>
                         </thead>
                         <tbody>

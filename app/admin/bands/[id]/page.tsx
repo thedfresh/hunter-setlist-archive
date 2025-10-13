@@ -228,7 +228,7 @@ export default function BandDetailPage({ params }: { params: { id: string } }) {
                                         <th>Musician</th>
                                         <th>Joined</th>
                                         <th>Left</th>
-                                        <th>Actions</th>
+                                        <th></th>
                                     </tr>
                                 </thead>
                                 <tbody>

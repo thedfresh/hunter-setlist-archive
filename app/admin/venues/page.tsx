@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import VenueForm from "@/components/admin/VenueForm";
 import Modal from "@/components/ui/Modal";
 import { useToast } from "@/lib/hooks/useToast";
+import { Plus } from "lucide-react";
 
 export default function VenuesAdminPage() {
     const [venues, setVenues] = useState<any[]>([]);
@@ -95,14 +96,15 @@ export default function VenuesAdminPage() {
 
     return (
         <div>
-            <div className="page-header flex items-center justify-between">
-                <h1 className="page-title">Venues</h1>
-                <button className="btn btn-primary btn-medium" onClick={openAddModal}>
-                    <span>+</span>
-                    <span>Add Venue</span>
+            <div className="page-header flex items-center gap-3">
+                <h1 className="page-title">Venus</h1>
+                <button
+                    className="btn btn-secondary btn-small !bg-green-50 !text-green-700 hover:!bg-green-100"
+                    onClick={openAddModal}
+                >
+                    <Plus className="w-3 h-3" />
                 </button>
             </div>
-
             <div className="admin-stats">
                 <div className="admin-stat-item">
                     <span className="admin-stat-value">{venues.length}</span>
@@ -143,7 +145,7 @@ export default function VenuesAdminPage() {
                                 <th className="sortable text-center" onClick={() => handleSort('events')}>
                                     Events {sortKey === 'events' ? (sortOrder === 'asc' ? '▲' : '▼') : ''}
                                 </th>
-                                <th className="text-center">Actions</th>
+                                <th></th>
                             </tr>
                         </thead>
                         <tbody>

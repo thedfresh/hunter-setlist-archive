@@ -74,7 +74,7 @@ export default async function AdminDashboard() {
                 <th>Venue</th>
                 <th>City</th>
                 <th>Performer</th>
-                <th>Actions</th>
+                <th></th>
               </tr>
             </thead>
             <tbody>

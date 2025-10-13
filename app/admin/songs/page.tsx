@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Modal from "@/components/ui/Modal";
 import SongForm from "@/components/admin/SongForm";
 import { useToast } from "@/lib/hooks/useToast";
+import { Plus } from "lucide-react";
 
 export default function SongsAdminPage() {
     const [songs, setSongs] = useState<any[]>([]);
@@ -95,11 +96,13 @@ export default function SongsAdminPage() {
 
     return (
         <div className="page-container">
-            <div className="page-header flex items-center justify-between">
+            <div className="page-header flex items-center gap-3">
                 <h1 className="page-title">Songs</h1>
-                <button className="btn btn-primary btn-medium" onClick={openAddModal}>
-                    <span>+</span>
-                    <span>Add Song</span>
+                <button
+                    className="btn btn-secondary btn-small !bg-green-50 !text-green-700 hover:!bg-green-100"
+                    onClick={openAddModal}
+                >
+                    <Plus className="w-3 h-3" />
                 </button>
             </div>
             <div className="admin-stats">
@@ -135,7 +138,7 @@ export default function SongsAdminPage() {
                                     Performances {sortKey === 'performanceCount' ? (sortOrder === 'asc' ? '▲' : '▼') : ''}
                                 </th>
                                 <th>Box of Rain</th>
-                                <th>Actions</th>
+                                <th></th>
                             </tr>
                         </thead>
                         <tbody>

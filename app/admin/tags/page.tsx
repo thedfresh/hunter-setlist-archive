@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import Modal from '@/components/ui/Modal';
 import TagForm from '@/components/admin/TagForm';
 import { useToast } from '@/lib/hooks/useToast';
+import { Plus } from 'lucide-react';
 
 export default function TagsPage() {
     const [tags, setTags] = useState<any[]>([]);
@@ -83,14 +84,13 @@ export default function TagsPage() {
 
     return (
         <div>
-            <div className="page-header flex items-center justify-between">
+            <div className="page-header flex items-center gap-3">
                 <h1 className="page-title">Tags</h1>
                 <button
-                    className="btn btn-primary btn-medium"
+                    className="btn btn-secondary btn-small !bg-green-50 !text-green-700 hover:!bg-green-100"
                     onClick={openAddModal}
                 >
-                    <span>+</span>
-                    <span>Add Tag</span>
+                    <Plus className="w-3 h-3" />
                 </button>
             </div>
             <div className="admin-stats">
@@ -116,7 +116,7 @@ export default function TagsPage() {
                                 <th className="sortable" onClick={() => handleSort('uses')}>
                                     Uses {sortKey === 'uses' && (sortDir === 'asc' ? '▲' : '▼')}
                                 </th>
-                                <th>Actions</th>
+                                <th></th>
                             </tr>
                         </thead>
                         <tbody>

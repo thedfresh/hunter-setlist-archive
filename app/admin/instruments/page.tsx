@@ -1,9 +1,9 @@
 "use client";
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
 import { useToast } from '@/lib/hooks/useToast';
 import Modal from '@/components/ui/Modal';
 import InstrumentForm from '@/components/admin/InstrumentForm';
+import { Plus } from "lucide-react";
 
 export default function InstrumentsPage() {
     const [instruments, setInstruments] = useState<any[]>([]);
@@ -85,18 +85,15 @@ export default function InstrumentsPage() {
 
     return (
         <div>
-            {/* Page Header */}
-            <div className="page-header flex items-center justify-between">
+            <div className="page-header flex items-center gap-3">
                 <h1 className="page-title">Instruments</h1>
                 <button
-                    className="btn btn-primary btn-medium"
+                    className="btn btn-secondary btn-small !bg-green-50 !text-green-700 hover:!bg-green-100"
                     onClick={openAddModal}
                 >
-                    <span>+</span>
-                    <span>Add Instrument</span>
+                    <Plus className="w-3 h-3" />
                 </button>
             </div>
-
             {/* Stats Summary */}
             <div className="admin-stats">
                 <div className="admin-stat-item">
@@ -129,7 +126,7 @@ export default function InstrumentsPage() {
                                 <th className="sortable" onClick={() => handleSort('uses')}>
                                     Uses {sortKey === 'uses' && (sortDir === 'asc' ? '▲' : '▼')}
                                 </th>
-                                <th>Actions</th>
+                                <th></th>
                             </tr>
                         </thead>
                         <tbody>
