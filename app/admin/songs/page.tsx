@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import Modal from "@/components/ui/Modal";
 import SongForm from "@/components/admin/SongForm";
@@ -62,11 +63,6 @@ export default function SongsAdminPage() {
     }, []);
 
     function openAddModal() {
-        setEditingId(0);
-        setModalOpen(true);
-    }
-    function openEditModal(id: number) {
-        setEditingId(id);
         setModalOpen(true);
     }
     function handleSuccess() {
@@ -138,7 +134,9 @@ export default function SongsAdminPage() {
                                     <td>{song.performanceCount ?? song._count?.performances ?? 0}</td>
                                     <td className="text-center">{song.inBoxOfRain ?? song.in_box_of_rain ? "✔️" : "❌"}</td>
                                     <td className="text-center flex gap-2 justify-center">
-                                        <button className="btn btn-secondary btn-small" onClick={() => openEditModal(song.id)}>Edit</button>
+                                        <Link href={`/admin/songs/${song.id}`}>
+                                            <button className="btn btn-secondary btn-small">View/Edit</button>
+                                        </Link>
                                         <button className="btn btn-danger btn-small" onClick={() => handleDelete(song.id, (song._count?.performances ?? 0) + (song._count?.songAlbums ?? 0) + (song._count?.songTags ?? 0))}>Delete</button>
                                     </td>
                                 </tr>
@@ -152,9 +150,9 @@ export default function SongsAdminPage() {
             <Modal
                 isOpen={modalOpen}
                 onClose={handleCancel}
-                title={editingId === 0 ? "Add Song" : "Edit Song"}
+                title="Add Song"
             >
-                <SongForm songId={editingId} onSuccess={handleSuccess} onCancel={handleCancel} />
+                <SongForm songId={0} onSuccess={handleSuccess} onCancel={handleCancel} />
             </Modal>
         </div>
     );
