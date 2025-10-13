@@ -159,10 +159,16 @@ export default function SetsSection({ eventId }: SetsSectionProps) {
         <section className="mb-8">
             <details open={sets.length > 0}>
                 <summary className="text-lg font-medium select-none cursor-pointer flex items-center justify-between">
-                    <span>Sets & Performances ({sets.length})</span>
-                    <button className="btn btn-primary btn-medium" onClick={handleAddSet} type="button">
-                        Add Set
-                    </button>
+                    <div className="flex items-center gap-2">
+                        <span>Sets & Performances ({sets.length})</span>
+                        <button
+                            className="btn btn-secondary btn-small !bg-green-50 !text-green-700 hover:!bg-green-100"
+                            onClick={(e) => { e.preventDefault(); handleAddSet(); }}
+                            type="button"
+                        >
+                            <Plus className="w-3 h-3" />
+                        </button>
+                    </div>
                 </summary>
                 {loading ? (
                     <div className="mt-4">Loading sets...</div>
@@ -368,9 +374,15 @@ function SetCard({
                 ) : (
                     <div className="text-gray-400">No performances in this set.</div>
                 )}
-                <button className="btn btn-primary btn-small mt-2" onClick={() => onAddPerformance(set.id)} type="button">
-                    + Add Performance
-                </button>
+                <div className="flex justify-end">
+                    <button
+                        className="btn btn-secondary btn-small !bg-green-50 !text-green-700 hover:!bg-green-100 mt-2"
+                        onClick={() => onAddPerformance(set.id)}
+                        type="button"
+                    >
+                        <Plus className="w-3 h-3" />
+                    </button>
+                </div>
             </div>
             <Modal isOpen={musicianModalOpen} onClose={() => setMusicianModalOpen(false)} title={editingMusicianId ? "Edit Set Musician" : "Add Set Musician"}>
                 <SetMusicianForm

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useToast } from "@/lib/hooks/useToast";
 import Modal from "@/components/ui/Modal";
 import EventContributorForm from "@/components/admin/EventContributorForm";
+import { Plus } from 'lucide-react';
 
 interface EventContributorsSectionProps {
     eventId: number;
@@ -34,21 +35,15 @@ export default function EventContributorsSection({ eventId }: EventContributorsS
             const data = await res.json();
             setEventContributors(data.eventContributors || []);
         } catch (err) {
-            showError("Error loading contributors");
+            showError("Error fetching contributors");
         } finally {
             setLoading(false);
         }
     };
 
     useEffect(() => {
-        refreshContributors();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [eventId]);
-
-    const handleAdd = () => {
-        setEditingContributorId(null);
-        setModalOpen(true);
-    };
+        // No-op effect (old button section removed)
+    }, []);
 
     const handleEdit = (id: number) => {
         setEditingContributorId(id);
@@ -85,19 +80,21 @@ export default function EventContributorsSection({ eventId }: EventContributorsS
     return (
         <section className="mt-6">
             <details open={eventContributors.length > 0}>
-                <summary className="text-lg font-medium select-none cursor-pointer">
-                    Event Contributors ({eventContributors.length})
+                <summary className="text-lg font-medium select-none cursor-pointer flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                        <span>Event Contributors ({eventContributors.length})</span>
+                        <button
+                            className="btn btn-secondary btn-small !bg-green-50 !text-green-700 hover:!bg-green-100"
+                            onClick={(e) => { e.preventDefault(); setEditingContributorId(null); setModalOpen(true); }}
+                            type="button"
+                        >
+                            <Plus className="w-3 h-3" />
+                        </button>
+                    </div>
                 </summary>
                 <div className="mt-2">
-                    <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center mb-2">
                         <span className="font-semibold">Contributors and sources</span>
-                        <button
-                            className="btn btn-primary btn-medium"
-                            onClick={handleAdd}
-                            disabled={loading}
-                        >
-                            Add Contributor
-                        </button>
                     </div>
                     <div className="table-container">
                         <table className="table">

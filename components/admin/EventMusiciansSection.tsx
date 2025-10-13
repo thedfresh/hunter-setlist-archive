@@ -1,4 +1,5 @@
 "use client";
+import { Plus } from 'lucide-react';
 import { useState, useEffect } from "react";
 import { useToast } from "@/lib/hooks/useToast";
 import Modal from "@/components/ui/Modal";
@@ -68,14 +69,20 @@ export default function EventMusiciansSection({ eventId }: EventMusiciansSection
     return (
         <section className="mt-6">
             <details open={eventMusicians.length > 0}>
-                <summary className="cursor-pointer user-select-none font-medium text-lg mb-4">
-                    Event Musicians ({eventMusicians.length})
+                <summary className="cursor-pointer user-select-none font-medium text-lg mb-4 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                        <span>Event Musicians ({eventMusicians.length})</span>
+                        <button
+                            className="btn btn-secondary btn-small !bg-green-50 !text-green-700 hover:!bg-green-100"
+                            onClick={(e) => { e.preventDefault(); handleAdd(); }}
+                            type="button"
+                        >
+                            <Plus className="w-3 h-3" />
+                        </button>
+                    </div>
                 </summary>
 
-                <div className="flex items-center justify-between mb-2">
-                    <p className="text-sm text-gray-500">Show-level guest musicians</p>
-                    <button className="btn btn-primary btn-medium" onClick={handleAdd}>Add Musician</button>
-                </div>
+
 
                 <div className="table-container">
                     <table className="table">

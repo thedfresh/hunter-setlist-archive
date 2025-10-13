@@ -1,4 +1,6 @@
+
 "use client";
+import { Plus } from 'lucide-react';
 
 import { useState, useEffect } from "react";
 import { useToast } from "@/lib/hooks/useToast";
@@ -84,19 +86,21 @@ export default function ShowBanterSection({ eventId }: ShowBanterSectionProps) {
     return (
         <section className="mb-8">
             <details open={showBanter.length > 0}>
-                <summary className="text-lg font-medium select-none cursor-pointer">
-                    Show Banter ({showBanter.length})
+                <summary className="text-lg font-medium select-none cursor-pointer flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                        <span>Show Banter ({showBanter.length})</span>
+                        <button
+                            className="btn btn-secondary btn-small !bg-green-50 !text-green-700 hover:!bg-green-100"
+                            onClick={(e) => { e.preventDefault(); setEditingBanterId(null); setModalOpen(true); }}
+                            type="button"
+                        >
+                            <Plus className="w-3 h-3" />
+                        </button>
+                    </div>
                 </summary>
                 <div className="mt-2">
-                    <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center mb-2">
                         <span className="font-semibold">Stage talk and stories</span>
-                        <button
-                            className="btn btn-primary btn-medium"
-                            onClick={handleAdd}
-                            disabled={loading}
-                        >
-                            Add Banter
-                        </button>
                     </div>
                     <div className="table-container">
                         <table className="table">
