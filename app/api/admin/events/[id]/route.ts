@@ -15,7 +15,19 @@ export async function GET(request: Request, context: { params: Promise<{ id: str
                 venue: true,
                 eventType: true,
                 contentType: true,
-                primaryBand: true
+                primaryBand: true,
+                sets: {
+                    include: {
+                        setType: true,
+                        performances: {
+                            include: {
+                                song: true
+                            },
+                            orderBy: { performanceOrder: 'asc' }
+                        }
+                    },
+                    orderBy: { position: 'asc' }
+                }
             }
         });
 
