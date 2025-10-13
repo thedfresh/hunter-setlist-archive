@@ -7,6 +7,7 @@ import Breadcrumbs from "@/components/admin/Breadcrumbs";
 import EventMetadataForm from "@/components/admin/EventMetadataForm";
 import EventMusiciansSection from "@/components/admin/EventMusiciansSection";
 import EventContributorsSection from "@/components/admin/EventContributorsSection";
+import RecordingsSection from "@/components/admin/RecordingsSection";
 
 export default function EventDetailPage() {
     const params = useParams();
@@ -85,6 +86,8 @@ export default function EventDetailPage() {
                     <EventMusiciansSection eventId={eventIdNumeric} />
                     <hr className="my-8" />
                     <EventContributorsSection eventId={eventIdNumeric} />
+                    <hr className="my-8" />
+                    <RecordingsSection eventId={eventIdNumeric} />
                 </>
             )}
 
