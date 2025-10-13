@@ -29,6 +29,7 @@ export default function VenueForm({ venueId, onSuccess, onCancel }: VenueFormPro
                 .then(data => {
                     setName(data.name || "");
                     setSlug(data.slug || "");
+                    setSlugManuallyEdited(false);
                     setCity(data.city || "");
                     setStateProvince(data.stateProvince || "");
                     setCountry(data.country || "");
@@ -115,6 +116,16 @@ export default function VenueForm({ venueId, onSuccess, onCancel }: VenueFormPro
                 />
             </div>
             <div className="form-group">
+                <label className="form-label" htmlFor="context">Context</label>
+                <input
+                    id="context"
+                    className="input"
+                    value={context}
+                    onChange={e => setContext(e.target.value)}
+                    disabled={loading}
+                />
+            </div>
+            <div className="form-group">
                 <label className="form-label" htmlFor="slug">Slug (URL-friendly identifier)</label>
                 <input
                     id="slug"
@@ -169,17 +180,6 @@ export default function VenueForm({ venueId, onSuccess, onCancel }: VenueFormPro
                     />
                     Uncertain
                 </label>
-            </div>
-            <div className="form-group">
-                <label className="form-label" htmlFor="context">Context/Additional Info</label>
-                <textarea
-                    id="context"
-                    className="textarea"
-                    value={context}
-                    onChange={e => setContext(e.target.value)}
-                    disabled={loading}
-                    rows={2}
-                />
             </div>
             <div className="form-group">
                 <label className="form-label" htmlFor="publicNotes">Public Notes</label>

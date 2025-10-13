@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import VenueForm from "@/components/admin/VenueForm";
 import Modal from "@/components/ui/Modal";
@@ -95,7 +96,9 @@ export default function VenuesAdminPage() {
                                 <td className="text-center">{venue.isUncertain ? "✔️" : "❌"}</td>
                                 <td className="text-center">{venue._count?.events ?? 0}</td>
                                 <td className="text-center flex gap-2 justify-center">
-                                    <button className="btn btn-secondary btn-small" onClick={() => handleEdit(venue.id)}>Edit</button>
+                                    <Link href={`/admin/venues/${venue.id}`}>
+                                        <button className="btn btn-secondary btn-small">View/Edit</button>
+                                    </Link>
                                     <button className="btn btn-danger btn-small" onClick={() => handleDelete(venue.id, venue._count?.events ?? 0)}>Delete</button>
                                 </td>
                             </tr>
