@@ -1,10 +1,9 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { useToast } from "@/lib/hooks/useToast";
 import { formatEventDate } from "@/lib/formatters/dateFormatter";
-import { compareDates } from "@/lib/utils/dateSort";
+import { Check } from 'lucide-react';
 
 export default function EventsAdminPage() {
     const [events, setEvents] = useState<any[]>([]);
@@ -122,19 +121,17 @@ export default function EventsAdminPage() {
                             {filtered.map(event => {
                                 const venueFields = [event.venue?.name, event.venue?.context, event.venue?.city, event.venue?.stateProvince].filter(Boolean).join(", ");
                                 return (
-                                    <tr key={event.id}>
-                                        <td>
-                                            <Link href={`/admin/events/${event.id}`} className="text-hunter-gold hover:underline">
-                                                {formatEventDate(event)}
-                                            </Link>
-                                        </td>
-                                        <td>
-                                            <Link href={`/admin/events/${event.id}`} className="text-hunter-gold hover:underline">
-                                                {venueFields || "—"}
-                                            </Link>
-                                        </td>
+                                    <tr
+                                        key={event.id}
+                                        onClick={() => router.push(`/admin/events/${event.id}`)}
+                                        className="cursor-pointer hover:bg-gray-50"
+                                    >
+                                        <td>{formatEventDate(event)}</td>
+                                        <td>{venueFields || "—"}</td>
                                         <td>{event.primaryBand?.name || "Solo"}</td>
-                                        <td className="text-center">{event.verified ? "✓" : ""}</td>
+                                        <td className="text-center w-24">
+                                            {event.verified ? <Check className="w-4 h-4 text-green-600 inline" /> : ""}
+                                        </td>
                                     </tr>
                                 );
                             })}
