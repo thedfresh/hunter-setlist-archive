@@ -9,6 +9,7 @@ import EventMusiciansSection from "@/components/admin/EventMusiciansSection";
 import EventContributorsSection from "@/components/admin/EventContributorsSection";
 import RecordingsSection from "@/components/admin/RecordingsSection";
 import ShowBanterSection from "@/components/admin/ShowBanterSection";
+import SetsSection from "@/components/admin/SetsSection";
 
 export default function EventDetailPage() {
     const params = useParams();
@@ -83,6 +84,9 @@ export default function EventDetailPage() {
                         eventId={eventIdNumeric}
                         onSaveSuccess={loadEventData}
                     />
+
+                    <hr className="my-8" />
+                    <SetsSection eventId={eventIdNumeric} />
                     <hr className="my-8" />
                     <EventMusiciansSection eventId={eventIdNumeric} />
                     <hr className="my-8" />
