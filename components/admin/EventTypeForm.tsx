@@ -67,6 +67,7 @@ export default function EventTypeForm({ eventTypeId, onSuccess, onCancel }: Prop
                     value={name}
                     onChange={e => setName(e.target.value)}
                     required
+                    autoFocus
                     disabled={loading}
                 />
             </div>

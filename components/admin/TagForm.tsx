@@ -71,6 +71,7 @@ export default function TagForm({ tagId, onSuccess, onCancel }: TagFormProps) {
                 onChange={e => setName(e.target.value)}
                 disabled={loading}
                 required
+                autoFocus
             />
             <label className="form-label mt-4" htmlFor="description">Description</label>
             <textarea

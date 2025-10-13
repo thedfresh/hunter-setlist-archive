@@ -92,6 +92,7 @@ export default function BandForm({ bandId, onSuccess, onCancel }: BandFormProps)
                     onChange={e => setName(e.target.value)}
                     disabled={loading}
                     required
+                    autoFocus
                 />
             </div>
 

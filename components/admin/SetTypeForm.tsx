@@ -82,6 +82,7 @@ export default function SetTypeForm({ setTypeId, onSuccess, onCancel }: Props) {
                     value={displayName}
                     onChange={e => setDisplayName(e.target.value)}
                     required
+                    autoFocus
                     disabled={loading}
                 />
             </div>

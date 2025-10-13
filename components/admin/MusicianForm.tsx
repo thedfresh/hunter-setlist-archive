@@ -98,6 +98,7 @@ export default function MusicianForm({ musicianId, onSuccess, onCancel }: Musici
                     onChange={e => setName(e.target.value)}
                     disabled={loading}
                     required
+                    autoFocus
                 />
             </div>
             <div className="form-group">

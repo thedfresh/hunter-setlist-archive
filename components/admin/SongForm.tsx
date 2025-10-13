@@ -116,6 +116,7 @@ export default function SongForm({ songId, onSuccess, onCancel }: SongFormProps)
                     onChange={e => setTitle(e.target.value)}
                     disabled={loading}
                     required
+                    autoFocus
                 />
             </div>
             <div className="form-group">

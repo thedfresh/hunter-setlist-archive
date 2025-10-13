@@ -67,6 +67,7 @@ export default function LinkTypeForm({ linkTypeId, onSuccess, onCancel }: LinkTy
                 onChange={e => setName(e.target.value)}
                 disabled={loading}
                 required
+                autoFocus
             />
             <label className="form-label mt-4" htmlFor="description">Description</label>
             <textarea

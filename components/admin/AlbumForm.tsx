@@ -105,6 +105,7 @@ export default function AlbumForm({ albumId, onSuccess, onCancel }: AlbumFormPro
                     onChange={e => setTitle(e.target.value)}
                     disabled={loading}
                     required
+                    autoFocus
                 />
             </div>
 

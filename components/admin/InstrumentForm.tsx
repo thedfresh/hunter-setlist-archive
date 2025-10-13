@@ -71,6 +71,7 @@ const InstrumentForm: React.FC<InstrumentFormProps> = ({ instrumentId, onSuccess
                     value={name}
                     onChange={e => setName(e.target.value)}
                     required
+                    autoFocus
                     disabled={loading}
                 />
             </div>

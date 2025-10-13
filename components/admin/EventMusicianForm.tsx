@@ -109,6 +109,7 @@ export default function EventMusicianForm({ eventId, musicianId, onSuccess, onCa
                         onChange={e => setSelectedMusicianId(e.target.value)}
                         required
                         disabled={musicianId !== null}
+                        autoFocus
                     >
                         <option value="">Select musician...</option>
                         {musicians.map(m => (

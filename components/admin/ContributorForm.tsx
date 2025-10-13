@@ -78,6 +78,7 @@ export default function ContributorForm({ contributorId, onSuccess, onCancel }: 
                 onChange={e => setName(e.target.value)}
                 disabled={loading}
                 required
+                autoFocus
             />
             <label className="form-label mt-4" htmlFor="email">Email</label>
             <input

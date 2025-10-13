@@ -87,6 +87,7 @@ export default function BandMemberForm({ bandId, membershipId, onSuccess, onCanc
                     value={musicianId}
                     onChange={e => setMusicianId(Number(e.target.value))}
                     required
+                    autoFocus
                     disabled={membershipId > 0}
                 >
                     <option value="">Select musician...</option>

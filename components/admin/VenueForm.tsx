@@ -113,6 +113,7 @@ export default function VenueForm({ venueId, onSuccess, onCancel }: VenueFormPro
                     onChange={e => setName(e.target.value)}
                     disabled={loading}
                     required
+                    autoFocus
                 />
             </div>
             <div className="form-group">

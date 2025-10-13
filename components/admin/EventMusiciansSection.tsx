@@ -66,7 +66,7 @@ export default function EventMusiciansSection({ eventId }: EventMusiciansSection
     }
 
     return (
-        <section className="mb-8">
+        <section className="mt-6">
             <details open={eventMusicians.length > 0}>
                 <summary className="cursor-pointer user-select-none font-medium text-lg mb-4">
                     Event Musicians ({eventMusicians.length})
