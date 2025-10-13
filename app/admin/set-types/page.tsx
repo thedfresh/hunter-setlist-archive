@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import Modal from '@/components/ui/Modal';
 import SetTypeForm from '@/components/admin/SetTypeForm';
 import { useToast } from '@/lib/hooks/useToast';
-import { Plus } from "lucide-react";
+import { Plus, Trash2 } from 'lucide-react';
 
 export default function SetTypesPage() {
     const [setTypes, setSetTypes] = useState<any[]>([]);
@@ -91,60 +91,47 @@ export default function SetTypesPage() {
                     <Plus className="w-3 h-3" />
                 </button>
             </div>
-            <div className="admin-stats">
-                <div className="admin-stat-item">
-                    <span className="admin-stat-value">{setTypes.length}</span>
-                    <span>Total Set Types</span>
-                </div>
-            </div>
             {loading ? (
                 <div className="loading-state">
                     <div className="spinner"></div>
                     <div className="loading-text">Loading set types...</div>
                 </div>
             ) : setTypes.length > 0 ? (
-                <div className="table-container">
+                <div className="table-container inline-block">
                     <table className="table">
                         <thead>
                             <tr>
+                                <th className="w-12"></th>
                                 <th className="sortable" onClick={() => handleSort('name')}>
                                     Name {sortKey === 'name' && (sortDir === 'asc' ? '▲' : '▼')}
                                 </th>
-                                <th className="sortable" onClick={() => handleSort('displayName')}>
-                                    Display Name {sortKey === 'displayName' && (sortDir === 'asc' ? '▲' : '▼')}
-                                </th>
-                                <th className="sortable" onClick={() => handleSort('includeInStats')}>
-                                    Include in Stats
-                                </th>
+                                <th>Display Name</th>
+                                <th>Include in Stats</th>
                                 <th className="sortable" onClick={() => handleSort('uses')}>
                                     Uses {sortKey === 'uses' && (sortDir === 'asc' ? '▲' : '▼')}
                                 </th>
-                                <th></th>
                             </tr>
                         </thead>
                         <tbody>
                             {sorted.map((setType) => (
-                                <tr key={setType.id}>
+                                <tr
+                                    key={setType.id}
+                                    onClick={() => openEditModal(setType.id)}
+                                    className="cursor-pointer hover:bg-gray-50"
+                                >
+                                    <td className="w-12" onClick={(e) => e.stopPropagation()}>
+                                        <button
+                                            className="btn btn-secondary btn-small !bg-red-50 !text-red-600 hover:!bg-red-100"
+                                            onClick={() => handleDelete(setType.id)}
+                                            title="Delete set type"
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </button>
+                                    </td>
                                     <td>{setType.name}</td>
                                     <td>{setType.displayName}</td>
                                     <td>{setType.includeInStats ? '✔️' : '❌'}</td>
                                     <td>{setType._count?.sets ?? 0}</td>
-                                    <td>
-                                        <div className="table-actions">
-                                            <button
-                                                className="btn btn-secondary btn-small"
-                                                onClick={() => openEditModal(setType.id)}
-                                            >
-                                                Edit
-                                            </button>
-                                            <button
-                                                onClick={() => handleDelete(setType.id)}
-                                                className="btn btn-danger btn-small"
-                                            >
-                                                Delete
-                                            </button>
-                                        </div>
-                                    </td>
                                 </tr>
                             ))}
                         </tbody>

@@ -5,8 +5,10 @@ import { useToast } from "@/lib/hooks/useToast";
 import { formatEventDate } from "@/lib/formatters/dateFormatter";
 import { generateSlugFromName } from "@/lib/utils/generateSlug";
 import Link from "next/link";
+import { useRouter } from 'next/navigation';
 
 export default function SongAdminDetailPage({ params }: { params: { id: string } }) {
+    const router = useRouter();
     const songId = Number(params.id);
     const [song, setSong] = useState<any>(null);
     const [loading, setLoading] = useState(true);
@@ -270,27 +272,30 @@ export default function SongAdminDetailPage({ params }: { params: { id: string }
                                     <tr>
                                         <th>Date</th>
                                         <th>Venue</th>
-                                        <th>Event</th>
-                                        <th>Set Type</th>
+                                        <th>Performer</th>
+                                        <th className="text-center w-24">Verified</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {sortedPerformances.map((perf: any) => (
-                                        <tr key={perf.id}>
+                                        <tr
+                                            key={perf.id}
+                                            onClick={() => router.push(`/admin/events/${perf.set?.event?.id}`)}
+                                            className="cursor-pointer hover:bg-gray-50"
+                                        >
                                             <td>{perf.set?.event ? formatEventDate(perf.set.event) : "—"}</td>
                                             <td>
-                                                {perf.set?.event?.venue
-                                                    ? `${perf.set.event.venue.name}${perf.set.event.venue.city ? ", " + perf.set.event.venue.city : ""}`
-                                                    : "—"}
-                                            </td>
-                                            <td>
-                                                {perf.set?.event?.id ? (
-                                                    <Link href={`/admin/events/${perf.set.event.id}`}>
-                                                        <button className="btn btn-secondary btn-small">Edit Event</button>
-                                                    </Link>
+                                                {perf.set?.event?.venue ? (
+                                                    <>
+                                                        {perf.set.event.venue.name}
+                                                        {perf.set.event.venue.context && ` (${perf.set.event.venue.context})`}
+                                                        {perf.set.event.venue.city && `, ${perf.set.event.venue.city}`}
+                                                        {perf.set.event.venue.stateProvince && `, ${perf.set.event.venue.stateProvince}`}
+                                                    </>
                                                 ) : "—"}
                                             </td>
-                                            <td>{perf.set?.setType?.displayName || "—"}</td>
+                                            <td>{perf.set?.event?.primaryBand?.name || "Solo"}</td>
+                                            <td className="text-center w-24">{perf.set?.event?.verified ? "✔️" : "❌"}</td>
                                         </tr>
                                     ))}
                                 </tbody>

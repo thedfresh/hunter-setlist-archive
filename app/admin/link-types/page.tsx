@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import Modal from '@/components/ui/Modal';
 import LinkTypeForm from '@/components/admin/LinkTypeForm';
 import { useToast } from '@/lib/hooks/useToast';
-import { Plus } from "lucide-react";
+import { Plus, Trash2 } from 'lucide-react';
 
 export default function LinkTypesPage() {
     const [linkTypes, setLinkTypes] = useState<any[]>([]);
@@ -93,22 +93,17 @@ export default function LinkTypesPage() {
                     <Plus className="w-3 h-3" />
                 </button>
             </div>
-            <div className="admin-stats">
-                <div className="admin-stat-item">
-                    <span className="admin-stat-value">{linkTypes.length}</span>
-                    <span>Total Link Types</span>
-                </div>
-            </div>
             {loading ? (
                 <div className="loading-state">
                     <div className="spinner"></div>
                     <div className="loading-text">Loading link types...</div>
                 </div>
             ) : linkTypes.length > 0 ? (
-                <div className="table-container">
+                <div className="table-container inline-block">
                     <table className="table">
                         <thead>
                             <tr>
+                                <th className="w-12"></th>
                                 <th className="sortable" onClick={() => handleSort('name')}>
                                     Name {sortKey === 'name' && (sortDir === 'asc' ? '▲' : '▼')}
                                 </th>
@@ -116,31 +111,27 @@ export default function LinkTypesPage() {
                                 <th className="sortable" onClick={() => handleSort('uses')}>
                                     Uses {sortKey === 'uses' && (sortDir === 'asc' ? '▲' : '▼')}
                                 </th>
-                                <th></th>
                             </tr>
                         </thead>
                         <tbody>
-                            {sorted.map((lt) => (
-                                <tr key={lt.id}>
-                                    <td>{lt.name}</td>
-                                    <td>{truncate(lt.description, 60)}</td>
-                                    <td>{lt._count?.links ?? 0}</td>
-                                    <td>
-                                        <div className="table-actions">
-                                            <button
-                                                className="btn btn-secondary btn-small"
-                                                onClick={() => openEditModal(lt.id)}
-                                            >
-                                                Edit
-                                            </button>
-                                            <button
-                                                onClick={() => handleDelete(lt.id)}
-                                                className="btn btn-danger btn-small"
-                                            >
-                                                Delete
-                                            </button>
-                                        </div>
+                            {sorted.map((linkType) => (
+                                <tr
+                                    key={linkType.id}
+                                    onClick={() => openEditModal(linkType.id)}
+                                    className="cursor-pointer hover:bg-gray-50"
+                                >
+                                    <td className="w-12" onClick={(e) => e.stopPropagation()}>
+                                        <button
+                                            className="btn btn-secondary btn-small !bg-red-50 !text-red-600 hover:!bg-red-100"
+                                            onClick={() => handleDelete(linkType.id)}
+                                            title="Delete link type"
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </button>
                                     </td>
+                                    <td>{linkType.name}</td>
+                                    <td>{linkType.description || '—'}</td>
+                                    <td>{linkType._count?.links ?? 0}</td>
                                 </tr>
                             ))}
                         </tbody>

@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import Modal from '@/components/ui/Modal';
 import TagForm from '@/components/admin/TagForm';
 import { useToast } from '@/lib/hooks/useToast';
-import { Plus } from 'lucide-react';
+import { Plus, Trash2 } from 'lucide-react';
 
 export default function TagsPage() {
     const [tags, setTags] = useState<any[]>([]);
@@ -45,10 +45,7 @@ export default function TagsPage() {
         setEditingId(0);
         setModalOpen(true);
     }
-    function openEditModal(id: number) {
-        setEditingId(id);
-        setModalOpen(true);
-    }
+    // Removed openEditModal; row click now opens modal
 
     async function handleDelete(id: number) {
         if (!confirm('Are you sure you want to delete this tag?')) return;
@@ -105,10 +102,11 @@ export default function TagsPage() {
                     <div className="loading-text">Loading tags...</div>
                 </div>
             ) : tags.length > 0 ? (
-                <div className="table-container">
+                <div className="table-container inline-block">
                     <table className="table">
                         <thead>
                             <tr>
+                                <th className="w-12"></th>
                                 <th className="sortable" onClick={() => handleSort('name')}>
                                     Name {sortKey === 'name' && (sortDir === 'asc' ? '▲' : '▼')}
                                 </th>
@@ -116,40 +114,37 @@ export default function TagsPage() {
                                 <th className="sortable" onClick={() => handleSort('uses')}>
                                     Uses {sortKey === 'uses' && (sortDir === 'asc' ? '▲' : '▼')}
                                 </th>
-                                <th></th>
                             </tr>
                         </thead>
                         <tbody>
-                            {sorted.map((tag) => (
-                                <tr key={tag.id}>
+                            {tags.map((tag) => (
+                                <tr
+                                    key={tag.id}
+                                    onClick={() => {
+                                        setEditingId(tag.id);
+                                        setModalOpen(true);
+                                    }}
+                                    className="cursor-pointer hover:bg-gray-50"
+                                >
+                                    <td className="w-12" onClick={(e) => e.stopPropagation()}>
+                                        <button
+                                            className="btn btn-secondary btn-small !bg-red-50 !text-red-600 hover:!bg-red-100"
+                                            onClick={() => handleDelete(tag.id)}
+                                            title="Delete tag"
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </button>
+                                    </td>
                                     <td>{tag.name}</td>
                                     <td>{truncate(tag.description, 60)}</td>
                                     <td>{tag._count?.songTags ?? 0}</td>
-                                    <td>
-                                        <div className="table-actions">
-                                            <button
-                                                className="btn btn-secondary btn-small"
-                                                onClick={() => openEditModal(tag.id)}
-                                            >
-                                                Edit
-                                            </button>
-                                            <button
-                                                onClick={() => handleDelete(tag.id)}
-                                                className="btn btn-danger btn-small"
-                                            >
-                                                Delete
-                                            </button>
-                                        </div>
-                                    </td>
                                 </tr>
                             ))}
                         </tbody>
                     </table>
                 </div>
             ) : (
-                <div className="empty-state">
-                    <div className="empty-title">No tags found</div>
-                </div>
+                <div className="empty-state">No tags found.</div>
             )}
             <Modal
                 isOpen={modalOpen}

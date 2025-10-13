@@ -4,7 +4,7 @@ import Breadcrumbs from "@/components/admin/Breadcrumbs";
 import { useToast } from "@/lib/hooks/useToast";
 import { formatEventDate } from "@/lib/formatters/dateFormatter";
 import { generateVenueSlug } from "@/lib/utils/generateSlug";
-import Link from "next/link";
+import { useRouter } from 'next/navigation';
 
 export default function VenueAdminDetailPage({ params }: { params: { id: string } }) {
     const venueId = Number(params.id);
@@ -25,6 +25,7 @@ export default function VenueAdminDetailPage({ params }: { params: { id: string 
     });
     const { showToast } = useToast();
     const [saving, setSaving] = useState(false);
+    const router = useRouter();
 
     useEffect(() => {
         setLoading(true);
@@ -254,27 +255,25 @@ export default function VenueAdminDetailPage({ params }: { params: { id: string 
 
                     <div className="section-header mb-4">All Events at This Venue ({sortedEvents.length})</div>
                     {sortedEvents.length > 0 ? (
-                        <div className="table-container">
+                        <div className="table-container inline-block">
                             <table className="table">
                                 <thead>
                                     <tr>
                                         <th>Date</th>
                                         <th>Performer</th>
-                                        <th>Event</th>
-                                        <th>Verified</th>
+                                        <th className="text-center w-24">Verified</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {sortedEvents.map((event: any) => (
-                                        <tr key={event.id}>
+                                        <tr
+                                            key={event.id}
+                                            onClick={() => router.push(`/admin/events/${event.id}`)}
+                                            className="cursor-pointer hover:bg-gray-50"
+                                        >
                                             <td>{event ? formatEventDate(event) : "—"}</td>
                                             <td>{event.primaryBand?.name || "Solo"}</td>
-                                            <td>
-                                                <Link href={`/admin/events/${event.id}`}>
-                                                    <button className="btn btn-secondary btn-small">Edit Event</button>
-                                                </Link>
-                                            </td>
-                                            <td className="text-center">{event.verified ? "✔️" : "❌"}</td>
+                                            <td className="text-center w-24">{event.verified ? "✔️" : "❌"}</td>
                                         </tr>
                                     ))}
                                 </tbody>

@@ -4,9 +4,11 @@ import { useEffect, useState } from "react";
 import Modal from "@/components/ui/Modal";
 import SongForm from "@/components/admin/SongForm";
 import { useToast } from "@/lib/hooks/useToast";
-import { Plus } from "lucide-react";
+import { Plus, Trash2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 export default function SongsAdminPage() {
+    const router = useRouter();
     const [songs, setSongs] = useState<any[]>([]);
     const [sortKey, setSortKey] = useState('title');
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
@@ -105,12 +107,6 @@ export default function SongsAdminPage() {
                     <Plus className="w-3 h-3" />
                 </button>
             </div>
-            <div className="admin-stats">
-                <div className="admin-stat-item">
-                    <span className="admin-stat-value">{songs.length}</span>
-                    <span>Total Songs</span>
-                </div>
-            </div>
             <div className="mb-4">
                 <input
                     type="text"
@@ -126,10 +122,11 @@ export default function SongsAdminPage() {
                     <div className="loading-text">Loading songs...</div>
                 </div>
             ) : sorted.length > 0 ? (
-                <div className="table-container">
+                <div className="table-container inline-block">
                     <table className="table">
                         <thead>
                             <tr>
+                                <th className="w-12"></th>
                                 <th className="sortable" onClick={() => handleSort('title')}>
                                     Title {sortKey === 'title' ? (sortOrder === 'asc' ? '▲' : '▼') : ''}
                                 </th>
@@ -137,30 +134,27 @@ export default function SongsAdminPage() {
                                 <th className="sortable" onClick={() => handleSort('performanceCount')}>
                                     Performances {sortKey === 'performanceCount' ? (sortOrder === 'asc' ? '▲' : '▼') : ''}
                                 </th>
-                                <th>Box of Rain</th>
-                                <th></th>
                             </tr>
                         </thead>
                         <tbody>
                             {sorted.map((song: any) => (
-                                <tr key={song.id}>
+                                <tr
+                                    key={song.id}
+                                    onClick={() => router.push(`/admin/songs/${song.id}`)}
+                                    className="cursor-pointer hover:bg-gray-50"
+                                >
+                                    <td className="w-12" onClick={(e) => e.stopPropagation()}>
+                                        <button
+                                            className="btn btn-secondary btn-small !bg-red-50 !text-red-600 hover:!bg-red-100"
+                                            onClick={() => handleDelete(song.id, song.performanceCount ?? 0)}
+                                            title="Delete song"
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </button>
+                                    </td>
                                     <td>{song.title}</td>
                                     <td>{song.alternateTitle || ''}</td>
                                     <td>{song.performanceCount ?? 0}</td>
-                                    <td className="text-center">{song.inBoxOfRain ? "✔️" : "❌"}</td>
-                                    <td>
-                                        <div className="table-actions">
-                                            <Link href={`/admin/songs/${song.id}`}>
-                                                <button className="btn btn-secondary btn-small">View/Edit</button>
-                                            </Link>
-                                            <button
-                                                className="btn btn-danger btn-small"
-                                                onClick={() => handleDelete(song.id, song.performanceCount ?? 0)}
-                                            >
-                                                Delete
-                                            </button>
-                                        </div>
-                                    </td>
                                 </tr>
                             ))}
                         </tbody>

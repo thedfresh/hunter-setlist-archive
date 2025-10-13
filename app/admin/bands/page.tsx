@@ -4,7 +4,7 @@ import Modal from '@/components/ui/Modal';
 import BandForm from '@/components/admin/BandForm';
 import { useToast } from '@/lib/hooks/useToast';
 import { useRouter } from 'next/navigation';
-import { Plus } from "lucide-react";
+import { Plus, Trash2 } from 'lucide-react';
 
 export default function BandsPage() {
     const [bands, setBands] = useState<any[]>([]);
@@ -93,62 +93,45 @@ export default function BandsPage() {
                     <Plus className="w-3 h-3" />
                 </button>
             </div>
-            <div className="admin-stats">
-                <div className="admin-stat-item">
-                    <span className="admin-stat-value">{bands.length}</span>
-                    <span>Total Bands</span>
-                </div>
-            </div>
             {loading ? (
                 <div className="loading-state">
                     <div className="spinner"></div>
                     <div className="loading-text">Loading bands...</div>
                 </div>
             ) : bands.length > 0 ? (
-                <div className="table-container">
+                <div className="table-container inline-block">
                     <table className="table">
                         <thead>
                             <tr>
+                                <th className="w-12"></th>
                                 <th className="sortable" onClick={() => handleSort('name')}>
                                     Name {sortKey === 'name' && (sortDir === 'asc' ? '▲' : '▼')}
                                 </th>
-                                <th className="sortable" onClick={() => handleSort('members')}>
-                                    Members {sortKey === 'members' && (sortDir === 'asc' ? '▲' : '▼')}
-                                </th>
+                                <th>Members</th>
                                 <th className="sortable" onClick={() => handleSort('shows')}>
                                     Shows {sortKey === 'shows' && (sortDir === 'asc' ? '▲' : '▼')}
                                 </th>
-                                <th></th>
                             </tr>
                         </thead>
                         <tbody>
                             {sorted.map((band) => (
-                                <tr key={band.id}>
-                                    <td>{band.name}</td>
-                                    <td>{band.bandMusicians?.length ?? 0}</td>
-                                    <td>{band._count?.events ?? 0}</td>
-                                    <td>
-                                        <div className="table-actions flex gap-2">
-                                            <button
-                                                className="btn btn-secondary btn-small"
-                                                onClick={() => router.push(`/admin/bands/${band.id}`)}
-                                            >
-                                                View/Edit
-                                            </button>
-                                            <button
-                                                className="btn btn-secondary btn-small"
-                                                onClick={() => openEditModal(band.id)}
-                                            >
-                                                Edit Info
-                                            </button>
-                                            <button
-                                                onClick={() => handleDelete(band.id)}
-                                                className="btn btn-danger btn-small"
-                                            >
-                                                Delete
-                                            </button>
-                                        </div>
+                                <tr
+                                    key={band.id}
+                                    onClick={() => router.push(`/admin/bands/${band.id}`)}
+                                    className="cursor-pointer hover:bg-gray-50"
+                                >
+                                    <td className="w-12" onClick={(e) => e.stopPropagation()}>
+                                        <button
+                                            className="btn btn-secondary btn-small !bg-red-50 !text-red-600 hover:!bg-red-100"
+                                            onClick={() => handleDelete(band.id)}
+                                            title="Delete band"
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </button>
                                     </td>
+                                    <td>{band.name}</td>
+                                    <td>{band._count?.bandMusicians ?? 0}</td>
+                                    <td>{band._count?.events ?? 0}</td>
                                 </tr>
                             ))}
                         </tbody>

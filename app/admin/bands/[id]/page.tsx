@@ -5,6 +5,7 @@ import { useToast } from "@/lib/hooks/useToast";
 import { generateSlugFromName } from "@/lib/utils/generateSlug";
 import BandMemberForm from "@/components/admin/BandMemberForm";
 import Breadcrumbs from "@/components/admin/Breadcrumbs";
+import { Plus, Trash2 } from "lucide-react";
 
 function formatDate(date: string | null) {
     if (!date) return "—";
@@ -212,47 +213,46 @@ export default function BandDetailPage({ params }: { params: { id: string } }) {
 
                     <hr className="my-8" />
 
-                    <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-3 mb-4">
                         <h2 className="section-header">Members ({band.bandMusicians?.length || 0})</h2>
-                        <button className="btn btn-primary btn-medium" onClick={openAddModal}>
-                            <span>+</span>
-                            <span>Add Member</span>
+                        <button
+                            className="btn btn-secondary btn-small !bg-green-50 !text-green-700 hover:!bg-green-100"
+                            onClick={openAddModal}
+                        >
+                            <Plus className="w-3 h-3" />
                         </button>
                     </div>
 
                     {band.bandMusicians?.length > 0 ? (
-                        <div className="table-container">
+                        <div className="table-container inline-block">
                             <table className="table">
                                 <thead>
                                     <tr>
+                                        <th className="w-12"></th>
                                         <th>Musician</th>
                                         <th>Joined</th>
                                         <th>Left</th>
-                                        <th></th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {band.bandMusicians.map((bm: any) => (
-                                        <tr key={bm.id}>
+                                        <tr
+                                            key={bm.id}
+                                            onClick={() => openEditModal(bm.id)}
+                                            className="cursor-pointer hover:bg-gray-50"
+                                        >
+                                            <td className="w-12" onClick={(e) => e.stopPropagation()}>
+                                                <button
+                                                    className="btn btn-secondary btn-small !bg-red-50 !text-red-600 hover:!bg-red-100"
+                                                    onClick={() => handleMemberRemove(bm.id)}
+                                                    title="Remove member"
+                                                >
+                                                    <Trash2 className="w-4 h-4" />
+                                                </button>
+                                            </td>
                                             <td>{bm.musician?.name || "—"}</td>
                                             <td>{formatDate(bm.joinedDate)}</td>
                                             <td>{formatDate(bm.leftDate)}</td>
-                                            <td>
-                                                <div className="table-actions">
-                                                    <button
-                                                        className="btn btn-secondary btn-small"
-                                                        onClick={() => openEditModal(bm.id)}
-                                                    >
-                                                        Edit
-                                                    </button>
-                                                    <button
-                                                        className="btn btn-danger btn-small"
-                                                        onClick={() => handleMemberRemove(bm.id)}
-                                                    >
-                                                        Remove
-                                                    </button>
-                                                </div>
-                                            </td>
                                         </tr>
                                     ))}
                                 </tbody>

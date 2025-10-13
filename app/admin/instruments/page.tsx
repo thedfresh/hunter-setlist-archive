@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { useToast } from '@/lib/hooks/useToast';
 import Modal from '@/components/ui/Modal';
 import InstrumentForm from '@/components/admin/InstrumentForm';
-import { Plus } from "lucide-react";
+import { Plus, Trash2 } from 'lucide-react';
 
 export default function InstrumentsPage() {
     const [instruments, setInstruments] = useState<any[]>([]);
@@ -113,10 +113,11 @@ export default function InstrumentsPage() {
                     <div className="loading-text">Loading instruments...</div>
                 </div>
             ) : instruments.length > 0 ? (
-                <div className="table-container">
+                <div className="table-container inline-block">
                     <table className="table">
                         <thead>
                             <tr>
+                                <th className="w-12"></th>
                                 <th className="sortable" onClick={() => handleSort('name')}>
                                     Name {sortKey === 'name' && (sortDir === 'asc' ? '▲' : '▼')}
                                 </th>
@@ -126,33 +127,29 @@ export default function InstrumentsPage() {
                                 <th className="sortable" onClick={() => handleSort('uses')}>
                                     Uses {sortKey === 'uses' && (sortDir === 'asc' ? '▲' : '▼')}
                                 </th>
-                                <th></th>
                             </tr>
                         </thead>
                         <tbody>
                             {sorted.map((instrument) => {
-                                const uses = instrument._count.eventMusicians + instrument._count.performanceMusicians;
+                                const uses = (instrument._count?.eventMusicians ?? 0) + (instrument._count?.performanceMusicians ?? 0);
                                 return (
-                                    <tr key={instrument.id}>
+                                    <tr
+                                        key={instrument.id}
+                                        onClick={() => openEditModal(instrument.id)}
+                                        className="cursor-pointer hover:bg-gray-50"
+                                    >
+                                        <td className="w-12" onClick={(e) => e.stopPropagation()}>
+                                            <button
+                                                className="btn btn-secondary btn-small !bg-red-50 !text-red-600 hover:!bg-red-100"
+                                                onClick={() => handleDelete(instrument.id)}
+                                                title="Delete instrument"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </button>
+                                        </td>
                                         <td>{instrument.name}</td>
                                         <td>{instrument.displayName}</td>
                                         <td>{uses}</td>
-                                        <td>
-                                            <div className="table-actions">
-                                                <button
-                                                    className="btn btn-secondary btn-small"
-                                                    onClick={() => openEditModal(instrument.id)}
-                                                >
-                                                    Edit
-                                                </button>
-                                                <button
-                                                    onClick={() => handleDelete(instrument.id)}
-                                                    className="btn btn-danger btn-small"
-                                                >
-                                                    Delete
-                                                </button>
-                                            </div>
-                                        </td>
                                     </tr>
                                 );
                             })}

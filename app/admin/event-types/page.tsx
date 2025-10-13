@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import Modal from '@/components/ui/Modal';
 import EventTypeForm from '@/components/admin/EventTypeForm';
 import { useToast } from '@/lib/hooks/useToast';
-import { Plus } from "lucide-react";
+import { Plus, Trash2 } from 'lucide-react';
 
 export default function EventTypesPage() {
     const [eventTypes, setEventTypes] = useState<any[]>([]);
@@ -88,56 +88,45 @@ export default function EventTypesPage() {
                     <Plus className="w-3 h-3" />
                 </button>
             </div>
-            <div className="admin-stats">
-                <div className="admin-stat-item">
-                    <span className="admin-stat-value">{eventTypes.length}</span>
-                    <span>Total Event Types</span>
-                </div>
-            </div>
             {loading ? (
                 <div className="loading-state">
                     <div className="spinner"></div>
                     <div className="loading-text">Loading event types...</div>
                 </div>
             ) : eventTypes.length > 0 ? (
-                <div className="table-container">
+                <div className="table-container inline-block">
                     <table className="table">
                         <thead>
                             <tr>
+                                <th className="w-12"></th>
                                 <th className="sortable" onClick={() => handleSort('name')}>
                                     Name {sortKey === 'name' && (sortDir === 'asc' ? '▲' : '▼')}
                                 </th>
-                                <th className="sortable" onClick={() => handleSort('includeInStats')}>
-                                    Include in Stats
-                                </th>
+                                <th>Include in Stats</th>
                                 <th className="sortable" onClick={() => handleSort('uses')}>
                                     Uses {sortKey === 'uses' && (sortDir === 'asc' ? '▲' : '▼')}
                                 </th>
-                                <th></th>
                             </tr>
                         </thead>
                         <tbody>
                             {sorted.map((eventType) => (
-                                <tr key={eventType.id}>
+                                <tr
+                                    key={eventType.id}
+                                    onClick={() => openEditModal(eventType.id)}
+                                    className="cursor-pointer hover:bg-gray-50"
+                                >
+                                    <td className="w-12" onClick={(e) => e.stopPropagation()}>
+                                        <button
+                                            className="btn btn-secondary btn-small !bg-red-50 !text-red-600 hover:!bg-red-100"
+                                            onClick={() => handleDelete(eventType.id)}
+                                            title="Delete event type"
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </button>
+                                    </td>
                                     <td>{eventType.name}</td>
                                     <td>{eventType.includeInStats ? '✔️' : '❌'}</td>
                                     <td>{eventType._count?.events ?? 0}</td>
-                                    <td>
-                                        <div className="table-actions">
-                                            <button
-                                                className="btn btn-secondary btn-small"
-                                                onClick={() => openEditModal(eventType.id)}
-                                            >
-                                                Edit
-                                            </button>
-                                            <button
-                                                onClick={() => handleDelete(eventType.id)}
-                                                className="btn btn-danger btn-small"
-                                            >
-                                                Delete
-                                            </button>
-                                        </div>
-                                    </td>
                                 </tr>
                             ))}
                         </tbody>

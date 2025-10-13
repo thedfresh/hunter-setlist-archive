@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import Modal from '@/components/ui/Modal';
 import ContentTypeForm from '@/components/admin/ContentTypeForm';
 import { useToast } from '@/lib/hooks/useToast';
-import { Plus } from "lucide-react";
+import { Plus, Trash2 } from 'lucide-react';
 
 export default function ContentTypesPage() {
     const [contentTypes, setContentTypes] = useState<any[]>([]);
@@ -88,52 +88,43 @@ export default function ContentTypesPage() {
                     <Plus className="w-3 h-3" />
                 </button>
             </div>
-            <div className="admin-stats">
-                <div className="admin-stat-item">
-                    <span className="admin-stat-value">{contentTypes.length}</span>
-                    <span>Total Content Types</span>
-                </div>
-            </div>
             {loading ? (
                 <div className="loading-state">
                     <div className="spinner"></div>
                     <div className="loading-text">Loading content types...</div>
                 </div>
             ) : contentTypes.length > 0 ? (
-                <div className="table-container">
+                <div className="table-container inline-block">
                     <table className="table">
                         <thead>
                             <tr>
+                                <th className="w-12"></th>
                                 <th className="sortable" onClick={() => handleSort('name')}>
                                     Name {sortKey === 'name' && (sortDir === 'asc' ? '▲' : '▼')}
                                 </th>
                                 <th className="sortable" onClick={() => handleSort('uses')}>
                                     Uses {sortKey === 'uses' && (sortDir === 'asc' ? '▲' : '▼')}
                                 </th>
-                                <th></th>
                             </tr>
                         </thead>
                         <tbody>
                             {sorted.map((contentType) => (
-                                <tr key={contentType.id}>
+                                <tr
+                                    key={contentType.id}
+                                    onClick={() => openEditModal(contentType.id)}
+                                    className="cursor-pointer hover:bg-gray-50"
+                                >
+                                    <td className="w-12" onClick={(e) => e.stopPropagation()}>
+                                        <button
+                                            className="btn btn-secondary btn-small !bg-red-50 !text-red-600 hover:!bg-red-100"
+                                            onClick={() => handleDelete(contentType.id)}
+                                            title="Delete content type"
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </button>
+                                    </td>
                                     <td>{contentType.name}</td>
                                     <td>{contentType._count?.events ?? 0}</td>
-                                    <td>
-                                        <div className="table-actions">
-                                            <button
-                                                className="btn btn-secondary btn-small"
-                                                onClick={() => openEditModal(contentType.id)}
-                                            >
-                                                Edit
-                                            </button>
-                                            <button
-                                                onClick={() => handleDelete(contentType.id)}
-                                                className="btn btn-danger btn-small"
-                                            >
-                                                Delete
-                                            </button>
-                                        </div>
-                                    </td>
                                 </tr>
                             ))}
                         </tbody>

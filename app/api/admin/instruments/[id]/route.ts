@@ -18,3 +18,14 @@ export async function DELETE(
         return NextResponse.json({ error: 'Failed to delete instrument' }, { status: 500 });
     }
 }
+
+export async function GET(_req: Request, { params }: { params: { id: string } }) {
+    try {
+        const id = Number(params.id);
+        const instrument = await prisma.instrument.findUnique({ where: { id } });
+        if (!instrument) return NextResponse.json({ error: "Not found" }, { status: 404 });
+        return NextResponse.json(instrument);
+    } catch (err: any) {
+        return NextResponse.json({ error: err.message }, { status: 500 });
+    }
+}

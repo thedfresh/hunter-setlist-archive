@@ -4,9 +4,11 @@ import { useEffect, useState } from "react";
 import VenueForm from "@/components/admin/VenueForm";
 import Modal from "@/components/ui/Modal";
 import { useToast } from "@/lib/hooks/useToast";
-import { Plus } from "lucide-react";
+import { Plus, Trash2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 export default function VenuesAdminPage() {
+    const router = useRouter();
     const [venues, setVenues] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [modalOpen, setModalOpen] = useState(false);
@@ -97,19 +99,13 @@ export default function VenuesAdminPage() {
     return (
         <div>
             <div className="page-header flex items-center gap-3">
-                <h1 className="page-title">Venus</h1>
+                <h1 className="page-title">Venues</h1>
                 <button
                     className="btn btn-secondary btn-small !bg-green-50 !text-green-700 hover:!bg-green-100"
                     onClick={openAddModal}
                 >
                     <Plus className="w-3 h-3" />
                 </button>
-            </div>
-            <div className="admin-stats">
-                <div className="admin-stat-item">
-                    <span className="admin-stat-value">{venues.length}</span>
-                    <span>Total Venues</span>
-                </div>
             </div>
 
             <div className="mb-4">
@@ -128,10 +124,11 @@ export default function VenuesAdminPage() {
                     <div className="loading-text">Loading venues...</div>
                 </div>
             ) : sorted.length > 0 ? (
-                <div className="table-container">
+                <div className="table-container inline-block">
                     <table className="table">
                         <thead>
                             <tr>
+                                <th className="w-12"></th>
                                 <th className="sortable" onClick={() => handleSort('name')}>
                                     Name {sortKey === 'name' ? (sortOrder === 'asc' ? '▲' : '▼') : ''}
                                 </th>
@@ -145,30 +142,29 @@ export default function VenuesAdminPage() {
                                 <th className="sortable text-center" onClick={() => handleSort('events')}>
                                     Events {sortKey === 'events' ? (sortOrder === 'asc' ? '▲' : '▼') : ''}
                                 </th>
-                                <th></th>
                             </tr>
                         </thead>
                         <tbody>
                             {sorted.map((venue: any) => (
-                                <tr key={venue.id}>
-                                    <td>{venue.name}</td>
+                                <tr
+                                    key={venue.id}
+                                    onClick={() => router.push(`/admin/venues/${venue.id}`)}
+                                    className="cursor-pointer hover:bg-gray-50"
+                                >
+                                    <td className="w-12" onClick={(e) => e.stopPropagation()}>
+                                        <button
+                                            className="btn btn-secondary btn-small !bg-red-50 !text-red-600 hover:!bg-red-100"
+                                            onClick={() => handleDelete(venue.id, venue._count?.events ?? 0)}
+                                            title="Delete venue"
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </button>
+                                    </td>
+                                    <td>{venue.name}{venue.context && ` (${venue.context})`}</td>
                                     <td>{venue.city}</td>
                                     <td>{venue.stateProvince}</td>
                                     <td className="text-center">{venue.isUncertain ? "✔️" : "❌"}</td>
                                     <td className="text-center">{venue._count?.events ?? 0}</td>
-                                    <td>
-                                        <div className="table-actions">
-                                            <Link href={`/admin/venues/${venue.id}`}>
-                                                <button className="btn btn-secondary btn-small">View/Edit</button>
-                                            </Link>
-                                            <button
-                                                className="btn btn-danger btn-small"
-                                                onClick={() => handleDelete(venue.id, venue._count?.events ?? 0)}
-                                            >
-                                                Delete
-                                            </button>
-                                        </div>
-                                    </td>
                                 </tr>
                             ))}
                         </tbody>
