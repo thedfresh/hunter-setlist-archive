@@ -12,9 +12,8 @@ export async function GET(req: Request, { params }: { params: Params }) {
       where: { id },
       include: {
         bandMusicians: {
-          include: {
-            musician: true,
-          },
+          include: { musician: true },
+          orderBy: { joinedDate: 'asc' }
         },
         _count: { select: { events: true } }
       },
