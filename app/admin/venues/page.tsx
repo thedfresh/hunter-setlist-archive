@@ -5,49 +5,48 @@ import VenueForm from "@/components/admin/VenueForm";
 import Modal from "@/components/ui/Modal";
 import { useToast } from "@/lib/hooks/useToast";
 
-function fetchVenues() {
-    return fetch("/api/venues").then(res => res.json());
-}
-
 export default function VenuesAdminPage() {
-    const [venues, setVenues] = useState([]);
+    const [venues, setVenues] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [modalOpen, setModalOpen] = useState(false);
     const [editVenueId, setEditVenueId] = useState(0);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [sortKey, setSortKey] = useState('name');
+    const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
     const { showToast } = useToast();
 
-    const refreshVenues = async () => {
+    useEffect(() => {
+        refreshVenues();
+    }, []);
+
+    async function refreshVenues() {
         setLoading(true);
         try {
-            const data = await fetchVenues();
+            const res = await fetch("/api/venues", { cache: 'no-store' });
+            const data = await res.json();
             setVenues(data.venues || []);
         } catch {
             showToast("Failed to load venues", "error");
         } finally {
             setLoading(false);
         }
-    };
-
-    useEffect(() => {
-        refreshVenues();
-    }, []);
+    }
 
     function openAddModal() {
         setEditVenueId(0);
         setModalOpen(true);
     }
-    function handleEdit(id: number) {
-        setEditVenueId(id);
-        setModalOpen(true);
-    }
+
     function handleSuccess() {
         setModalOpen(false);
         refreshVenues();
         showToast("Venue saved", "success");
     }
+
     function handleCancel() {
         setModalOpen(false);
     }
+
     async function handleDelete(id: number, eventCount: number) {
         if (eventCount > 0) {
             showToast(`Cannot delete - has ${eventCount} events`, "error");
@@ -65,54 +64,127 @@ export default function VenuesAdminPage() {
         }
     }
 
+    function handleSort(key: string) {
+        if (sortKey === key) {
+            setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+        } else {
+            setSortKey(key);
+            setSortOrder('asc');
+        }
+    }
+
+    const filtered = venues.filter(venue =>
+        venue.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (venue.city || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (venue.stateProvince || '').toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    const sorted = [...filtered].sort((a, b) => {
+        let aVal, bVal;
+        if (sortKey === 'events') {
+            aVal = a._count?.events ?? 0;
+            bVal = b._count?.events ?? 0;
+        } else {
+            aVal = a[sortKey]?.toLowerCase() || '';
+            bVal = b[sortKey]?.toLowerCase() || '';
+        }
+        if (aVal < bVal) return sortOrder === 'asc' ? -1 : 1;
+        if (aVal > bVal) return sortOrder === 'asc' ? 1 : -1;
+        return 0;
+    });
+
     return (
-        <div className="page-container">
-            <h1 className="text-2xl font-bold mb-6">Venues</h1>
-            <div className="flex justify-end mb-4">
-                <button className="btn btn-primary btn-medium" onClick={openAddModal}>Add Venue</button>
+        <div>
+            <div className="page-header flex items-center justify-between">
+                <h1 className="page-title">Venues</h1>
+                <button className="btn btn-primary btn-medium" onClick={openAddModal}>
+                    <span>+</span>
+                    <span>Add Venue</span>
+                </button>
             </div>
-            <div className="table-container">
-                <table className="table">
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>City</th>
-                            <th>State</th>
-                            <th className="text-center">Uncertain</th>
-                            <th className="text-center">Events</th>
-                            <th className="text-center">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {loading ? (
-                            <tr><td colSpan={6} className="loading-state">Loading...</td></tr>
-                        ) : venues.length === 0 ? (
-                            <tr><td colSpan={6} className="empty-state">No venues found</td></tr>
-                        ) : venues.map((venue: any) => (
-                            <tr key={venue.id}>
-                                <td>{venue.name}</td>
-                                <td>{venue.city}</td>
-                                <td>{venue.stateProvince}</td>
-                                <td className="text-center">{venue.isUncertain ? "✔️" : "❌"}</td>
-                                <td className="text-center">{venue._count?.events ?? 0}</td>
-                                <td className="text-center flex gap-2 justify-center">
-                                    <Link href={`/admin/venues/${venue.id}`}>
-                                        <button className="btn btn-secondary btn-small">View/Edit</button>
-                                    </Link>
-                                    <button className="btn btn-danger btn-small" onClick={() => handleDelete(venue.id, venue._count?.events ?? 0)}>Delete</button>
-                                </td>
+
+            <div className="admin-stats">
+                <div className="admin-stat-item">
+                    <span className="admin-stat-value">{venues.length}</span>
+                    <span>Total Venues</span>
+                </div>
+            </div>
+
+            <div className="mb-4">
+                <input
+                    type="text"
+                    placeholder="Search venues by name, city, or state..."
+                    className="input"
+                    value={searchTerm}
+                    onChange={e => setSearchTerm(e.target.value)}
+                />
+            </div>
+
+            {loading ? (
+                <div className="loading-state">
+                    <div className="spinner"></div>
+                    <div className="loading-text">Loading venues...</div>
+                </div>
+            ) : sorted.length > 0 ? (
+                <div className="table-container">
+                    <table className="table">
+                        <thead>
+                            <tr>
+                                <th className="sortable" onClick={() => handleSort('name')}>
+                                    Name {sortKey === 'name' ? (sortOrder === 'asc' ? '▲' : '▼') : ''}
+                                </th>
+                                <th className="sortable" onClick={() => handleSort('city')}>
+                                    City {sortKey === 'city' ? (sortOrder === 'asc' ? '▲' : '▼') : ''}
+                                </th>
+                                <th className="sortable" onClick={() => handleSort('stateProvince')}>
+                                    State {sortKey === 'stateProvince' ? (sortOrder === 'asc' ? '▲' : '▼') : ''}
+                                </th>
+                                <th className="text-center">Uncertain</th>
+                                <th className="sortable text-center" onClick={() => handleSort('events')}>
+                                    Events {sortKey === 'events' ? (sortOrder === 'asc' ? '▲' : '▼') : ''}
+                                </th>
+                                <th className="text-center">Actions</th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
+                        </thead>
+                        <tbody>
+                            {sorted.map((venue: any) => (
+                                <tr key={venue.id}>
+                                    <td>{venue.name}</td>
+                                    <td>{venue.city}</td>
+                                    <td>{venue.stateProvince}</td>
+                                    <td className="text-center">{venue.isUncertain ? "✔️" : "❌"}</td>
+                                    <td className="text-center">{venue._count?.events ?? 0}</td>
+                                    <td>
+                                        <div className="table-actions">
+                                            <Link href={`/admin/venues/${venue.id}`}>
+                                                <button className="btn btn-secondary btn-small">View/Edit</button>
+                                            </Link>
+                                            <button
+                                                className="btn btn-danger btn-small"
+                                                onClick={() => handleDelete(venue.id, venue._count?.events ?? 0)}
+                                            >
+                                                Delete
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            ) : (
+                <div className="empty-state">
+                    <div className="empty-title">No venues found</div>
+                </div>
+            )}
+
             <Modal
                 isOpen={modalOpen}
                 onClose={() => setModalOpen(false)}
-                title={editVenueId === 0 ? 'Add Venue' : 'Edit Venue'}
+                title="Add Venue"
             >
                 <VenueForm
-                    venueId={editVenueId || 0}
+                    venueId={0}
                     onSuccess={handleSuccess}
                     onCancel={handleCancel}
                 />
