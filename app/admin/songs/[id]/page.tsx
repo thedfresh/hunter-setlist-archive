@@ -16,7 +16,6 @@ export default function SongAdminDetailPage({ params }: { params: { id: string }
     const [form, setForm] = useState({
         title: "",
         slug: "",
-        slugManuallyEdited: false,
         alternateTitle: "",
         originalArtist: "",
         lyricsBy: "",
@@ -39,7 +38,6 @@ export default function SongAdminDetailPage({ params }: { params: { id: string }
                 setForm({
                     title: data.song.title || "",
                     slug: data.song.slug || "",
-                    slugManuallyEdited: false,
                     alternateTitle: data.song.alternateTitle || "",
                     originalArtist: data.song.originalArtist || "",
                     lyricsBy: data.song.lyricsBy || "",
@@ -56,12 +54,6 @@ export default function SongAdminDetailPage({ params }: { params: { id: string }
             })
             .finally(() => setLoading(false));
     }, [songId]);
-
-    useEffect(() => {
-        if (!form.slugManuallyEdited && form.title) {
-            setForm(f => ({ ...f, slug: generateSlugFromName(f.title) }));
-        }
-    }, [form.title, form.slugManuallyEdited]);
 
     async function handleSave(e: React.FormEvent) {
         e.preventDefault();
@@ -154,7 +146,7 @@ export default function SongAdminDetailPage({ params }: { params: { id: string }
                                     id="slug"
                                     className="input"
                                     value={form.slug}
-                                    onChange={e => setForm(f => ({ ...f, slug: e.target.value, slugManuallyEdited: true }))}
+                                    onChange={e => setForm(f => ({ ...f, slug: e.target.value }))}
                                     disabled={saving}
                                 />
                                 <p className="form-help">Auto-generated</p>

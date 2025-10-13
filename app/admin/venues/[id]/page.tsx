@@ -14,7 +14,6 @@ export default function VenueAdminDetailPage({ params }: { params: { id: string 
     const [form, setForm] = useState({
         name: "",
         slug: "",
-        slugManuallyEdited: false,
         context: "",
         city: "",
         stateProvince: "",
@@ -37,7 +36,6 @@ export default function VenueAdminDetailPage({ params }: { params: { id: string 
                 setForm({
                     name: data.venue.name || "",
                     slug: data.venue.slug || "",
-                    slugManuallyEdited: false,
                     context: data.venue.context || "",
                     city: data.venue.city || "",
                     stateProvince: data.venue.stateProvince || "",
@@ -53,15 +51,6 @@ export default function VenueAdminDetailPage({ params }: { params: { id: string 
             })
             .finally(() => setLoading(false));
     }, [venueId]);
-
-    useEffect(() => {
-        if (!form.slugManuallyEdited && form.name) {
-            setForm(f => ({
-                ...f,
-                slug: generateVenueSlug(f.name, f.city, f.stateProvince)
-            }));
-        }
-    }, [form.name, form.city, form.stateProvince, form.slugManuallyEdited]);
 
     async function handleSave(e: React.FormEvent) {
         e.preventDefault();
@@ -163,7 +152,7 @@ export default function VenueAdminDetailPage({ params }: { params: { id: string 
                                     id="slug"
                                     className="input"
                                     value={form.slug}
-                                    onChange={e => setForm(f => ({ ...f, slug: e.target.value, slugManuallyEdited: true }))}
+                                    onChange={e => setForm(f => ({ ...f, slug: e.target.value }))}
                                     disabled={saving}
                                 />
                                 <p className="form-help">Auto-generated</p>

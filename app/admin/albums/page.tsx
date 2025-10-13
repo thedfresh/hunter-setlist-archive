@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Modal from '@/components/ui/Modal';
 import AlbumForm from '@/components/admin/AlbumForm';
 import { useToast } from '@/lib/hooks/useToast';
@@ -11,7 +12,7 @@ export default function AlbumsPage() {
     const [sortKey, setSortKey] = useState<'title' | 'artist' | 'year' | 'tracks'>('title');
     const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
     const [modalOpen, setModalOpen] = useState(false);
-    const [editingId, setEditingId] = useState<number | null>(null);
+    const router = useRouter();
     const { showSuccess, showError } = useToast();
 
     useEffect(() => {
@@ -42,11 +43,6 @@ export default function AlbumsPage() {
     }
 
     function openAddModal() {
-        setEditingId(0);
-        setModalOpen(true);
-    }
-    function openEditModal(id: number) {
-        setEditingId(id);
         setModalOpen(true);
     }
 
@@ -106,7 +102,9 @@ export default function AlbumsPage() {
                                     Title {sortKey === 'title' && (sortDir === 'asc' ? '▲' : '▼')}
                                 </th>
                                 <th>Artist</th>
-                                <th>Year</th>
+                                <th className="sortable" onClick={() => handleSort('year')}>
+                                    Year {sortKey === 'year' && (sortDir === 'asc' ? '▲' : '▼')}
+                                </th>
                                 <th>Official</th>
                                 <th className="sortable" onClick={() => handleSort('tracks')}>
                                     Tracks {sortKey === 'tracks' && (sortDir === 'asc' ? '▲' : '▼')}
@@ -117,7 +115,7 @@ export default function AlbumsPage() {
                             {sorted.map((album) => (
                                 <tr
                                     key={album.id}
-                                    onClick={() => openEditModal(album.id)}
+                                    onClick={() => router.push(`/admin/albums/${album.id}`)}
                                     className="cursor-pointer hover:bg-gray-50"
                                 >
                                     <td className="w-12" onClick={(e) => e.stopPropagation()}>
@@ -147,13 +145,13 @@ export default function AlbumsPage() {
             <Modal
                 isOpen={modalOpen}
                 onClose={() => setModalOpen(false)}
-                title={editingId === 0 ? 'Add Album' : 'Edit Album'}
+                title="Add Album"
             >
                 <AlbumForm
-                    albumId={editingId || 0}
+                    albumId={0}
                     onSuccess={async () => {
                         setModalOpen(false);
-                        showSuccess(editingId === 0 ? 'Album added' : 'Album updated');
+                        showSuccess('Album added');
                         await refreshAlbums();
                     }}
                     onCancel={() => setModalOpen(false)}
