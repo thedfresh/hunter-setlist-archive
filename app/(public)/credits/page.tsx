@@ -20,7 +20,7 @@ export default function CreditsPage() {
 
                 <p className="mb-4"><strong>Bill Gallagher</strong> contributed an enormous amount of the performance data on this site by meticulously combing through <em>Bay Area Music</em> (BAM) magazine and sharing all that research with the archive.</p>
 
-                <p className="mb-4"><strong>Alex Allan's</strong> lyrics site <ExternalLink href="http://whitegum.com/">WhiteGum</ExternalLink> contains a wealth of information about Hunter's songwriting process and has been invaluable in deciphering the lyrical and musical fragments that define a good Hunter setlist.</p>
+                <p className="mb-4"><strong>Alex Allan's</strong> lyrics site <ExternalLink href="https://whitegum.com/intro.htm">WhiteGum</ExternalLink> contains a wealth of information about Hunter's songwriting process and has been invaluable in deciphering the lyrical and musical fragments that define a good Hunter setlist.</p>
 
                 <h2 className="text-xl font-semibold mt-8 mb-4">Archival & Technical Resources</h2>
 
