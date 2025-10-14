@@ -52,6 +52,12 @@ export default function VenueAdminDetailPage({ params }: { params: { id: string 
             .finally(() => setLoading(false));
     }, [venueId]);
 
+    useEffect(() => {
+        if (form.name) {
+            setForm(f => ({ ...f, slug: generateVenueSlug(form.name, form.city, form.stateProvince) }));
+        }
+    }, [form.name, form.city, form.stateProvince]);
+
     async function handleSave(e: React.FormEvent) {
         e.preventDefault();
         setError("");

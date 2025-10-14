@@ -55,6 +55,12 @@ export default function SongAdminDetailPage({ params }: { params: { id: string }
             .finally(() => setLoading(false));
     }, [songId]);
 
+    useEffect(() => {
+        if (form.title) {
+            setForm(f => ({ ...f, slug: generateSlugFromName(form.title) }));
+        }
+    }, [form.title]);
+
     async function handleSave(e: React.FormEvent) {
         e.preventDefault();
         setError("");
