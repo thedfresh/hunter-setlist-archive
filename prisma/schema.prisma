@@ -443,3 +443,16 @@ model LinkType {
 
   @@map("link_types")
 }
+
+model RssEntry {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String   @db.Text
+  link        String?
+  pubDate     DateTime @default(now()) @map("pub_date")
+  isPublished Boolean  @default(false) @map("is_published")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@map("rss_entries")
+}

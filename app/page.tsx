@@ -54,8 +54,36 @@ export default function HomePage() {
           good start.  If you have information, recordings, or corrections to contribute, please email me at
           <a href="mailto:dfresh@gmail.com" className="link-internal">dfresh@gmail.com</a>.  Enjoy exploring the legacy of Robert Hunter!
         </p>
-        <p className="text-sm text-gray-700">
-        </p>
+        <div className="card mt-6 px-6 py-4 bg-gray-50">
+          <h3 className="text-lg font-semibold mb-2">Get Updates!</h3>
+          <p className="text-sm text-gray-700 mb-2">
+            If you'd like to be notified when new features are added, or when significant new data is added to the site, please consider subscribing to
+            my newsletter.  (This is a low-volume newsletter - I only send out an email when there is something significant to share.  Use the RSS feed
+            to track smaller, more frequent updates.)
+          </p>
+          <p className="text-sm text-gray-700 mb-4">
+            <form
+              action="https://buttondown.com/api/emails/embed-subscribe/hunter-archives"
+              method="post"
+              target="popupwindow"
+              onSubmit={() => window.open('https://buttondown.com/hunter-archives', 'popupwindow')}
+              className="embeddable-buttondown-form flex gap-2 max-w-md"
+            >
+              <label htmlFor="bd-email" className="sr-only">Enter your email</label>
+              <input
+                type="email"
+                name="email"
+                id="bd-email"
+                placeholder="your@email.com"
+                className="input input-small flex-1"
+                required
+              />
+              <button type="submit" className="btn btn-primary btn-medium">
+                Subscribe
+              </button>
+            </form>
+          </p>
+        </div>
       </section>
       <section>
         <h2 className="text-xl font-semibold mb-4 text-center">Today in Robert Hunter Performances</h2>

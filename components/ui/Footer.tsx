@@ -1,25 +1,50 @@
-import React from 'react';
-import Link from 'next/link';
-
-const Footer: React.FC = () => {
+export default function Footer() {
     return (
-        <footer className="bg-gray-100 text-gray-600 py-4 w-full border-t border-gray-600">
-            <div className="container mx-auto flex flex-wrap justify-center items-center gap-2 text-sm">
-                <span>© 2025 Robert Hunter Performance Archive</span>
-                <span className="mx-2">|</span>
-                <span><a
-                    href="mailto:dfresh@gmail.com"
-                    className="hover:text-hunter-gold transition-colors"
-                >
-                    Douglas Aldridge
-                </a>, Webmaster</span>
-                <span className="mx-2">|</span>
-                <Link href="/about" className="hover:text-hunter-gold transition-colors">
-                    About This Project
-                </Link>
+        <footer className="border-t border-gray-200 bg-gray-50 text-gray-700">
+            <div className="max-w-7xl mx-auto px-4 py-6">
+                {/* Row 1: Navigation Links */}
+                <nav className="flex justify-center gap-6 mb-4 text-sm">
+                    <a href="/about" className="hover:text-hunter-gold">About</a>
+                    <span className="text-gray-300">|</span>
+                    <a href="/credits" className="hover:text-hunter-gold">Credits</a>
+                    <span className="text-gray-300">|</span>
+                    <a href="/rss.xml" className="hover:text-hunter-gold">RSS Feed</a>
+                    <span className="text-gray-300">|</span>
+                    <a href="mailto:contact@stillunsung.com" className="hover:text-hunter-gold">Contact</a>
+                </nav>
+
+                {/* Row 2: Newsletter - Single Line */}
+                <div className="flex items-center justify-center gap-4 text-sm">
+                    <span className="text-gray-600">Get notified when new shows are added:</span>
+                    <form
+                        action="https://buttondown.com/api/emails/embed-subscribe/hunter-archives"
+                        method="post"
+                        target="popupwindow"
+                        onSubmit={() => window.open('https://buttondown.com/hunter-archives', 'popupwindow')}
+                        className="flex gap-2"
+                    >
+                        <input
+                            type="email"
+                            name="email"
+                            id="bd-email"
+                            placeholder="your@email.com"
+                            className="input input-small w-64"
+                            required
+                        />
+                        <button type="submit" className="btn btn-primary btn-small">
+                            Subscribe
+                        </button>
+                    </form>
+                    <a
+                        href="https://buttondown.com/refer/hunter-archives"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs text-gray-400 hover:text-hunter-gold"
+                    >
+                        Powered by Buttondown
+                    </a>
+                </div>
             </div>
         </footer>
     );
-};
-
-export default Footer;
+}

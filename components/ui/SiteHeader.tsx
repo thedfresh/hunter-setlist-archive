@@ -23,6 +23,15 @@ const SiteHeader = () => {
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    fetch('/api/admin/check')
+      .then(res => {
+        if (res.ok) setIsAdmin(true);
+      })
+      .catch(() => setIsAdmin(false));
+  }, []);
 
   useEffect(() => {
     setSelectedIndex(-1);
@@ -172,6 +181,13 @@ const SiteHeader = () => {
             <Link href="/band" className="nav-link">Bands</Link>
             <Link href="/hunter" className="nav-link">Hunter</Link>
             <Link href="/about" className="nav-link">About</Link>
+            <Link href="/credits" className="nav-link">Credits</Link>
+            {isAdmin && (
+              <>
+                <span className="text-gray-300">|</span>
+                <a href="/admin" className="hover:text-hunter-gold">Admin</a>
+              </>
+            )}
           </nav>
           <div className="relative w-full max-w-xs">
             <input

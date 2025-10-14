@@ -225,10 +225,10 @@ export default function SetsSection({ eventId }: SetsSectionProps) {
                         eventId={eventId}
                         setId={editingPerformance.setId}
                         performanceId={editingPerformance.perfId}
-                        onSuccess={() => {
+                        onSuccess={async () => {
                             setPerfModalOpen(false);
                             showSuccess(editingPerformance.perfId ? "Performance updated" : "Performance added");
-                            refreshSets();
+                            await refreshSets();
 
                             // Focus the Add Performance button after adding (not editing)
                             if (!editingPerformance.perfId && activeSetIdForFocus) {

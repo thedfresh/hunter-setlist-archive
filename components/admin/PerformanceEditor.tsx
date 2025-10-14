@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Plus } from "lucide-react";
 
 interface PerformanceEditorProps {
     eventId: number;
@@ -9,6 +10,29 @@ interface PerformanceEditorProps {
 }
 
 export default function PerformanceEditor({ eventId, setId, performanceId, onSuccess, onCancel }: PerformanceEditorProps) {
+    const handleSaveMusician = async () => {
+        if (!selectedMusicianId) return;
+        const res = await fetch(`/api/admin/performances/${performanceId}/musicians`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ musicianId: selectedMusicianId, instrumentId: selectedInstrumentId })
+        });
+        if (res.ok) {
+            const data = await fetch(`/api/admin/performances/${performanceId}/musicians`).then(r => r.json());
+            setPerformanceMusicians(data.performanceMusicians || []);
+            setShowAddMusician(false);
+            setSelectedMusicianId(null);
+            setSelectedInstrumentId(null);
+        }
+    };
+
+    const handleDeleteMusician = async (id: number) => {
+        if (!confirm('Delete this musician?')) return;
+        await fetch(`/api/admin/performances/${performanceId}/musicians/${id}`, { method: 'DELETE' });
+        const data = await fetch(`/api/admin/performances/${performanceId}/musicians`).then(r => r.json());
+        setPerformanceMusicians(data.performanceMusicians || []);
+        onSuccess();
+    };
     const [songId, setSongId] = useState<number | null>(null);
     const [seguesInto, setSeguesInto] = useState(false);
     const [isTruncatedStart, setIsTruncatedStart] = useState(false);
@@ -27,19 +51,35 @@ export default function PerformanceEditor({ eventId, setId, performanceId, onSuc
     const [error, setError] = useState("");
     const [songs, setSongs] = useState<any[]>([]);
     const [musicians, setMusicians] = useState<any[]>([]);
+    const [instruments, setInstruments] = useState<any[]>([]);
+    const [performanceMusicians, setPerformanceMusicians] = useState<any[]>([]);
+    const [showAddMusician, setShowAddMusician] = useState(false);
+    const [selectedMusicianId, setSelectedMusicianId] = useState<number | null>(null);
+    const [selectedInstrumentId, setSelectedInstrumentId] = useState<number | null>(null);
+
+    useEffect(() => {
+        if (performanceId) {
+            fetch(`/api/admin/performances/${performanceId}/musicians`)
+                .then(res => res.json())
+                .then(data => setPerformanceMusicians(data.performanceMusicians || []));
+        }
+    }, [performanceId]);
 
     useEffect(() => {
         async function fetchDropdowns() {
             try {
-                const [songsRes, musiciansRes] = await Promise.all([
+                const [songsRes, musiciansRes, instrumentsRes] = await Promise.all([
                     fetch("/api/songs"),
-                    fetch("/api/musicians")
+                    fetch("/api/musicians"),
+                    fetch("/api/instruments")
                 ]);
-                if (!songsRes.ok || !musiciansRes.ok) throw new Error();
+                if (!songsRes.ok || !musiciansRes.ok || !instrumentsRes.ok) throw new Error();
                 const songsData = await songsRes.json();
                 const musiciansData = await musiciansRes.json();
+                const instrumentsData = await instrumentsRes.json();
                 setSongs(songsData.songs || []);
                 setMusicians(musiciansData.musicians || []);
+                setInstruments(instrumentsData.instruments || []);
             } catch {
                 setError("Failed to load dropdowns");
             }
@@ -230,6 +270,49 @@ export default function PerformanceEditor({ eventId, setId, performanceId, onSuc
                         <option key={m.id} value={m.id}>{m.name}</option>
                     ))}
                 </select>
+            </div>
+
+            {/* Performance Musicians Section */}
+            <div className="mb-4 p-3 bg-gray-50 rounded">
+                <div className="flex items-center gap-2 mb-2">
+                    <h3 className="text-sm font-medium">Performance Musicians ({performanceMusicians.length})</h3>
+                    {!showAddMusician && (
+                        <button
+                            type="button"
+                            className="btn btn-secondary btn-small !bg-green-50 !text-green-700 hover:!bg-green-100"
+                            onClick={() => setShowAddMusician(true)}
+                        >
+                            <Plus className="w-3 h-3" />
+                        </button>
+                    )}
+                </div>
+
+                {performanceMusicians.map(pm => (
+                    <div key={pm.id} className="flex items-center justify-between py-1 text-sm">
+                        <span>{pm.musician.name}{pm.instrument && `, ${pm.instrument.displayName}`}</span>
+                        <button type="button" className="btn btn-danger btn-small" onClick={() => handleDeleteMusician(pm.id)}>
+                            Delete
+                        </button>
+                    </div>
+                ))}
+
+                {showAddMusician && (
+                    <div className="grid grid-cols-2 gap-2 mt-2">
+                        <select className="select" value={selectedMusicianId ?? ""} onChange={e => setSelectedMusicianId(Number(e.target.value))}>
+                            <option value="">Select musician</option>
+                            {musicians.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
+                        </select>
+                        <select className="select" value={selectedInstrumentId ?? ""} onChange={e => setSelectedInstrumentId(Number(e.target.value))}>
+                            <option value="">Select instrument</option>
+                            {instruments.map(i => <option key={i.id} value={i.id}>{i.displayName}</option>)}
+                        </select>
+                        <div></div>
+                        <div className="flex gap-2">
+                            <button type="button" className="btn btn-secondary btn-small flex-1" onClick={() => setShowAddMusician(false)}>Cancel</button>
+                            <button type="button" className="btn btn-primary btn-small flex-1" onClick={handleSaveMusician}>Save</button>
+                        </div>
+                    </div>
+                )}
             </div>
             <div className="grid grid-cols-2 gap-4 mb-4">
                 <div>

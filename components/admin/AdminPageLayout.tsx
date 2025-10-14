@@ -25,6 +25,7 @@ export default function AdminPageLayout({
         { label: 'Albums', href: '/admin/albums' },
         { label: 'Tags', href: '/admin/tags' },
         { label: 'Instruments', href: '/admin/instruments' },
+        { label: 'RSS Feed', href: '/admin/rss-entries' },
     ];
 
     const referenceItems = [
