@@ -33,6 +33,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
             },
         });
         revalidatePath('/admin/rss-entries');
+        revalidatePath('/rss.xml')
         return Response.json(entry);
     } catch (error) {
         if (
@@ -53,6 +54,7 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
             where: { id: parseInt(params.id, 10) },
         });
         revalidatePath('/admin/rss-entries');
+        revalidatePath('/rss.xml')
         return Response.json(entry);
     } catch (error) {
         if (
