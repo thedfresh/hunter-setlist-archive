@@ -1,11 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useToast } from "@/lib/hooks/useToast";
 import Modal from "@/components/ui/Modal";
 import SetForm from "@/components/admin/SetForm";
 import PerformanceEditor from "@/components/admin/PerformanceEditor";
 import { Edit2, Trash2, GripVertical, Plus } from 'lucide-react';
 import { DndContext, closestCenter, DragEndEvent } from '@dnd-kit/core';
-import { SortableContext, verticalListSortingStrategy, useSortable, arrayMove } from '@dnd-kit/sortable'; import { CSS } from '@dnd-kit/utilities';
+import { SortableContext, verticalListSortingStrategy, useSortable, arrayMove } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import SetMusicianForm from "@/components/admin/SetMusicianForm";
 
 interface SetsSectionProps {
@@ -30,7 +31,8 @@ export default function SetsSection({ eventId }: SetsSectionProps) {
     const [editingSetId, setEditingSetId] = useState<number | null>(null);
     const [perfModalOpen, setPerfModalOpen] = useState(false);
     const [editingPerformance, setEditingPerformance] = useState<{ setId: number; perfId: number | null } | null>(null);
-    // Removed set dragging state
+    const [activeSetIdForFocus, setActiveSetIdForFocus] = useState<number | null>(null);
+    const addPerfButtonRefs = useRef<Map<number, HTMLButtonElement>>(new Map());
     const { showSuccess, showError } = useToast();
 
     const refreshSets = async () => {
@@ -75,6 +77,7 @@ export default function SetsSection({ eventId }: SetsSectionProps) {
     };
 
     const handleAddPerformance = (setId: number) => {
+        setActiveSetIdForFocus(setId);
         setEditingPerformance({ setId, perfId: null });
         setPerfModalOpen(true);
     };
@@ -95,8 +98,6 @@ export default function SetsSection({ eventId }: SetsSectionProps) {
             showError("Error deleting performance");
         }
     };
-
-
 
     const handleDragEnd = async (event: DragEndEvent) => {
         const { active, over } = event;
@@ -152,7 +153,6 @@ export default function SetsSection({ eventId }: SetsSectionProps) {
         }
     };
 
-    // Only performances are sortable, not sets
     const allPerformanceIds = sets.flatMap(s => (s.performances || []).map((p: any) => p.id));
 
     return (
@@ -177,7 +177,6 @@ export default function SetsSection({ eventId }: SetsSectionProps) {
                 ) : (
                     <DndContext
                         collisionDetection={closestCenter}
-                        // Removed onDragStart handler
                         onDragEnd={handleDragEnd}
                     >
                         <SortableContext items={allPerformanceIds} strategy={verticalListSortingStrategy}>
@@ -187,6 +186,13 @@ export default function SetsSection({ eventId }: SetsSectionProps) {
                                         key={set.id}
                                         set={set}
                                         eventId={eventId}
+                                        addPerfButtonRef={(el) => {
+                                            if (el) {
+                                                addPerfButtonRefs.current.set(set.id, el);
+                                            } else {
+                                                addPerfButtonRefs.current.delete(set.id);
+                                            }
+                                        }}
                                         onEditSet={handleEditSet}
                                         onDeleteSet={handleDeleteSet}
                                         onAddPerformance={handleAddPerformance}
@@ -196,7 +202,6 @@ export default function SetsSection({ eventId }: SetsSectionProps) {
                                 ))}
                             </div>
                         </SortableContext>
-                        {/* Removed DragOverlay for sets */}
                     </DndContext>
                 )}
             </details>
@@ -224,6 +229,15 @@ export default function SetsSection({ eventId }: SetsSectionProps) {
                             setPerfModalOpen(false);
                             showSuccess(editingPerformance.perfId ? "Performance updated" : "Performance added");
                             refreshSets();
+
+                            // Focus the Add Performance button after adding (not editing)
+                            if (!editingPerformance.perfId && activeSetIdForFocus) {
+                                setTimeout(() => {
+                                    const button = addPerfButtonRefs.current.get(activeSetIdForFocus);
+                                    button?.focus();
+                                }, 100);
+                            }
+                            setActiveSetIdForFocus(null);
                         }}
                         onCancel={() => setPerfModalOpen(false)}
                     />
@@ -236,6 +250,7 @@ export default function SetsSection({ eventId }: SetsSectionProps) {
 function SetCard({
     set,
     eventId,
+    addPerfButtonRef,
     onEditSet,
     onDeleteSet,
     onAddPerformance,
@@ -244,6 +259,7 @@ function SetCard({
 }: {
     set: any;
     eventId: number;
+    addPerfButtonRef?: (el: HTMLButtonElement | null) => void;
     onEditSet: (setId: number) => void;
     onDeleteSet: (setId: number) => void;
     onAddPerformance: (setId: number) => void;
@@ -324,7 +340,6 @@ function SetCard({
                         </button>
                     </div>
                 </summary>
-                {/* rest stays the same */}
                 <div className="mt-2">
                     {musiciansLoading ? (
                         <div className="text-sm text-gray-500">Loading...</div>
@@ -376,6 +391,7 @@ function SetCard({
                 )}
                 <div className="flex justify-end">
                     <button
+                        ref={addPerfButtonRef}
                         className="btn btn-secondary btn-small !bg-green-50 !text-green-700 hover:!bg-green-100 mt-2"
                         onClick={() => onAddPerformance(set.id)}
                         type="button"
@@ -398,7 +414,6 @@ function SetCard({
                 />
             </Modal>
         </div>
-
     );
 }
 

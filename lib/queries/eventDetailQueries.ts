@@ -53,24 +53,27 @@ export async function getEventBySlug(slug: string) {
     });
 }
 
-export async function getEventWithNavigation(slug: string) {
+export async function getEventWithNavigation(slug: string, isAdmin: boolean = false) {
     const event = await getEventBySlug(slug);
     if (!event) return { event: null, prevEvent: null, nextEvent: null };
 
     let prevEvent = null;
     let nextEvent = null;
     if (event?.sortDate) {
+        const whereClause = isAdmin ? {} : { isPublic: true };
+
         prevEvent = await prisma.event.findFirst({
             where: {
-                isPublic: true,
+                ...whereClause,
                 sortDate: { lt: event.sortDate },
             },
             orderBy: { sortDate: 'desc' },
             select: { id: true, slug: true, displayDate: true, sortDate: true },
         });
+
         nextEvent = await prisma.event.findFirst({
             where: {
-                isPublic: true,
+                ...whereClause,
                 sortDate: { gt: event.sortDate },
             },
             orderBy: { sortDate: 'asc' },
