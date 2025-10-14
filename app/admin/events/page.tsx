@@ -1,11 +1,14 @@
 "use client";
+import CreateEventForm from "@/components/admin/CreateEventForm";
+import Modal from "@/components/ui/Modal";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/lib/hooks/useToast";
 import { formatEventDate } from "@/lib/formatters/dateFormatter";
-import { Check } from 'lucide-react';
+import { Check, Plus } from 'lucide-react';
 
 export default function EventsAdminPage() {
+    const [createModalOpen, setCreateModalOpen] = useState(false);
     const [events, setEvents] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
@@ -69,11 +72,28 @@ export default function EventsAdminPage() {
 
     return (
         <div className="page-container">
-            <h1 className="mb-4">Events</h1>
-            <div className="flex flex-col md:flex-row gap-4 mb-6 items-center">
+            <div className="page-header flex items-center gap-3">
+                <h1 className="page-title">Events</h1>
+                <button
+                    className="btn btn-secondary btn-small !bg-green-50 !text-green-700 hover:!bg-green-100"
+                    onClick={() => setCreateModalOpen(true)}
+                >
+                    <Plus className="w-3 h-3" />
+                </button>
+            </div>
+            <Modal isOpen={createModalOpen} onClose={() => setCreateModalOpen(false)} title="Create Event">
+                <CreateEventForm
+                    onSuccess={(newEventId: number) => {
+                        setCreateModalOpen(false);
+                        router.push(`/admin/events/${newEventId}`);
+                    }}
+                    onCancel={() => setCreateModalOpen(false)}
+                />
+            </Modal>
+            <div className="flex flex-col md:flex-row gap-4 mb-6 items-start">
                 <input
                     type="text"
-                    className="search-input"
+                    className="search-input w-full md:w-1/2"
                     placeholder="Search date or venue..."
                     value={searchTerm}
                     onChange={e => setSearchTerm(e.target.value)}
