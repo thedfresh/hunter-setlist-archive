@@ -28,13 +28,12 @@ export async function PUT(req: Request, { params }: { params: { id: string; cont
 }
 
 export async function DELETE(_req: Request, { params }: { params: { id: string; contributorId: string } }) {
-    const eventId = Number(params.id);
-    const contributorId = Number(params.contributorId);
-    if (!eventId || !contributorId) return NextResponse.json({ error: 'Invalid eventId or contributorId' }, { status: 400 });
+    const eventContributorId = Number(params.contributorId);  // This is EventContributor.id
+    if (!eventContributorId) return NextResponse.json({ error: 'Invalid ID' }, { status: 400 });
     try {
-        const existing = await prisma.eventContributor.findFirst({ where: { eventId, contributorId } });
-        if (!existing) return NextResponse.json({ error: 'EventContributor not found' }, { status: 404 });
-        await prisma.eventContributor.delete({ where: { id: existing.id } });
+        await prisma.eventContributor.delete({
+            where: { id: eventContributorId }
+        });
         revalidatePath('/admin/events');
         return NextResponse.json({ success: true });
     } catch (error: any) {

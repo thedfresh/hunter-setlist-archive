@@ -42,8 +42,8 @@ export default function EventContributorsSection({ eventId }: EventContributorsS
     };
 
     useEffect(() => {
-        // No-op effect (old button section removed)
-    }, []);
+        refreshContributors();
+    }, [eventId]);
 
     const handleEdit = (id: number) => {
         setEditingContributorId(id);
@@ -133,7 +133,7 @@ export default function EventContributorsSection({ eventId }: EventContributorsS
                                                 </button>
                                                 <button
                                                     className="btn btn-danger btn-small"
-                                                    onClick={() => handleDelete(c.contributorId)}
+                                                    onClick={() => handleDelete(c.id)}
                                                     disabled={loading}
                                                 >
                                                     Delete
