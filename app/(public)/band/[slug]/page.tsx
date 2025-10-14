@@ -4,6 +4,24 @@ import { PageContainer } from '@/components/ui/PageContainer';
 import Link from 'next/link';
 import { formatEventDate } from '@/lib/formatters/dateFormatter';
 
+
+export async function generateMetadata({ params }: { params: { slug: string } }) {
+  const band = await getBandBySlug(params.slug);
+
+  if (!band) {
+    return {
+      title: 'Band Not Found | Hunter Archive',
+    };
+  }
+
+  const showCount = band.events?.length || 0;
+
+  return {
+    title: `${band.name} (${showCount} shows) | Hunter Archive`,
+    description: `Performance history and setlists from ${band.name} featuring Robert Hunter`,
+  };
+}
+
 export default async function BandDetailPage({ params }: { params: { slug: string } }) {
   const { slug } = params;
   const band = await getBandBySlug(slug);

@@ -29,6 +29,7 @@ export async function POST(request: Request) {
             },
         });
         revalidatePath('/admin/rss-entries');
+        revalidatePath('/rss.xml')
         return Response.json(entry, { status: 201 });
     } catch (error) {
         return Response.json({ error: 'Server error' }, { status: 500 });

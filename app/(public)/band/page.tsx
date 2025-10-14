@@ -8,6 +8,11 @@ function getBandCardClassFromName(bandName: string): string {
   return getPerformerCardClass({ primaryBand: { name: bandName, isHunterBand: true } });
 }
 
+export const metadata = {
+  title: 'Bands | Hunter Archive',
+  description: "Robert Hunter's bands and guest appearances - Comfort, Roadhog, Dinosaurs, and more",
+};
+
 export default async function BandBrowsePage() {
   const bands = await getBandsBrowse();
   const hunterBands = bands.filter((b: any) => b.isHunterBand)

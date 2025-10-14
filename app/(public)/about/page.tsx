@@ -1,5 +1,11 @@
 import { PageContainer } from '@/components/ui/PageContainer';
 
+// app/(public)/credits/page.tsx
+export const metadata = {
+  title: 'About this Site | Hunter Archive',
+  description: 'Information about the Robert Hunter Performance Archive project, its history, and how to contribute.'
+};
+
 export default function AboutPage() {
   return (
     <PageContainer variant="text">

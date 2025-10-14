@@ -4,6 +4,25 @@ import { PageContainer } from '@/components/ui/PageContainer';
 import Link from 'next/link';
 import { getPerformerTextClass } from '@/lib/utils/performerStyles';
 import { formatEventDate } from '@/lib/formatters/dateFormatter';
+import { formatVenue } from '@/lib/formatters/venueFormatter';
+
+export async function generateMetadata({ params }: { params: { slug: string } }) {
+  const venue = await getVenueBySlug(params.slug);
+
+  if (!venue) {
+    return {
+      title: 'Venue Not Found | Hunter Archive',
+    };
+  }
+
+  const showCount = venue.events?.length || 0;
+  const location = formatVenue(venue);
+
+  return {
+    title: `${location} (${showCount} shows) | Hunter Archive`,
+    description: `Robert Hunter performances at ${venue.name}${venue.city ? ` in ${venue.city}` : ''}`,
+  };
+}
 
 export default async function VenueDetailPage({ params }: { params: { slug: string } }) {
   const { slug } = params;

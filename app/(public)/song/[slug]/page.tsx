@@ -4,6 +4,28 @@ import Link from 'next/link';
 import { formatEventDate } from '@/lib/formatters/dateFormatter';
 import { getSongWithPerformances } from '@/lib/queries/songQueries';
 
+export async function generateMetadata({ params }: { params: { slug: string } }) {
+  const song = await getSongWithPerformances(params.slug);
+
+  if (!song) {
+    return {
+      title: 'Song Not Found | Hunter Archive',
+    };
+  }
+
+  // Count non-medley performances for stats
+  const performanceCount = song.performances.filter((p: any) =>
+    !p.isMedley && p.set?.event?.eventType?.includeInStats !== false
+  ).length;
+
+  const artist = song.originalArtist || 'Robert Hunter';
+
+  return {
+    title: `${song.title} (${performanceCount} performances) | Hunter Archive`,
+    description: `Performance history and recordings of "${song.title}"}.`,
+  };
+}
+
 export default async function SongDetailPage({ params }: { params: { slug: string } }) {
   const { slug } = params;
 

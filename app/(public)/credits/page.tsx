@@ -1,6 +1,11 @@
 import { PageContainer } from '@/components/ui/PageContainer';
 import ExternalLink from '@/components/ui/ExternalLink';
 
+export const metadata = {
+    title: 'Credits & Acknowledgments | Hunter Archive',
+    description: "Credits and acknowledgments for contributors to the Robert Hunter Performance Archive.",
+};
+
 export default function CreditsPage() {
     return (
         <PageContainer variant="text">
