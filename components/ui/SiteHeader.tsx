@@ -26,7 +26,7 @@ const SiteHeader = () => {
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    fetch('/api/admin/check')
+    fetch('/api/auth/check')
       .then(res => {
         if (res.ok) setIsAdmin(true);
       })
