@@ -6,9 +6,10 @@ interface ModalProps {
     onClose: () => void;
     title: string;
     children: React.ReactNode;
+    zIndex?: number;
 }
 
-const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }) => {
+const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, zIndex }) => {
     useEffect(() => {
         if (!isOpen) return;
 
@@ -24,9 +25,12 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }) => {
 
     if (!isOpen) return null;
 
+    const backdropStyle = zIndex ? { zIndex } : undefined;
+    const modalStyle = zIndex ? { zIndex: zIndex + 1 } : undefined;
+
     return createPortal(
-        <div className="modal-backdrop" onClick={onClose}>
-            <div className="modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-backdrop" style={backdropStyle} onClick={onClose}>
+            <div className="modal" style={modalStyle} onClick={e => e.stopPropagation()}>
                 <div className="modal-header">
                     <span className="modal-title">{title}</span>
                     <button className="modal-close" onClick={onClose} aria-label="Close">

@@ -3,7 +3,7 @@ import { generateVenueSlug } from "@/lib/utils/generateSlug";
 
 interface VenueFormProps {
     venueId: number;
-    onSuccess: () => void;
+    onSuccess: (venueId?: number) => void;
     onCancel: () => void;
 }
 
@@ -61,6 +61,7 @@ export default function VenueForm({ venueId, onSuccess, onCancel }: VenueFormPro
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
+        e.stopPropagation();
         setError("");
         if (!name.trim()) {
             setError("Name is required");
@@ -89,7 +90,7 @@ export default function VenueForm({ venueId, onSuccess, onCancel }: VenueFormPro
             );
             const data = await res.json();
             if (!res.ok) throw new Error(data.error || "Save failed");
-            onSuccess();
+            onSuccess(venueId > 0 ? venueId : data.id);
         } catch (err: any) {
             setError(err?.message || "Failed to save");
         } finally {
@@ -174,27 +175,29 @@ export default function VenueForm({ venueId, onSuccess, onCancel }: VenueFormPro
                     Uncertain
                 </label>
             </div>
-            <div className="form-group">
-                <label className="form-label" htmlFor="publicNotes">Public Notes</label>
-                <textarea
-                    id="publicNotes"
-                    className="textarea"
-                    value={publicNotes}
-                    onChange={e => setPublicNotes(e.target.value)}
-                    disabled={loading}
-                    rows={2}
-                />
-            </div>
-            <div className="form-group">
-                <label className="form-label" htmlFor="privateNotes">Private Notes</label>
-                <textarea
-                    id="privateNotes"
-                    className="textarea"
-                    value={privateNotes}
-                    onChange={e => setPrivateNotes(e.target.value)}
-                    disabled={loading}
-                    rows={2}
-                />
+            <div className="grid grid-cols-2 gap-4">
+                <div className="form-group">
+                    <label className="form-label" htmlFor="publicNotes">Public Notes</label>
+                    <textarea
+                        id="publicNotes"
+                        className="textarea"
+                        value={publicNotes}
+                        onChange={e => setPublicNotes(e.target.value)}
+                        disabled={loading}
+                        rows={2}
+                    />
+                </div>
+                <div className="form-group">
+                    <label className="form-label" htmlFor="privateNotes">Private Notes</label>
+                    <textarea
+                        id="privateNotes"
+                        className="textarea"
+                        value={privateNotes}
+                        onChange={e => setPrivateNotes(e.target.value)}
+                        disabled={loading}
+                        rows={2}
+                    />
+                </div>
             </div>
             {error && <div className="form-error mb-4">{error}</div>}
             <div className="flex gap-3 justify-end mt-6">

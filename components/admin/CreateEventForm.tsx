@@ -1,5 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useToast } from "@/lib/hooks/useToast";
+import { Plus } from "lucide-react";
+import VenueForm from "./VenueForm";
+import Modal from "../ui/Modal";
 
 interface Props {
     onSuccess: (eventId: number) => void;
@@ -29,6 +32,8 @@ export default function CreateEventForm({ onSuccess, onCancel }: Props) {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string>("");
     const { showSuccess, showError } = useToast();
+    const [venueModalOpen, setVenueModalOpen] = useState(false);
+    const venueSelectRef = useRef<HTMLSelectElement>(null);
 
     useEffect(() => {
         async function fetchDropdowns() {
@@ -69,6 +74,7 @@ export default function CreateEventForm({ onSuccess, onCancel }: Props) {
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
         setError("");
+        console.log('Form values:', { year, month, day, venueId });
         if (!year || !month || !day || !venueId) {
             setError("Year, month, day, and venue are required");
             return;
@@ -108,6 +114,27 @@ export default function CreateEventForm({ onSuccess, onCancel }: Props) {
         }
     }
 
+    async function refreshVenues() {
+        try {
+            const res = await fetch("/api/venues");
+            const data = await res.json();
+            setVenues(data.venues || []);
+        } catch {
+            showError("Failed to refresh venues");
+        }
+    }
+
+    async function handleVenueCreated(newVenueId?: number) {
+        if (newVenueId) {
+            setVenueId(String(newVenueId));
+        }
+        setVenueModalOpen(false);
+        refreshVenues();
+        setTimeout(() => {
+            venueSelectRef.current?.focus();
+        }, 100);
+    }
+
     return (
         <form className="space-y-4" onSubmit={handleSubmit}>
             {error && <div className="form-error mb-4">{error}</div>}
@@ -144,17 +171,26 @@ export default function CreateEventForm({ onSuccess, onCancel }: Props) {
 
             <div>
                 <label className="form-label form-label-required">Venue</label>
-                <select className="select" value={venueId} onChange={e => setVenueId(e.target.value)} required>
-                    <option value="">Select venue...</option>
-                    {venues.map(v => (
-                        <option key={v.id} value={v.id}>
-                            {v.name}
-                            {v.context && ` (${v.context})`}
-                            {v.city && `, ${v.city}`}
-                            {v.stateProvince && `, ${v.stateProvince}`}
-                        </option>
-                    ))}
-                </select>
+                <div className="flex gap-2">
+                    <select ref={venueSelectRef} className="select flex-1" value={venueId} onChange={e => setVenueId(e.target.value)} required>
+                        <option value="">Select venue...</option>
+                        {venues.map(v => (
+                            <option key={v.id} value={v.id}>
+                                {v.name}
+                                {v.context && ` (${v.context})`}
+                                {v.city && `, ${v.city}`}
+                                {v.stateProvince && `, ${v.stateProvince}`}
+                            </option>
+                        ))}
+                    </select>
+                    <button
+                        type="button"
+                        className="btn btn-secondary btn-medium !bg-green-50 !text-green-700 hover:!bg-green-100"
+                        onClick={() => setVenueModalOpen(true)}
+                    >
+                        <Plus className="w-4 h-4" />
+                    </button>
+                </div>
             </div>
 
             <div className="grid gap-4">
@@ -225,6 +261,19 @@ export default function CreateEventForm({ onSuccess, onCancel }: Props) {
                     Create Event
                 </button>
             </div>
+            <Modal
+                isOpen={venueModalOpen}
+                onClose={() => setVenueModalOpen(false)}
+                title="Create New Venue"
+                zIndex={1100}
+            >
+                <VenueForm
+                    venueId={0}
+                    onSuccess={handleVenueCreated}
+                    onCancel={() => setVenueModalOpen(false)}
+                />
+            </Modal>
         </form>
+
     );
 }

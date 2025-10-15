@@ -3,7 +3,7 @@ import { generateSlugFromName } from "@/lib/utils/generateSlug";
 
 interface SongFormProps {
     songId: number;
-    onSuccess: () => void;
+    onSuccess: (newSongId?: number) => void;
     onCancel: () => void;
 }
 
@@ -65,6 +65,7 @@ export default function SongForm({ songId, onSuccess, onCancel }: SongFormProps)
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
+        e.stopPropagation();
         setError("");
         if (!title.trim()) {
             setError("Title is required");
@@ -93,7 +94,7 @@ export default function SongForm({ songId, onSuccess, onCancel }: SongFormProps)
             );
             const data = await res.json();
             if (!res.ok) throw new Error(data.error || "Save failed");
-            onSuccess();
+            onSuccess(songId > 0 ? songId : data.song?.id || data.id);
         } catch (err: any) {
             if (err?.message?.toLowerCase().includes("slug")) {
                 setError("Slug must be unique");
@@ -197,27 +198,29 @@ export default function SongForm({ songId, onSuccess, onCancel }: SongFormProps)
                     Appears in Box of Rain
                 </label>
             </div>
-            <div className="form-group">
-                <label className="form-label" htmlFor="publicNotes">Public Notes</label>
-                <textarea
-                    id="publicNotes"
-                    className="textarea"
-                    value={publicNotes}
-                    onChange={e => setPublicNotes(e.target.value)}
-                    disabled={loading}
-                    rows={2}
-                />
-            </div>
-            <div className="form-group">
-                <label className="form-label" htmlFor="privateNotes">Private Notes</label>
-                <textarea
-                    id="privateNotes"
-                    className="textarea"
-                    value={privateNotes}
-                    onChange={e => setPrivateNotes(e.target.value)}
-                    disabled={loading}
-                    rows={2}
-                />
+            <div className="grid grid-cols-2 gap-4">
+                <div className="form-group">
+                    <label className="form-label" htmlFor="publicNotes">Public Notes</label>
+                    <textarea
+                        id="publicNotes"
+                        className="textarea"
+                        value={publicNotes}
+                        onChange={e => setPublicNotes(e.target.value)}
+                        disabled={loading}
+                        rows={2}
+                    />
+                </div>
+                <div className="form-group">
+                    <label className="form-label" htmlFor="privateNotes">Private Notes</label>
+                    <textarea
+                        id="privateNotes"
+                        className="textarea"
+                        value={privateNotes}
+                        onChange={e => setPrivateNotes(e.target.value)}
+                        disabled={loading}
+                        rows={2}
+                    />
+                </div>
             </div>
             {error && <div className="form-error mb-4">{error}</div>}
             <div className="flex gap-3 justify-end mt-6">

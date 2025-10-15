@@ -1,5 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Plus } from "lucide-react";
+import Modal from "@/components/ui/Modal";
+import SongForm from "@/components/admin/SongForm";
 
 interface PerformanceEditorProps {
     eventId: number;
@@ -56,6 +58,8 @@ export default function PerformanceEditor({ eventId, setId, performanceId, onSuc
     const [showAddMusician, setShowAddMusician] = useState(false);
     const [selectedMusicianId, setSelectedMusicianId] = useState<number | null>(null);
     const [selectedInstrumentId, setSelectedInstrumentId] = useState<number | null>(null);
+    const [songModalOpen, setSongModalOpen] = useState(false);
+    const songSelectRef = useRef<HTMLSelectElement>(null);
 
     useEffect(() => {
         if (performanceId) {
@@ -64,6 +68,14 @@ export default function PerformanceEditor({ eventId, setId, performanceId, onSuc
                 .then(data => setPerformanceMusicians(data.performanceMusicians || []));
         }
     }, [performanceId]);
+
+    useEffect(() => {
+        if (!performanceId && songs.length > 0 && songSelectRef.current) {
+            setTimeout(() => {
+                songSelectRef.current?.focus();
+            }, 100);
+        }
+    }, [songs, performanceId]);
 
     useEffect(() => {
         async function fetchDropdowns() {
@@ -138,6 +150,27 @@ export default function PerformanceEditor({ eventId, setId, performanceId, onSuc
         }
     }, [performanceId, eventId, setId]);
 
+    async function refreshSongs() {
+        try {
+            const res = await fetch("/api/songs");
+            const data = await res.json();
+            setSongs(data.songs || []);
+        } catch {
+            setError("Failed to refresh songs");
+        }
+    }
+
+    async function handleSongCreated(newSongId?: number) {
+        await refreshSongs();
+        if (newSongId) {
+            setSongId(newSongId);
+        }
+        setSongModalOpen(false);
+        setTimeout(() => {
+            songSelectRef.current?.focus();
+        }, 100);
+    }
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
@@ -195,19 +228,28 @@ export default function PerformanceEditor({ eventId, setId, performanceId, onSuc
         <form onSubmit={handleSubmit} className="space-y-4">
             <div>
                 <label className="form-label form-label-required">Song</label>
-                <select
-                    className="select"
-                    value={songId ?? ""}
-                    onChange={e => setSongId(Number(e.target.value))}
-                    required
-                    autoFocus
-                    disabled={loading}
-                >
-                    <option value="">Select song</option>
-                    {songs.map((song: any) => (
-                        <option key={song.id} value={song.id}>{song.title}</option>
-                    ))}
-                </select>
+                <div className="flex gap-2">
+                    <select
+                        ref={songSelectRef}
+                        className="select flex-1"
+                        value={songId ?? ""}
+                        onChange={e => setSongId(Number(e.target.value))}
+                        required
+                        disabled={loading}
+                    >
+                        <option value="">Select song</option>
+                        {songs.map((song: any) => (
+                            <option key={song.id} value={song.id}>{song.title}</option>
+                        ))}
+                    </select>
+                    <button
+                        type="button"
+                        className="btn btn-secondary btn-medium !bg-green-50 !text-green-700 hover:!bg-green-100"
+                        onClick={() => setSongModalOpen(true)}
+                    >
+                        <Plus className="w-4 h-4" />
+                    </button>
+                </div>
             </div>
             <div className="grid grid-cols-3 gap-x-6 gap-y-2 mb-4">
                 <div className="flex flex-col gap-2">
@@ -345,6 +387,19 @@ export default function PerformanceEditor({ eventId, setId, performanceId, onSuc
                     Save
                 </button>
             </div>
+            <Modal
+                isOpen={songModalOpen}
+                onClose={() => setSongModalOpen(false)}
+                title="Create New Song"
+                zIndex={1100}
+            >
+                <SongForm
+                    songId={0}
+                    onSuccess={handleSongCreated}
+                    onCancel={() => setSongModalOpen(false)}
+                />
+            </Modal>
         </form>
+
     );
 }
