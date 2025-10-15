@@ -4,9 +4,10 @@ import Modal from "@/components/ui/Modal";
 import SetForm from "@/components/admin/SetForm";
 import PerformanceEditor from "@/components/admin/PerformanceEditor";
 import { Edit2, Trash2, GripVertical, Plus } from 'lucide-react';
-import { DndContext, closestCenter, DragEndEvent } from '@dnd-kit/core';
+import { DndContext, closestCenter, DragEndEvent, DragStartEvent } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy, useSortable, arrayMove } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { useDroppable } from '@dnd-kit/core';
 import SetMusicianForm from "@/components/admin/SetMusicianForm";
 
 interface SetsSectionProps {
@@ -24,6 +25,23 @@ function renderPerformanceDisplay(perf: any) {
     return parts.join(' ');
 }
 
+// Droppable zone component - only visible during drag
+function DroppableZone({ id, isDragging }: { id: string; isDragging: boolean }) {
+    const { setNodeRef, isOver } = useDroppable({ id });
+
+    if (!isDragging) return null;
+
+    return (
+        <div
+            ref={setNodeRef}
+            className={`h-12 border-2 border-dashed rounded flex items-center justify-center text-sm transition-colors ${isOver ? 'border-blue-500 bg-blue-50 text-blue-600' : 'border-gray-300 bg-gray-50 text-gray-400'
+                }`}
+        >
+            Drop performance here
+        </div>
+    );
+}
+
 export default function SetsSection({ eventId }: SetsSectionProps) {
     const [sets, setSets] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
@@ -32,6 +50,7 @@ export default function SetsSection({ eventId }: SetsSectionProps) {
     const [perfModalOpen, setPerfModalOpen] = useState(false);
     const [editingPerformance, setEditingPerformance] = useState<{ setId: number; perfId: number | null } | null>(null);
     const [activeSetIdForFocus, setActiveSetIdForFocus] = useState<number | null>(null);
+    const [isDragging, setIsDragging] = useState(false);
     const addPerfButtonRefs = useRef<Map<number, HTMLButtonElement>>(new Map());
     const { showSuccess, showError } = useToast();
 
@@ -99,13 +118,52 @@ export default function SetsSection({ eventId }: SetsSectionProps) {
         }
     };
 
+    const handleDragStart = (event: DragStartEvent) => {
+        setIsDragging(true);
+    };
+
     const handleDragEnd = async (event: DragEndEvent) => {
+        setIsDragging(false);
         const { active, over } = event;
         if (!over) return;
 
         const sourceSet = sets.find(s => s.performances?.some((p: any) => p.id === active.id));
         if (!sourceSet) return;
 
+        const overId = String(over.id);
+
+        // Check if dropping on a zone
+        if (overId.startsWith('drop-set-')) {
+            const parts = overId.split('-');
+            const targetSetId = parseInt(parts[2]);
+            const zoneType = parts[3]; // 'empty' or 'bottom'
+
+            const targetSet = sets.find(s => s.id === targetSetId);
+            if (!targetSet) return;
+
+            const targetPosition = zoneType === 'empty' ? 1 : (targetSet.performances?.length || 0) + 1;
+
+            try {
+                const res = await fetch(`/api/admin/events/${eventId}/sets/${sourceSet.id}/performances/move`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        performanceId: active.id,
+                        targetSetId: targetSetId,
+                        targetPosition: targetPosition
+                    })
+                });
+                if (!res.ok) throw new Error();
+                showSuccess('Performance moved');
+                await refreshSets();
+            } catch {
+                showError('Failed to move performance');
+                await refreshSets();
+            }
+            return;
+        }
+
+        // Dropping on another performance (existing logic)
         const targetSet = sets.find(s => s.performances?.some((p: any) => p.id === over.id));
         if (!targetSet) return;
 
@@ -177,6 +235,7 @@ export default function SetsSection({ eventId }: SetsSectionProps) {
                 ) : (
                     <DndContext
                         collisionDetection={closestCenter}
+                        onDragStart={handleDragStart}
                         onDragEnd={handleDragEnd}
                     >
                         <SortableContext items={allPerformanceIds} strategy={verticalListSortingStrategy}>
@@ -186,6 +245,7 @@ export default function SetsSection({ eventId }: SetsSectionProps) {
                                         key={set.id}
                                         set={set}
                                         eventId={eventId}
+                                        isDragging={isDragging}
                                         addPerfButtonRef={(el) => {
                                             if (el) {
                                                 addPerfButtonRefs.current.set(set.id, el);
@@ -250,6 +310,7 @@ export default function SetsSection({ eventId }: SetsSectionProps) {
 function SetCard({
     set,
     eventId,
+    isDragging,
     addPerfButtonRef,
     onEditSet,
     onDeleteSet,
@@ -259,6 +320,7 @@ function SetCard({
 }: {
     set: any;
     eventId: number;
+    isDragging: boolean;
     addPerfButtonRef?: (el: HTMLButtonElement | null) => void;
     onEditSet: (setId: number) => void;
     onDeleteSet: (setId: number) => void;
@@ -303,6 +365,8 @@ function SetCard({
             showError("Failed to delete set musician");
         }
     }
+
+    const performances = set.performances || [];
 
     return (
         <div className="border rounded-lg p-4">
@@ -376,19 +440,27 @@ function SetCard({
                 </div>
             </details>
             <div className="mt-4 space-y-2">
-                {set.performances && set.performances.length > 0 ? (
-                    set.performances.map((perf: any) => (
-                        <SortablePerformance
-                            key={perf.id}
-                            perf={perf}
-                            setId={set.id}
-                            onEdit={onEditPerformance}
-                            onDelete={onDeletePerformance}
-                        />
-                    ))
-                ) : (
-                    <div className="text-gray-400">No performances in this set.</div>
+                {/* Drop zone for empty sets */}
+                {performances.length === 0 && (
+                    <DroppableZone id={`drop-set-${set.id}-empty`} isDragging={isDragging} />
                 )}
+
+                {/* Performances */}
+                {performances.map((perf: any) => (
+                    <SortablePerformance
+                        key={perf.id}
+                        perf={perf}
+                        setId={set.id}
+                        onEdit={onEditPerformance}
+                        onDelete={onDeletePerformance}
+                    />
+                ))}
+
+                {/* Drop zone at bottom */}
+                {performances.length > 0 && (
+                    <DroppableZone id={`drop-set-${set.id}-bottom`} isDragging={isDragging} />
+                )}
+
                 <div className="flex justify-end">
                     <button
                         ref={addPerfButtonRef}
@@ -440,7 +512,7 @@ function SortablePerformance({
         <div
             ref={setNodeRef}
             style={style}
-            className={`flex items-center justify-between gap-2 rounded p-1 ${isDragging ? 'bg-blue-100 border-2 border-blue-500' : ''} ${isOver ? 'border-t-2 border-blue-400' : ''}`}
+            className={`flex items-center justify-between gap-2 rounded p-1 ${isDragging ? 'bg-blue-100 border-2 border-blue-500' : ''}`}
         >
             <div className="flex items-center gap-2 flex-wrap flex-1 min-w-0">
                 <button type="button" {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing p-1 hover:bg-gray-100 rounded flex-shrink-0">
