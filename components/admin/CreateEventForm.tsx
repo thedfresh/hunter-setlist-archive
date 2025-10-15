@@ -43,8 +43,18 @@ export default function CreateEventForm({ onSuccess, onCancel }: Props) {
                 const bData = await bRes.json();
                 const etData = await etRes.json();
                 const ctData = await ctRes.json();
+
                 const hunterBand = bData.bands?.find((b: any) => b.name === "Robert Hunter");
                 if (hunterBand) setPrimaryBandId(String(hunterBand.id));
+
+                // Set default Event Type to "Public Performance"
+                const publicPerformanceType = etData.eventTypes?.find((et: any) => et.name === "Public Performance");
+                if (publicPerformanceType) setEventTypeId(publicPerformanceType.id);
+
+                // Set default Content Type to "Music"
+                const musicType = ctData.contentTypes?.find((ct: any) => ct.name === "Music");
+                if (musicType) setContentTypeId(musicType.id);
+
                 setVenues(vData.venues || []);
                 setBands(bData.bands || []);
                 setEventTypes(etData.eventTypes || []);
@@ -105,7 +115,7 @@ export default function CreateEventForm({ onSuccess, onCancel }: Props) {
             <div className="grid grid-cols-3 gap-4">
                 <div>
                     <label className="form-label form-label-required">Year</label>
-                    <input className="input" type="number" value={year} onChange={e => setYear(Number(e.target.value))} required />
+                    <input className="input" type="number" value={year} onChange={e => setYear(Number(e.target.value))} required autoFocus />
                 </div>
                 <div>
                     <label className="form-label form-label-required">Month</label>
@@ -134,7 +144,7 @@ export default function CreateEventForm({ onSuccess, onCancel }: Props) {
 
             <div>
                 <label className="form-label form-label-required">Venue</label>
-                <select className="select" value={venueId} onChange={e => setVenueId(e.target.value)} required autoFocus>
+                <select className="select" value={venueId} onChange={e => setVenueId(e.target.value)} required>
                     <option value="">Select venue...</option>
                     {venues.map(v => (
                         <option key={v.id} value={v.id}>

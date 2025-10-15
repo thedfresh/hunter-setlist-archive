@@ -59,23 +59,26 @@ export async function PUT(request: Request, context: { params: Promise<{ id: str
         return NextResponse.json({ error: "Valid year is required" }, { status: 400 });
     }
 
-    // Generate slug
-    const slug = generateSlug({ year, month, day, showTiming });
+    // Use slug from body if provided, otherwise generate from date fields
+    const slug = body.slug?.trim() || generateSlug({ year, month, day, showTiming });
 
-    // Calculate sortDate
-    let hour = 20;
-    if (showTiming?.toLowerCase() === 'late') hour = 22;
-    if (showTiming?.toLowerCase() === 'early') hour = 18;
-
+    // Use sortDate from body if provided, otherwise calculate from date fields
     let sortDate;
-    if (year && month && day) {
-        sortDate = new Date(Date.UTC(year, month - 1, day, hour, 0));
-    } else if (year && month) {
-        sortDate = new Date(Date.UTC(year, month - 1, 1, hour, 0));
-    } else if (year) {
-        sortDate = new Date(Date.UTC(year, 0, 1, hour, 0));
-    }
+    if (body.sortDate) {
+        sortDate = new Date(body.sortDate);
+    } else {
+        let hour = 20;
+        if (showTiming?.toLowerCase() === 'late') hour = 22;
+        if (showTiming?.toLowerCase() === 'early') hour = 18;
 
+        if (year && month && day) {
+            sortDate = new Date(Date.UTC(year, month - 1, day, hour, 0));
+        } else if (year && month) {
+            sortDate = new Date(Date.UTC(year, month - 1, 1, hour, 0));
+        } else if (year) {
+            sortDate = new Date(Date.UTC(year, 0, 1, hour, 0));
+        }
+    }
     let event;
     try {
         event = await prisma.event.update({

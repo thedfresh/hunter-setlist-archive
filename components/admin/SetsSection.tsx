@@ -447,6 +447,11 @@ function SortablePerformance({
                     <GripVertical className="w-3 h-3 text-gray-400" />
                 </button>
                 {renderPerformanceDisplay(perf)}
+                {perf.isSoloHunter && (
+                    <span className="inline-block px-2 py-1 text-xs font-medium bg-amber-50 text-amber-700 rounded whitespace-nowrap">
+                        Solo Hunter
+                    </span>
+                )}
                 {perf.publicNotes && <span className="ml-1">📝</span>}
                 {perf.isMedley && <span className="ml-1">🎵</span>}
                 {perf.performanceMusicians && perf.performanceMusicians.length > 0 && (
