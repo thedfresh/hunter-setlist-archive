@@ -87,7 +87,20 @@ export default function VenueAdminDetailPage({ params }: { params: { id: string 
             showToast("Venue updated", "success");
             fetch(`/api/venues/${venueId}`)
                 .then(res => res.json())
-                .then(data => setVenue(data.venue));
+                .then(data => {
+                    setVenue(data.venue);
+                    setForm({
+                        name: data.venue.name || "",
+                        slug: data.venue.slug || "",
+                        context: data.venue.context || "",
+                        city: data.venue.city || "",
+                        stateProvince: data.venue.stateProvince || "",
+                        country: data.venue.country || "",
+                        isUncertain: !!data.venue.isUncertain,
+                        publicNotes: data.venue.publicNotes || "",
+                        privateNotes: data.venue.privateNotes || "",
+                    });
+                });
         } catch (err: any) {
             if (err?.message?.toLowerCase().includes("slug")) {
                 setError("Slug must be unique");

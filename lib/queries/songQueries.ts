@@ -101,7 +101,9 @@ export async function getSongWithPerformances(slug: string) {
                                             slug: true,
                                             name: true,
                                             context: true,
+                                            stateProvince: true,
                                             city: true,
+                                            country: true,
                                         }
                                     }
                                 }

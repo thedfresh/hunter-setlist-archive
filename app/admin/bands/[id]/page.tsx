@@ -22,7 +22,6 @@ export default function BandDetailPage({ params }: { params: { id: string } }) {
     const [form, setForm] = useState({
         name: "",
         slug: "",
-        slugManuallyEdited: false,
         publicNotes: "",
         privateNotes: ""
     });
@@ -39,7 +38,6 @@ export default function BandDetailPage({ params }: { params: { id: string } }) {
                 setForm({
                     name: bandData.name || "",
                     slug: bandData.slug || "",
-                    slugManuallyEdited: false,
                     publicNotes: bandData.publicNotes || "",
                     privateNotes: bandData.privateNotes || "",
                 });
@@ -49,10 +47,10 @@ export default function BandDetailPage({ params }: { params: { id: string } }) {
     }, [bandId]);
 
     useEffect(() => {
-        if (!form.slugManuallyEdited && form.name) {
+        if (form.name) {
             setForm(f => ({ ...f, slug: generateSlugFromName(f.name) }));
         }
-    }, [form.name, form.slugManuallyEdited]);
+    }, [form.name]);
 
     async function handleMetaSave(e: React.FormEvent) {
         e.preventDefault();
@@ -76,7 +74,18 @@ export default function BandDetailPage({ params }: { params: { id: string } }) {
             const data = await res.json();
             if (!res.ok) throw new Error(data.error || "Failed to save");
             showToast("Band updated", "success");
-            setBand((prev: any) => ({ ...prev, ...form }));
+            fetch(`/api/bands/${bandId}`)
+                .then(res => res.json())
+                .then(data => {
+                    const bandData = data.band || data;
+                    setBand(bandData);
+                    setForm({
+                        name: bandData.name || "",
+                        slug: bandData.slug || "",
+                        publicNotes: bandData.publicNotes || "",
+                        privateNotes: bandData.privateNotes || "",
+                    });
+                });
         } catch (err: any) {
             if (err?.message?.toLowerCase().includes('slug')) {
                 setError('Slug must be unique');
@@ -169,7 +178,7 @@ export default function BandDetailPage({ params }: { params: { id: string } }) {
                                     id="slug"
                                     className="input"
                                     value={form.slug}
-                                    onChange={e => setForm(f => ({ ...f, slug: e.target.value, slugManuallyEdited: true }))}
+                                    onChange={e => setForm(f => ({ ...f, slug: e.target.value }))}
                                     disabled={saving}
                                 />
                                 <p className="form-help">Auto-generated</p>

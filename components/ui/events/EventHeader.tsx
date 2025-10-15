@@ -1,6 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { getPerformerCardClass } from '@/lib/utils/performerStyles';
+import { formatVenue } from '@/lib/formatters/venueFormatter';
 
 interface EventHeaderProps {
   event: {
@@ -50,7 +51,7 @@ const EventHeader: React.FC<EventHeaderProps> = ({ event, eventMusicians, adjace
     } : { name: 'Robert Hunter', isHunterBand: true }
   });
   const venue = event.venue
-    ? `${event.venue.name}${event.venue.city ? ', ' + event.venue.city : ''}${event.venue.stateProvince ? ', ' + event.venue.stateProvince : ''}`
+    ? formatVenue(event.venue)
     : '';
 
   return (

@@ -3,6 +3,7 @@ import { PageContainer } from '@/components/ui/PageContainer';
 import Link from 'next/link';
 import { formatEventDate } from '@/lib/formatters/dateFormatter';
 import { getSongWithPerformances } from '@/lib/queries/songQueries';
+import { formatVenue } from '@/lib/formatters/venueFormatter';
 
 export async function generateMetadata({ params }: { params: { slug: string } }) {
   const song = await getSongWithPerformances(params.slug);
@@ -190,19 +191,11 @@ export default async function SongDetailPage({ params }: { params: { slug: strin
                       {showDateVenue && perf.set.event.venue ? (
                         perf.set.event.venue.slug ? (
                           <Link href={`/venue/${perf.set.event.venue.slug}`} className="link-internal">
-                            {perf.set.event.venue.name}
-                            {perf.set.event.venue.context ? `, ${perf.set.event.venue.context}` : ''}
-                            {perf.set.event.venue.city ? `, ${perf.set.event.venue.city}` : ''}
-                            {perf.set.event.venue.stateProvince ? `, ${perf.set.event.venue.stateProvince}` : ''}
-                            {perf.set.event.venue.country ? `, ${perf.set.event.venue.country}` : ''}
+                            {formatVenue(perf.set.event.venue)}
                           </Link>
                         ) : (
                           <span>
-                            {perf.set.event.venue.name}
-                            {perf.set.event.venue.context ? `, ${perf.set.event.venue.context}` : ''}
-                            {perf.set.event.venue.city ? `, ${perf.set.event.venue.city}` : ''}
-                            {perf.set.event.venue.stateProvince ? `, ${perf.set.event.venue.stateProvince}` : ''}
-                            {perf.set.event.venue.country ? `, ${perf.set.event.venue.country}` : ''}
+                            {formatVenue(perf.set.event.venue)}
                           </span>
                         )
                       ) : ''}

@@ -6,24 +6,6 @@ import { getPerformerTextClass } from '@/lib/utils/performerStyles';
 import { formatEventDate } from '@/lib/formatters/dateFormatter';
 import { formatVenue } from '@/lib/formatters/venueFormatter';
 
-export async function generateMetadata({ params }: { params: { slug: string } }) {
-  const venue = await getVenueBySlug(params.slug);
-
-  if (!venue) {
-    return {
-      title: 'Venue Not Found | Hunter Archive',
-    };
-  }
-
-  const showCount = venue.events?.length || 0;
-  const location = formatVenue(venue);
-
-  return {
-    title: `${location} (${showCount} shows) | Hunter Archive`,
-    description: `Robert Hunter performances at ${venue.name}${venue.city ? ` in ${venue.city}` : ''}`,
-  };
-}
-
 export default async function VenueDetailPage({ params }: { params: { slug: string } }) {
   const { slug } = params;
   const venue = await getVenueBySlug(slug);
@@ -56,7 +38,7 @@ export default async function VenueDetailPage({ params }: { params: { slug: stri
       <PageContainer>
         <h1 className="text-2xl font-bold mb-2">{venue.name}</h1>
         <div className="text-gray-700 mb-2">
-          {venue.city}{venue.city && venue.stateProvince ? ', ' : ''}{venue.stateProvince}
+          {formatVenue({ city: venue.city, stateProvince: venue.stateProvince, country: venue.country })}
         </div>
         {venue.publicNotes && (
           <div className="mb-4 text-sm text-gray-600 whitespace-pre-line">{venue.publicNotes}</div>

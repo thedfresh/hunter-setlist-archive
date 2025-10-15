@@ -2,7 +2,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
-import { generateSlugFromName } from '@/lib/utils/generateSlug';
+import { generateSlugFromName, resolveSlugCollision } from '@/lib/utils/generateSlug';
 
 export async function GET(_req: Request, { params }: { params: { id: string } }) {
     try {
@@ -34,20 +34,28 @@ export async function PUT(request: Request, { params }: { params: { id: string }
             return NextResponse.json({ error: 'Name is required' }, { status: 400 });
         }
 
+        let band;
         try {
-            const band = await prisma.band.update({
+            band = await prisma.band.update({
                 where: { id },
                 data: { name, slug, publicNotes, privateNotes }
             });
-            revalidatePath('/admin/bands');
-            return NextResponse.json(band);
         } catch (err: any) {
             if (err?.code === 'P2002') {
-                return NextResponse.json({ error: 'Slug must be unique' }, { status: 400 });
+                const resolvedSlug = await resolveSlugCollision(slug, 'bands', id);
+                band = await prisma.band.update({
+                    where: { id },
+                    data: { name, slug: resolvedSlug, publicNotes, privateNotes }
+                });
+            } else {
+                throw err;
             }
-            throw err;
         }
+
+        revalidatePath('/admin/bands');
+        return NextResponse.json(band);
     } catch (error: any) {
+        console.error('PUT /api/admin/bands/[id] error:', error);
         return NextResponse.json({ error: error?.message || 'Failed to update band' }, { status: 500 });
     }
 }

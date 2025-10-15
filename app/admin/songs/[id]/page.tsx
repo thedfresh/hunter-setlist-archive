@@ -6,6 +6,7 @@ import { formatEventDate } from "@/lib/formatters/dateFormatter";
 import { generateSlugFromName } from "@/lib/utils/generateSlug";
 import Link from "next/link";
 import { useRouter } from 'next/navigation';
+import { formatVenue } from '@/lib/formatters/venueFormatter';
 
 export default function SongAdminDetailPage({ params }: { params: { id: string } }) {
     const router = useRouter();
@@ -91,7 +92,21 @@ export default function SongAdminDetailPage({ params }: { params: { id: string }
             showToast("Song updated", "success");
             fetch(`/api/songs/${songId}`)
                 .then(res => res.json())
-                .then(data => setSong(data.song));
+                .then(data => {
+                    setSong(data.song);
+                    setForm({
+                        title: data.song.title || "",
+                        slug: data.song.slug || "",
+                        alternateTitle: data.song.alternateTitle || "",
+                        originalArtist: data.song.originalArtist || "",
+                        lyricsBy: data.song.lyricsBy || "",
+                        musicBy: data.song.musicBy || "",
+                        isUncertain: !!data.song.isUncertain,
+                        inBoxOfRain: !!data.song.inBoxOfRain,
+                        publicNotes: data.song.publicNotes || "",
+                        privateNotes: data.song.privateNotes || "",
+                    });
+                });
         } catch (err: any) {
             if (err?.message?.toLowerCase().includes("slug")) {
                 setError("Slug must be unique");
@@ -283,14 +298,7 @@ export default function SongAdminDetailPage({ params }: { params: { id: string }
                                         >
                                             <td>{perf.set?.event ? formatEventDate(perf.set.event) : "—"}</td>
                                             <td>
-                                                {perf.set?.event?.venue ? (
-                                                    <>
-                                                        {perf.set.event.venue.name}
-                                                        {perf.set.event.venue.context && ` (${perf.set.event.venue.context})`}
-                                                        {perf.set.event.venue.city && `, ${perf.set.event.venue.city}`}
-                                                        {perf.set.event.venue.stateProvince && `, ${perf.set.event.venue.stateProvince}`}
-                                                    </>
-                                                ) : "—"}
+                                                {perf.set?.event?.venue ? formatVenue(perf.set.event.venue) : "—"}
                                             </td>
                                             <td>{perf.set?.event?.primaryBand?.name || "Solo"}</td>
                                             <td className="text-center w-24">{perf.set?.event?.verified ? "✔️" : "❌"}</td>

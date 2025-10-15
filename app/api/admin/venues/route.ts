@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-import { generateVenueSlug } from "@/lib/utils/generateSlug";
+import { generateVenueSlug, resolveSlugCollision } from "@/lib/utils/generateSlug";
+
 
 export async function POST(req: Request) {
     try {
@@ -11,8 +12,10 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "Name is required" }, { status: 400 });
         }
         const slug = body.slug?.trim() || generateVenueSlug(name, city, stateProvince);
+
+        let venue;
         try {
-            const venue = await prisma.venue.create({
+            venue = await prisma.venue.create({
                 data: {
                     name: name.trim(),
                     slug,
@@ -25,15 +28,31 @@ export async function POST(req: Request) {
                     context: context?.trim() || null,
                 },
             });
-            revalidatePath('/admin/venues');
-            return NextResponse.json(venue, { status: 201 });
         } catch (error: any) {
-            if (error?.code === 'P2002' && error?.meta?.target?.includes('slug')) {
-                return NextResponse.json({ error: 'Slug must be unique' }, { status: 400 });
+            if (error?.code === 'P2002') {
+                const resolvedSlug = await resolveSlugCollision(slug, 'venues');
+                venue = await prisma.venue.create({
+                    data: {
+                        name: name.trim(),
+                        slug: resolvedSlug,
+                        city: city?.trim() || null,
+                        stateProvince: stateProvince?.trim() || null,
+                        country: country?.trim() || null,
+                        isUncertain: !!isUncertain,
+                        publicNotes: publicNotes?.trim() || null,
+                        privateNotes: privateNotes?.trim() || null,
+                        context: context?.trim() || null,
+                    },
+                });
+            } else {
+                throw error;
             }
-            return NextResponse.json({ error: error?.message || 'Failed to create venue' }, { status: 500 });
         }
+
+        revalidatePath('/admin/venues');
+        return NextResponse.json(venue, { status: 201 });
     } catch (error: any) {
+        console.error('POST /api/admin/venues error:', error);
         return NextResponse.json({ error: error?.message || 'Failed to create venue' }, { status: 500 });
     }
 }

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { generateSlugFromName } from "@/lib/utils/generateSlug";
+import { resolveSlugCollision } from '@/lib/utils/generateSlug';
 
 export async function GET(_req: Request, { params }: { params: { id: string } }) {
     try {
@@ -32,14 +33,19 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
     try {
         const id = Number(params.id);
         if (!id) return NextResponse.json({ error: 'Invalid ID' }, { status: 400 });
+
         const body = await req.json();
         const { title, slug, alternateTitle, originalArtist, lyricsBy, musicBy, isUncertain = false, inBoxOfRain = false, publicNotes, privateNotes } = body;
+
         if (!title || typeof title !== "string" || title.trim() === "") {
             return NextResponse.json({ error: "Title is required" }, { status: 400 });
         }
+
         const finalSlug = slug?.trim() || generateSlugFromName(title);
+
+        let updated;
         try {
-            const updated = await prisma.song.update({
+            updated = await prisma.song.update({
                 where: { id },
                 data: {
                     title: title.trim(),
@@ -54,15 +60,34 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
                     privateNotes: privateNotes?.trim() || null,
                 },
             });
-            revalidatePath('/admin/songs');
-            return NextResponse.json(updated);
         } catch (error: any) {
-            if (error?.code === 'P2002' && error?.meta?.target?.includes('slug')) {
-                return NextResponse.json({ error: 'Slug must be unique' }, { status: 400 });
+            if (error?.code === 'P2002') {
+                const resolvedSlug = await resolveSlugCollision(finalSlug, 'songs', id);
+                updated = await prisma.song.update({
+                    where: { id },
+                    data: {
+                        title: title.trim(),
+                        slug: resolvedSlug,
+                        alternateTitle: alternateTitle?.trim() || null,
+                        originalArtist: originalArtist?.trim() || null,
+                        lyricsBy: lyricsBy?.trim() || null,
+                        musicBy: musicBy?.trim() || null,
+                        isUncertain: !!isUncertain,
+                        inBoxOfRain: !!inBoxOfRain,
+                        publicNotes: publicNotes?.trim() || null,
+                        privateNotes: privateNotes?.trim() || null,
+                    },
+                });
+            } else {
+                throw error;
             }
-            return NextResponse.json({ error: error?.message || 'Failed to update song' }, { status: 500 });
         }
+
+        revalidatePath('/admin/songs');
+        return NextResponse.json(updated);
+
     } catch (error: any) {
+        console.error('PUT /api/admin/songs/[id] error:', error);
         return NextResponse.json({ error: error?.message || 'Failed to update song' }, { status: 500 });
     }
 }

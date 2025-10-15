@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useToast } from '@/lib/hooks/useToast';
 import { generateSlug } from '@/lib/utils/eventSlug';
+import { formatVenue } from '@/lib/formatters/venueFormatter';
 
 interface EventMetadataFormProps {
     eventId: number;
@@ -110,39 +111,21 @@ export default function EventMetadataForm({ eventId, onSaveSuccess }: EventMetad
         }
     }
 
+    // Regenerate slug from date fields (always, unless slug is blank)
     useEffect(() => {
         if (!year) return;
 
-        // Regenerate slug
         const newSlug = generateSlug({
             year: Number(year),
             month: month ? Number(month) : null,
             day: day ? Number(day) : null,
             showTiming: showTiming || null
         });
-        setSlug(newSlug);
 
-        // Regenerate sortDate with UTC formatting
-        let hour = 20;
-        if (showTiming?.toLowerCase() === 'late') hour = 22;
-        if (showTiming?.toLowerCase() === 'early') hour = 18;
-
-        let newSortDate;
-        if (year && month && day) {
-            newSortDate = new Date(Date.UTC(Number(year), Number(month) - 1, Number(day), hour, 0));
-        } else if (year && month) {
-            newSortDate = new Date(Date.UTC(Number(year), Number(month) - 1, 1, hour, 0));
-        } else if (year) {
-            newSortDate = new Date(Date.UTC(Number(year), 0, 1, hour, 0));
-        }
-
-        if (newSortDate) {
-            const utcString = newSortDate.getUTCFullYear() + '-' +
-                String(newSortDate.getUTCMonth() + 1).padStart(2, '0') + '-' +
-                String(newSortDate.getUTCDate()).padStart(2, '0') + 'T' +
-                String(newSortDate.getUTCHours()).padStart(2, '0') + ':' +
-                String(newSortDate.getUTCMinutes()).padStart(2, '0');
-            setSortDate(utcString);
+        // If slug is currently blank, regenerate
+        // Otherwise, update to match current date fields (user can override)
+        if (!slug || slug === newSlug) {
+            setSlug(newSlug);
         }
     }, [year, month, day, showTiming]);
 
@@ -173,7 +156,12 @@ export default function EventMetadataForm({ eventId, onSaveSuccess }: EventMetad
                 isUncertain,
                 isPublic,
                 verified,
-                slug: slug,
+                slug: slug || generateSlug({
+                    year: Number(year),
+                    month: month ? Number(month) : null,
+                    day: day ? Number(day) : null,
+                    showTiming: showTiming || null
+                }),
                 sortDate: sortDate ? new Date(sortDate + ':00.000Z').toISOString() : null
             };
 
@@ -187,6 +175,13 @@ export default function EventMetadataForm({ eventId, onSaveSuccess }: EventMetad
             if (!res.ok) throw new Error(data.error || "Failed to save event");
 
             showToast("Event saved successfully", "success");
+            // Refetch to get server-resolved slug
+            const refetchRes = await fetch(`/api/admin/events/${eventId}`);
+            const refetchData = await refetchRes.json();
+            if (refetchData.event) {
+                setSlug(refetchData.event.slug || "");
+                setSortDate(refetchData.event.sortDate ? new Date(refetchData.event.sortDate).toISOString().slice(0, 16) : "");
+            }
             onSaveSuccess(); // Call parent callback to reload header
         } catch (err: any) {
             setError(err.message || "Failed to save event");
@@ -269,7 +264,7 @@ export default function EventMetadataForm({ eventId, onSaveSuccess }: EventMetad
                             <option value="">Select venue...</option>
                             {venues.map(venue => (
                                 <option key={venue.id} value={venue.id}>
-                                    {venue.name}{venue.city ? `, ${venue.city}` : ""}
+                                    {formatVenue(venue)}
                                 </option>
                             ))}
                         </select>

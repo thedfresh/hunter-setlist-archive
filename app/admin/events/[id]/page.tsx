@@ -10,6 +10,7 @@ import EventContributorsSection from "@/components/admin/EventContributorsSectio
 import RecordingsSection from "@/components/admin/RecordingsSection";
 import ShowBanterSection from "@/components/admin/ShowBanterSection";
 import SetsSection from "@/components/admin/SetsSection";
+import { formatVenue } from '@/lib/formatters/venueFormatter';
 
 export default function EventDetailPage() {
     const params = useParams();
@@ -129,10 +130,7 @@ export default function EventDetailPage() {
                 </h1>
                 {event?.venue && (
                     <p className="text-base text-gray-700">
-                        {event.venue.name}
-                        {event.venue.context && `, ${event.venue.context}`}
-                        {event.venue.city && `, ${event.venue.city}`}
-                        {event.venue.stateProvince && `, ${event.venue.stateProvince}`}
+                        {formatVenue(event.venue)}
                     </p>
                 )}
                 {event?.primaryBand && (

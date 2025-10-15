@@ -10,7 +10,6 @@ interface BandFormProps {
 export default function BandForm({ bandId, onSuccess, onCancel }: BandFormProps) {
     const [name, setName] = useState('');
     const [slug, setSlug] = useState('');
-    const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
     const [publicNotes, setPublicNotes] = useState('');
     const [privateNotes, setPrivateNotes] = useState('');
     const [loading, setLoading] = useState(false);
@@ -32,18 +31,18 @@ export default function BandForm({ bandId, onSuccess, onCancel }: BandFormProps)
         } else {
             setName('');
             setSlug('');
-            setSlugManuallyEdited(false);
             setPublicNotes('');
             setPrivateNotes('');
             setError('');
         }
     }, [bandId]);
 
+    // Always regenerate slug from name (user can override by editing slug field)
     useEffect(() => {
-        if (!slugManuallyEdited && name) {
+        if (name) {
             setSlug(generateSlugFromName(name));
         }
-    }, [name, slugManuallyEdited]);
+    }, [name]);
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
@@ -54,6 +53,7 @@ export default function BandForm({ bandId, onSuccess, onCancel }: BandFormProps)
         }
         setLoading(true);
         try {
+            const finalSlug = slug.trim() || generateSlugFromName(name);
             const res = await fetch(
                 bandId > 0 ? `/api/admin/bands/${bandId}` : '/api/admin/bands',
                 {
@@ -61,7 +61,7 @@ export default function BandForm({ bandId, onSuccess, onCancel }: BandFormProps)
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         name: name.trim(),
-                        slug: slug.trim(),
+                        slug: finalSlug,
                         publicNotes: publicNotes.trim(),
                         privateNotes: privateNotes.trim(),
                     }),
@@ -71,11 +71,7 @@ export default function BandForm({ bandId, onSuccess, onCancel }: BandFormProps)
             if (!res.ok) throw new Error(data.error || 'Save failed');
             onSuccess();
         } catch (err: any) {
-            if (err?.message?.toLowerCase().includes('slug')) {
-                setError('Slug must be unique');
-            } else {
-                setError(err?.message || 'Failed to save');
-            }
+            setError(err?.message || 'Failed to save');
         } finally {
             setLoading(false);
         }
@@ -102,10 +98,7 @@ export default function BandForm({ bandId, onSuccess, onCancel }: BandFormProps)
                     id="slug"
                     className="input"
                     value={slug}
-                    onChange={e => {
-                        setSlug(e.target.value);
-                        setSlugManuallyEdited(true);
-                    }}
+                    onChange={e => setSlug(e.target.value)}
                     disabled={loading}
                 />
                 <p className="form-help">Auto-generated from name, but you can customize it</p>

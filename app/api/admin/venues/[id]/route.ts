@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-import { generateVenueSlug } from "@/lib/utils/generateSlug";
+import { generateVenueSlug, resolveSlugCollision } from "@/lib/utils/generateSlug";
 
 export async function GET(_req: Request, { params }: { params: { id: string } }) {
     try {
@@ -28,8 +28,10 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
             return NextResponse.json({ error: "Name is required" }, { status: 400 });
         }
         const slug = body.slug?.trim() || generateVenueSlug(name, city, stateProvince);
+
+        let updated;
         try {
-            const updated = await prisma.venue.update({
+            updated = await prisma.venue.update({
                 where: { id },
                 data: {
                     name: name.trim(),
@@ -43,15 +45,32 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
                     context: context?.trim() || null,
                 },
             });
-            revalidatePath('/admin/venues');
-            return NextResponse.json(updated);
         } catch (error: any) {
-            if (error?.code === 'P2002' && error?.meta?.target?.includes('slug')) {
-                return NextResponse.json({ error: 'Slug must be unique' }, { status: 400 });
+            if (error?.code === 'P2002') {
+                const resolvedSlug = await resolveSlugCollision(slug, 'venues', id);
+                updated = await prisma.venue.update({
+                    where: { id },
+                    data: {
+                        name: name.trim(),
+                        slug: resolvedSlug,
+                        city: city?.trim() || null,
+                        stateProvince: stateProvince?.trim() || null,
+                        country: country?.trim() || null,
+                        isUncertain: !!isUncertain,
+                        publicNotes: publicNotes?.trim() || null,
+                        privateNotes: privateNotes?.trim() || null,
+                        context: context?.trim() || null,
+                    },
+                });
+            } else {
+                throw error;
             }
-            return NextResponse.json({ error: error?.message || 'Failed to update venue' }, { status: 500 });
         }
+
+        revalidatePath('/admin/venues');
+        return NextResponse.json(updated);
     } catch (error: any) {
+        console.error('PUT /api/admin/venues/[id] error:', error);
         return NextResponse.json({ error: error?.message || 'Failed to update venue' }, { status: 500 });
     }
 }

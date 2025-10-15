@@ -10,7 +10,6 @@ interface VenueFormProps {
 export default function VenueForm({ venueId, onSuccess, onCancel }: VenueFormProps) {
     const [name, setName] = useState("");
     const [slug, setSlug] = useState("");
-    const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
     const [city, setCity] = useState("");
     const [stateProvince, setStateProvince] = useState("");
     const [country, setCountry] = useState("");
@@ -29,7 +28,6 @@ export default function VenueForm({ venueId, onSuccess, onCancel }: VenueFormPro
                 .then(data => {
                     setName(data.name || "");
                     setSlug(data.slug || "");
-                    setSlugManuallyEdited(false);
                     setCity(data.city || "");
                     setStateProvince(data.stateProvince || "");
                     setCountry(data.country || "");
@@ -43,7 +41,6 @@ export default function VenueForm({ venueId, onSuccess, onCancel }: VenueFormPro
         } else {
             setName("");
             setSlug("");
-            setSlugManuallyEdited(false);
             setCity("");
             setStateProvince("");
             setCountry("");
@@ -55,11 +52,12 @@ export default function VenueForm({ venueId, onSuccess, onCancel }: VenueFormPro
         }
     }, [venueId]);
 
+    // Always regenerate slug from name/city/state (user can override by editing slug field)
     useEffect(() => {
-        if (!slugManuallyEdited && name) {
+        if (name) {
             setSlug(generateVenueSlug(name, city, stateProvince));
         }
-    }, [name, city, stateProvince, slugManuallyEdited]);
+    }, [name, city, stateProvince]);
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
@@ -70,6 +68,7 @@ export default function VenueForm({ venueId, onSuccess, onCancel }: VenueFormPro
         }
         setLoading(true);
         try {
+            const finalSlug = slug.trim() || generateVenueSlug(name, city, stateProvince);
             const res = await fetch(
                 venueId > 0 ? `/api/admin/venues/${venueId}` : "/api/admin/venues",
                 {
@@ -77,7 +76,7 @@ export default function VenueForm({ venueId, onSuccess, onCancel }: VenueFormPro
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
                         name: name.trim(),
-                        slug: slug.trim(),
+                        slug: finalSlug,
                         city: city.trim(),
                         stateProvince: stateProvince.trim(),
                         country: country.trim(),
@@ -92,11 +91,7 @@ export default function VenueForm({ venueId, onSuccess, onCancel }: VenueFormPro
             if (!res.ok) throw new Error(data.error || "Save failed");
             onSuccess();
         } catch (err: any) {
-            if (err?.message?.toLowerCase().includes("slug")) {
-                setError("Slug must be unique");
-            } else {
-                setError(err?.message || "Failed to save");
-            }
+            setError(err?.message || "Failed to save");
         } finally {
             setLoading(false);
         }
@@ -132,10 +127,7 @@ export default function VenueForm({ venueId, onSuccess, onCancel }: VenueFormPro
                     id="slug"
                     className="input"
                     value={slug}
-                    onChange={e => {
-                        setSlug(e.target.value);
-                        setSlugManuallyEdited(true);
-                    }}
+                    onChange={e => setSlug(e.target.value)}
                     disabled={loading}
                 />
                 <p className="form-help">Auto-generated from name, city, and state, but you can customize it</p>
