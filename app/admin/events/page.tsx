@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/lib/hooks/useToast";
 import { formatEventDate } from "@/lib/formatters/dateFormatter";
-import { Check, Plus } from 'lucide-react';
+import { Check, Plus, Trash2 } from 'lucide-react';
 
 export default function EventsAdminPage() {
     const [createModalOpen, setCreateModalOpen] = useState(false);
@@ -32,6 +32,22 @@ export default function EventsAdminPage() {
             showToast("Failed to load events", "error");
         } finally {
             setLoading(false);
+        }
+    }
+
+    async function handleDelete(id: number) {
+        if (!confirm('Delete this event and all related data? This cannot be undone.')) return;
+
+        try {
+            const res = await fetch(`/api/admin/events/${id}`, { method: 'DELETE' });
+            if (!res.ok) {
+                const data = await res.json();
+                throw new Error(data.error || 'Failed to delete');
+            }
+            showToast('Event deleted', 'success');
+            await refreshEvents();
+        } catch (err: any) {
+            showToast(err.message, 'error');
         }
     }
 
@@ -116,6 +132,7 @@ export default function EventsAdminPage() {
                     <table className="table">
                         <thead>
                             <tr>
+                                <th className="w-12"></th>
                                 <th className="cursor-pointer" onClick={() => {
                                     if (sortKey === "date") setSortDir(sortDir === "asc" ? "desc" : "asc");
                                     setSortKey("date");
@@ -146,6 +163,15 @@ export default function EventsAdminPage() {
                                         onClick={() => router.push(`/admin/events/${event.id}`)}
                                         className="cursor-pointer hover:bg-gray-50"
                                     >
+                                        <td className="w-12" onClick={(e) => e.stopPropagation()}>
+                                            <button
+                                                className="btn btn-secondary btn-small !bg-red-50 !text-red-600 hover:!bg-red-100"
+                                                onClick={() => handleDelete(event.id)}
+                                                title="Delete event"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </button>
+                                        </td>
                                         <td>{formatEventDate(event)}</td>
                                         <td>{venueFields || "—"}</td>
                                         <td>{event.primaryBand?.name || "Solo"}</td>

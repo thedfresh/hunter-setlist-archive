@@ -709,63 +709,61 @@
   ============================================ */
 
   .toast-container {
-    @apply fixed top-5 right-5 flex flex-col gap-3 z-[100] max-w-md;
+    @apply fixed top-20 left-1/2 -translate-x-1/2 flex flex-col gap-3 z-[100] max-w-md;
   }
 
   .toast {
     @apply flex gap-3 items-start p-4 rounded-lg;
     @apply bg-white shadow-lg border-l-4;
-    @apply animate-[slideInRight_0.3s_ease];
+    @apply animate-[slideInDown_0.3s_ease];
   }
 
-  @keyframes slideInRight {
+  @keyframes slideInDown {
     from {
       opacity: 0;
-      transform: translateX(100%);
+      transform: translateY(-100%);
     }
 
     to {
       opacity: 1;
-      transform: translateX(0);
+      transform: translateY(0);
     }
   }
 
   .toast-info {
-    @apply border-l-blue-500;
+    @apply border-blue-200 bg-blue-50;
   }
 
   .toast-success {
-    @apply border-l-[#6b8e23];
+    @apply border-green-200 bg-green-50;
   }
 
   .toast-warning {
-    @apply border-l-amber-500;
+    @apply border-amber-200 bg-amber-50;
   }
 
   .toast-error {
-    @apply border-l-red-600;
+    @apply border-red-200 bg-red-50;
   }
 
-  .toast-icon {
-    @apply w-5 h-5 flex-shrink-0;
+  .alert-icon {
+    @apply text-lg flex-shrink-0;
   }
 
-  .toast-content {
+  .alert-content {
     @apply flex-1;
   }
 
-  .toast-title {
-    @apply text-sm font-semibold text-gray-900 mb-0.5;
+  .alert-title {
+    @apply font-semibold text-sm mb-1;
   }
 
-  .toast-description {
-    @apply text-xs text-gray-600;
+  .alert-description {
+    @apply text-sm text-gray-700;
   }
 
-  .toast-close {
-    @apply p-1 bg-transparent border-0 rounded cursor-pointer;
-    @apply text-gray-400 transition-all;
-    @apply hover:bg-gray-100 hover:text-gray-700;
+  .alert-close {
+    @apply flex-shrink-0 text-gray-400 hover:text-gray-600 transition-colors;
   }
 
   /* ============================================
