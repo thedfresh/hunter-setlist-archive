@@ -60,23 +60,55 @@ export async function getEventWithNavigation(slug: string, isAdmin: boolean = fa
     let prevEvent = null;
     let nextEvent = null;
     if (event?.sortDate) {
-        const whereClause = isAdmin ? {} : { isPublic: true };
-
         prevEvent = await prisma.event.findFirst({
-            where: {
-                ...whereClause,
-                sortDate: { lt: event.sortDate },
+            where: isAdmin ? {
+                OR: [
+                    { sortDate: { lt: event.sortDate } },
+                    {
+                        sortDate: event.sortDate,
+                        id: { lt: event.id }
+                    }
+                ]
+            } : {
+                isPublic: true,
+                OR: [
+                    { sortDate: { lt: event.sortDate } },
+                    {
+                        sortDate: event.sortDate,
+                        id: { lt: event.id }
+                    }
+                ]
             },
-            orderBy: { sortDate: 'desc' },
+            orderBy: [
+                { sortDate: 'desc' },
+                { id: 'desc' }
+            ],
             select: { id: true, slug: true, displayDate: true, sortDate: true },
         });
 
         nextEvent = await prisma.event.findFirst({
-            where: {
-                ...whereClause,
-                sortDate: { gt: event.sortDate },
+            where: isAdmin ? {
+                OR: [
+                    { sortDate: { gt: event.sortDate } },
+                    {
+                        sortDate: event.sortDate,
+                        id: { gt: event.id }
+                    }
+                ]
+            } : {
+                isPublic: true,
+                OR: [
+                    { sortDate: { gt: event.sortDate } },
+                    {
+                        sortDate: event.sortDate,
+                        id: { gt: event.id }
+                    }
+                ]
             },
-            orderBy: { sortDate: 'asc' },
+            orderBy: [
+                { sortDate: 'asc' },
+                { id: 'asc' }
+            ],
             select: { id: true, slug: true, displayDate: true, sortDate: true },
         });
     }
@@ -217,21 +249,38 @@ export async function getEventBySlugWithNavigation(slug: string) {
         prevEvent = await prisma.event.findFirst({
             where: {
                 isPublic: true,
-                sortDate: { lt: event.sortDate },
+                OR: [
+                    { sortDate: { lt: event.sortDate } },
+                    {
+                        sortDate: event.sortDate,
+                        id: { lt: event.id }
+                    }
+                ]
             },
-            orderBy: { sortDate: 'desc' },
+            orderBy: [
+                { sortDate: 'desc' },
+                { id: 'desc' }
+            ],
             select: { id: true, slug: true, displayDate: true, sortDate: true },
         });
         nextEvent = await prisma.event.findFirst({
             where: {
                 isPublic: true,
-                sortDate: { gt: event.sortDate },
+                OR: [
+                    { sortDate: { gt: event.sortDate } },
+                    {
+                        sortDate: event.sortDate,
+                        id: { gt: event.id }
+                    }
+                ]
             },
-            orderBy: { sortDate: 'asc' },
+            orderBy: [
+                { sortDate: 'asc' },
+                { id: 'asc' }
+            ],
             select: { id: true, slug: true, displayDate: true, sortDate: true },
         });
     }
 
     return { event, prevEvent, nextEvent };
 }
-// Moved from queryBuilders/eventQueries.ts

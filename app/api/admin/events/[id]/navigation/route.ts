@@ -29,13 +29,35 @@ export async function GET(
         // Get prev/next events (ALL events for admin)
         const [prevEvent, nextEvent] = await Promise.all([
             prisma.event.findFirst({
-                where: { sortDate: { lt: event.sortDate } },
-                orderBy: { sortDate: 'desc' },
+                where: {
+                    OR: [
+                        { sortDate: { lt: event.sortDate } },
+                        {
+                            sortDate: event.sortDate,
+                            id: { lt: eventId }
+                        }
+                    ]
+                },
+                orderBy: [
+                    { sortDate: 'desc' },
+                    { id: 'desc' }
+                ],
                 select: { id: true, slug: true, year: true, month: true, day: true, showTiming: true, displayDate: true }
             }),
             prisma.event.findFirst({
-                where: { sortDate: { gt: event.sortDate } },
-                orderBy: { sortDate: 'asc' },
+                where: {
+                    OR: [
+                        { sortDate: { gt: event.sortDate } },
+                        {
+                            sortDate: event.sortDate,
+                            id: { gt: eventId }
+                        }
+                    ]
+                },
+                orderBy: [
+                    { sortDate: 'asc' },
+                    { id: 'asc' }
+                ],
                 select: { id: true, slug: true, year: true, month: true, day: true, showTiming: true, displayDate: true }
             })
         ]);
