@@ -34,6 +34,29 @@ export default function EventDetailPage() {
         }
     }, [eventIdNumeric]);
 
+    const handleDelete = async () => {
+        if (!event || !eventIdNumeric) return;
+
+        const confirmMessage = `Delete event ${formatEventDate(event)}?\n\nThis will permanently delete all sets, performances, recordings, musicians, contributors, and related data.\n\nThis cannot be undone.`;
+
+        if (!confirm(confirmMessage)) return;
+
+        try {
+            const res = await fetch(`/api/admin/events/${eventIdNumeric}`, {
+                method: 'DELETE'
+            });
+
+            if (!res.ok) {
+                const data = await res.json();
+                throw new Error(data.error || 'Failed to delete');
+            }
+
+            router.push('/admin/events');
+        } catch (err: any) {
+            alert(`Error: ${err.message}`);
+        }
+    };
+
     async function loadEventData() {
         try {
             const eventIdToFetch = eventIdNumeric || eventSlug;
@@ -125,19 +148,29 @@ export default function EventDetailPage() {
 
             {/* Event Header Card */}
             <div className={`event-card ${getPerformerCardClass(event)} mb-6`}>
-                <h1 className="text-2xl font-semibold mb-2">
-                    {event ? formatEventDate(event) : "Event"}
-                </h1>
-                {event?.venue && (
-                    <p className="text-base text-gray-700">
-                        {formatVenue(event.venue)}
-                    </p>
-                )}
-                {event?.primaryBand && (
-                    <p className="text-sm text-gray-600 mt-1">
-                        {event.primaryBand.name}
-                    </p>
-                )}
+                <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                        <h1 className="text-2xl font-semibold mb-2">
+                            {event ? formatEventDate(event) : "Event"}
+                        </h1>
+                        {event?.venue && (
+                            <p className="text-base text-gray-700">
+                                {formatVenue(event.venue)}
+                            </p>
+                        )}
+                        {event?.primaryBand && (
+                            <p className="text-sm text-gray-600 mt-1">
+                                {event.primaryBand.name}
+                            </p>
+                        )}
+                    </div>
+                    <button
+                        className="btn btn-danger btn-small"
+                        onClick={handleDelete}
+                    >
+                        Delete Event
+                    </button>
+                </div>
             </div>
 
             {eventIdNumeric && (
