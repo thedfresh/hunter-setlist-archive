@@ -122,12 +122,21 @@ export default function EventMetadataForm({ eventId, onSaveSuccess }: EventMetad
             showTiming: showTiming || null
         });
 
-        // If slug is currently blank, regenerate
-        // Otherwise, update to match current date fields (user can override)
-        if (!slug || slug === newSlug) {
-            setSlug(newSlug);
-        }
+        setSlug(newSlug);
     }, [year, month, day, showTiming]);
+
+    useEffect(() => {
+        if (!year) return;
+
+        const yearNum = Number(year);
+        const monthNum = month ? Number(month) : 1;
+        const dayNum = day ? Number(day) : 1;
+
+        const date = new Date(Date.UTC(yearNum, monthNum - 1, dayNum, 0, 0, 0));
+        const isoString = date.toISOString().slice(0, 16);
+
+        setSortDate(isoString);
+    }, [year, month, day]);
 
     async function handleSave(e: React.FormEvent) {
         e.preventDefault();
