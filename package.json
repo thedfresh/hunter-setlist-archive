@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "sync-from-prod": "bash local_data/scripts/sync-from-prod.sh"
+    "sync-from-prod": "bash local-data/scripts/sync-from-prod.sh"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

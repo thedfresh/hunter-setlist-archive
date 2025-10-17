@@ -37,17 +37,35 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
 export async function POST(req: Request, { params }: { params: { id: string } }) {
     const eventId = Number(params.id);
     if (!eventId) return NextResponse.json({ error: 'Invalid eventId' }, { status: 400 });
+
     let body;
     try {
         body = await req.json();
     } catch {
         return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
     }
+
     const { performanceId, banterText, isBeforeSong, isVerbatim, publicNotes, privateNotes } = body;
+
+    // LOG THE INCOMING DATA
+    console.log('=== BANTER CREATE REQUEST ===');
+    console.log('Event ID:', eventId);
+    console.log('Body received:', JSON.stringify(body, null, 2));
+    console.log('Has id field?', 'id' in body);
+
     if (!performanceId || !banterText) {
         return NextResponse.json({ error: 'performanceId and banterText are required' }, { status: 400 });
     }
+
     try {
+        // LOG BEFORE CREATE
+        console.log('Attempting to create with data:', {
+            performanceId,
+            banterText: banterText.substring(0, 50) + '...',
+            isBeforeSong,
+            isVerbatim,
+        });
+
         const showBanter = await prisma.showBanter.create({
             data: {
                 performanceId,
@@ -58,9 +76,20 @@ export async function POST(req: Request, { params }: { params: { id: string } })
                 privateNotes,
             },
         });
+
+        // LOG SUCCESS
+        console.log('Created successfully with ID:', showBanter.id);
+
         revalidatePath('/admin/events');
         return NextResponse.json(showBanter, { status: 201 });
     } catch (error: any) {
+        // LOG THE FULL ERROR
+        console.error('=== BANTER CREATE FAILED ===');
+        console.error('Error name:', error.name);
+        console.error('Error code:', error.code);
+        console.error('Error message:', error.message);
+        console.error('Full error:', JSON.stringify(error, null, 2));
+
         return NextResponse.json({ error: error?.message || 'Failed to create show banter' }, { status: 500 });
     }
 }

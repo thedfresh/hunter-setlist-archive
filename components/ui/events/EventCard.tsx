@@ -8,7 +8,7 @@ import StageTalk from './StageTalk';
 import RecordingsSection from './RecordingsSection';
 import ContributorsSection from './ContributorsSection';
 import { formatEventDate } from '@/lib/formatters/dateFormatter';
-import { getPerformerTextClass } from '@/lib/utils/performerStyles';
+import { formatVenue } from '@/lib/formatters/venueFormatter';
 
 interface EventCardProps {
     event: any;
@@ -67,9 +67,9 @@ const EventCard: React.FC<EventCardProps> = ({
             <div className="flex items-center gap-3 text-lg font-semibold">
                 <span>{event.displayDate || formatEventDate(event)}</span>
                 <span className="text-gray-700 text-base font-normal">
-                    {event.venue?.name}
-                    {event.venue?.city ? `, ${event.venue.city}` : ''}
-                    {event.venue?.stateProvince ? `, ${event.venue.stateProvince}` : ''}
+                    <span className="text-gray-700 text-base font-normal">
+                        {event.venue ? formatVenue(event.venue) : ''}
+                    </span>
                 </span>
             </div>
         </div>

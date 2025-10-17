@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/lib/hooks/useToast";
 import { formatEventDate } from "@/lib/formatters/dateFormatter";
+import { formatVenue } from "@/lib/formatters/venueFormatter";
 import { Check, Plus, Trash2 } from 'lucide-react';
 
 export default function EventsAdminPage() {
@@ -78,10 +79,10 @@ export default function EventsAdminPage() {
     // Filter after sorting
     const filtered = sorted.filter(event => {
         const dateStr = formatEventDate(event);
-        const venueFields = [event.venue?.name, event.venue?.context, event.venue?.city, event.venue?.stateProvince].filter(Boolean).join(", ");
+        const venueDisplay = event.venue ? formatVenue(event.venue) : '';
         const matchesSearch =
             dateStr.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            venueFields.toLowerCase().includes(searchTerm.toLowerCase());
+            venueDisplay.toLowerCase().includes(searchTerm.toLowerCase());
         const matchesVerified = verifiedFilter ? event.verified === true : true;
         return matchesSearch && matchesVerified;
     });
@@ -156,7 +157,7 @@ export default function EventsAdminPage() {
                         </thead>
                         <tbody>
                             {filtered.map(event => {
-                                const venueFields = [event.venue?.name, event.venue?.context, event.venue?.city, event.venue?.stateProvince].filter(Boolean).join(", ");
+                                const venueDisplay = event.venue ? formatVenue(event.venue) : '—';
                                 return (
                                     <tr
                                         key={event.id}
@@ -173,7 +174,7 @@ export default function EventsAdminPage() {
                                             </button>
                                         </td>
                                         <td>{formatEventDate(event)}</td>
-                                        <td>{venueFields || "—"}</td>
+                                        <td>{venueDisplay}</td>
                                         <td>{event.primaryBand?.name || "Solo"}</td>
                                         <td className="text-center w-24">
                                             {event.verified ? <Check className="w-4 h-4 text-green-600 inline" /> : ""}
