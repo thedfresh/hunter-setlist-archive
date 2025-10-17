@@ -70,7 +70,7 @@ export default function EventMetadataForm({ eventId, onSaveSuccess }: EventMetad
             setBilling(e.billing || "");
             setEtreeShowId(e.etreeShowId || "");
             setSlug(e.slug || "");
-            setSortDate(e.sortDate ? new Date(e.sortDate).toISOString().slice(0, 16) : "");
+            setSortDate(e.sortDate ? e.sortDate.slice(0, 16) : "");
             setDateUncertain(e.dateUncertain || false);
             setVenueUncertain(e.venueUncertain || false);
             setHunterParticipationUncertain(e.hunterParticipationUncertain || false);
@@ -189,7 +189,7 @@ export default function EventMetadataForm({ eventId, onSaveSuccess }: EventMetad
             const refetchData = await refetchRes.json();
             if (refetchData.event) {
                 setSlug(refetchData.event.slug || "");
-                setSortDate(refetchData.event.sortDate ? new Date(refetchData.event.sortDate).toISOString().slice(0, 16) : "");
+                setSortDate(refetchData.event.sortDate ? refetchData.event.sortDate.slice(0, 16) : "");
             }
             onSaveSuccess(); // Call parent callback to reload header
         } catch (err: any) {
