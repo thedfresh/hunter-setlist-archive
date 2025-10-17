@@ -36,7 +36,6 @@ export default function EventMetadataForm({ eventId, onSaveSuccess }: EventMetad
     const [privateNotes, setPrivateNotes] = useState("");
     const [rawData, setRawData] = useState("");
     const [rawDataGdsets, setRawDataGdsets] = useState("");
-    const [dataLoaded, setDataLoaded] = useState(false);
 
     // UI state
     const [error, setError] = useState("");
@@ -82,7 +81,6 @@ export default function EventMetadataForm({ eventId, onSaveSuccess }: EventMetad
             setPrivateNotes(e.privateNotes || "");
             setRawData(e.rawData || "");
             setRawDataGdsets(e.rawDataGdsets || "");
-            setDataLoaded(true);
         } catch (err: any) {
             setError(err.message || "Failed to load event");
         }
@@ -112,32 +110,33 @@ export default function EventMetadataForm({ eventId, onSaveSuccess }: EventMetad
             console.error("Failed to load dropdown data:", err);
         }
     }
-    useEffect(() => {
-        if (!year || !dataLoaded) return;
+
+    // Helper function to regenerate slug and sortDate based on current date fields
+    function regenerateSlugAndSortDate(yearVal: number | string, monthVal: number | string, dayVal: number | string, timingVal: string) {
+        if (!yearVal) return;
 
         // Generate slug
         const newSlug = generateSlug({
-            year: Number(year),
-            month: month ? Number(month) : null,
-            day: day ? Number(day) : null,
-            showTiming: showTiming || null
+            year: Number(yearVal),
+            month: monthVal ? Number(monthVal) : null,
+            day: dayVal ? Number(dayVal) : null,
+            showTiming: timingVal || null
         });
         setSlug(newSlug);
 
         // Generate sortDate
-        const yearNum = Number(year);
-        const monthNum = month ? Number(month) : 1;
-        const dayNum = day ? Number(day) : 1;
+        const yearNum = Number(yearVal);
+        const monthNum = monthVal ? Number(monthVal) : 1;
+        const dayNum = dayVal ? Number(dayVal) : 1;
 
-        // Determine hour based on showTiming
         let hour = 20; // Default to 8pm
-        if (showTiming === 'Early') hour = 14; // 2pm
-        else if (showTiming === 'Late') hour = 22; // 10pm
+        if (timingVal === 'Early') hour = 20; // 8pm
+        else if (timingVal === 'Late') hour = 22; // 10pm
 
         const date = new Date(Date.UTC(yearNum, monthNum - 1, dayNum, hour, 0, 0));
         const isoString = date.toISOString().slice(0, 16);
         setSortDate(isoString);
-    }, [year, month, day, showTiming, dataLoaded]);
+    }
 
     async function handleSave(e: React.FormEvent) {
         e.preventDefault();
@@ -185,7 +184,7 @@ export default function EventMetadataForm({ eventId, onSaveSuccess }: EventMetad
             if (!res.ok) throw new Error(data.error || "Failed to save event");
 
             showToast("Event saved successfully", "success");
-            onSaveSuccess(); // Call parent callback to reload header
+            onSaveSuccess();
         } catch (err: any) {
             setError(err.message || "Failed to save event");
         }
@@ -206,7 +205,11 @@ export default function EventMetadataForm({ eventId, onSaveSuccess }: EventMetad
                             type="number"
                             className="input"
                             value={year}
-                            onChange={e => setYear(e.target.value)}
+                            onChange={e => {
+                                const newYear = e.target.value;
+                                setYear(newYear);
+                                regenerateSlugAndSortDate(newYear, month, day, showTiming);
+                            }}
                             required
                         />
                     </div>
@@ -218,7 +221,11 @@ export default function EventMetadataForm({ eventId, onSaveSuccess }: EventMetad
                             max="12"
                             className="input"
                             value={month}
-                            onChange={e => setMonth(e.target.value)}
+                            onChange={e => {
+                                const newMonth = e.target.value;
+                                setMonth(newMonth);
+                                regenerateSlugAndSortDate(year, newMonth, day, showTiming);
+                            }}
                         />
                     </div>
                     <div className="form-group">
@@ -229,7 +236,11 @@ export default function EventMetadataForm({ eventId, onSaveSuccess }: EventMetad
                             max="31"
                             className="input"
                             value={day}
-                            onChange={e => setDay(e.target.value)}
+                            onChange={e => {
+                                const newDay = e.target.value;
+                                setDay(newDay);
+                                regenerateSlugAndSortDate(year, month, newDay, showTiming);
+                            }}
                         />
                     </div>
                     <div className="form-group">
@@ -246,7 +257,11 @@ export default function EventMetadataForm({ eventId, onSaveSuccess }: EventMetad
                         <select
                             className="select"
                             value={showTiming}
-                            onChange={e => setShowTiming(e.target.value)}
+                            onChange={e => {
+                                const newTiming = e.target.value;
+                                setShowTiming(newTiming);
+                                regenerateSlugAndSortDate(year, month, day, newTiming);
+                            }}
                         >
                             <option value="">—</option>
                             <option value="Early">Early</option>
