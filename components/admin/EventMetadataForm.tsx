@@ -189,13 +189,6 @@ export default function EventMetadataForm({ eventId, onSaveSuccess }: EventMetad
             if (!res.ok) throw new Error(data.error || "Failed to save event");
 
             showToast("Event saved successfully", "success");
-            // Refetch to get server-resolved slug
-            const refetchRes = await fetch(`/api/admin/events/${eventId}`);
-            const refetchData = await refetchRes.json();
-            if (refetchData.event) {
-                setSlug(refetchData.event.slug || "");
-                setSortDate(refetchData.event.sortDate ? refetchData.event.sortDate.slice(0, 16) : "");
-            }
             onSaveSuccess(); // Call parent callback to reload header
         } catch (err: any) {
             setError(err.message || "Failed to save event");
