@@ -36,6 +36,7 @@ export default function EventMetadataForm({ eventId, onSaveSuccess }: EventMetad
     const [privateNotes, setPrivateNotes] = useState("");
     const [rawData, setRawData] = useState("");
     const [rawDataGdsets, setRawDataGdsets] = useState("");
+    const [dataLoaded, setDataLoaded] = useState(false);
 
     // UI state
     const [error, setError] = useState("");
@@ -81,6 +82,7 @@ export default function EventMetadataForm({ eventId, onSaveSuccess }: EventMetad
             setPrivateNotes(e.privateNotes || "");
             setRawData(e.rawData || "");
             setRawDataGdsets(e.rawDataGdsets || "");
+            setDataLoaded(true);
         } catch (err: any) {
             setError(err.message || "Failed to load event");
         }
@@ -110,38 +112,32 @@ export default function EventMetadataForm({ eventId, onSaveSuccess }: EventMetad
             console.error("Failed to load dropdown data:", err);
         }
     }
-
-    // Regenerate slug from date fields (always, unless slug is blank)
     useEffect(() => {
-        if (!year) return;
+        if (!year || !dataLoaded) return;
 
+        // Generate slug
         const newSlug = generateSlug({
             year: Number(year),
             month: month ? Number(month) : null,
             day: day ? Number(day) : null,
             showTiming: showTiming || null
         });
-
         setSlug(newSlug);
-    }, [year, month, day, showTiming]);
 
-    useEffect(() => {
-        if (!year) return;
-
+        // Generate sortDate
         const yearNum = Number(year);
         const monthNum = month ? Number(month) : 1;
         const dayNum = day ? Number(day) : 1;
 
         // Determine hour based on showTiming
         let hour = 20; // Default to 8pm
-        if (showTiming === 'Early') hour = 20; // 8pm
+        if (showTiming === 'Early') hour = 14; // 2pm
         else if (showTiming === 'Late') hour = 22; // 10pm
 
         const date = new Date(Date.UTC(yearNum, monthNum - 1, dayNum, hour, 0, 0));
         const isoString = date.toISOString().slice(0, 16);
-
         setSortDate(isoString);
-    }, [year, month, day, showTiming]);
+    }, [year, month, day, showTiming, dataLoaded]);
 
     async function handleSave(e: React.FormEvent) {
         e.preventDefault();
