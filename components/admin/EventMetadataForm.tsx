@@ -132,11 +132,16 @@ export default function EventMetadataForm({ eventId, onSaveSuccess }: EventMetad
         const monthNum = month ? Number(month) : 1;
         const dayNum = day ? Number(day) : 1;
 
-        const date = new Date(Date.UTC(yearNum, monthNum - 1, dayNum, 0, 0, 0));
+        // Determine hour based on showTiming
+        let hour = 20; // Default to 8pm
+        if (showTiming === 'Early') hour = 20; // 8pm
+        else if (showTiming === 'Late') hour = 22; // 10pm
+
+        const date = new Date(Date.UTC(yearNum, monthNum - 1, dayNum, hour, 0, 0));
         const isoString = date.toISOString().slice(0, 16);
 
         setSortDate(isoString);
-    }, [year, month, day]);
+    }, [year, month, day, showTiming]);
 
     async function handleSave(e: React.FormEvent) {
         e.preventDefault();
