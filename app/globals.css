@@ -1462,17 +1462,17 @@
     line-height: 0;
   }
 
-  /* Combined fragment indicator (†‡) */
   .fragment-both::after {
-    content: '†‡';
+    content: '§';
+    /* Changed from '†‡' */
     @apply text-amber-900 ml-0.5 font-bold text-[0.85em];
     vertical-align: super;
     line-height: 0;
   }
 
-  /* Partial performance indicator (§) */
   .partial::after {
-    content: '§';
+    content: '※';
+    /* Changed from '§' */
     @apply text-amber-900 ml-0.5 font-bold text-[0.85em];
     vertical-align: super;
     line-height: 0;

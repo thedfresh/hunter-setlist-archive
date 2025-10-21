@@ -35,6 +35,45 @@ export interface CollapsibleGroup {
 
 export type ViewMode = 'standard' | 'complete';
 
+
+export const FRAGMENT_INDICATORS = {
+    combined: { symbol: '§', label: 'Song fragment', cssClass: 'fragment-both' },
+    lyrical: { symbol: '†', label: 'Lyrical fragment', cssClass: 'fragment-lyrical' },
+    musical: { symbol: '‡', label: 'Instrumental fragment', cssClass: 'fragment-musical' },
+    partial: { symbol: '※', label: 'Partial performance', cssClass: 'partial' }
+} as const;
+
+export interface FragmentIndicators {
+    hasCombined: boolean;
+    hasLyrical: boolean;
+    hasMusical: boolean;
+    hasPartial: boolean;
+}
+
+export function getFragmentIndicators(
+    visiblePerformances: Performance[],
+    viewMode: ViewMode
+): FragmentIndicators {
+    // Partial shows in both views, fragments only in complete
+    const hasPartial = visiblePerformances.some(p => p.isPartial);
+
+    if (viewMode !== 'complete') {
+        return {
+            hasCombined: false,
+            hasLyrical: false,
+            hasMusical: false,
+            hasPartial
+        };
+    }
+
+    return {
+        hasCombined: visiblePerformances.some(p => p.isLyricalFragment && p.isMusicalFragment),
+        hasLyrical: visiblePerformances.some(p => p.isLyricalFragment && !p.isMusicalFragment),
+        hasMusical: visiblePerformances.some(p => p.isMusicalFragment && !p.isLyricalFragment),
+        hasPartial
+    };
+}
+
 /**
  * Identifies medley groups in a list of performances
  * Medleys are consecutive performances where:
@@ -211,23 +250,19 @@ export function buildVisibleNoteMap(
 
     visiblePerformances.forEach(perf => {
         // Add publicNotes
-        if (perf.publicNotes?.trim()) {
+        if (perf.publicNotes && perf.publicNotes.trim()) {
             const note = perf.publicNotes.trim();
             if (!noteMap.has(note)) {
-                noteMap.set(note, noteNum++);
+                noteMap.set(note, noteNum);
+                noteNum = noteNum + 1;
             }
         }
 
-        // Add performanceMusician notes
-        if (perf.performanceMusicians?.length) {
-            perf.performanceMusicians.forEach(pm => {
-                if (pm.musician?.name && pm.instrument?.displayName) {
-                    const musicianNote = `${pm.musician.name} on ${pm.instrument.displayName}`;
-                    if (!noteMap.has(musicianNote)) {
-                        noteMap.set(musicianNote, noteNum++);
-                    }
-                }
-            });
+        // Add COMBINED performanceMusician note
+        const musicianNote = generatePerformanceMusicianNote(perf.performanceMusicians);
+        if (musicianNote && !noteMap.has(musicianNote)) {
+            noteMap.set(musicianNote, noteNum);
+            noteNum = noteNum + 1;
         }
     });
 
@@ -306,4 +341,51 @@ export function generateGroupLabel(group: CollapsibleGroup): string {
 
         return displayName;
     }
+}
+
+const INSTRUMENT_SORT_ORDER: { [key: string]: number } = {
+    'guitar': 1,
+    'keyboards': 2,
+    'bass': 3,
+    'drums': 4,
+    'vocals': 5
+};
+
+function getInstrumentSortKey(displayName: string): number {
+    const lower = displayName.toLowerCase();
+    for (const [key, order] of Object.entries(INSTRUMENT_SORT_ORDER)) {
+        if (lower.includes(key)) return order;
+    }
+    return 999; // Unknown instruments at end
+}
+
+export function generatePerformanceMusicianNote(
+    performanceMusicians: Performance['performanceMusicians']
+): string | null {
+    if (!performanceMusicians || performanceMusicians.length === 0) {
+        return null;
+    }
+
+    // Extract plain data first (avoid Prisma symbols)
+    const plainMusicians = performanceMusicians.map(pm => ({
+        musicianName: pm.musician?.name || '',
+        instrumentName: pm.instrument?.displayName || ''
+    }));
+
+    // Sort by instrument priority, then alphabetically
+    plainMusicians.sort((a, b) => {
+        const orderA = getInstrumentSortKey(a.instrumentName);
+        const orderB = getInstrumentSortKey(b.instrumentName);
+
+        if (orderA !== orderB) return orderA - orderB;
+
+        return a.musicianName.localeCompare(b.musicianName);
+    });
+
+    // Generate combined text
+    const parts = plainMusicians
+        .filter(pm => pm.musicianName && pm.instrumentName)
+        .map(pm => `${pm.musicianName} on ${pm.instrumentName}`);
+
+    return parts.length > 0 ? parts.join(', ') : null;
 }

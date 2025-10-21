@@ -5,7 +5,8 @@ import {
     Performance,
     CollapsibleGroup,
     ViewMode,
-    generateGroupLabel
+    generateGroupLabel,
+    generatePerformanceMusicianNote
 } from '@/lib/utils/setlistVisibility';
 
 interface SetMusician {
@@ -85,7 +86,7 @@ const Setlist: React.FC<SetlistProps> = ({
 
         if (perf.isUncertain) classes.push('uncertain');
 
-        // Only show fragment indicators in Complete view
+        // Fragment indicators only in Complete view
         if (viewMode === 'complete') {
             if (perf.isLyricalFragment && perf.isMusicalFragment) {
                 classes.push('fragment-both');
@@ -94,10 +95,11 @@ const Setlist: React.FC<SetlistProps> = ({
             } else if (perf.isMusicalFragment) {
                 classes.push('fragment-musical');
             }
+        }
 
-            if (perf.isPartial) {
-                classes.push('partial');
-            }
+        // Partial shows in BOTH views (moved outside Complete-only block)
+        if (perf.isPartial) {
+            classes.push('partial');
         }
 
         return classes.join(' ');
@@ -119,19 +121,20 @@ const Setlist: React.FC<SetlistProps> = ({
 
         const numbers: number[] = [];
 
-        if (perf.publicNotes?.trim()) {
+        if (perf.publicNotes && perf.publicNotes.trim()) {
             const n = visibleNoteMap.get(perf.publicNotes.trim());
-            if (n) numbers.push(n);
+            if (n) {
+                numbers.push(n);
+            }
         }
 
-        if (perf.performanceMusicians && Array.isArray(perf.performanceMusicians)) {
-            perf.performanceMusicians.forEach(pm => {
-                if (pm.musician?.name && pm.instrument?.displayName) {
-                    const musicianNote = `${pm.musician.name} on ${pm.instrument.displayName}`;
-                    const n = visibleNoteMap.get(musicianNote);
-                    if (n) numbers.push(n);
-                }
-            });
+        // Get COMBINED musician note
+        const musicianNote = generatePerformanceMusicianNote(perf.performanceMusicians);
+        if (musicianNote) {
+            const n = visibleNoteMap.get(musicianNote);
+            if (n) {
+                numbers.push(n);
+            }
         }
 
         return numbers.sort((a, b) => a - b);
@@ -145,22 +148,34 @@ const Setlist: React.FC<SetlistProps> = ({
         const groupFootnotes: number[] = [];
 
         if (!isExpanded && showFootnotes) {
-            // Check each possible note
+            // Check each possible note in the visible note map
             visibleNoteMap.forEach((num, note) => {
-                // Count how many performances in this group have this note
-                const perfsWithNote = group.performances.filter(perf => {
+                // Count how many performances in this group have this exact note
+                let perfsWithNote = 0;
+
+                for (const perf of group.performances) {
+                    let hasNote = false;
+
                     // Check publicNotes
-                    if (perf.publicNotes?.trim() === note) return true;
-                    // Check performanceMusicians
-                    if (perf.performanceMusicians?.some(pm =>
-                        pm.musician?.name && pm.instrument?.displayName &&
-                        `${pm.musician.name} on ${pm.instrument.displayName}` === note
-                    )) return true;
-                    return false;
-                });
+                    if (perf.publicNotes && perf.publicNotes.trim() === note) {
+                        hasNote = true;
+                    }
+
+                    // Check performanceMusicians using COMBINED note
+                    if (!hasNote) {
+                        const perfMusicianNote = generatePerformanceMusicianNote(perf.performanceMusicians);
+                        if (perfMusicianNote === note) {
+                            hasNote = true;
+                        }
+                    }
+
+                    if (hasNote) {
+                        perfsWithNote = perfsWithNote + 1;
+                    }
+                }
 
                 // If ALL performances have this note, it's a group-level footnote
-                if (perfsWithNote.length === group.performances.length) {
+                if (perfsWithNote === group.performances.length) {
                     groupFootnotes.push(num);
                 }
             });
@@ -311,7 +326,7 @@ const Setlist: React.FC<SetlistProps> = ({
                         className={`set-section flex flex-col md:flex-row gap-1 md:gap-3${i === 0 ? '' : ' mt-3'}`}
                         key={set.id}
                     >
-                        <div className="set-label md:min-w-[80px] md:text-right font-semibold">
+                        <div className="set-label md:w-[110px] md:text-right font-semibold">
                             {set.setType?.displayName}
                             {set.isUncertain && (
                                 <span className="badge-uncertain-small" title="Set order uncertain">

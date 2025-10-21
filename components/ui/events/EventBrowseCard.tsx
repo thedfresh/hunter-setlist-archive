@@ -112,6 +112,12 @@ const EventBrowseCard: React.FC<EventBrowseCardProps> = ({ event }) => {
                 </div>
             </div>
 
+            {/* Billing row - NEW */}
+            {event.billing && (
+                <div className="text-sm italic text-gray-600 mb-2">
+                    {event.billing}
+                </div>
+            )}
             {/* Bottom row: Set info & Recordings */}
             <div className="flex items-center justify-between text-sm border-t border-gray-200 pt-2">
                 {/* Set info */}

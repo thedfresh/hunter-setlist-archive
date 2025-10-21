@@ -1,6 +1,7 @@
 import React from 'react';
 import { getGuestVocalsClass } from '@/lib/config/bands';
 import { Performance, ViewMode } from '@/lib/utils/setlistVisibility';
+import { getFragmentIndicators, FRAGMENT_INDICATORS } from '@/lib/utils/setlistVisibility';
 
 interface PerformanceNotesProps {
   event?: any;
@@ -35,6 +36,7 @@ const PerformanceNotes: React.FC<PerformanceNotesProps> = ({
   const hasMusicalFragment = viewMode === 'complete' && visiblePerformances.some(p => p.isMusicalFragment);
   const hasPartial = viewMode === 'complete' && visiblePerformances.some(p => p.isPartial);
   const hasAnyFragments = hasLyricalFragment || hasMusicalFragment || hasPartial;
+  const fragmentIndicators = getFragmentIndicators(visiblePerformances, viewMode);
 
   if (uniqueNotes.length === 0 && !hasAnyFragments && !hasGuestVocals) return null;
 
@@ -51,19 +53,12 @@ const PerformanceNotes: React.FC<PerformanceNotesProps> = ({
               Note: <span className={getGuestVocalsClass(event.primaryBand?.name) || ''}>Colored song titles</span> indicate guest or alternate lead vocals.
             </div>
           )}
-          {hasLyricalFragment && (
-            <div className="mb-2">
-              <span className="text-xs font-semibold inline-block w-4 text-center text-amber-900">†</span> Lyrical fragment or quote
-            </div>
-          )}
-          {hasMusicalFragment && (
-            <div className="mb-2">
-              <span className="text-xs font-semibold inline-block w-4 text-center text-amber-900">‡</span> Musical/instrumental quote
-            </div>
-          )}
-          {hasPartial && (
-            <div className="mb-2">
-              <span className="text-xs font-semibold inline-block w-4 text-center text-amber-900">§</span> Partial performance
+          {(fragmentIndicators.hasCombined || fragmentIndicators.hasLyrical || fragmentIndicators.hasMusical || fragmentIndicators.hasPartial) && (
+            <div className="text-sm text-gray-600 mb-3">
+              {fragmentIndicators.hasCombined && <div>{FRAGMENT_INDICATORS.combined.symbol} = {FRAGMENT_INDICATORS.combined.label}</div>}
+              {fragmentIndicators.hasLyrical && <div>{FRAGMENT_INDICATORS.lyrical.symbol} = {FRAGMENT_INDICATORS.lyrical.label}</div>}
+              {fragmentIndicators.hasMusical && <div>{FRAGMENT_INDICATORS.musical.symbol} = {FRAGMENT_INDICATORS.musical.label}</div>}
+              {fragmentIndicators.hasPartial && <div>{FRAGMENT_INDICATORS.partial.symbol} = {FRAGMENT_INDICATORS.partial.label}</div>}
             </div>
           )}
           {uniqueNotes.map(({ note, num }) => (
