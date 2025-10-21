@@ -39,16 +39,18 @@ const EventCard: React.FC<EventCardProps> = ({
     // Expanded groups state
     const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
 
-    const [viewMode, setViewMode] = useState<'standard' | 'complete'>(() => {
-        // Read from localStorage during initialization (no flash)
-        if (typeof window !== 'undefined') {
-            const saved = localStorage.getItem('setlist-view-mode');
-            if (saved === 'standard' || saved === 'complete') {
-                return saved;
-            }
+    // Hydration-safe viewMode state
+    const [viewMode, setViewMode] = useState<'standard' | 'complete'>('standard');
+    const [isHydrated, setIsHydrated] = useState(false);
+
+    // Load from localStorage after hydration to prevent mismatch
+    useEffect(() => {
+        setIsHydrated(true);
+        const saved = localStorage.getItem('setlist-view-mode');
+        if (saved === 'standard' || saved === 'complete') {
+            setViewMode(saved);
         }
-        return 'standard';
-    });
+    }, []);
 
     // Reset expanded groups when view mode changes
     useEffect(() => {
@@ -62,7 +64,9 @@ const EventCard: React.FC<EventCardProps> = ({
     // Save preference when changed
     function handleViewModeChange(mode: 'standard' | 'complete') {
         setViewMode(mode);
-        localStorage.setItem('setlist-view-mode', mode);
+        if (isHydrated) {
+            localStorage.setItem('setlist-view-mode', mode);
+        }
     }
 
     // Calculate all visibility state using centralized utility
