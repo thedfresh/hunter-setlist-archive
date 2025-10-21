@@ -22,6 +22,7 @@ jobs:
           git pull origin main
           npm install --omit=dev
           export $(cat .env | xargs) && npx prisma migrate deploy
+          export $(cat .env | xargs) && npx prisma generate
           export $(cat .env | xargs) && npm run build
           sleep 2
           export $(cat .env | xargs) && pm2 reload hunter-archive || (pm2 start npm --name "hunter-archive" -- start)
