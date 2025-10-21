@@ -87,6 +87,8 @@ export async function getEventsOnThisDate() {
           name: true,
         },
       },
+      eventType: { select: { name: true } },
+      contentType: { select: { name: true } },
       sets: {
         select: {
           id: true,
@@ -111,80 +113,57 @@ export async function getEventsOnThisDate() {
 import { prisma } from '@/lib/prisma';
 import { getPrismaDateOrderBy } from '@/lib/utils/dateSort';
 
-export async function getEventsBrowse({ page = 1, pageSize = 100, where = {} }: GetEventsBrowseParams) {
-  // Don't spread - use the where clause as-is since it's already built correctly
+export async function getEventsBrowse({ page, pageSize = 100, where = {} }: GetEventsBrowseParams) {
   const finalWhere = Object.keys(where).length > 0 ? where : getBrowsableEventsWhere();
+  const skipPagination = !page;
+
+  const queryOptions: any = {
+    where: finalWhere,
+    include: {
+      venue: true,
+      primaryBand: true,
+      eventType: true,
+      contentType: true,
+      eventMusicians: {
+        include: { musician: true, instrument: true }
+      },
+      sets: {
+        include: {
+          setType: true,
+          band: true,
+          setMusicians: { include: { musician: true, instrument: true } },
+          performances: {
+            include: {
+              song: true,
+              performanceMusicians: { include: { musician: true, instrument: true } }
+            },
+            orderBy: { performanceOrder: 'asc' }
+          }
+        },
+        orderBy: { position: 'asc' }
+      },
+      recordings: { include: { recordingType: true, contributor: true } },
+      eventContributors: { include: { contributor: true } },
+      links: { include: { linkType: true } }
+    },
+    orderBy: { sortDate: 'asc' }
+  };
+
+  if (!skipPagination) {
+    queryOptions.skip = ((page || 1) - 1) * pageSize;
+    queryOptions.take = pageSize;
+  }
 
   const [totalCount, events] = await Promise.all([
     prisma.event.count({ where: finalWhere }),
-    prisma.event.findMany({
-      where: finalWhere,
-      include: {
-        venue: true,
-        primaryBand: true,
-        eventMusicians: {
-          include: {
-            musician: true,
-            instrument: true,
-          }
-        },
-        sets: {
-          include: {
-            setType: true,
-            band: true,
-            setMusicians: {
-              include: {
-                musician: true,
-                instrument: true,
-              }
-            },
-            performances: {
-              include: {
-                song: true,
-                performanceMusicians: {
-                  include: {
-                    musician: true,
-                    instrument: true,
-                  }
-                },
-              },
-              orderBy: { performanceOrder: 'asc' },
-            },
-          },
-          orderBy: { position: 'asc' },
-        },
-        recordings: {
-          include: {
-            recordingType: true,
-            contributor: true,
-          },
-        },
-        eventContributors: {
-          include: {
-            contributor: true,
-          },
-        },
-        links: {
-          include: {
-            linkType: true,
-          },
-        },
-      },
-      orderBy: { sortDate: 'asc' },
-      skip: (page - 1) * pageSize,
-      take: pageSize,
-    }),
+    prisma.event.findMany(queryOptions)
   ]);
-
-  const totalPages = Math.ceil(totalCount / pageSize);
 
   return {
     events,
     totalCount,
-    currentPage: page,
-    totalPages,
-    pageSize,
+    currentPage: page || 1,
+    totalPages: skipPagination ? 1 : Math.ceil(totalCount / pageSize),
+    pageSize
   };
 }
-
-// Get event by slug with navigation (prev/next) events

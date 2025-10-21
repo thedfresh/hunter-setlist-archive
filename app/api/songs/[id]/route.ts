@@ -11,9 +11,29 @@ export async function GET(req: Request, { params }: { params: Params }) {
     const song = await prisma.song.findUnique({
       where: { id: Number(id) },
       include: {
+        _count: {
+          select: {
+            performances: true,
+            songAlbums: true,
+            songTags: true,
+          }
+        },
         songAlbums: { include: { album: true } },
         songTags: { include: { tag: true } },
-        links: true,
+        leadVocals: {
+          select: {
+            id: true,
+            name: true,
+          }
+        },
+        links: {
+          include: {
+            linkType: true,
+          },
+          orderBy: {
+            createdAt: 'asc',
+          }
+        },
         performances: {
           include: {
             set: {
@@ -29,17 +49,11 @@ export async function GET(req: Request, { params }: { params: Params }) {
     });
     if (!song) return NextResponse.json({ error: "Song not found." }, { status: 404 });
 
-    // Fetch links for this song
-    const links = await prisma.link.findMany({
-      where: { songId: Number(id) },
-    });
-
     return NextResponse.json({
       song: {
         ...song,
         albums: song.songAlbums.map(sa => sa.album),
         tags: song.songTags.map(st => st.tag),
-        links: links,
       },
     });
   } catch (error) {

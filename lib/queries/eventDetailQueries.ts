@@ -6,6 +6,8 @@ export async function getEventBySlug(slug: string) {
         include: {
             venue: true,
             primaryBand: true,
+            eventType: true,
+            contentType: true,
             eventMusicians: {
                 include: {
                     musician: true,
@@ -24,7 +26,35 @@ export async function getEventBySlug(slug: string) {
                     },
                     performances: {
                         include: {
-                            song: true,
+                            leadVocals: {
+                                select: {
+                                    id: true,
+                                    name: true,
+                                }
+                            },
+                            song: {
+                                select: {
+                                    id: true,
+                                    title: true,
+                                    slug: true,
+                                    songTags: {
+                                        include: {
+                                            tag: {
+                                                select: {
+                                                    id: true,
+                                                    name: true,
+                                                }
+                                            }
+                                        }
+                                    },
+                                    leadVocals: {
+                                        select: {
+                                            id: true,
+                                            name: true,
+                                        }
+                                    }
+                                }
+                            },
                             performanceMusicians: {
                                 include: {
                                     musician: true,
@@ -127,6 +157,8 @@ export async function searchEvents(filters: any) {
             include: {
                 venue: true,
                 primaryBand: true,
+                eventType: true,
+                contentType: true,
                 eventMusicians: {
                     include: {
                         musician: true,
@@ -145,7 +177,35 @@ export async function searchEvents(filters: any) {
                         },
                         performances: {
                             include: {
-                                song: true,
+                                leadVocals: {
+                                    select: {
+                                        id: true,
+                                        name: true,
+                                    }
+                                },
+                                song: {
+                                    select: {
+                                        id: true,
+                                        title: true,
+                                        slug: true,
+                                        songTags: {
+                                            include: {
+                                                tag: {
+                                                    select: {
+                                                        id: true,
+                                                        name: true,
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        leadVocals: {
+                                            select: {
+                                                id: true,
+                                                name: true,
+                                            }
+                                        }
+                                    }
+                                },
                                 performanceMusicians: {
                                     include: {
                                         musician: true,
@@ -192,6 +252,8 @@ export async function getEventBySlugWithNavigation(slug: string) {
         include: {
             venue: true,
             primaryBand: true,
+            eventType: true,
+            contentType: true,
             eventMusicians: {
                 include: {
                     musician: true,
@@ -210,7 +272,35 @@ export async function getEventBySlugWithNavigation(slug: string) {
                     },
                     performances: {
                         include: {
-                            song: true,
+                            leadVocals: {
+                                select: {
+                                    id: true,
+                                    name: true,
+                                }
+                            },
+                            song: {
+                                select: {
+                                    id: true,
+                                    title: true,
+                                    slug: true,
+                                    songTags: {
+                                        include: {
+                                            tag: {
+                                                select: {
+                                                    id: true,
+                                                    name: true,
+                                                }
+                                            }
+                                        }
+                                    },
+                                    leadVocals: {
+                                        select: {
+                                            id: true,
+                                            name: true,
+                                        }
+                                    }
+                                }
+                            },
                             performanceMusicians: {
                                 include: {
                                     musician: true,

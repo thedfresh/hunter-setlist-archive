@@ -500,7 +500,9 @@ function SortablePerformance({
     onEdit: (setId: number, perfId: number) => void;
     onDelete: (setId: number, perfId: number) => void;
 }) {
-    const { attributes, listeners, setNodeRef, transform, transition, isDragging, isOver } = useSortable({ id: perf.id });
+    const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: perf.id });
+    const [saving, setSaving] = useState<string | null>(null);
+    const { showError } = useToast();
 
     const style = {
         transform: CSS.Transform.toString(transform),
@@ -508,50 +510,124 @@ function SortablePerformance({
         opacity: isDragging ? 0.5 : 1
     };
 
+    async function handleQuickToggle(field: string, value: boolean) {
+        setSaving(field);
+        try {
+            const res = await fetch(`/api/admin/performances/${perf.id}/quick-update`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ [field]: value })
+            });
+
+            if (!res.ok) throw new Error();
+
+            // Optimistically update local state
+            perf[field] = value;
+        } catch {
+            showError(`Failed to update ${field}`);
+        } finally {
+            setSaving(null);
+        }
+    }
+
     return (
         <div
             ref={setNodeRef}
             style={style}
-            className={`flex items-center justify-between gap-2 rounded p-1 ${isDragging ? 'bg-blue-100 border-2 border-blue-500' : ''}`}
+            className={`rounded p-2 ${isDragging ? 'bg-blue-100 border-2 border-blue-500' : 'bg-white border border-gray-200'}`}
         >
-            <div className="flex items-center gap-2 flex-wrap flex-1 min-w-0">
-                <button type="button" {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing p-1 hover:bg-gray-100 rounded flex-shrink-0">
-                    <GripVertical className="w-3 h-3 text-gray-400" />
-                </button>
-                {renderPerformanceDisplay(perf)}
-                {perf.isSoloHunter && (
-                    <span className="inline-block px-2 py-1 text-xs font-medium bg-amber-50 text-amber-700 rounded whitespace-nowrap">
-                        Solo Hunter
-                    </span>
-                )}
-                {perf.publicNotes && <span className="ml-1">📝</span>}
-                {perf.isMedley && <span className="ml-1">🎵</span>}
-                {perf.performanceMusicians && perf.performanceMusicians.length > 0 && (
-                    <div className="flex gap-1 flex-wrap">
-                        {perf.performanceMusicians.map((pm: any) => (
-                            <span key={pm.id} className="inline-block px-2 py-1 text-xs font-medium bg-green-50 text-green-700 rounded whitespace-nowrap">
-                                {pm.musician?.name}, {pm.instrument?.displayName || 'vocals'}
-                            </span>
-                        ))}
-                    </div>
-                )}
-                {perf.song?.songTags && perf.song.songTags.length > 0 && (
-                    <div className="flex gap-1 flex-wrap">
-                        {perf.song.songTags.map((st: any) => (
-                            <span key={st.tag.id} className="inline-block px-2 py-1 text-xs font-medium bg-gray-100 text-gray-700 rounded whitespace-nowrap">
-                                {st.tag.name}
-                            </span>
-                        ))}
-                    </div>
-                )}
+            <div className="flex items-center justify-between gap-2 mb-1">
+                <div className="flex items-center gap-2 flex-wrap flex-1 min-w-0">
+                    <button type="button" {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing p-1 hover:bg-gray-100 rounded flex-shrink-0">
+                        <GripVertical className="w-3 h-3 text-gray-400" />
+                    </button>
+                    {renderPerformanceDisplay(perf)}
+                    {perf.isSoloHunter && (
+                        <span className="inline-block px-2 py-1 text-xs font-medium bg-amber-50 text-amber-700 rounded whitespace-nowrap">
+                            Solo Hunter
+                        </span>
+                    )}
+                    {perf.performanceMusicians && perf.performanceMusicians.length > 0 && (
+                        <div className="flex gap-1 flex-wrap">
+                            {perf.performanceMusicians.map((pm: any) => (
+                                <span key={pm.id} className="inline-block px-2 py-1 text-xs font-medium bg-green-50 text-green-700 rounded whitespace-nowrap">
+                                    {pm.musician?.name}, {pm.instrument?.displayName || 'vocals'}
+                                </span>
+                            ))}
+                        </div>
+                    )}
+                    {perf.song?.songTags && perf.song.songTags.length > 0 && (
+                        <div className="flex gap-1 flex-wrap">
+                            {perf.song.songTags.map((st: any) => (
+                                <span key={st.tag.id} className="inline-block px-2 py-1 text-xs font-medium bg-gray-100 text-gray-700 rounded whitespace-nowrap">
+                                    {st.tag.name}
+                                </span>
+                            ))}
+                        </div>
+                    )}
+                </div>
+                <div className="flex gap-2 flex-shrink-0">
+                    <button className="btn btn-secondary btn-small" onClick={() => onEdit(setId, perf.id)} type="button">
+                        <Edit2 className="w-4 h-4" />
+                    </button>
+                    <button className="btn btn-danger btn-small !bg-red-100 !text-red-700 hover:!bg-red-200" onClick={() => onDelete(setId, perf.id)} type="button">
+                        <Trash2 className="w-4 h-4" />
+                    </button>
+                </div>
             </div>
-            <div className="flex gap-2 flex-shrink-0">
-                <button className="btn btn-secondary btn-small" onClick={() => onEdit(setId, perf.id)} type="button">
-                    <Edit2 className="w-4 h-4" />
-                </button>
-                <button className="btn btn-danger btn-small !bg-red-100 !text-red-700 hover:!bg-red-200" onClick={() => onDelete(setId, perf.id)} type="button">
-                    <Trash2 className="w-4 h-4" />
-                </button>
+
+            {/* Quick edit checkboxes */}
+            <div className="flex gap-3 pl-6 mt-1 text-xs text-gray-600">
+                <label className="flex items-center gap-1 cursor-pointer hover:text-gray-900" style={{ opacity: saving === 'seguesInto' ? 0.5 : 1 }}>
+                    <input
+                        type="checkbox"
+                        checked={perf.seguesInto || false}
+                        onChange={(e) => handleQuickToggle('seguesInto', e.target.checked)}
+                        disabled={saving !== null}
+                        className="w-3 h-3"
+                    />
+                    Segues
+                </label>
+                <label className="flex items-center gap-1 cursor-pointer hover:text-gray-900" style={{ opacity: saving === 'isPartial' ? 0.5 : 1 }}>
+                    <input
+                        type="checkbox"
+                        checked={perf.isPartial || false}
+                        onChange={(e) => handleQuickToggle('isPartial', e.target.checked)}
+                        disabled={saving !== null}
+                        className="w-3 h-3"
+                    />
+                    Partial
+                </label>
+                <label className="flex items-center gap-1 cursor-pointer hover:text-gray-900" style={{ opacity: saving === 'isMedley' ? 0.5 : 1 }}>
+                    <input
+                        type="checkbox"
+                        checked={perf.isMedley || false}
+                        onChange={(e) => handleQuickToggle('isMedley', e.target.checked)}
+                        disabled={saving !== null}
+                        className="w-3 h-3"
+                    />
+                    Medley
+                </label>
+                <label className="flex items-center gap-1 cursor-pointer hover:text-gray-900" style={{ opacity: saving === 'isLyricalFragment' ? 0.5 : 1 }}>
+                    <input
+                        type="checkbox"
+                        checked={perf.isLyricalFragment || false}
+                        onChange={(e) => handleQuickToggle('isLyricalFragment', e.target.checked)}
+                        disabled={saving !== null}
+                        className="w-3 h-3"
+                    />
+                    Lyrical †
+                </label>
+                <label className="flex items-center gap-1 cursor-pointer hover:text-gray-900" style={{ opacity: saving === 'isMusicalFragment' ? 0.5 : 1 }}>
+                    <input
+                        type="checkbox"
+                        checked={perf.isMusicalFragment || false}
+                        onChange={(e) => handleQuickToggle('isMusicalFragment', e.target.checked)}
+                        disabled={saving !== null}
+                        className="w-3 h-3"
+                    />
+                    Musical ‡
+                </label>
             </div>
         </div>
     );

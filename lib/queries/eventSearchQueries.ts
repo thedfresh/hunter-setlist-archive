@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma';
-import { getBrowsableEventsWhere } from '@/lib/utils/queryFilters';
+import { getBrowsableEventsWhere, getCountableEventsWhere } from '@/lib/utils/queryFilters';
 import { getEventsBrowse } from './eventBrowseQueries';
 
 // Filter categories for event search
@@ -139,13 +139,54 @@ export async function searchEvents(searchParams: Record<string, string | undefin
     }
 
     // Query counts for each filter category
-    const allCount = await prisma.event.count({ where: getBrowsableEventsWhere() });
-    const soloCount = await prisma.event.count({ where: { primaryBand: { name: 'Robert Hunter' } } });
-    const roadhogCount = await prisma.event.count({ where: { primaryBand: { name: 'Roadhog' } } });
-    const comfortCount = await prisma.event.count({ where: { primaryBand: { name: 'Comfort' } } });
-    const dinosaursCount = await prisma.event.count({ where: { primaryBand: { name: 'Dinosaurs' } } });
-    const specialCount = await prisma.event.count({ where: { primaryBand: { isHunterBand: true, name: { notIn: ['Robert Hunter', 'Roadhog', 'Comfort', 'Dinosaurs'] } } } });
-    const guestCount = await prisma.event.count({ where: { primaryBand: { isHunterBand: false } } });
+    const allCount = await prisma.event.count({
+        where: getCountableEventsWhere()
+    });
+
+    const soloCount = await prisma.event.count({
+        where: {
+            ...getCountableEventsWhere(),
+            primaryBand: { name: 'Robert Hunter' }
+        }
+    });
+
+    const roadhogCount = await prisma.event.count({
+        where: {
+            ...getCountableEventsWhere(),
+            primaryBand: { name: 'Roadhog' }
+        }
+    });
+
+    const comfortCount = await prisma.event.count({
+        where: {
+            ...getCountableEventsWhere(),
+            primaryBand: { name: 'Comfort' }
+        }
+    });
+
+    const dinosaursCount = await prisma.event.count({
+        where: {
+            ...getCountableEventsWhere(),
+            primaryBand: { name: 'Dinosaurs' }
+        }
+    });
+
+    const specialCount = await prisma.event.count({
+        where: {
+            ...getCountableEventsWhere(),
+            primaryBand: {
+                isHunterBand: true,
+                name: { notIn: ['Robert Hunter', 'Roadhog', 'Comfort', 'Dinosaurs'] }
+            }
+        }
+    });
+
+    const guestCount = await prisma.event.count({
+        where: {
+            ...getCountableEventsWhere(),
+            primaryBand: { isHunterBand: false }
+        }
+    });
 
     // Deduplicate bandCounts by building from FILTER_CATEGORIES
     const keyToCount: Record<string, number> = {
@@ -194,7 +235,7 @@ export async function searchEvents(searchParams: Record<string, string | undefin
     }
 
     // Get events and pagination
-    const { events, totalCount, currentPage, totalPages, pageSize } = await getEventsBrowse({ page, where });
+    const { events } = await getEventsBrowse({ where });
 
     // Strip Prisma symbols from events
     const cleanEvents = JSON.parse(JSON.stringify(events));
@@ -202,10 +243,6 @@ export async function searchEvents(searchParams: Record<string, string | undefin
     return {
         events: cleanEvents,
         bandCounts,
-        totalCount,
-        currentPage,
-        totalPages,
-        pageSize,
         selectedTypes,
         search,
         searchType

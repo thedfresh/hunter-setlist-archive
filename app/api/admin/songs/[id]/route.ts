@@ -35,7 +35,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
         if (!id) return NextResponse.json({ error: 'Invalid ID' }, { status: 400 });
 
         const body = await req.json();
-        const { title, slug, alternateTitle, originalArtist, lyricsBy, musicBy, isUncertain = false, inBoxOfRain = false, publicNotes, privateNotes } = body;
+        const { title, slug, alternateTitle, originalArtist, songBy, lyricsBy, musicBy, leadVocalsId, arrangement, parentSongId, isUncertain, inBoxOfRain, publicNotes, privateNotes } = body;
 
         if (!title || typeof title !== "string" || title.trim() === "") {
             return NextResponse.json({ error: "Title is required" }, { status: 400 });
@@ -52,8 +52,12 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
                     slug: finalSlug,
                     alternateTitle: alternateTitle?.trim() || null,
                     originalArtist: originalArtist?.trim() || null,
+                    songBy: songBy?.trim() || null,
                     lyricsBy: lyricsBy?.trim() || null,
                     musicBy: musicBy?.trim() || null,
+                    leadVocalsId: leadVocalsId === 0 || leadVocalsId === null ? null : Number(leadVocalsId),
+                    arrangement: arrangement?.trim() || null,
+                    parentSongId: parentSongId === 0 || parentSongId === null ? null : Number(parentSongId),
                     isUncertain: !!isUncertain,
                     inBoxOfRain: !!inBoxOfRain,
                     publicNotes: publicNotes?.trim() || null,
@@ -67,11 +71,15 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
                     where: { id },
                     data: {
                         title: title.trim(),
-                        slug: resolvedSlug,
+                        slug: finalSlug,
                         alternateTitle: alternateTitle?.trim() || null,
                         originalArtist: originalArtist?.trim() || null,
+                        songBy: songBy?.trim() || null,
                         lyricsBy: lyricsBy?.trim() || null,
                         musicBy: musicBy?.trim() || null,
+                        leadVocalsId: leadVocalsId === 0 || leadVocalsId === null ? null : Number(leadVocalsId),
+                        arrangement: arrangement?.trim() || null,
+                        parentSongId: parentSongId === 0 || parentSongId === null ? null : Number(parentSongId),
                         isUncertain: !!isUncertain,
                         inBoxOfRain: !!inBoxOfRain,
                         publicNotes: publicNotes?.trim() || null,

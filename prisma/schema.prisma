@@ -89,6 +89,7 @@ model Musician {
   defaultInstruments   MusicianDefaultInstrument[]
   performanceMusicians PerformanceMusician[]
   performanceVocals    Performance[]               @relation("PerformanceLeadVocals")
+  songDefaultVocals    Song[]                      @relation("SongLeadVocals")
   setMusicians         SetMusician[]
 
   @@map("musicians")
@@ -236,8 +237,12 @@ model Song {
   id             Int           @id @default(autoincrement())
   title          String
   originalArtist String?       @map("original_artist")
+  arrangement    String?       @map("arrangement")
+  parentSongId   Int?          @map("parent_song_id")
+  songBy         String?       @map("song_by")
   lyricsBy       String?       @map("lyrics_by")
   musicBy        String?       @map("music_by")
+  leadVocalsId   Int?          @map("lead_vocals_id")
   isUncertain    Boolean       @default(false) @map("is_uncertain")
   publicNotes    String?       @map("public_notes")
   createdAt      DateTime      @default(now()) @map("created_at")
@@ -246,6 +251,9 @@ model Song {
   alternateTitle String?       @map("alternate_title")
   privateNotes   String?       @map("private_notes")
   slug           String?       @unique
+  leadVocals     Musician?     @relation("SongLeadVocals", fields: [leadVocalsId], references: [id])
+  parentSong     Song?         @relation("SongVariants", fields: [parentSongId], references: [id])
+  variants       Song[]        @relation("SongVariants")
   links          Link[]
   performances   Performance[]
   songAlbums     SongAlbum[]
@@ -289,6 +297,7 @@ model Performance {
   hasCuts              Boolean               @default(false) @map("has_cuts")
   isPartial            Boolean               @default(false) @map("is_partial")
   publicNotes          String?               @map("public_notes")
+  publicNotesExpanded  String?               @map("public_notes_expanded")
   createdAt            DateTime              @default(now()) @map("created_at")
   isUncertain          Boolean               @default(false) @map("is_uncertain")
   leadVocalsId         Int?                  @map("lead_vocals_id")
@@ -297,10 +306,12 @@ model Performance {
   isMusicalFragment    Boolean               @default(false) @map("is_musical_fragment")
   isSoloHunter         Boolean               @default(false) @map("is_solo_hunter")
   privateNotes         String?               @map("private_notes")
-  performanceMusicians PerformanceMusician[]
+  isAborted            Boolean               @default(false) @map("is_aborted")
+  lyricalVariation     String?               @map("lyrical_variation")
   leadVocals           Musician?             @relation("PerformanceLeadVocals", fields: [leadVocalsId], references: [id])
   set                  Set                   @relation(fields: [setId], references: [id], onDelete: Cascade)
   song                 Song                  @relation(fields: [songId], references: [id])
+  performanceMusicians PerformanceMusician[]
   showBanter           ShowBanter[]
 
   @@map("performances")

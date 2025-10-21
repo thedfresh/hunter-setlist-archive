@@ -1,63 +1,78 @@
 import React from 'react';
-
-interface PerformanceMusician {
-  musician: { name: string };
-  instrument: { displayName: string };
-}
+import { getGuestVocalsClass } from '@/lib/config/bands';
+import { Performance, ViewMode } from '@/lib/utils/setlistVisibility';
 
 interface PerformanceNotesProps {
-  performances: Array<{
-    id: number;
-    publicNotes?: string | null;
-    song: { title: string };
-    performanceMusicians?: PerformanceMusician[];
-  }>;
+  event?: any;
+  viewMode: ViewMode;
+  visibilityData: {
+    allPerformances: Performance[];
+    visiblePerformances: Performance[];
+    visibleNoteMap: Map<string, number>;
+  };
 }
 
-const PerformanceNotes: React.FC<PerformanceNotesProps> = ({ performances }) => {
-  // Collect all notes: publicNotes and generated performanceMusicians notes
-  type PerfNote = { perfId: number; note: string };
-  const allNotes: PerfNote[] = [];
+const PerformanceNotes: React.FC<PerformanceNotesProps> = ({
+  event,
+  viewMode,
+  visibilityData
+}) => {
+  const { visiblePerformances, visibleNoteMap } = visibilityData;
 
-  for (const perf of performances) {
-    if (perf.publicNotes && perf.publicNotes.trim()) {
-      allNotes.push({ perfId: perf.id, note: perf.publicNotes.trim() });
-    }
-    if (perf.performanceMusicians && perf.performanceMusicians.length > 0) {
-      perf.performanceMusicians.forEach(pm => {
-        if (pm.musician?.name && pm.instrument?.displayName) {
-          allNotes.push({
-            perfId: perf.id,
-            note: `${pm.musician.name} on ${pm.instrument.displayName}`,
-          });
-        }
-      });
-    }
-  }
+  // Build array of unique notes with their numbers
+  const uniqueNotes = Array.from(visibleNoteMap.entries())
+    .sort((a, b) => a[1] - b[1])  // Sort by number
+    .map(([note, num]) => ({ note, num }));
 
-  if (allNotes.length === 0) return null;
+  // Detect if any VISIBLE performances have guest vocals
+  const hasGuestVocals = visiblePerformances.some((perf: any) => {
+    const vocalist = perf.leadVocals || perf.song?.leadVocals;
+    return vocalist && vocalist.name !== 'Robert Hunter';
+  });
 
-  // Deduplicate notes and assign numbers
-  const noteMap = new Map<string, number>();
-  let noteNum = 1;
-  for (const { note } of allNotes) {
-    if (!noteMap.has(note)) {
-      noteMap.set(note, noteNum++);
-    }
-  }
+  // Check which fragment indicators are used in VISIBLE performances (Complete view only)
+  const hasLyricalFragment = viewMode === 'complete' && visiblePerformances.some(p => p.isLyricalFragment);
+  const hasMusicalFragment = viewMode === 'complete' && visiblePerformances.some(p => p.isMusicalFragment);
+  const hasPartial = viewMode === 'complete' && visiblePerformances.some(p => p.isPartial);
+  const hasAnyFragments = hasLyricalFragment || hasMusicalFragment || hasPartial;
 
-  // 3. Map performance id to footnote number (if needed elsewhere)
-  // const perfToNoteNum = Object.fromEntries(allNotes.map(n => [n.perfId, noteMap.get(n.note)]));
+  if (uniqueNotes.length === 0 && !hasAnyFragments && !hasGuestVocals) return null;
 
-  // 4. Render
   return (
     <div className="notes-section">
-      <div className="notes-title">Performance Notes</div>
-      {Array.from(noteMap.entries()).map(([note, num]) => (
-        <div className="notes-content" key={num}>
-          [{num}] {note}
+      {uniqueNotes.length > 0 && (
+        <div className="notes-title">Performance Notes</div>
+      )}
+
+      {(hasAnyFragments || uniqueNotes.length > 0 || hasGuestVocals) && (
+        <div className="notes-content">
+          {hasGuestVocals && event && (
+            <div className="mb-2">
+              Note: <span className={getGuestVocalsClass(event.primaryBand?.name) || ''}>Colored song titles</span> indicate guest or alternate lead vocals.
+            </div>
+          )}
+          {hasLyricalFragment && (
+            <div className="mb-2">
+              <span className="text-xs font-semibold inline-block w-4 text-center text-amber-900">†</span> Lyrical fragment or quote
+            </div>
+          )}
+          {hasMusicalFragment && (
+            <div className="mb-2">
+              <span className="text-xs font-semibold inline-block w-4 text-center text-amber-900">‡</span> Musical/instrumental quote
+            </div>
+          )}
+          {hasPartial && (
+            <div className="mb-2">
+              <span className="text-xs font-semibold inline-block w-4 text-center text-amber-900">§</span> Partial performance
+            </div>
+          )}
+          {uniqueNotes.map(({ note, num }) => (
+            <div key={num} className="mb-2">
+              <span className="text-xs font-semibold inline-block w-4 text-center">[{num}]</span> {note}
+            </div>
+          ))}
         </div>
-      ))}
+      )}
     </div>
   );
 };

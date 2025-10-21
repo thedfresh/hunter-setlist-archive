@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import Setlist from '@/components/ui/events/Setlist';
+import EventBrowseCard from '@/components/ui/events/EventBrowseCard';
 import { formatEventDate } from '@/lib/formatters/dateFormatter';
 import { getPerformerCardClass } from '@/lib/utils/performerStyles';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
@@ -93,22 +93,7 @@ export default function HomePage() {
           <>
             <div className="grid grid-cols-1 gap-4">
               {events.map((event: any) => (
-                <Link
-                  key={event.id}
-                  href={`/event/${event.slug}`}
-                  className={`event-card ${getPerformerCardClass(event)} block py-3 px-6`}
-                >
-                  <div className="mb-1 text-base font-semibold text-gray-700">{event.primaryBand?.name || 'Robert Hunter'}</div>
-                  <div className="mb-2 flex items-center gap-3 text-lg font-semibold">
-                    <span>{getEventDisplayDate(event)}</span>
-                    <span className="text-gray-700 text-base font-normal">
-                      {event.venue?.name}
-                      {event.venue?.city ? `, ${event.venue.city}` : ''}
-                      {event.venue?.stateProvince ? `, ${event.venue.stateProvince}` : ''}
-                    </span>
-                  </div>
-                  <Setlist sets={event.sets} />
-                </Link>
+                <EventBrowseCard key={event.id} event={event} />
               ))}
             </div>
           </>

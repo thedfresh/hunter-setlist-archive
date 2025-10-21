@@ -6,7 +6,7 @@ import { useEffect, useState, Suspense } from 'react';
 import { BandFilterChips } from './BandFilterChips';
 import Link from 'next/link';
 import Pagination from '@/components/ui/Pagination'
-import EventCard from '@/components/ui/events/EventCard';
+import EventBrowseCard from '@/components/ui/events/EventBrowseCard';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 
 export const dynamic = 'force-dynamic';
@@ -76,12 +76,14 @@ function EventBrowsePageContent() {
   return (
     <PageContainer>
       <div className="flex gap-10">
-        <div className="fixed left-10 top-[160px] w-[160px]">
+        <div className="hidden md:block fixed left-10 top-[160px] w-[160px]">
           <BandFilterChips bandCounts={bandCounts} selectedKeys={selectedTypes} />
         </div>
         <div className="flex-1">
           <div className="page-header">
-            <div className="page-title">Browse Events</div>
+            <div className="page-title">
+              Browse Events <span className="text-gray-500 font-normal text-lg">({events.length})</span>
+            </div>
           </div>
 
           {hasActiveSearch && (
@@ -91,18 +93,16 @@ function EventBrowsePageContent() {
             </div>
           )}
 
-          <div className="grid grid-cols-1 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {typedEvents.map(event => (
               <Link key={event.id} href={`/event/${event.slug}`}>
-                <EventCard
+                <EventBrowseCard
+                  key={event.id}
                   event={event}
-                  variant="browse"
                 />
               </Link>
             ))}
           </div>
-
-          <Pagination currentPage={currentPage} totalPages={totalPages} searchParams={searchParamsObj} basePath='/event' />
         </div>
       </div>
     </PageContainer>

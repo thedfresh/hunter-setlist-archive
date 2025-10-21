@@ -27,7 +27,7 @@ export function getCountableEventsWhere() {
  */
 export function getCountablePerformancesWhere() {
     return {
-        isMedley: false,
+        isAborted: false,
         set: {
             setType: {
                 includeInStats: true

@@ -14,29 +14,30 @@ export default function Footer() {
                 </nav>
 
                 {/* Row 2: Newsletter - Single Line */}
-                <div className="flex items-center justify-center gap-4 text-sm">
-                    <span className="text-gray-600">Get notified when new shows are added:</span>
+                {/* Row 2: Newsletter - Responsive Layout */}
+                <div className="flex flex-col md:flex-row items-center justify-center gap-4 text-sm">
+                    <span className="text-gray-600 text-center md:text-left">Get notified when new shows are added:</span>
                     <form
                         action="https://buttondown.com/api/emails/embed-subscribe/hunter-archives"
                         method="post"
                         target="popupwindow"
                         onSubmit={() => window.open('https://buttondown.com/hunter-archives', 'popupwindow')}
-                        className="flex gap-2"
+                        className="flex gap-2 w-full md:w-auto"
                     >
                         <input
                             type="email"
                             name="email"
                             id="bd-email"
                             placeholder="your@email.com"
-                            className="input input-small w-64"
+                            className="input input-small flex-1 md:w-64"
                             required
                         />
                         <button type="submit" className="btn btn-primary btn-small">
                             Subscribe
                         </button>
                     </form>
-                    <a
-                        href="https://buttondown.com/refer/hunter-archives"
+
+                    <a href="https://buttondown.com/refer/hunter-archives"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-xs text-gray-400 hover:text-hunter-gold"

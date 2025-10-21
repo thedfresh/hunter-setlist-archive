@@ -1,4 +1,3 @@
-
 "use client";
 import Link from 'next/link';
 import Image from 'next/image';
@@ -21,6 +20,7 @@ const SiteHeader = () => {
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -48,7 +48,6 @@ const SiteHeader = () => {
         .then((data) => {
           const breakdown = data.suggestions || [];
           const filteredBreakdown = breakdown.filter((option: any) => {
-            // Keep "all appearances", "Band", and "guest" options
             if (option.type === 'person-all' ||
               option.type === 'person-primary' ||
               option.type === 'person-guest' ||
@@ -56,9 +55,7 @@ const SiteHeader = () => {
               return true;
             }
 
-            // For band membership options (person-band), check if person name matches band name
             if (option.type === 'person-band') {
-              // Extract person name (before "with") and band name (after "with")
               const parts = option.label.match(/^(.+?) with (.+?) \(/);
               if (parts) {
                 const personName = parts[1].toLowerCase().trim();
@@ -66,7 +63,7 @@ const SiteHeader = () => {
                 const keep = personName !== bandName;
                 return keep;
               }
-              return true; // Keep if we can't parse the label
+              return true;
             }
             return true;
           });
@@ -158,10 +155,10 @@ const SiteHeader = () => {
     }
   };
 
-
   return (
     <header className="site-header relative">
-      <div className="logo-container">
+      {/* Logo - desktop only */}
+      <div className="logo-container hidden md:block">
         <Link href="/">
           <Image
             src="/images/title.png"
@@ -172,9 +169,80 @@ const SiteHeader = () => {
           />
         </Link>
       </div>
+
       <div className="nav-bar">
         <div className="nav-bar-content">
-          <nav className="main-nav">
+          {/* Mobile: Hamburger + Search in same row */}
+          <div className="md:hidden flex items-center gap-3 w-full">
+            {/* Hamburger button */}
+            <button
+              className="flex flex-col gap-1.5 p-2 flex-shrink-0"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label="Menu"
+            >
+              <span
+                className="w-6 h-0.5 bg-gray-700 transition-transform"
+                style={{ transform: mobileMenuOpen ? 'rotate(45deg) translateY(8px)' : 'none' }}
+              />
+              <span
+                className="w-6 h-0.5 bg-gray-700 transition-opacity"
+                style={{ opacity: mobileMenuOpen ? 0 : 1 }}
+              />
+              <span
+                className="w-6 h-0.5 bg-gray-700 transition-transform"
+                style={{ transform: mobileMenuOpen ? 'rotate(-45deg) translateY(-8px)' : 'none' }}
+              />
+            </button>
+
+            {/* Search box - takes remaining space */}
+            <div className="relative flex-1">
+              <input
+                ref={inputRef}
+                type="text"
+                className="header-search-box px-3 py-2 pl-10 rounded w-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                placeholder="Search..."
+                value={query}
+                onChange={(e) => {
+                  setQuery(e.target.value);
+                  if (e.target.value.length >= 2) {
+                    setShowDropdown(true);
+                  }
+                }}
+                onFocus={() => setShowDropdown(true)}
+                onBlur={handleBlur}
+                onKeyDown={handleKeyDown}
+              />
+              <svg
+                className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <circle cx="11" cy="11" r="7" strokeWidth="2" />
+                <line x1="16.5" y1="16.5" x2="21" y2="21" strokeWidth="2" strokeLinecap="round" />
+              </svg>
+              {showDropdown && Array.isArray(suggestions) && suggestions.length > 0 && (
+                <div
+                  ref={dropdownRef}
+                  className="absolute left-0 right-0 mt-1 bg-white border border-gray-200 rounded shadow-lg z-50"
+                  style={{ maxHeight: "260px", overflowY: "auto" }}
+                >
+                  {suggestions.map((s: any, idx: number) => (
+                    <div
+                      key={idx}
+                      className={`px-3 py-2 cursor-pointer text-sm text-gray-800 ${idx === selectedIndex ? 'bg-blue-100' : 'hover:bg-blue-50'}`}
+                      onMouseDown={() => handleSuggestionClick(s)}
+                    >
+                      <span className="font-medium">{s.label}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Desktop nav */}
+          <nav className="main-nav hidden md:flex">
             <Link href="/event" className="nav-link">Shows</Link>
             <Link href="/song" className="nav-link">Songs</Link>
             <Link href="/venue" className="nav-link">Venues</Link>
@@ -189,9 +257,10 @@ const SiteHeader = () => {
               </>
             )}
           </nav>
-          <div className="relative w-full max-w-xs">
+
+          {/* Desktop search */}
+          <div className="relative w-full max-w-xs hidden md:block">
             <input
-              ref={inputRef}
               type="text"
               className="header-search-box px-3 py-2 pl-10 rounded w-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400"
               placeholder="Search dates, places or names..."
@@ -228,15 +297,30 @@ const SiteHeader = () => {
                     onMouseDown={() => handleSuggestionClick(s)}
                   >
                     <span className="font-medium">{s.label}</span>
-                    {/* {s.type && (
-                      <span className="ml-2 text-xs text-gray-500">[{s.label}]</span>
-                    )} */}
                   </div>
                 ))}
               </div>
             )}
           </div>
         </div>
+
+        {/* Mobile dropdown menu */}
+        {mobileMenuOpen && (
+          <nav className="md:hidden bg-[#ffffed] border-t border-gray-300 shadow-lg">
+            <div className="flex flex-col py-2">
+              <Link href="/event" className="px-4 py-3 hover:bg-gray-100 text-gray-700" onClick={() => setMobileMenuOpen(false)}>Shows</Link>
+              <Link href="/song" className="px-4 py-3 hover:bg-gray-100 text-gray-700" onClick={() => setMobileMenuOpen(false)}>Songs</Link>
+              <Link href="/venue" className="px-4 py-3 hover:bg-gray-100 text-gray-700" onClick={() => setMobileMenuOpen(false)}>Venues</Link>
+              <Link href="/band" className="px-4 py-3 hover:bg-gray-100 text-gray-700" onClick={() => setMobileMenuOpen(false)}>Bands</Link>
+              <Link href="/hunter" className="px-4 py-3 hover:bg-gray-100 text-gray-700" onClick={() => setMobileMenuOpen(false)}>Hunter</Link>
+              <Link href="/about" className="px-4 py-3 hover:bg-gray-100 text-gray-700" onClick={() => setMobileMenuOpen(false)}>About</Link>
+              <Link href="/credits" className="px-4 py-3 hover:bg-gray-100 text-gray-700" onClick={() => setMobileMenuOpen(false)}>Credits</Link>
+              {isAdmin && (
+                <a href="/admin" className="px-4 py-3 hover:bg-gray-100 text-gray-700" onClick={() => setMobileMenuOpen(false)}>Admin</a>
+              )}
+            </div>
+          </nav>
+        )}
       </div>
     </header>
   );

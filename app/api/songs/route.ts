@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCountablePerformancesWhere, getBrowsableEventsWhere } from '@/lib/utils/queryFilters';
 import { formatEventDate } from '@/lib/formatters/dateFormatter';
+import { calculateSongPerformanceStats } from "@/lib/queries/songQueries";
+
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
@@ -15,6 +17,7 @@ export async function GET() {
           select: {
             event: {
               select: {
+                id: true,
                 year: true,
                 month: true,
                 day: true,
@@ -63,15 +66,15 @@ export async function GET() {
       }
     });
 
-    // Group countable performances by songId for counts
+    // Group countable performances by songId, counting DISTINCT events only
     const songCountData = new Map();
-    countablePerformances.forEach(perf => {
+    countablePerformances.forEach(perf => {  // CHANGED from songCountData
       const event = perf.set && perf.set.event;
       if (!event || !event.year) return;
       if (!songCountData.has(perf.songId)) {
-        songCountData.set(perf.songId, { count: 0 });
+        songCountData.set(perf.songId, { eventIds: new Set() });
       }
-      songCountData.get(perf.songId).count++;
+      songCountData.get(perf.songId).eventIds.add(event.id);
     });
 
     // Group browsable performances by songId for first/last dates
@@ -103,7 +106,7 @@ export async function GET() {
       songs: songs.map(song => {
         const countData = songCountData.get(song.id);
         const dateData = songDateData.get(song.id) || [];
-        let performanceCount = countData ? countData.count : 0;
+        let performanceCount = countData ? countData.eventIds.size : 0;
         let firstPerformance = null;
         let lastPerformance = null;
         if (dateData.length > 0) {

@@ -1,24 +1,21 @@
-/**
- * Calculates performance stats for a song:
- * - performanceCount
- * - firstPerformance (date, slug, sortDate)
- * - lastPerformance (date, slug, sortDate)
- * Only includes countable performances (excludes studios, medleys, etc).
- *
- * @param songId - The song's ID
- * @returns { performanceCount, firstPerformance, lastPerformance }
- */
 export async function calculateSongPerformanceStats(songId: number) {
+    // Get all performances with event data, excluding non-countable events
     const performances = await prisma.performance.findMany({
         where: {
             songId,
-            ...getCountablePerformancesWhere(),
+            set: {
+                setType: { includeInStats: true },
+                event: {
+                    eventType: { includeInStats: true }
+                }
+            }
         },
         select: {
             set: {
                 select: {
                     event: {
                         select: {
+                            id: true,
                             sortDate: true,
                             displayDate: true,
                             slug: true,
@@ -29,20 +26,22 @@ export async function calculateSongPerformanceStats(songId: number) {
         }
     });
 
-    const dates = performances
-        .map(perf => {
-            const event = perf.set?.event;
-            return event && event.sortDate
-                ? {
-                    sortDate: String(event.sortDate),
-                    date: String(event.displayDate || ''),
-                    slug: String(event.slug || ''),
-                }
-                : null;
-        })
-        .filter(Boolean) as { sortDate: string; date: string; slug: string }[];
+    // Extract unique events (song performed multiple times in same show = 1 count)
+    const eventMap = new Map();
+    performances.forEach(perf => {
+        const event = perf.set?.event;
+        if (event && event.sortDate) {
+            eventMap.set(event.id, {
+                sortDate: String(event.sortDate),
+                date: String(event.displayDate || ''),
+                slug: String(event.slug || ''),
+            });
+        }
+    });
 
+    const dates = Array.from(eventMap.values());
     const performanceCount = dates.length;
+
     let firstPerformance = null;
     let lastPerformance = null;
     if (performanceCount > 0) {
@@ -56,7 +55,7 @@ export async function calculateSongPerformanceStats(songId: number) {
     return { performanceCount, firstPerformance, lastPerformance };
 }
 import { prisma } from '@/lib/prisma';
-import { getCountablePerformancesWhere, getBrowsableEventsWhere } from '@/lib/utils/queryFilters';
+import { getBrowsableEventsWhere } from '@/lib/utils/queryFilters';
 
 /**
  * Fetches a single song by slug, including all related albums, tags, links,
@@ -72,7 +71,36 @@ export async function getSongWithPerformances(slug: string) {
         include: {
             songAlbums: { include: { album: true } },
             songTags: { include: { tag: true } },
-            links: true,
+            leadVocals: {
+                select: {
+                    id: true,
+                    name: true,
+                }
+            },
+            links: {
+                include: {
+                    linkType: true,
+                }
+            },
+            parentSong: {
+                select: {
+                    id: true,
+                    title: true,
+                    slug: true,
+                    arrangement: true,
+                }
+            },
+            variants: {
+                select: {
+                    id: true,
+                    title: true,
+                    slug: true,
+                    arrangement: true,
+                },
+                orderBy: {
+                    arrangement: 'asc',
+                }
+            },
             performances: {
                 where: {
                     set: { event: getBrowsableEventsWhere() }
