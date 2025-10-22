@@ -6,7 +6,8 @@ import {
     CollapsibleGroup,
     ViewMode,
     generateGroupLabel,
-    generatePerformanceMusicianNote
+    generatePerformanceMusicianNote,
+    shouldShowFragmentIndicator
 } from '@/lib/utils/setlistVisibility';
 
 interface SetMusician {
@@ -86,21 +87,12 @@ const Setlist: React.FC<SetlistProps> = ({
 
         if (perf.isUncertain) classes.push('uncertain');
 
-        // Fragment indicators only in Complete view
-        if (viewMode === 'complete') {
-            if (perf.isLyricalFragment && perf.isMusicalFragment) {
-                classes.push('fragment-both');
-            } else if (perf.isLyricalFragment) {
-                classes.push('fragment-lyrical');
-            } else if (perf.isMusicalFragment) {
-                classes.push('fragment-musical');
-            }
-        }
+        const indicators = shouldShowFragmentIndicator(perf, viewMode);
 
-        // Partial shows in BOTH views (moved outside Complete-only block)
-        if (perf.isPartial) {
-            classes.push('partial');
-        }
+        if (indicators.combined) classes.push('fragment-both');
+        if (indicators.lyrical) classes.push('fragment-lyrical');
+        if (indicators.musical) classes.push('fragment-musical');
+        if (indicators.partial) classes.push('partial');
 
         return classes.join(' ');
     };
@@ -237,9 +229,17 @@ const Setlist: React.FC<SetlistProps> = ({
         const isLast = index === performances.length - 1;
         const nextPerf = performances[index + 1];
 
+        // Check if next performance will be visible in current view mode
+        const nextIsHiddenFragment = nextPerf &&
+            viewMode === 'standard' &&
+            (nextPerf.isLyricalFragment || nextPerf.isMusicalFragment) &&
+            !perfToGroupMap.get(nextPerf.id); // Not in a group
+
         let separator = '';
         if (!isLast && !isLastInGroup) {
-            if (perf.seguesInto) {
+            if (nextIsHiddenFragment) {
+                separator = ''; // No separator when next song is hidden
+            } else if (perf.seguesInto) {
                 separator = ' > ';
             } else if (perf.isTruncatedEnd || nextPerf?.isTruncatedStart) {
                 separator = ' ';
@@ -292,10 +292,12 @@ const Setlist: React.FC<SetlistProps> = ({
             if (isFirstInGroup) {
                 // Render the entire group (collapsed or expanded)
                 const isLastGroup = (i + group.performances.length) === performances.length;
+                const lastPerfInGroup = group.performances[group.performances.length - 1];
+
                 result.push(
                     <React.Fragment key={group.id}>
                         {renderGroup(group, isLastGroup)}
-                        {!isLastGroup && ', '}
+                        {!isLastGroup && (lastPerfInGroup.seguesInto ? ' > ' : ', ')}
                     </React.Fragment>
                 );
                 i += group.performances.length;

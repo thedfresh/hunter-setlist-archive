@@ -49,31 +49,48 @@ export interface FragmentIndicators {
     hasMusical: boolean;
     hasPartial: boolean;
 }
+/**
+ * Determines which fragment indicators should be visible for a single performance
+ * This is the single source of truth for fragment visibility rules
+ */
+export function shouldShowFragmentIndicator(
+    perf: Performance,
+    viewMode: ViewMode
+): { lyrical: boolean; musical: boolean; combined: boolean; partial: boolean } {
+    const isLyrical = perf.isLyricalFragment === true;
+    const isMusical = perf.isMusicalFragment === true;
+    const isPartial = perf.isPartial === true;
 
+    return {
+        lyrical: viewMode === 'complete' && isLyrical && !isMusical,
+        musical: viewMode === 'complete' && isMusical && !isLyrical,
+        combined: viewMode === 'complete' && isLyrical && isMusical,
+        partial: isPartial  // Shows in both Compact and Complete
+    };
+}
+/**
+ * Determines which fragment indicators appear in the legend
+ * Based on what's actually visible in the setlist
+ */
 export function getFragmentIndicators(
     visiblePerformances: Performance[],
     viewMode: ViewMode
 ): FragmentIndicators {
-    // Partial shows in both views, fragments only in complete
-    const hasPartial = visiblePerformances.some(p => p.isPartial);
+    let hasCombined = false;
+    let hasLyrical = false;
+    let hasMusical = false;
+    let hasPartial = false;
 
-    if (viewMode !== 'complete') {
-        return {
-            hasCombined: false,
-            hasLyrical: false,
-            hasMusical: false,
-            hasPartial
-        };
-    }
+    visiblePerformances.forEach(perf => {
+        const indicators = shouldShowFragmentIndicator(perf, viewMode);
+        if (indicators.combined) hasCombined = true;
+        if (indicators.lyrical) hasLyrical = true;
+        if (indicators.musical) hasMusical = true;
+        if (indicators.partial) hasPartial = true;
+    });
 
-    return {
-        hasCombined: visiblePerformances.some(p => p.isLyricalFragment && p.isMusicalFragment),
-        hasLyrical: visiblePerformances.some(p => p.isLyricalFragment && !p.isMusicalFragment),
-        hasMusical: visiblePerformances.some(p => p.isMusicalFragment && !p.isLyricalFragment),
-        hasPartial
-    };
+    return { hasCombined, hasLyrical, hasMusical, hasPartial };
 }
-
 /**
  * Identifies medley groups in a list of performances
  * Medleys are consecutive performances where:
@@ -201,6 +218,7 @@ export function buildPerformanceToGroupMap(
 
     return map;
 }
+
 
 /**
  * Determines which performances should be visible based on:

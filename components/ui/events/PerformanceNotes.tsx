@@ -20,9 +20,12 @@ const PerformanceNotes: React.FC<PerformanceNotesProps> = ({
 }) => {
   const { visiblePerformances, visibleNoteMap } = visibilityData;
 
+  // Use centralized fragment indicator logic
+  const fragmentIndicators = getFragmentIndicators(visiblePerformances, viewMode);
+
   // Build array of unique notes with their numbers
   const uniqueNotes = Array.from(visibleNoteMap.entries())
-    .sort((a, b) => a[1] - b[1])  // Sort by number
+    .sort((a, b) => a[1] - b[1])
     .map(([note, num]) => ({ note, num }));
 
   // Detect if any VISIBLE performances have guest vocals
@@ -31,18 +34,16 @@ const PerformanceNotes: React.FC<PerformanceNotesProps> = ({
     return vocalist && vocalist.name !== 'Robert Hunter';
   });
 
-  // Check which fragment indicators are used in VISIBLE performances (Complete view only)
-  const hasLyricalFragment = viewMode === 'complete' && visiblePerformances.some(p => p.isLyricalFragment);
-  const hasMusicalFragment = viewMode === 'complete' && visiblePerformances.some(p => p.isMusicalFragment);
-  const hasPartial = viewMode === 'complete' && visiblePerformances.some(p => p.isPartial);
-  const hasAnyFragments = hasLyricalFragment || hasMusicalFragment || hasPartial;
-  const fragmentIndicators = getFragmentIndicators(visiblePerformances, viewMode);
+  const hasAnyFragments = fragmentIndicators.hasCombined ||
+    fragmentIndicators.hasLyrical ||
+    fragmentIndicators.hasMusical ||
+    fragmentIndicators.hasPartial;
 
   if (uniqueNotes.length === 0 && !hasAnyFragments && !hasGuestVocals) return null;
 
   return (
     <div className="notes-section">
-      {uniqueNotes.length > 0 && (
+      {(uniqueNotes.length > 0 || hasAnyFragments) && (
         <div className="notes-title">Performance Notes</div>
       )}
 
@@ -53,12 +54,24 @@ const PerformanceNotes: React.FC<PerformanceNotesProps> = ({
               Note: <span className={getGuestVocalsClass(event.primaryBand?.name) || ''}>Colored song titles</span> indicate guest or alternate lead vocals.
             </div>
           )}
-          {(fragmentIndicators.hasCombined || fragmentIndicators.hasLyrical || fragmentIndicators.hasMusical || fragmentIndicators.hasPartial) && (
-            <div className="text-sm text-gray-600 mb-3">
-              {fragmentIndicators.hasCombined && <div>{FRAGMENT_INDICATORS.combined.symbol} = {FRAGMENT_INDICATORS.combined.label}</div>}
-              {fragmentIndicators.hasLyrical && <div>{FRAGMENT_INDICATORS.lyrical.symbol} = {FRAGMENT_INDICATORS.lyrical.label}</div>}
-              {fragmentIndicators.hasMusical && <div>{FRAGMENT_INDICATORS.musical.symbol} = {FRAGMENT_INDICATORS.musical.label}</div>}
-              {fragmentIndicators.hasPartial && <div>{FRAGMENT_INDICATORS.partial.symbol} = {FRAGMENT_INDICATORS.partial.label}</div>}
+          {fragmentIndicators.hasCombined && (
+            <div className="mb-2">
+              {FRAGMENT_INDICATORS.combined.symbol} = {FRAGMENT_INDICATORS.combined.label}
+            </div>
+          )}
+          {fragmentIndicators.hasLyrical && (
+            <div className="mb-2">
+              {FRAGMENT_INDICATORS.lyrical.symbol} = {FRAGMENT_INDICATORS.lyrical.label}
+            </div>
+          )}
+          {fragmentIndicators.hasMusical && (
+            <div className="mb-2">
+              {FRAGMENT_INDICATORS.musical.symbol} = {FRAGMENT_INDICATORS.musical.label}
+            </div>
+          )}
+          {fragmentIndicators.hasPartial && (
+            <div className="mb-2">
+              {FRAGMENT_INDICATORS.partial.symbol} = {FRAGMENT_INDICATORS.partial.label}
             </div>
           )}
           {uniqueNotes.map(({ note, num }) => (
