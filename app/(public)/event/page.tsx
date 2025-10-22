@@ -15,6 +15,19 @@ function EventBrowsePageContent() {
   const searchParamsHook = useSearchParams();
   const [results, setResults] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [showSetlists, setShowSetlists] = useState(false);
+
+  // Initialize showSetlists from localStorage
+  useEffect(() => {
+    const stored = localStorage.getItem('hunterArchive_browseShowSetlists');
+    setShowSetlists(stored === 'true');
+  }, []);
+
+  const toggleSetlists = () => {
+    const newValue = !showSetlists;
+    setShowSetlists(newValue);
+    localStorage.setItem('hunterArchive_browseShowSetlists', newValue.toString());
+  };
 
   useEffect(() => {
     const params = Object.fromEntries(searchParamsHook.entries());
@@ -93,12 +106,26 @@ function EventBrowsePageContent() {
             </div>
           )}
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Filter section with toggle button */}
+          <div className="mb-6 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              {/* Add any existing filter chips here if needed */}
+            </div>
+            <button
+              onClick={toggleSetlists}
+              className="btn btn-secondary btn-small"
+            >
+              {showSetlists ? 'Hide Setlists' : 'Show Setlists'}
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 gap-6">
             {typedEvents.map(event => (
               <Link key={event.id} href={`/event/${event.slug}`}>
                 <EventBrowseCard
                   key={event.id}
                   event={event}
+                  showSetlist={showSetlists}
                 />
               </Link>
             ))}
