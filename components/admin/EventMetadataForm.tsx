@@ -89,7 +89,7 @@ export default function EventMetadataForm({ eventId, onSaveSuccess }: EventMetad
     async function loadDropdownData() {
         try {
             const [venuesRes, eventTypesRes, contentTypesRes, bandsRes] = await Promise.all([
-                fetch("/api/venues"),
+                fetch("/api/venues?includePrivate=true"),
                 fetch("/api/event-types"),
                 fetch("/api/content-types"),
                 fetch("/api/bands")
