@@ -39,7 +39,7 @@ export default function CreateEventForm({ onSuccess, onCancel }: Props) {
         async function fetchDropdowns() {
             try {
                 const [vRes, bRes, etRes, ctRes] = await Promise.all([
-                    fetch("/api/venues"),
+                    fetch("/api/venues?includePrivate=true"),
                     fetch("/api/bands"),
                     fetch("/api/event-types"),
                     fetch("/api/content-types")
