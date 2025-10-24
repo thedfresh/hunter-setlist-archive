@@ -138,15 +138,20 @@ const EventBrowseCard: React.FC<EventBrowseCardProps> = ({ event, showSetlist = 
 
                                 {/* Right column: Song list */}
                                 <div className="flex-1 text-sm leading-relaxed text-gray-600">
-                                    {set.performances?.map((performance: any, perfIndex: number) => (
-                                        <React.Fragment key={performance.id || perfIndex}>
-                                            <span className="inline-block whitespace-nowrap">
-                                                {performance.song?.title || 'Unknown Song'}
-                                                {performance.seguesInto && ' > '}
-                                            </span>
-                                            {perfIndex < set.performances.length - 1 && !performance.seguesInto && ', '}
-                                        </React.Fragment>
-                                    )) || 'No songs listed'}
+                                    {set.performances?.map((performance: any, perfIndex: number) => {
+                                        const isLast = perfIndex === set.performances.length - 1;
+                                        const hasSegue = performance.seguesInto;
+                                        return (
+                                            <React.Fragment key={performance.id || perfIndex}>
+                                                <span className="inline-block whitespace-nowrap">
+                                                    {performance.song?.title || 'Unknown Song'}
+                                                    {hasSegue && ' '}
+                                                    {hasSegue ? '>' : (!isLast ? ',' : '')}
+                                                </span>
+                                                {' '}
+                                            </React.Fragment>
+                                        );
+                                    }) || 'No songs listed'}
                                 </div>
                             </div>
                         </div>

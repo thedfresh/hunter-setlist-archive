@@ -16,6 +16,8 @@
 
   --color-dinosaurs: #00d9ff;
   --color-dinosaurs-dark: #7b2cbf;
+  --color-dinosaurs-text: #0e7490;
+  /* Darker cyan for text/vocals */
   --color-dinosaurs-bg: #e8f4ff;
 
   --color-special: #7d5a80;
@@ -1509,7 +1511,7 @@
   }
 
   .guest-vocals-dinosaurs {
-    color: var(--color-dinosaurs);
+    color: var(--color-dinosaurs-text);
   }
 
   .guest-vocals-special {

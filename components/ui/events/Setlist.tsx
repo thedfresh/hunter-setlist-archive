@@ -40,7 +40,7 @@ interface SetlistProps {
     visibilityData: {
         allPerformances: Performance[];
         allGroups: CollapsibleGroup[];
-        perfToGroupMap: Map<number, string>;
+        perfToGroupMap: Map<string, string>;
         visiblePerformances: Performance[];
         visibleNoteMap: Map<string, number>;
     };
@@ -207,6 +207,24 @@ const Setlist: React.FC<SetlistProps> = ({
         );
     }
 
+
+    // Helper: Find next visible performance (skipping hidden fragments)
+    function findNextVisiblePerformance(index: number, performances: Performance[], viewMode: string, perfToGroupMap: Map<string, string>) {
+        for (let i = index + 1; i < performances.length; i++) {
+            const perf = performances[i];
+            // In standard mode, skip fragments not in a group
+            if (
+                viewMode === 'standard' &&
+                (perf.isLyricalFragment || perf.isMusicalFragment) &&
+                !perfToGroupMap.get(String(perf.id))
+            ) {
+                continue;
+            }
+            return perf;
+        }
+        return null;
+    }
+
     function renderSong(
         perf: Performance,
         index: number,
@@ -227,24 +245,16 @@ const Setlist: React.FC<SetlistProps> = ({
 
         const footnotes = getFootnoteNumbers(perf);
         const isLast = index === performances.length - 1;
-        const nextPerf = performances[index + 1];
-
-        // Check if next performance will be visible in current view mode
-        const nextIsHiddenFragment = nextPerf &&
-            viewMode === 'standard' &&
-            (nextPerf.isLyricalFragment || nextPerf.isMusicalFragment) &&
-            !perfToGroupMap.get(nextPerf.id); // Not in a group
+        const nextVisiblePerf = findNextVisiblePerformance(index, performances, viewMode, perfToGroupMap);
 
         let separator = '';
-        if (!isLast && !isLastInGroup) {
-            if (nextIsHiddenFragment) {
-                separator = ''; // No separator when next song is hidden
-            } else if (perf.seguesInto) {
-                separator = ' > ';
-            } else if (perf.isTruncatedEnd || nextPerf?.isTruncatedStart) {
-                separator = ' ';
+        if (!isLast && !isLastInGroup && nextVisiblePerf) {
+            if (nextVisiblePerf.seguesInto) {
+                separator = '>';
+            } else if (perf.isTruncatedEnd || nextVisiblePerf.isTruncatedStart) {
+                separator = '';
             } else {
-                separator = ', ';
+                separator = ',';
             }
         }
 
@@ -265,7 +275,9 @@ const Setlist: React.FC<SetlistProps> = ({
                             <sup key={n} className="text-xs">[{n}]</sup>
                         ))}
                     </span>
+                    {separator === '>' && ' '}
                     {separator}
+                    {separator && ' '}
                 </span>
                 {' '}
             </React.Fragment>
@@ -283,7 +295,7 @@ const Setlist: React.FC<SetlistProps> = ({
 
         while (i < performances.length) {
             const perf = performances[i];
-            const groupId = perfToGroupMap.get(perf.id);
+            const groupId = perfToGroupMap.get(String(perf.id));
             const group = setGroups.find(g => g.id === groupId);
 
             // Check if this is the first performance in a group
@@ -297,7 +309,13 @@ const Setlist: React.FC<SetlistProps> = ({
                 result.push(
                     <React.Fragment key={group.id}>
                         {renderGroup(group, isLastGroup)}
-                        {!isLastGroup && (lastPerfInGroup.seguesInto ? ' > ' : ', ')}
+                        {!isLastGroup && (
+                            <>
+                                {lastPerfInGroup.seguesInto && ' '}
+                                {lastPerfInGroup.seguesInto ? '>' : ','}
+                                {' '}
+                            </>
+                        )}
                     </React.Fragment>
                 );
                 i += group.performances.length;
@@ -329,7 +347,21 @@ const Setlist: React.FC<SetlistProps> = ({
                         key={set.id}
                     >
                         <div className="set-label md:w-[110px] md:text-right font-semibold">
-                            {set.setType?.displayName}
+                            {(() => {
+                                const encoreTypeSets = sets.filter((s: any) =>
+                                    s.setType?.displayName.toLowerCase().includes('encore')
+                                );
+                                const hasMultipleEncores = encoreTypeSets.length > 1;
+                                const label = set.setType?.displayName || '';
+                                if (
+                                    hasMultipleEncores &&
+                                    label.toLowerCase().includes('encore') &&
+                                    !/\d$/.test(label.trim())
+                                ) {
+                                    return `${label} ${encoreTypeSets.findIndex((s: any) => s.id === set.id) + 1}`;
+                                }
+                                return label;
+                            })()}
                             {set.isUncertain && (
                                 <span className="badge-uncertain-small" title="Set order uncertain">
                                     ?
