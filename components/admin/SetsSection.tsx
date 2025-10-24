@@ -565,6 +565,7 @@ function SortablePerformance({
                             ))}
                         </div>
                     )}
+
                 </div>
                 <div className="flex gap-2 flex-shrink-0">
                     <button className="btn btn-secondary btn-small" onClick={() => onEdit(setId, perf.id)} type="button">
@@ -629,6 +630,13 @@ function SortablePerformance({
                     Musical ‡
                 </label>
             </div>
+            {perf.leadVocals && (
+                <div className="flex gap-3 pl-6 mt-1 text-xs text-gray-600">
+                    <span className="inline-block px-2 py-1 text-xs font-medium bg-purple-50 text-purple-700 rounded whitespace-nowrap">
+                        Vocals: {perf.leadVocals.name}
+                    </span>
+                </div>
+            )}
         </div>
     );
 }

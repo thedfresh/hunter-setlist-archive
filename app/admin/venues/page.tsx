@@ -25,7 +25,7 @@ export default function VenuesAdminPage() {
     async function refreshVenues() {
         setLoading(true);
         try {
-            const res = await fetch("/api/venues", { cache: 'no-store' });
+            const res = await fetch("/api/venues?includePrivate=true", { cache: 'no-store' });
             const data = await res.json();
             setVenues(data.venues || []);
         } catch {

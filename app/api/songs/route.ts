@@ -44,7 +44,6 @@ export async function GET() {
         set: {
           event: getBrowsableEventsWhere(),
         },
-        isMedley: false,
       },
       select: {
         songId: true,

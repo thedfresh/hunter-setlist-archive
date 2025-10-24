@@ -36,8 +36,7 @@ export interface GetVenuesBrowseParams {
   hasShows?: boolean;
 }
 
-export async function getVenuesBrowse(/* params: GetVenuesBrowseParams */) {
-  // Future: add filters to where
+export async function getVenuesBrowse(options?: { includePrivate?: boolean }) {
   const venues = await prisma.venue.findMany({
     where: {},
     select: {
@@ -50,13 +49,24 @@ export async function getVenuesBrowse(/* params: GetVenuesBrowseParams */) {
       publicNotes: true,
       _count: {
         select: {
-          events: {
-            where: getCountableEventsWhere()
-          }
+          events: options?.includePrivate
+            ? true // Admin: count all events
+            : {
+              where: {
+                isPublic: true,
+                eventType: {
+                  name: { not: 'Errata' }
+                }
+              }
+            }
         },
       },
     },
     orderBy: { name: 'asc' },
   });
+  // For public pages, filter out venues with no qualifying events
+  if (!options?.includePrivate) {
+    return venues.filter(v => v._count.events > 0);
+  }
   return venues;
 }
