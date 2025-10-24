@@ -195,16 +195,20 @@ export default function ShowBanterForm({ eventId, banterId, onSuccess, onCancel 
                     </label>
                 </div>
             </div>
-            <div className="mb-4">
+            <div className="form-group">
                 <label className="form-label form-label-required">Banter Text</label>
                 <textarea
                     className="textarea"
                     rows={6}
                     value={banterText}
                     onChange={e => setBanterText(e.target.value)}
-                    disabled={loading}
+                    placeholder="Markdown supported: **bold**, *italic*, [links](url), etc."
                     required
+                    disabled={loading}
                 />
+                <div className="form-help">
+                    Supports markdown: **bold**, *italic*, [links](url), lists, etc.
+                </div>
             </div>
             <div className="mb-4">
                 <div className="checkbox-label">

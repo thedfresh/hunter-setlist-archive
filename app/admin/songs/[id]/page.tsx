@@ -49,6 +49,11 @@ export default function SongAdminDetailPage({ params }: { params: { id: string }
     const [allTags, setAllTags] = useState<any[]>([]);
     const [tagError, setTagError] = useState('');
 
+    // Navigation state
+    const [prevSong, setPrevSong] = useState<any>(null);
+    const [nextSong, setNextSong] = useState<any>(null);
+    const [navLoading, setNavLoading] = useState(true);
+
     useEffect(() => {
         setLoading(true);
 
@@ -110,6 +115,27 @@ export default function SongAdminDetailPage({ params }: { params: { id: string }
             setForm(f => ({ ...f, slug: generateSlugFromName(form.title) }));
         }
     }, [form.title]);
+
+    useEffect(() => {
+        if (songId) {
+            loadNavigation();
+        }
+    }, [songId]);
+
+    async function loadNavigation() {
+        setNavLoading(true);
+        try {
+            const res = await fetch(`/api/admin/songs/${songId}/navigation`);
+            if (!res.ok) throw new Error();
+            const data = await res.json();
+            setPrevSong(data.prevSong);
+            setNextSong(data.nextSong);
+        } catch (err) {
+            console.error("Failed to load navigation", err);
+        } finally {
+            setNavLoading(false);
+        }
+    }
 
     async function handleAddTag() {
         setTagError('');
@@ -341,16 +367,44 @@ export default function SongAdminDetailPage({ params }: { params: { id: string }
         }
     }
 
+    const handlePrevClick = () => {
+        if (prevSong?.id) {
+            router.push(`/admin/songs/${prevSong.id}`);
+        }
+    };
+
+    const handleNextClick = () => {
+        if (nextSong?.id) {
+            router.push(`/admin/songs/${nextSong.id}`);
+        }
+    };
+
     return (
         <div>
-            <Breadcrumbs items={[
-                { label: "Home", href: "/admin" },
-                { label: "Songs", href: "/admin/songs" },
-                { label: song?.title || "Song" }
-            ]} />
-
-            <div className="page-header mb-6">
-                <h1 className="page-title">{song?.title || "Song"}</h1>
+            <div className="flex justify-between items-center mb-6">
+                <Breadcrumbs items={[
+                    { label: "Home", href: "/admin" },
+                    { label: "Songs", href: "/admin/songs" },
+                    { label: song?.title || "Song" }
+                ]} />
+                {!navLoading && (
+                    <div className="flex gap-2">
+                        <button
+                            className="btn btn-secondary btn-small"
+                            onClick={handlePrevClick}
+                            disabled={!prevSong?.id}
+                        >
+                            Prev
+                        </button>
+                        <button
+                            className="btn btn-secondary btn-small"
+                            onClick={handleNextClick}
+                            disabled={!nextSong?.id}
+                        >
+                            Next
+                        </button>
+                    </div>
+                )}
             </div>
 
             {loading ? (

@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCountablePerformancesWhere, getBrowsableEventsWhere } from '@/lib/utils/queryFilters';
 import { formatEventDate } from '@/lib/formatters/dateFormatter';
-import { calculateSongPerformanceStats } from "@/lib/queries/songQueries";
 
 export const dynamic = 'force-dynamic';
 
