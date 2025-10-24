@@ -40,7 +40,7 @@ interface SetlistProps {
     visibilityData: {
         allPerformances: Performance[];
         allGroups: CollapsibleGroup[];
-        perfToGroupMap: Map<string, string>;
+        perfToGroupMap: Map<number, string>;
         visiblePerformances: Performance[];
         visibleNoteMap: Map<string, number>;
     };
@@ -209,14 +209,14 @@ const Setlist: React.FC<SetlistProps> = ({
 
 
     // Helper: Find next visible performance (skipping hidden fragments)
-    function findNextVisiblePerformance(index: number, performances: Performance[], viewMode: string, perfToGroupMap: Map<string, string>) {
+    function findNextVisiblePerformance(index: number, performances: Performance[], viewMode: string, perfToGroupMap: Map<number, string>) {
         for (let i = index + 1; i < performances.length; i++) {
             const perf = performances[i];
             // In standard mode, skip fragments not in a group
             if (
                 viewMode === 'standard' &&
                 (perf.isLyricalFragment || perf.isMusicalFragment) &&
-                !perfToGroupMap.get(String(perf.id))
+                !perfToGroupMap.get(perf.id)
             ) {
                 continue;
             }
@@ -295,7 +295,7 @@ const Setlist: React.FC<SetlistProps> = ({
 
         while (i < performances.length) {
             const perf = performances[i];
-            const groupId = perfToGroupMap.get(String(perf.id));
+            const groupId = perfToGroupMap.get(perf.id);
             const group = setGroups.find(g => g.id === groupId);
 
             // Check if this is the first performance in a group
