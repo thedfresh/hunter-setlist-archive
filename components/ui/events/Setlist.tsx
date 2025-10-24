@@ -175,7 +175,7 @@ const Setlist: React.FC<SetlistProps> = ({
 
         if (viewMode === 'complete') {
             return group.performances.map((perf, idx) =>
-                renderSong(perf, idx, group.performances, null, idx === group.performances.length - 1 && isLastInSet)
+                renderSong(perf, idx, group.performances, null, idx === group.performances.length - 1)
             );
         }
 
@@ -192,7 +192,7 @@ const Setlist: React.FC<SetlistProps> = ({
                     )}
                     <span className={isExpanded ? 'expanded-content' : 'collapsed-content'}>
                         {group.performances.map((perf, idx) =>
-                            renderSong(perf, idx, group.performances, group.id, idx === group.performances.length - 1 && isLastInSet)
+                            renderSong(perf, idx, group.performances, group.id, idx === group.performances.length - 1)
                         )}
                     </span>
                 </span>
@@ -249,7 +249,7 @@ const Setlist: React.FC<SetlistProps> = ({
 
         let separator = '';
         if (!isLast && !isLastInGroup && nextVisiblePerf) {
-            if (nextVisiblePerf.seguesInto) {
+            if (perf.seguesInto) {
                 separator = '>';
             } else if (perf.isTruncatedEnd || nextVisiblePerf.isTruncatedStart) {
                 separator = '';
@@ -279,7 +279,7 @@ const Setlist: React.FC<SetlistProps> = ({
                     {separator}
                     {separator && ' '}
                 </span>
-                {' '}
+                {!isLastInGroup && ' '}
             </React.Fragment>
         );
     }
