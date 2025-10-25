@@ -116,7 +116,7 @@ export default function CreateEventForm({ onSuccess, onCancel }: Props) {
 
     async function refreshVenues() {
         try {
-            const res = await fetch("/api/venues");
+            const res = await fetch("/api/venues?includePrivate=true");
             const data = await res.json();
             setVenues(data.venues || []);
         } catch {
