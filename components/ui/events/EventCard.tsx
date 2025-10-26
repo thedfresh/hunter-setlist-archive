@@ -1,9 +1,9 @@
 'use client';
 import React from 'react';
 import Link from 'next/link';
-import { X, Mic, Music, Video, ChevronLeft, ChevronRight } from 'lucide-react';
+import { X, Mic, Music, Video, ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
 import { getPerformerCardClass } from '@/lib/utils/performerStyles';
-import { getBandConfig, getPerformerBorderClass, getPerformerLightBgClass } from '@/lib/config/bands';
+import { getBandConfig, getPerformerBorderClass, getPerformerHeaderBorderClass, getPerformerLightBgClass, getPerformerGhostButtonClass } from '@/lib/config/bands';
 import { formatEventDate } from '@/lib/formatters/dateFormatter';
 import { formatVenue } from '@/lib/formatters/venueFormatter';
 import Setlist from './Setlist';
@@ -61,7 +61,9 @@ const EventCard: React.FC<EventCardProps> = ({
     const bandConfig = getBandConfig(performerName);
     const textClass = bandConfig.textClass;
     const borderClass = getPerformerBorderClass(event);
+    const headerBorderClass = getPerformerHeaderBorderClass(event);
     const lightBgClass = getPerformerLightBgClass(event);
+    const ghostButtonClass = getPerformerGhostButtonClass(event);
 
     // Calculate recordings for badges
     const lmaRecordings = event.recordings?.filter((r: any) => r.lmaIdentifier) || [];
@@ -130,13 +132,13 @@ const EventCard: React.FC<EventCardProps> = ({
     return (
         <>
             <div className={`bg-white rounded-lg shadow-sm overflow-hidden ${borderClass}`}>
-                {/* Header - colored background */}
-                <div className={`${performerCardClass} px-5 py-4 border-b border-white/30`}>
-                    <div className="flex justify-between items-center mb-2">
+                {/* Header - colored background with band-colored border */}
+                <div className={`${performerCardClass} px-5 py-4 border-b ${headerBorderClass}`}>
+                    <div className="flex justify-between items-start mb-2">
                         <div className={`text-sm font-semibold ${textClass}`}>
                             {performerName}
                         </div>
-                        <div className="flex gap-2">
+                        <div className="flex gap-2 items-center">
                             {showPrevNext ? (
                                 <>
                                     <Link href={prevEvent?.slug ? `/event/${prevEvent.slug}` : '#'}>
@@ -157,20 +159,30 @@ const EventCard: React.FC<EventCardProps> = ({
                             )}
                         </div>
                     </div>
-                    <div className="flex items-baseline gap-2.5">
-                        <span className="text-lg font-semibold text-gray-900">
-                            {event.displayDate || formatEventDate(event)}
-                            {(!event.year || !event.month || !event.day || event.dateUncertain) && (
-                                <span className="badge-uncertain-small ml-1" title="Date uncertain">?</span>
-                            )}
-                        </span>
-                        <span className="text-gray-400">|</span>
-                        <span className="text-base text-gray-700">
-                            {formatVenue(event.venue)}
-                            {(event.venue?.name?.includes('Unknown') || event.venue?.isUncertain || event.venueUncertain) && (
-                                <span className="badge-uncertain-small ml-1" title="Venue uncertain">?</span>
-                            )}
-                        </span>
+                    <div className="flex items-baseline gap-2.5 justify-between">
+                        <div className="flex items-baseline gap-2.5">
+                            <span className="text-lg font-semibold text-gray-900">
+                                {event.displayDate || formatEventDate(event)}
+                                {(!event.year || !event.month || !event.day || event.dateUncertain) && (
+                                    <span className="badge-uncertain-small ml-1" title="Date uncertain">?</span>
+                                )}
+                            </span>
+                            <span className="text-gray-400">|</span>
+                            <span className="text-base text-gray-700">
+                                {formatVenue(event.venue)}
+                                {(event.venue?.name?.includes('Unknown') || event.venue?.isUncertain || event.venueUncertain) && (
+                                    <span className="badge-uncertain-small ml-1" title="Venue uncertain">?</span>
+                                )}
+                            </span>
+                        </div>
+                        {/* Detail link for browse view - right side of date/venue row */}
+                        {!showPrevNext && (
+                            <Link href={`/event/${event.slug}`}>
+                                <button className={`btn ${ghostButtonClass} btn-small flex items-center gap-1`}>
+                                    Detail <ArrowRight size={12} />
+                                </button>
+                            </Link>
+                        )}
                     </div>
                 </div>
 

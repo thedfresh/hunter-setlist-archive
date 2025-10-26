@@ -336,43 +336,60 @@ const Setlist: React.FC<SetlistProps> = ({
         return result;
     }
 
+    // Count encore sets
+    const encoreSets = sets.filter((s: any) =>
+        s.setType?.displayName.toLowerCase().includes('encore')
+    );
+    const hasMultipleEncores = encoreSets.length > 1;
+
     return (
         <div className="text-sm leading-loose text-gray-800">
             {sets.map((set, i) => {
                 const perfs = set.performances.filter((perf) => perf.song);
+                const isEncore = set.setType?.displayName.toLowerCase().includes('encore');
+                
+                // Generate encore label (E:, E1:, E2:)
+                let encoreLabel = '';
+                if (isEncore) {
+                    if (hasMultipleEncores) {
+                        const encoreNum = encoreSets.findIndex((s: any) => s.id === set.id) + 1;
+                        encoreLabel = `E${encoreNum}:`;
+                    } else {
+                        encoreLabel = 'E:';
+                    }
+                }
 
                 return (
                     <section
-                        className={`set-section flex flex-col md:flex-row gap-1 md:gap-3${i === 0 ? '' : ' mt-3'}`}
+                        className={`set-section${i === 0 ? '' : ' mt-4'}`}
                         key={set.id}
                     >
-                        <div className="set-label md:w-[110px] md:text-right font-semibold">
-                            {(() => {
-                                const encoreTypeSets = sets.filter((s: any) =>
-                                    s.setType?.displayName.toLowerCase().includes('encore')
-                                );
-                                const hasMultipleEncores = encoreTypeSets.length > 1;
-                                const label = set.setType?.displayName || '';
-                                if (
-                                    hasMultipleEncores &&
-                                    label.toLowerCase().includes('encore') &&
-                                    !/\d$/.test(label.trim())
-                                ) {
-                                    return `${label} ${encoreTypeSets.findIndex((s: any) => s.id === set.id) + 1}`;
-                                }
-                                return label;
-                            })()}
-                            {set.isUncertain && (
-                                <span className="badge-uncertain-small" title="Set order uncertain">
-                                    ?
+                        {/* Regular sets: header on own line */}
+                        {!isEncore && (
+                            <div className="font-semibold text-gray-900 mb-2">
+                                {set.setType?.displayName || `Set ${i + 1}`}
+                                {set.isUncertain && (
+                                    <span className="badge-uncertain-small ml-1" title="Set order uncertain">
+                                        ?
+                                    </span>
+                                )}
+                            </div>
+                        )}
+                        
+                        {/* Set notes */}
+                        {set.publicNotes && (
+                            <div className="set-note text-xs text-gray-600 italic mb-2">
+                                {set.publicNotes}
+                            </div>
+                        )}
+                        
+                        {/* Songs */}
+                        <div className="setlist">
+                            {/* Encore: inline label */}
+                            {isEncore && (
+                                <span className="font-semibold text-gray-900 mr-1">
+                                    {encoreLabel}
                                 </span>
-                            )}
-                        </div>
-                        <div className="setlist flex-1">
-                            {set.publicNotes && (
-                                <div className="set-note text-xs text-gray-600 italic mb-2">
-                                    {set.publicNotes}
-                                </div>
                             )}
                             {renderPerformances(perfs, i)}
                         </div>

@@ -184,22 +184,21 @@ function EventBrowsePageContent() {
             </div>
           )}
 
-          {/* Cards - Single column, max-width centered */}
-          <div className="max-w-4xl mx-auto flex flex-col gap-5">
+          {/* Cards - Full width */}
+          <div className="flex flex-col gap-5">
             {typedEvents.map(event => (
-              <Link key={event.id} href={`/event/${event.slug}`}>
-                <EventCard
-                  event={event}
-                  showPrevNext={false}
-                  showViewToggle={showSetlists}
-                  showPerformanceNotes={viewMode === 'complete'}
-                  showStageTalk={false}
-                  showRecordings={false}
-                  showContributors={false}
-                  viewMode={viewMode}
-                  onViewModeChange={handleViewModeChange}
-                />
-              </Link>
+              <EventCard
+                key={event.id}
+                event={event}
+                showPrevNext={false}
+                showViewToggle={showSetlists}
+                showPerformanceNotes={viewMode === 'complete'}
+                showStageTalk={false}
+                showRecordings={false}
+                showContributors={false}
+                viewMode={viewMode}
+                onViewModeChange={handleViewModeChange}
+              />
             ))}
           </div>
         </div>
