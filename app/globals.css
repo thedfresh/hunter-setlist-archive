@@ -480,25 +480,81 @@
     --border-secondary: var(--color-guest-dark);
   }
 
-  /* Performer text colors */
+  /* Light band backgrounds for bottom sections */
+  .bg-solo-light {
+    background-color: rgba(245, 241, 232, 0.3);
+  }
+  
+  .bg-roadhog-light {
+    background-color: rgba(254, 245, 231, 0.3);
+  }
+  
+  .bg-comfort-light {
+    background-color: rgba(239, 245, 232, 0.3);
+  }
+  
+  .bg-dinosaurs-light {
+    background-color: rgba(232, 244, 255, 0.3);
+  }
+  
+  .bg-special-light {
+    background-color: rgba(240, 232, 240, 0.3);
+  }
+  
+  .bg-guest-light {
+    background-color: rgba(248, 250, 252, 0.3);
+  }
+  
+  /* Event card borders - thick top, thin sides */
+  .event-border-solo {
+    border: 1px solid var(--color-solo);
+    border-top-width: 6px;
+  }
+  
+  .event-border-roadhog {
+    border: 1px solid var(--color-roadhog);
+    border-top-width: 6px;
+  }
+  
+  .event-border-comfort {
+    border: 1px solid var(--color-comfort);
+    border-top-width: 6px;
+  }
+  
+  .event-border-dinosaurs {
+    border: 1px solid var(--color-dinosaurs);
+    border-top-width: 6px;
+  }
+  
+  .event-border-special {
+    border: 1px solid var(--color-special);
+    border-top-width: 6px;
+  }
+  
+  .event-border-guest {
+    border: 1px solid var(--color-guest);
+    border-top-width: 6px;
+  }
+
+  /* Performer text colors - darker for better contrast on colored backgrounds */
   .text-hunter-solo-primary {
-    color: var(--color-solo);
+    color: var(--color-solo-dark);
   }
 
   .text-hunter-roadhog-primary {
-    color: var(--color-roadhog);
+    color: var(--color-roadhog-dark);
   }
 
   .text-hunter-comfort-primary {
-    color: var(--color-comfort);
+    color: var(--color-comfort-dark);
   }
 
   .text-hunter-dinosaurs-primary {
-    color: var(--color-dinosaurs);
+    color: var(--color-dinosaurs-dark);
   }
 
   .text-hunter-special-primary {
-    color: var(--color-special);
+    color: var(--color-special-dark);
   }
 
   /* Card content sections */
@@ -1664,5 +1720,36 @@
     color: #1e40af;
     border: 1px solid #3b82f6;
     margin-left: 6px;
+  }
+  
+  /* Event card borders - thick top, thin sides */
+  .border-solo {
+    border: 1px solid var(--color-solo);
+    border-top-width: 6px;
+  }
+  
+  .border-roadhog {
+    border: 1px solid var(--color-roadhog);
+    border-top-width: 6px;
+  }
+  
+  .border-comfort {
+    border: 1px solid var(--color-comfort);
+    border-top-width: 6px;
+  }
+  
+  .border-dinosaurs {
+    border: 1px solid var(--color-dinosaurs);
+    border-top-width: 6px;
+  }
+  
+  .border-special {
+    border: 1px solid var(--color-special);
+    border-top-width: 6px;
+  }
+  
+  .border-guest {
+    border: 1px solid var(--color-guest);
+    border-top-width: 6px;
   }
 }

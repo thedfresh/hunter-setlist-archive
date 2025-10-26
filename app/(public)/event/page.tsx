@@ -5,8 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import { useEffect, useState, Suspense } from 'react';
 import { BandFilterChips } from './BandFilterChips';
 import Link from 'next/link';
-import Pagination from '@/components/ui/Pagination'
-import EventBrowseCard from '@/components/ui/events/EventBrowseCard';
+import EventCard from '@/components/ui/events/EventCard';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 
 export const dynamic = 'force-dynamic';
@@ -15,18 +14,37 @@ function EventBrowsePageContent() {
   const searchParamsHook = useSearchParams();
   const [results, setResults] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [showSetlists, setShowSetlists] = useState(false);
+  const [showSetlists, setShowSetlists] = useState(true);
+  const [viewMode, setViewMode] = useState<'standard' | 'complete'>('standard');
+  const [isHydrated, setIsHydrated] = useState(false);
 
-  // Initialize showSetlists from localStorage
+  // Initialize from localStorage after hydration
   useEffect(() => {
-    const stored = localStorage.getItem('hunterArchive_browseShowSetlists');
-    setShowSetlists(stored === 'true');
+    setIsHydrated(true);
+    const savedSetlists = localStorage.getItem('hunterArchive_browseShowSetlists');
+    const savedViewMode = localStorage.getItem('setlist-view-mode');
+    
+    if (savedSetlists !== null) {
+      setShowSetlists(savedSetlists === 'true');
+    }
+    if (savedViewMode === 'standard' || savedViewMode === 'complete') {
+      setViewMode(savedViewMode);
+    }
   }, []);
 
   const toggleSetlists = () => {
     const newValue = !showSetlists;
     setShowSetlists(newValue);
-    localStorage.setItem('hunterArchive_browseShowSetlists', newValue.toString());
+    if (isHydrated) {
+      localStorage.setItem('hunterArchive_browseShowSetlists', newValue.toString());
+    }
+  };
+
+  const handleViewModeChange = (mode: 'standard' | 'complete') => {
+    setViewMode(mode);
+    if (isHydrated) {
+      localStorage.setItem('setlist-view-mode', mode);
+    }
   };
 
   useEffect(() => {
@@ -64,10 +82,7 @@ function EventBrowsePageContent() {
 
   const { events, bandCounts, currentPage, totalPages, selectedTypes, search, searchType } = results;
   const searchParamsObj = Object.fromEntries(searchParamsHook.entries());
-
-  // Explicitly type events array
   const typedEvents = events as import('@/lib/types').Event[];
-
   const hasActiveSearch = !!(search && searchType);
 
   function getSearchLabel(type: string) {
@@ -93,39 +108,96 @@ function EventBrowsePageContent() {
           <BandFilterChips bandCounts={bandCounts} selectedKeys={selectedTypes} />
         </div>
         <div className="flex-1">
-          <div className="page-header">
+          {/* Page Header with Controls */}
+          <div className="flex justify-between items-center mb-6 pb-4 border-b-2 border-gray-200">
             <div className="page-title">
               Browse Events <span className="text-gray-500 font-normal text-lg">({events.length})</span>
+            </div>
+            
+            <div className="flex gap-4 items-center">
+              {/* Setlist toggle */}
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-600 font-medium">Setlists:</span>
+                <div className="inline-flex bg-gray-100 rounded-md p-0.5">
+                  <button
+                    className={`px-3 py-1.5 text-xs font-medium rounded transition-all ${
+                      showSetlists
+                        ? 'bg-white text-gray-900 shadow-sm'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                    onClick={() => setShowSetlists(true)}
+                  >
+                    Show
+                  </button>
+                  <button
+                    className={`px-3 py-1.5 text-xs font-medium rounded transition-all ${
+                      !showSetlists
+                        ? 'bg-white text-gray-900 shadow-sm'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                    onClick={() => setShowSetlists(false)}
+                  >
+                    Hide
+                  </button>
+                </div>
+              </div>
+              
+              {/* View mode toggle */}
+              {showSetlists && (
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-600 font-medium">View:</span>
+                  <div className="inline-flex bg-gray-100 rounded-md p-0.5">
+                    <button
+                      className={`px-3 py-1.5 text-xs font-medium rounded transition-all ${
+                        viewMode === 'standard'
+                          ? 'bg-white text-gray-900 shadow-sm'
+                          : 'text-gray-600 hover:text-gray-900'
+                      }`}
+                      onClick={() => handleViewModeChange('standard')}
+                    >
+                      Compact
+                    </button>
+                    <button
+                      className={`px-3 py-1.5 text-xs font-medium rounded transition-all ${
+                        viewMode === 'complete'
+                          ? 'bg-white text-gray-900 shadow-sm'
+                          : 'text-gray-600 hover:text-gray-900'
+                      }`}
+                      onClick={() => handleViewModeChange('complete')}
+                    >
+                      Complete
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
           {hasActiveSearch && (
             <div className="mb-4 flex items-center gap-3 bg-blue-50 border border-blue-200 rounded px-4 py-2">
-              <span className="text-blue-700 font-medium">Showing results for: <span className="font-bold">{getSearchLabel(searchType)}: {search}</span></span>
-              <Link href={getClearSearchUrl(searchParamsObj)} className="block transition-transform hover:-translate-y-1">Clear</Link>
+              <span className="text-blue-700 font-medium">
+                Showing results for: <span className="font-bold">{getSearchLabel(searchType)}: {search}</span>
+              </span>
+              <Link href={getClearSearchUrl(searchParamsObj)} className="block transition-transform hover:-translate-y-1">
+                Clear
+              </Link>
             </div>
           )}
 
-          {/* Filter section with toggle button */}
-          <div className="mb-6 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              {/* Add any existing filter chips here if needed */}
-            </div>
-            <button
-              onClick={toggleSetlists}
-              className="btn btn-secondary btn-small"
-            >
-              {showSetlists ? 'Hide Setlists' : 'Show Setlists'}
-            </button>
-          </div>
-
-          <div className="grid grid-cols-1 gap-6">
+          {/* Cards - Single column, max-width centered */}
+          <div className="max-w-4xl mx-auto flex flex-col gap-5">
             {typedEvents.map(event => (
               <Link key={event.id} href={`/event/${event.slug}`}>
-                <EventBrowseCard
-                  key={event.id}
+                <EventCard
                   event={event}
-                  showSetlist={showSetlists}
+                  showPrevNext={false}
+                  showViewToggle={showSetlists}
+                  showPerformanceNotes={viewMode === 'complete'}
+                  showStageTalk={false}
+                  showRecordings={false}
+                  showContributors={false}
+                  viewMode={viewMode}
+                  onViewModeChange={handleViewModeChange}
                 />
               </Link>
             ))}

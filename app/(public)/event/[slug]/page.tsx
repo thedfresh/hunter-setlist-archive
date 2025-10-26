@@ -1,13 +1,14 @@
+import React from 'react';
 import EventCard from '@/components/ui/events/EventCard';
 import { getEventBySlugWithNavigation } from '@/lib/queries/eventDetailQueries';
 import { notFound } from 'next/navigation';
 import { PageContainer } from '@/components/ui/PageContainer';
 import { formatEventDate } from '@/lib/formatters/dateFormatter';
 import { formatVenue } from '@/lib/formatters/venueFormatter';
-import { getEventBySlug } from '@/lib/queries/eventDetailQueries';
+import EventDetailClient from './EventDetailClient';
 
 export async function generateMetadata({ params }: { params: { slug: string } }) {
-  const event = await getEventBySlug(params.slug);
+  const { event } = await getEventBySlugWithNavigation(params.slug);
 
   if (!event) {
     return {
@@ -23,25 +24,23 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 
   return {
     title,
-    description: `Setlist and recordings from ${performer}${venue ? ` at ${venue}` : ''}`,
+    description: `Setlist and recordings from ${performer}${venue ? ` at ${venue.name}` : ''}`,
   };
 }
 
 export default async function EventDetailPage({ params }: { params: { slug: string } }) {
   const { event, prevEvent, nextEvent } = await getEventBySlugWithNavigation(params.slug);
-  if (!event) return notFound();
+  
+  if (!event) {
+    return notFound();
+  }
+
   return (
     <PageContainer>
-      <EventCard
+      <EventDetailClient
         event={event}
-        variant="detail"
         prevEvent={prevEvent}
         nextEvent={nextEvent}
-        showPrevNext={true}
-        showPerformanceNotes={true}
-        showStageTalk={true}
-        showRecordings={true}
-        showContributors={true}
       />
     </PageContainer>
   );
