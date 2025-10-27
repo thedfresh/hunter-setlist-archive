@@ -100,13 +100,13 @@
     @apply flex items-center gap-4 md:gap-10 flex-1;
     @apply md:ml-[180px] max-w-6xl;
     /* CHANGED: Stack vertically on mobile, horizontal on desktop */
-    @apply flex-col md:flex-row md:justify-between;
+  @apply flex-col xl:flex-row xl:justify-between;
   }
 
   .main-nav {
     @apply flex items-center flex-1 overflow-x-auto;
     /* CHANGED: Tighter spacing on mobile */
-    @apply gap-3 md:gap-8;
+  @apply gap-3 xl:gap-8;
     /* ADD: Show scrollbar might help */
     @apply pb-1;
   }
@@ -237,64 +237,64 @@
     @apply hover:bg-gray-100 hover:text-gray-900;
     @apply active:bg-gray-200;
   }
-  
+
   /* Band-colored ghost buttons for browse cards */
   .btn-ghost-solo {
     background-color: rgba(245, 241, 232, 0.5);
     border: 1px solid var(--color-solo);
     color: var(--color-solo-dark);
   }
-  
+
   .btn-ghost-solo:hover {
     background-color: var(--color-solo-bg);
   }
-  
+
   .btn-ghost-roadhog {
     background-color: rgba(254, 245, 231, 0.5);
     border: 1px solid var(--color-roadhog);
     color: var(--color-roadhog-dark);
   }
-  
+
   .btn-ghost-roadhog:hover {
     background-color: var(--color-roadhog-bg);
   }
-  
+
   .btn-ghost-comfort {
     background-color: rgba(239, 245, 232, 0.5);
     border: 1px solid var(--color-comfort);
     color: var(--color-comfort-dark);
   }
-  
+
   .btn-ghost-comfort:hover {
     background-color: var(--color-comfort-bg);
   }
-  
+
   .btn-ghost-dinosaurs {
     background-color: rgba(232, 244, 255, 0.5);
     border: 1px solid var(--color-dinosaurs);
     color: var(--color-dinosaurs-dark);
   }
-  
+
   .btn-ghost-dinosaurs:hover {
     background-color: var(--color-dinosaurs-bg);
   }
-  
+
   .btn-ghost-special {
     background-color: rgba(240, 232, 240, 0.5);
     border: 1px solid var(--color-special);
     color: var(--color-special-dark);
   }
-  
+
   .btn-ghost-special:hover {
     background-color: var(--color-special-bg);
   }
-  
+
   .btn-ghost-guest {
     background-color: rgba(248, 250, 252, 0.5);
     border: 1px solid var(--color-guest);
     color: var(--color-guest-dark);
   }
-  
+
   .btn-ghost-guest:hover {
     background-color: var(--color-guest-bg);
   }
@@ -546,79 +546,79 @@
   .bg-solo-light {
     background-color: rgba(245, 241, 232, 0.3);
   }
-  
+
   .bg-roadhog-light {
     background-color: rgba(254, 245, 231, 0.3);
   }
-  
+
   .bg-comfort-light {
     background-color: rgba(239, 245, 232, 0.3);
   }
-  
+
   .bg-dinosaurs-light {
     background-color: rgba(232, 244, 255, 0.3);
   }
-  
+
   .bg-special-light {
     background-color: rgba(240, 232, 240, 0.3);
   }
-  
+
   .bg-guest-light {
     background-color: rgba(248, 250, 252, 0.3);
   }
-  
+
   /* Event card borders - thick top, thin sides */
   .event-border-solo {
     border: 1px solid var(--color-solo);
     border-top-width: 6px;
   }
-  
+
   .event-border-roadhog {
     border: 1px solid var(--color-roadhog);
     border-top-width: 6px;
   }
-  
+
   .event-border-comfort {
     border: 1px solid var(--color-comfort);
     border-top-width: 6px;
   }
-  
+
   .event-border-dinosaurs {
     border: 1px solid var(--color-dinosaurs);
     border-top-width: 6px;
   }
-  
+
   .event-border-special {
     border: 1px solid var(--color-special);
     border-top-width: 6px;
   }
-  
+
   .event-border-guest {
     border: 1px solid var(--color-guest);
     border-top-width: 6px;
   }
-  
+
   /* Header bottom borders - match card border color */
   .header-border-solo {
     border-bottom-color: var(--color-solo);
   }
-  
+
   .header-border-roadhog {
     border-bottom-color: var(--color-roadhog);
   }
-  
+
   .header-border-comfort {
     border-bottom-color: var(--color-comfort);
   }
-  
+
   .header-border-dinosaurs {
     border-bottom-color: var(--color-dinosaurs);
   }
-  
+
   .header-border-special {
     border-bottom-color: var(--color-special);
   }
-  
+
   .header-border-guest {
     border-bottom-color: var(--color-guest);
   }
@@ -1353,9 +1353,7 @@
     SETLIST DISPLAY
     ============================================ */
 
-  .set-section {
-    @apply mt-5;
-  }
+  .set-section {}
 
   .set-label {
     @apply text-sm font-semibold text-gray-900 mb-2;
@@ -1369,10 +1367,6 @@
     @apply text-sm leading-relaxed text-gray-800;
   }
 
-  /* Notes sections */
-  .notes-section {
-    @apply mt-3;
-  }
 
   .notes-title {
     @apply text-sm font-semibold text-gray-900 mb-3;
@@ -1808,33 +1802,33 @@
     border: 1px solid #3b82f6;
     margin-left: 6px;
   }
-  
+
   /* Event card borders - thick top, thin sides */
   .border-solo {
     border: 1px solid var(--color-solo);
     border-top-width: 6px;
   }
-  
+
   .border-roadhog {
     border: 1px solid var(--color-roadhog);
     border-top-width: 6px;
   }
-  
+
   .border-comfort {
     border: 1px solid var(--color-comfort);
     border-top-width: 6px;
   }
-  
+
   .border-dinosaurs {
     border: 1px solid var(--color-dinosaurs);
     border-top-width: 6px;
   }
-  
+
   .border-special {
     border: 1px solid var(--color-special);
     border-top-width: 6px;
   }
-  
+
   .border-guest {
     border: 1px solid var(--color-guest);
     border-top-width: 6px;

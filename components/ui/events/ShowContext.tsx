@@ -6,6 +6,7 @@ interface ShowContextProps {
     showSetBandContext?: boolean;
     showSetMusicians?: boolean;
     showPublicNotes?: boolean;
+    hasGuestLeadVocals?: boolean;
 }
 
 
@@ -15,13 +16,13 @@ const ShowContext: React.FC<ShowContextProps> = ({
     showSetBandContext = true,
     showSetMusicians = true,
     showPublicNotes = true,
+    hasGuestLeadVocals = false,
 }) => {
     const hasEventMusicians = showEventMusicians && event.eventMusicians && event.eventMusicians.length > 0;
     const hasBandContext = showSetBandContext && event.sets && event.sets.some((set: any) => set.bandId && set.bandId !== event.primaryBandId && set.band);
     const hasSetMusicians = showSetMusicians && event.sets && event.sets.some((set: any) => set.setMusicians && set.setMusicians.length > 0);
     const hasPublicNotes = showPublicNotes && !!event.publicNotes;
-    const showNotesSection = hasEventMusicians || hasBandContext || hasSetMusicians || hasPublicNotes;
-
+    const showNotesSection = hasEventMusicians || hasBandContext || hasSetMusicians || hasPublicNotes || hasGuestLeadVocals;
     if (!showNotesSection) return null;
 
     return (

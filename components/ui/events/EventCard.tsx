@@ -109,7 +109,9 @@ const EventCard: React.FC<EventCardProps> = ({
     const hasShowContext = event.eventMusicians?.length > 0 ||
         event.sets?.some((s: any) => s.bandId && s.bandId !== event.primaryBandId && s.band) ||
         event.sets?.some((s: any) => s.setMusicians && s.setMusicians.length > 0) ||
+        visibilityData.hasGuestLeadVocals ||
         event.publicNotes;
+
 
     // Check if there's anything that changes between Compact and Complete modes
     const hasToggleableContent =
@@ -123,7 +125,8 @@ const EventCard: React.FC<EventCardProps> = ({
         );
 
     // Only show notes border if there are actual notes to display
-    const hasNotesContent = hasShowContext || (showPerformanceNotes && hasToggleableContent);
+    const hasActualNotesToDisplay = hasShowContext ||
+        (showPerformanceNotes && hasToggleableContent && viewMode === 'complete');
 
     const hasBottomSection = (showRecordings && event.recordings?.length > 0) ||
         (showContributors && event.eventContributors?.length > 0) ||
@@ -138,8 +141,25 @@ const EventCard: React.FC<EventCardProps> = ({
                 {showPrevNext ? (
                     <div className={`${performerCardClass} px-5 py-4 border-b ${headerBorderClass}`}>
                         <div className="flex justify-between items-start mb-2">
-                            <div className={`text-sm font-semibold ${textClass}`}>
-                                {performerName}
+                            <div className="flex gap-2 items-center">
+                                <span className={`text-sm font-semibold ${textClass}`}>
+                                    {performerName}
+                                </span>
+                                {event.eventType?.name === 'Errata' && (
+                                    <span className="badge-errata">
+                                        <X size={10} className="inline" /> ERRATA
+                                    </span>
+                                )}
+                                {event.eventType?.name === 'Studio Session' && (
+                                    <span className="badge-studio">
+                                        <Mic size={10} className="inline" /> Studio
+                                    </span>
+                                )}
+                                {event.eventType?.name === 'Interview' && (
+                                    <span className="badge-interview">
+                                        <Mic size={10} className="inline" /> Interview
+                                    </span>
+                                )}
                             </div>
                             <div className="flex gap-2 items-center">
                                 <Link href={prevEvent?.slug ? `/event/${prevEvent.slug}` : '#'}>
@@ -181,14 +201,14 @@ const EventCard: React.FC<EventCardProps> = ({
                                     {badges}
                                 </div>
                             </div>
-                            <div className="flex items-baseline gap-2.5">
+                            <div className="flex flex-col sm:flex-row sm:items-baseline sm:gap-2.5">
                                 <span className="text-lg font-semibold text-gray-900">
                                     {event.displayDate || formatEventDate(event)}
                                     {(!event.year || !event.month || !event.day || event.dateUncertain) && (
                                         <span className="badge-uncertain-small ml-1" title="Date uncertain">?</span>
                                     )}
                                 </span>
-                                <span className="text-gray-400">|</span>
+                                <span className="text-gray-400 hidden sm:inline">|</span>
                                 <span className="text-base text-gray-700">
                                     {formatVenue(event.venue)}
                                     {(event.venue?.name?.includes('Unknown') || event.venue?.isUncertain || event.venueUncertain) && (
@@ -201,10 +221,10 @@ const EventCard: React.FC<EventCardProps> = ({
                 )}
 
                 {/* Main Content - White background */}
-                <div className="px-6 py-5 bg-white">
+                <div className="px-5 py-4 bg-white">
                     {/* Billing + Toggle Row - only show toggle if there's toggleable content */}
                     {(event.billing || (showViewToggle && hasSets && hasToggleableContent)) && (
-                        <div className="flex justify-between items-center mb-4">
+                        <div className="flex justify-between items-center">
                             <div className="text-sm italic text-gray-600">
                                 {event.billing || ''}
                             </div>
@@ -235,32 +255,36 @@ const EventCard: React.FC<EventCardProps> = ({
 
                     {/* Setlist */}
                     {hasSets && (
-                        <div className="mb-5">
-                            <Setlist
-                                sets={event.sets}
-                                showFootnotes={true}
-                                showSongLinks={true}
-                                event={event}
-                                viewMode={viewMode}
-                                expandedGroups={expandedGroups}
-                                setExpandedGroups={setExpandedGroups}
-                                visibilityData={visibilityData}
-                            />
-                        </div>
+                        <Setlist
+                            sets={event.sets}
+                            showFootnotes={true}
+                            showSongLinks={true}
+                            event={event}
+                            viewMode={viewMode}
+                            expandedGroups={expandedGroups}
+                            setExpandedGroups={setExpandedGroups}
+                            visibilityData={visibilityData}
+                        />
                     )}
 
                     {/* No setlist message */}
                     {!hasSets && (
-                        <div className="text-sm text-gray-400 italic">No setlist available</div>
+                        <div className={`text-sm text-gray-400 italic ${event.billing ? 'mt-3' : ''}`}>
+                            No setlist available
+                        </div>
                     )}
 
                     {/* Notes section - only show border if has sets AND notes content exists */}
-                    {hasSets && hasNotesContent && (
-                        <div className="mt-6 pt-5 border-t border-gray-200">
+                    {hasSets && hasActualNotesToDisplay && (
+                        <div className="mt-4 pt-4 border-t border-gray-200">
                             {/* Show Context (event musicians, set context) */}
                             {hasShowContext && (
                                 <div className="mb-5">
-                                    <ShowContext event={event} showPublicNotes={true} />
+                                    <ShowContext
+                                        event={event}
+                                        showPublicNotes={true}
+                                        hasGuestLeadVocals={visibilityData.hasGuestLeadVocals}
+                                    />
                                 </div>
                             )}
 
@@ -279,9 +303,9 @@ const EventCard: React.FC<EventCardProps> = ({
 
             {/* Bottom Section - OUTSIDE main card, very light band-colored bg */}
             {hasBottomSection && (
-                <div className={`mt-6 p-6 border border-gray-200 rounded-lg ${lightBgClass}`}>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <div className="space-y-6">
+                <div className={`mt-6 p-4 border border-gray-200 rounded-lg ${lightBgClass}`}>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-4">
                             {showContributors && event.eventContributors && event.eventContributors.length > 0 && (
                                 <ContributorsSection
                                     contributors={event.eventContributors

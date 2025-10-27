@@ -158,8 +158,8 @@ function EventBrowsePageContent() {
               <ul className="text-sm text-gray-700 leading-relaxed space-y-2 list-disc pl-5 mt-3">
                 <li>Setlists between 1984-1993 are still being updated. Earlier and later setlists are mostly complete.</li>
                 <li>Use the search bar in the header to filter by date (YYYY-MM-DD, YYYY-MM or YYYY), band, guests or venue.</li>
-                <li>The default setlist view is Compact - fragmentary songs and notes hidden, medleys and suites collapsed. Toggle the Complete setting for the whole page or a specific show to see the full setlist with performance notes.</li>
-                <li>Click any event header to view all event info, including recordings, show notes, stage banter, etc. Details are still being added and primarily exist from 1976-1983 at present.</li>
+                <li>The default setlist view is Compact - fragmentary songs and notes hidden, medleys and suites collapsed. Toggle the Complete setting (for the whole page or a specific show) to see the full setlist with performance notes.</li>
+                <li>Click the event header to view all event info, including recordings, show notes, stage banter, etc. (Details are still being added and primarily exist from 1976-1983 at present.)</li>
               </ul>
             )}
           </div>

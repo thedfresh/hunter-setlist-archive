@@ -173,7 +173,7 @@ const SiteHeader = () => {
       <div className="nav-bar">
         <div className="nav-bar-content">
           {/* Mobile: Hamburger + Search in same row */}
-          <div className="md:hidden flex items-center gap-3 w-full">
+          <div className="xl:hidden flex items-center gap-3 w-full">
             {/* Hamburger button */}
             <button
               className="flex flex-col gap-1.5 p-2 flex-shrink-0"
@@ -242,7 +242,7 @@ const SiteHeader = () => {
           </div>
 
           {/* Desktop nav */}
-          <nav className="main-nav hidden md:flex">
+          <nav className="main-nav hidden xl:flex">
             <Link href="/event" className="nav-link">Shows</Link>
             <Link href="/song" className="nav-link">Songs</Link>
             <Link href="/venue" className="nav-link">Venues</Link>
@@ -259,7 +259,7 @@ const SiteHeader = () => {
           </nav>
 
           {/* Desktop search */}
-          <div className="relative w-full max-w-xs hidden md:block">
+          <div className="relative w-full max-w-xs hidden xl:block">
             <input
               type="text"
               className="header-search-box px-3 py-2 pl-10 rounded w-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400"
@@ -306,7 +306,7 @@ const SiteHeader = () => {
 
         {/* Mobile dropdown menu */}
         {mobileMenuOpen && (
-          <nav className="md:hidden bg-[#ffffed] border-t border-gray-300 shadow-lg">
+          <nav className="xl:hidden bg-[#ffffed] border-t border-gray-300 shadow-lg">
             <div className="flex flex-col py-2">
               <Link href="/event" className="px-4 py-3 hover:bg-gray-100 text-gray-700" onClick={() => setMobileMenuOpen(false)}>Shows</Link>
               <Link href="/song" className="px-4 py-3 hover:bg-gray-100 text-gray-700" onClick={() => setMobileMenuOpen(false)}>Songs</Link>

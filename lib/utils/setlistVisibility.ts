@@ -318,12 +318,18 @@ export function calculateSetlistVisibility(
     // Step 5: Build note map for visible performances only
     const visibleNoteMap = buildVisibleNoteMap(visiblePerformances);
 
+    const hasGuestLeadVocals = allPerformances.some(p => {
+        const vocalist = p.leadVocals || p.song?.leadVocals;
+        return vocalist && vocalist.name !== 'Robert Hunter';
+    });
+
     return {
         allPerformances,
         allGroups,
         perfToGroupMap,
         visiblePerformances,
-        visibleNoteMap
+        visibleNoteMap,
+        hasGuestLeadVocals
     };
 }
 
