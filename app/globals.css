@@ -100,13 +100,13 @@
     @apply flex items-center gap-4 md:gap-10 flex-1;
     @apply md:ml-[180px] max-w-6xl;
     /* CHANGED: Stack vertically on mobile, horizontal on desktop */
-  @apply flex-col xl:flex-row xl:justify-between;
+    @apply flex-col xl:flex-row xl:justify-between;
   }
 
   .main-nav {
     @apply flex items-center flex-1 overflow-x-auto;
     /* CHANGED: Tighter spacing on mobile */
-  @apply gap-3 xl:gap-8;
+    @apply gap-3 xl:gap-8;
     /* ADD: Show scrollbar might help */
     @apply pb-1;
   }
