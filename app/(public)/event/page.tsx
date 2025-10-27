@@ -16,14 +16,16 @@ function EventBrowsePageContent() {
   const [loading, setLoading] = useState(true);
   const [showSetlists, setShowSetlists] = useState(true);
   const [viewMode, setViewMode] = useState<'standard' | 'complete'>('standard');
+  const [eventViewModes, setEventViewModes] = useState<Record<number, 'standard' | 'complete'>>({});
   const [isHydrated, setIsHydrated] = useState(false);
+  const [showHelp, setShowHelp] = useState(true);
 
   // Initialize from localStorage after hydration
   useEffect(() => {
     setIsHydrated(true);
     const savedSetlists = localStorage.getItem('hunterArchive_browseShowSetlists');
     const savedViewMode = localStorage.getItem('setlist-view-mode');
-    
+
     if (savedSetlists !== null) {
       setShowSetlists(savedSetlists === 'true');
     }
@@ -32,19 +34,19 @@ function EventBrowsePageContent() {
     }
   }, []);
 
-  const toggleSetlists = () => {
-    const newValue = !showSetlists;
-    setShowSetlists(newValue);
-    if (isHydrated) {
-      localStorage.setItem('hunterArchive_browseShowSetlists', newValue.toString());
-    }
-  };
-
   const handleViewModeChange = (mode: 'standard' | 'complete') => {
     setViewMode(mode);
+    setEventViewModes({});  // Clear per-event overrides when page mode changes
     if (isHydrated) {
       localStorage.setItem('setlist-view-mode', mode);
     }
+  };
+
+  const handleEventViewModeChange = (eventId: number, mode: 'standard' | 'complete') => {
+    setEventViewModes(prev => ({
+      ...prev,
+      [eventId]: mode
+    }));
   };
 
   useEffect(() => {
@@ -113,64 +115,53 @@ function EventBrowsePageContent() {
             <div className="page-title">
               Browse Events <span className="text-gray-500 font-normal text-lg">({events.length})</span>
             </div>
-            
+
             <div className="flex gap-4 items-center">
-              {/* Setlist toggle */}
+              {/* View mode toggle */}
               <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-600 font-medium">Setlists:</span>
+                <span className="text-sm text-gray-600 font-medium">View:</span>
                 <div className="inline-flex bg-gray-100 rounded-md p-0.5">
                   <button
-                    className={`px-3 py-1.5 text-xs font-medium rounded transition-all ${
-                      showSetlists
-                        ? 'bg-white text-gray-900 shadow-sm'
-                        : 'text-gray-600 hover:text-gray-900'
-                    }`}
-                    onClick={() => setShowSetlists(true)}
+                    className={`px-3 py-1.5 text-xs font-medium rounded transition-all ${viewMode === 'standard'
+                      ? 'bg-white text-gray-900 shadow-sm'
+                      : 'text-gray-600 hover:text-gray-900'
+                      }`}
+                    onClick={() => handleViewModeChange('standard')}
                   >
-                    Show
+                    Compact
                   </button>
                   <button
-                    className={`px-3 py-1.5 text-xs font-medium rounded transition-all ${
-                      !showSetlists
-                        ? 'bg-white text-gray-900 shadow-sm'
-                        : 'text-gray-600 hover:text-gray-900'
-                    }`}
-                    onClick={() => setShowSetlists(false)}
+                    className={`px-3 py-1.5 text-xs font-medium rounded transition-all ${viewMode === 'complete'
+                      ? 'bg-white text-gray-900 shadow-sm'
+                      : 'text-gray-600 hover:text-gray-900'
+                      }`}
+                    onClick={() => handleViewModeChange('complete')}
                   >
-                    Hide
+                    Complete
                   </button>
                 </div>
               </div>
-              
-              {/* View mode toggle */}
-              {showSetlists && (
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-gray-600 font-medium">View:</span>
-                  <div className="inline-flex bg-gray-100 rounded-md p-0.5">
-                    <button
-                      className={`px-3 py-1.5 text-xs font-medium rounded transition-all ${
-                        viewMode === 'standard'
-                          ? 'bg-white text-gray-900 shadow-sm'
-                          : 'text-gray-600 hover:text-gray-900'
-                      }`}
-                      onClick={() => handleViewModeChange('standard')}
-                    >
-                      Compact
-                    </button>
-                    <button
-                      className={`px-3 py-1.5 text-xs font-medium rounded transition-all ${
-                        viewMode === 'complete'
-                          ? 'bg-white text-gray-900 shadow-sm'
-                          : 'text-gray-600 hover:text-gray-900'
-                      }`}
-                      onClick={() => handleViewModeChange('complete')}
-                    >
-                      Complete
-                    </button>
-                  </div>
-                </div>
-              )}
             </div>
+          </div>
+
+          {/* Help section */}
+          <div className={`mb-8 bg-gray-50 border border-gray-200 rounded-lg ${showHelp ? 'p-5' : 'p-3'}`}>
+            <div
+              onClick={() => setShowHelp(!showHelp)}
+              className="flex items-center justify-between cursor-pointer hover:opacity-80 transition-opacity"
+            >
+              <h3 className="text-lg font-semibold text-gray-900">How to use this page</h3>
+              <span className="text-gray-500 text-lg">{showHelp ? '▼' : '▶'}</span>
+            </div>
+
+            {showHelp && (
+              <ul className="text-sm text-gray-700 leading-relaxed space-y-2 list-disc pl-5 mt-3">
+                <li>Setlists between 1984-1993 are still being updated. Earlier and later setlists are mostly complete.</li>
+                <li>Use the search bar in the header to filter by date (YYYY-MM-DD, YYYY-MM or YYYY), band, guests or venue.</li>
+                <li>The default setlist view is Compact - fragmentary songs and notes hidden, medleys and suites collapsed. Toggle the Complete setting for the whole page or a specific show to see the full setlist with performance notes.</li>
+                <li>Click any event header to view all event info, including recordings, show notes, stage banter, etc. Details are still being added and primarily exist from 1976-1983 at present.</li>
+              </ul>
+            )}
           </div>
 
           {hasActiveSearch && (
@@ -191,13 +182,13 @@ function EventBrowsePageContent() {
                 key={event.id}
                 event={event}
                 showPrevNext={false}
-                showViewToggle={showSetlists}
-                showPerformanceNotes={viewMode === 'complete'}
+                showViewToggle={true}
+                showPerformanceNotes={(eventViewModes[event.id] || viewMode) === 'complete'}
                 showStageTalk={false}
                 showRecordings={false}
                 showContributors={false}
-                viewMode={viewMode}
-                onViewModeChange={handleViewModeChange}
+                viewMode={eventViewModes[event.id] || viewMode}
+                onViewModeChange={(mode) => handleEventViewModeChange(event.id, mode)}
               />
             ))}
           </div>

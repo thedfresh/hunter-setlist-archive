@@ -105,18 +105,18 @@ const EventCard: React.FC<EventCardProps> = ({
 
     // Check for content
     const hasSets = event.sets && event.sets.length > 0;
-    
+
     const hasShowContext = event.eventMusicians?.length > 0 ||
         event.sets?.some((s: any) => s.bandId && s.bandId !== event.primaryBandId && s.band) ||
         event.sets?.some((s: any) => s.setMusicians && s.setMusicians.length > 0) ||
         event.publicNotes;
 
     // Check if there's anything that changes between Compact and Complete modes
-    const hasToggleableContent = visibilityData.allPerformances.some((p: any) => 
-        p.publicNotes || 
+    const hasToggleableContent = visibilityData.allPerformances.some((p: any) =>
+        p.publicNotes ||
         p.performanceMusicians?.length > 0 ||
-        p.isLyricalFragment || 
-        p.isMusicalFragment || 
+        p.isLyricalFragment ||
+        p.isMusicalFragment ||
         p.isPartial
     );
 
@@ -124,42 +124,34 @@ const EventCard: React.FC<EventCardProps> = ({
     const hasNotesContent = hasShowContext || (showPerformanceNotes && hasToggleableContent);
 
     const hasBottomSection = (showRecordings && event.recordings?.length > 0) ||
-                            (showContributors && event.eventContributors?.length > 0) ||
-                            (showStageTalk && event.sets?.some((s: any) => 
-                                s.performances?.some((p: any) => p.showBanter?.length > 0)
-                            ));
+        (showContributors && event.eventContributors?.length > 0) ||
+        (showStageTalk && event.sets?.some((s: any) =>
+            s.performances?.some((p: any) => p.showBanter?.length > 0)
+        ));
 
     return (
         <>
             <div className={`bg-white rounded-lg shadow-sm overflow-hidden ${borderClass}`}>
-                {/* Header - colored background with band-colored border */}
-                <div className={`${performerCardClass} px-5 py-4 border-b ${headerBorderClass}`}>
-                    <div className="flex justify-between items-start mb-2">
-                        <div className={`text-sm font-semibold ${textClass}`}>
-                            {performerName}
+                {/* Header - clickable on browse, static on detail */}
+                {showPrevNext ? (
+                    <div className={`${performerCardClass} px-5 py-4 border-b ${headerBorderClass}`}>
+                        <div className="flex justify-between items-start mb-2">
+                            <div className={`text-sm font-semibold ${textClass}`}>
+                                {performerName}
+                            </div>
+                            <div className="flex gap-2 items-center">
+                                <Link href={prevEvent?.slug ? `/event/${prevEvent.slug}` : '#'}>
+                                    <button className="btn btn-secondary btn-small" disabled={!prevEvent?.slug}>
+                                        <ChevronLeft size={14} /> Prev
+                                    </button>
+                                </Link>
+                                <Link href={nextEvent?.slug ? `/event/${nextEvent.slug}` : '#'}>
+                                    <button className="btn btn-secondary btn-small" disabled={!nextEvent?.slug}>
+                                        Next <ChevronRight size={14} />
+                                    </button>
+                                </Link>
+                            </div>
                         </div>
-                        <div className="flex gap-2 items-center">
-                            {showPrevNext ? (
-                                <>
-                                    <Link href={prevEvent?.slug ? `/event/${prevEvent.slug}` : '#'}>
-                                        <button className="btn btn-secondary btn-small" disabled={!prevEvent?.slug}>
-                                            <ChevronLeft size={14} /> Prev
-                                        </button>
-                                    </Link>
-                                    <Link href={nextEvent?.slug ? `/event/${nextEvent.slug}` : '#'}>
-                                        <button className="btn btn-secondary btn-small" disabled={!nextEvent?.slug}>
-                                            Next <ChevronRight size={14} />
-                                        </button>
-                                    </Link>
-                                </>
-                            ) : (
-                                <div className="flex gap-2 items-center">
-                                    {badges}
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                    <div className="flex items-baseline gap-2.5 justify-between">
                         <div className="flex items-baseline gap-2.5">
                             <span className="text-lg font-semibold text-gray-900">
                                 {event.displayDate || formatEventDate(event)}
@@ -175,16 +167,36 @@ const EventCard: React.FC<EventCardProps> = ({
                                 )}
                             </span>
                         </div>
-                        {/* Detail link for browse view - right side of date/venue row */}
-                        {!showPrevNext && (
-                            <Link href={`/event/${event.slug}`}>
-                                <button className={`btn ${ghostButtonClass} btn-small flex items-center gap-1`}>
-                                    Detail <ArrowRight size={12} />
-                                </button>
-                            </Link>
-                        )}
                     </div>
-                </div>
+                ) : (
+                    <Link href={`/event/${event.slug}`}>
+                        <div className={`${performerCardClass} px-5 py-4 border-b ${headerBorderClass} cursor-pointer hover:opacity-90 transition-opacity`}>
+                            <div className="flex justify-between items-start mb-2">
+                                <div className={`text-sm font-semibold ${textClass}`}>
+                                    {performerName}
+                                </div>
+                                <div className="flex gap-2 items-center">
+                                    {badges}
+                                </div>
+                            </div>
+                            <div className="flex items-baseline gap-2.5">
+                                <span className="text-lg font-semibold text-gray-900">
+                                    {event.displayDate || formatEventDate(event)}
+                                    {(!event.year || !event.month || !event.day || event.dateUncertain) && (
+                                        <span className="badge-uncertain-small ml-1" title="Date uncertain">?</span>
+                                    )}
+                                </span>
+                                <span className="text-gray-400">|</span>
+                                <span className="text-base text-gray-700">
+                                    {formatVenue(event.venue)}
+                                    {(event.venue?.name?.includes('Unknown') || event.venue?.isUncertain || event.venueUncertain) && (
+                                        <span className="badge-uncertain-small ml-1" title="Venue uncertain">?</span>
+                                    )}
+                                </span>
+                            </div>
+                        </div>
+                    </Link>
+                )}
 
                 {/* Main Content - White background */}
                 <div className="px-6 py-5 bg-white">
@@ -197,21 +209,19 @@ const EventCard: React.FC<EventCardProps> = ({
                             {showViewToggle && hasSets && hasToggleableContent && onViewModeChange && (
                                 <div className="inline-flex bg-gray-100 rounded-md p-0.5">
                                     <button
-                                        className={`px-3 py-1 text-[11px] font-medium rounded transition-all ${
-                                            viewMode === 'standard'
+                                        className={`px-3 py-1 text-[11px] font-medium rounded transition-all ${viewMode === 'standard'
                                                 ? 'bg-white text-gray-900 shadow-sm'
                                                 : 'text-gray-600 hover:text-gray-900'
-                                        }`}
+                                            }`}
                                         onClick={() => onViewModeChange('standard')}
                                     >
                                         Compact
                                     </button>
                                     <button
-                                        className={`px-3 py-1 text-[11px] font-medium rounded transition-all ${
-                                            viewMode === 'complete'
+                                        className={`px-3 py-1 text-[11px] font-medium rounded transition-all ${viewMode === 'complete'
                                                 ? 'bg-white text-gray-900 shadow-sm'
                                                 : 'text-gray-600 hover:text-gray-900'
-                                        }`}
+                                            }`}
                                         onClick={() => onViewModeChange('complete')}
                                     >
                                         Complete

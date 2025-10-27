@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import EventBrowseCard from '@/components/ui/events/EventBrowseCard';
+import EventCard from '@/components/ui/events/EventCard';
 import { formatEventDate } from '@/lib/formatters/dateFormatter';
 import { getPerformerCardClass } from '@/lib/utils/performerStyles';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
@@ -93,7 +93,17 @@ export default function HomePage() {
           <>
             <div className="grid grid-cols-1 gap-4">
               {events.map((event: any) => (
-                <EventBrowseCard key={event.id} event={event} />
+                <EventCard
+                  key={event.id}
+                  event={event}
+                  showPrevNext={false}
+                  showViewToggle={true}
+                  showPerformanceNotes={false}
+                  showStageTalk={false}
+                  showRecordings={false}
+                  showContributors={false}
+                  viewMode={'standard'}
+                />
               ))}
             </div>
           </>
