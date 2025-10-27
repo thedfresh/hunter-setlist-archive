@@ -112,13 +112,15 @@ const EventCard: React.FC<EventCardProps> = ({
         event.publicNotes;
 
     // Check if there's anything that changes between Compact and Complete modes
-    const hasToggleableContent = visibilityData.allPerformances.some((p: any) =>
-        p.publicNotes ||
-        p.performanceMusicians?.length > 0 ||
-        p.isLyricalFragment ||
-        p.isMusicalFragment ||
-        p.isPartial
-    );
+    const hasToggleableContent =
+        visibilityData.allGroups.length > 0 ||  // Has medleys/suites
+        visibilityData.allPerformances.some((p: any) =>
+            p.publicNotes ||
+            p.performanceMusicians?.length > 0 ||
+            p.isLyricalFragment ||
+            p.isMusicalFragment ||
+            p.isPartial
+        );
 
     // Only show notes border if there are actual notes to display
     const hasNotesContent = hasShowContext || (showPerformanceNotes && hasToggleableContent);
@@ -210,8 +212,8 @@ const EventCard: React.FC<EventCardProps> = ({
                                 <div className="inline-flex bg-gray-100 rounded-md p-0.5">
                                     <button
                                         className={`px-3 py-1 text-[11px] font-medium rounded transition-all ${viewMode === 'standard'
-                                                ? 'bg-white text-gray-900 shadow-sm'
-                                                : 'text-gray-600 hover:text-gray-900'
+                                            ? 'bg-white text-gray-900 shadow-sm'
+                                            : 'text-gray-600 hover:text-gray-900'
                                             }`}
                                         onClick={() => onViewModeChange('standard')}
                                     >
@@ -219,8 +221,8 @@ const EventCard: React.FC<EventCardProps> = ({
                                     </button>
                                     <button
                                         className={`px-3 py-1 text-[11px] font-medium rounded transition-all ${viewMode === 'complete'
-                                                ? 'bg-white text-gray-900 shadow-sm'
-                                                : 'text-gray-600 hover:text-gray-900'
+                                            ? 'bg-white text-gray-900 shadow-sm'
+                                            : 'text-gray-600 hover:text-gray-900'
                                             }`}
                                         onClick={() => onViewModeChange('complete')}
                                     >

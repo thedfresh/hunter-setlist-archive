@@ -134,7 +134,15 @@ export async function getEventsBrowse({ page, pageSize = 100, where = {} }: GetE
           setMusicians: { include: { musician: true, instrument: true } },
           performances: {
             include: {
-              song: true,
+              song: {
+                include: {
+                  songTags: {
+                    include: {
+                      tag: true
+                    }
+                  }
+                }
+              },
               performanceMusicians: { include: { musician: true, instrument: true } }
             },
             orderBy: { performanceOrder: 'asc' }
