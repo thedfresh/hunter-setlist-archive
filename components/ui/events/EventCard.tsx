@@ -125,7 +125,8 @@ const EventCard: React.FC<EventCardProps> = ({
         );
 
     // Only show notes border if there are actual notes to display; allow notes without setlist
-    const hasNotesContent = hasShowContext || (showPerformanceNotes && viewMode === 'complete');
+    const hasActualNotes = visibilityData.visibleNoteMap.size > 0;
+    const hasNotesContent = hasShowContext || (showPerformanceNotes && hasActualNotes);
 
     const hasBottomSection = (showRecordings && event.recordings?.length > 0) ||
         (showContributors && event.eventContributors?.length > 0) ||
