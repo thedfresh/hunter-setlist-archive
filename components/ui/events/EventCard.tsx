@@ -124,9 +124,8 @@ const EventCard: React.FC<EventCardProps> = ({
             p.isPartial
         );
 
-    // Only show notes border if there are actual notes to display
-    const hasActualNotesToDisplay = hasShowContext ||
-        (showPerformanceNotes && hasToggleableContent && viewMode === 'complete');
+    // Only show notes border if there are actual notes to display; allow notes without setlist
+    const hasNotesContent = hasShowContext || (showPerformanceNotes && viewMode === 'complete');
 
     const hasBottomSection = (showRecordings && event.recordings?.length > 0) ||
         (showContributors && event.eventContributors?.length > 0) ||
@@ -274,8 +273,8 @@ const EventCard: React.FC<EventCardProps> = ({
                         </div>
                     )}
 
-                    {/* Notes section - only show border if has sets AND notes content exists */}
-                    {hasSets && hasActualNotesToDisplay && (
+                    {/* Notes section - only show border if has sets AND notes content exists; allow notes without setlist */}
+                    {hasNotesContent && (
                         <div className="mt-4 pt-4 border-t border-gray-200">
                             {/* Show Context (event musicians, set context) */}
                             {hasShowContext && (
