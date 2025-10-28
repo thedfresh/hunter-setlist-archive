@@ -9,16 +9,17 @@ interface EventDetailClientProps {
 }
 
 export default function EventDetailClient({ event, prevEvent, nextEvent }: EventDetailClientProps) {
-  const [viewMode, setViewMode] = useState<'standard' | 'complete'>('standard');
+  const [viewMode, setViewMode] = useState<'standard' | 'complete'>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('setlist-view-mode');
+      if (saved === 'standard' || saved === 'complete') return saved;
+    }
+    return 'standard';
+  });
   const [isHydrated, setIsHydrated] = useState(false);
 
-  // Load view mode from localStorage after hydration
   useEffect(() => {
     setIsHydrated(true);
-    const saved = localStorage.getItem('setlist-view-mode');
-    if (saved === 'standard' || saved === 'complete') {
-      setViewMode(saved);
-    }
   }, []);
 
   // Save preference when changed
