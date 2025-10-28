@@ -47,7 +47,7 @@ const PerformanceNotes: React.FC<PerformanceNotesProps> = ({
         <div className="notes-title">Performance Notes</div>
       )}
 
-      {(hasAnyFragments || uniqueNotes.length > 0 || hasGuestVocals) && (
+      {(hasAnyFragments || hasGuestVocals) && (
         <div className="notes-content">
           {hasGuestVocals && event && (
             <div className="mb-2">
@@ -74,9 +74,13 @@ const PerformanceNotes: React.FC<PerformanceNotesProps> = ({
               {FRAGMENT_INDICATORS.partial.symbol} = {FRAGMENT_INDICATORS.partial.label}
             </div>
           )}
+        </div>
+      )}
+      {viewMode === 'complete' && uniqueNotes.length > 0 && (
+        <div className="mt-4">
           {uniqueNotes.map(({ note, num }) => (
-            <div key={num} className="mb-2">
-              <span className="text-xs font-semibold inline-block w-4 text-center">[{num}]</span> {note}
+            <div key={num} className="notes-content mb-2">
+              <span className="font-semibold inline-block w-4 text-center">[{num}]</span> {note}
             </div>
           ))}
         </div>

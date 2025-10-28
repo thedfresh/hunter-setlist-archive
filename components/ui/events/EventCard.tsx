@@ -107,8 +107,6 @@ const EventCard: React.FC<EventCardProps> = ({
     const hasSets = event.sets && event.sets.length > 0;
 
     const hasShowContext = event.eventMusicians?.length > 0 ||
-        event.sets?.some((s: any) => s.bandId && s.bandId !== event.primaryBandId && s.band) ||
-        event.sets?.some((s: any) => s.setMusicians && s.setMusicians.length > 0) ||
         visibilityData.hasGuestLeadVocals ||
         event.publicNotes;
 
@@ -267,16 +265,18 @@ const EventCard: React.FC<EventCardProps> = ({
 
                     {/* Setlist */}
                     {hasSets && (
-                        <Setlist
-                            sets={event.sets}
-                            showFootnotes={true}
-                            showSongLinks={true}
-                            event={event}
-                            viewMode={viewMode}
-                            expandedGroups={expandedGroups}
-                            setExpandedGroups={setExpandedGroups}
-                            visibilityData={visibilityData}
-                        />
+                        <div className={event.billing ? 'mt-3' : ''}>
+                            <Setlist
+                                sets={event.sets}
+                                showFootnotes={true}
+                                showSongLinks={true}
+                                event={event}
+                                viewMode={viewMode}
+                                expandedGroups={expandedGroups}
+                                setExpandedGroups={setExpandedGroups}
+                                visibilityData={visibilityData}
+                            />
+                        </div>
                     )}
 
                     {/* No setlist message */}

@@ -109,7 +109,7 @@ const Setlist: React.FC<SetlistProps> = ({
 
     // Get footnote numbers for a performance
     function getFootnoteNumbers(perf: Performance): number[] {
-        if (!showFootnotes) return [];
+        if (!showFootnotes || viewMode !== 'complete') return [];
 
         const numbers: number[] = [];
 
@@ -139,7 +139,7 @@ const Setlist: React.FC<SetlistProps> = ({
         // Find footnotes that apply to ALL songs in group (only for collapsed view)
         const groupFootnotes: number[] = [];
 
-        if (!isExpanded && showFootnotes) {
+        if (!isExpanded && showFootnotes && viewMode === 'complete') {
             // Check each possible note in the visible note map
             visibleNoteMap.forEach((num, note) => {
                 // Count how many performances in this group have this exact note
@@ -347,7 +347,7 @@ const Setlist: React.FC<SetlistProps> = ({
             {sets.map((set, i) => {
                 const perfs = set.performances.filter((perf) => perf.song);
                 const isEncore = set.setType?.displayName.toLowerCase().includes('encore');
-                
+
                 // Generate encore label (E:, E1:, E2:)
                 let encoreLabel = '';
                 if (isEncore) {
@@ -373,16 +373,29 @@ const Setlist: React.FC<SetlistProps> = ({
                                         ?
                                     </span>
                                 )}
+                                {set.bandId && set.band && set.band.name !== event?.primaryBand?.name && (
+                                    <span className="text-gray-600 font-normal text-xs ml-2">
+                                        ({set.band.name === 'Robert Hunter' ? 'Robert Hunter solo' : set.band.name})
+                                    </span>
+                                )}
+                                {set.setMusicians && set.setMusicians.length > 0 && (
+                                    <span className="text-gray-600 font-normal text-xs ml-2">
+                                        (with {set.setMusicians
+                                            .filter((sm: any) => sm.musician && sm.instrument)
+                                            .map((sm: any) => `${sm.musician.name} on ${sm.instrument.displayName}`)
+                                            .join(', ')})
+                                    </span>
+                                )}
                             </div>
                         )}
-                        
+
                         {/* Set notes */}
                         {set.publicNotes && (
                             <div className="set-note text-xs text-gray-600 italic mb-2">
                                 {set.publicNotes}
                             </div>
                         )}
-                        
+
                         {/* Songs */}
                         <div className="setlist">
                             {/* Encore: inline label */}
