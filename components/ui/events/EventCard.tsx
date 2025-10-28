@@ -125,8 +125,20 @@ const EventCard: React.FC<EventCardProps> = ({
         );
 
     // Only show notes border if there are actual notes to display; allow notes without setlist
-    const hasActualNotes = visibilityData.visibleNoteMap.size > 0;
-    const hasNotesContent = hasShowContext || (showPerformanceNotes && hasActualNotes);
+    // Check for fragment indicators in Complete mode
+    const hasFragmentIndicators = viewMode === 'complete' &&
+        visibilityData.allPerformances.some(p =>
+            p.isLyricalFragment || p.isMusicalFragment || p.isPartial
+        );
+
+    // Check for actual performance footnotes
+    const hasActualFootnotes = visibilityData.visibleNoteMap.size > 0;
+
+    // Show notes section if ANY of these exist
+    const hasNotesContent =
+        hasShowContext ||
+        (showPerformanceNotes && hasActualFootnotes) ||
+        (showPerformanceNotes && hasFragmentIndicators);
 
     const hasBottomSection = (showRecordings && event.recordings?.length > 0) ||
         (showContributors && event.eventContributors?.length > 0) ||
@@ -276,7 +288,7 @@ const EventCard: React.FC<EventCardProps> = ({
 
                     {/* Notes section - only show border if has sets AND notes content exists; allow notes without setlist */}
                     {hasNotesContent && (
-                        <div className="mt-4 pt-4 border-t border-gray-200">
+                        <div className={hasSets ? "mt-4 pt-4 border-t border-gray-200" : "mt-4"}>
                             {/* Show Context (event musicians, set context) */}
                             {hasShowContext && (
                                 <div className="mb-5">
