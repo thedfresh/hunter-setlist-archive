@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { getBrowsableEventsWhere } from '@/lib/utils/queryFilters';
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: Request) {
@@ -10,7 +11,9 @@ export async function GET(req: Request) {
     return NextResponse.json({ events: [] });
   }
   const events = await prisma.event.findMany({
-    where: { month, day },
+    where: {
+      ...getBrowsableEventsWhere(), month, day
+    },
     select: {
       id: true,
       year: true,
