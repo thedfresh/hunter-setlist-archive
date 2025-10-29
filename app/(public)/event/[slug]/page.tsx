@@ -30,17 +30,21 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 
 export default async function EventDetailPage({ params }: { params: { slug: string } }) {
   const { event, prevEvent, nextEvent } = await getEventBySlugWithNavigation(params.slug);
-  
+
   if (!event) {
     return notFound();
   }
+
+  // Only pass navigation events with a valid slug
+  const safePrevEvent = prevEvent && typeof prevEvent.slug === 'string' ? { ...prevEvent, slug: prevEvent.slug } : null;
+  const safeNextEvent = nextEvent && typeof nextEvent.slug === 'string' ? { ...nextEvent, slug: nextEvent.slug } : null;
 
   return (
     <PageContainer>
       <EventDetailClient
         event={event}
-        prevEvent={prevEvent}
-        nextEvent={nextEvent}
+        prevEvent={safePrevEvent}
+        nextEvent={safeNextEvent}
       />
     </PageContainer>
   );

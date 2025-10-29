@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { getBrowsableEventsWhere } from '@/lib/utils/queryFilters';
 import { prisma } from '@/lib/prisma';
 export const dynamic = 'force-dynamic';
 export async function GET() {
@@ -29,7 +30,9 @@ export async function GET() {
     }
     // Default: return events with sets, setTypes, performances, and songs
     const events = await prisma.event.findMany({
-      // Order by complete date: year, then month, then day (descending)
+      where: {
+        ...getBrowsableEventsWhere(),
+      },
       orderBy: [
         { year: 'desc' },
         { month: 'desc' },

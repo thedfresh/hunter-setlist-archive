@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/prisma';
 
 export async function getEventBySlug(slug: string) {
-    return prisma.event.findUnique({
+    const event = await prisma.event.findUnique({
         where: { slug },
         include: {
             venue: true,
@@ -81,6 +81,10 @@ export async function getEventBySlug(slug: string) {
             links: true,
         },
     });
+    if (!event || !event.isPublic) {
+        return null;
+    }
+    return event;
 }
 
 export async function getEventWithNavigation(slug: string, isAdmin: boolean = false) {
@@ -332,6 +336,11 @@ export async function getEventBySlugWithNavigation(slug: string) {
             },
         },
     });
+
+    // Return null if event is private
+    if (!event || !event.isPublic) {
+        return { event: null, prevEvent: null, nextEvent: null };
+    }
 
     let prevEvent = null;
     let nextEvent = null;

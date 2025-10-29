@@ -11,7 +11,7 @@ export async function GET(req: NextRequest, context: { params: Promise<{ id: str
     const id = Number(paramId);
     if (!id) return NextResponse.json({ error: 'Invalid event id.' }, { status: 400 });
     const event = await prisma.event.findUnique({ where: { id } });
-    if (!event) return NextResponse.json({ error: 'Event not found.' }, { status: 404 });
+    if (!event || !event.isPublic) return NextResponse.json({ error: 'Event not found.' }, { status: 404 });
     // Ensure all fields are present in response, include etreeShowId
     const e: any = event;
     return NextResponse.json({
