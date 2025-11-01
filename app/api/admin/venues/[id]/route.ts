@@ -68,6 +68,8 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
         }
 
         revalidatePath('/admin/venues');
+        revalidatePath('/venue');
+        revalidatePath(`/venue/${updated.slug}`);
         return NextResponse.json(updated);
     } catch (error: any) {
         console.error('PUT /api/admin/venues/[id] error:', error);
@@ -89,6 +91,7 @@ export async function DELETE(_req: Request, { params }: { params: { id: string }
         }
         await prisma.venue.delete({ where: { id } });
         revalidatePath('/admin/venues');
+        revalidatePath('/venue');
         return NextResponse.json({ success: true });
     } catch (error: any) {
         return NextResponse.json({ error: error?.message || 'Failed to delete venue' }, { status: 500 });

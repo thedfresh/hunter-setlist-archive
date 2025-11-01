@@ -6,6 +6,8 @@ import { getPerformerTextClass } from '@/lib/utils/performerStyles';
 import { formatEventDate } from '@/lib/formatters/dateFormatter';
 import { formatVenue } from '@/lib/formatters/venueFormatter';
 
+export const dynamic = 'force-dynamic';
+
 export default async function VenueDetailPage({ params }: { params: { slug: string } }) {
   const { slug } = params;
   const venue = await getVenueBySlug(slug);

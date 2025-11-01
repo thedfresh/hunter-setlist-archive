@@ -107,7 +107,6 @@ const EventCard: React.FC<EventCardProps> = ({
     const hasSets = event.sets && event.sets.length > 0;
 
     const hasShowContext = event.eventMusicians?.length > 0 ||
-        visibilityData.hasGuestLeadVocals ||
         event.publicNotes;
 
 
