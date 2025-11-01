@@ -1,4 +1,5 @@
 'use client';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import React, { useState, useEffect } from 'react';
 import EventCard from '@/components/ui/events/EventCard';
 
@@ -28,6 +29,14 @@ export default function EventDetailClient({ event, prevEvent, nextEvent }: Event
     if (isHydrated) {
       localStorage.setItem('setlist-view-mode', mode);
     }
+  }
+
+  if (!isHydrated) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <LoadingSpinner />
+      </div>
+    );
   }
 
   return (

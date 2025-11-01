@@ -43,7 +43,7 @@ const PerformanceNotes: React.FC<PerformanceNotesProps> = ({
 
   return (
     <div className="notes-section">
-      {(uniqueNotes.length > 0 || hasAnyFragments) && (
+      {((viewMode === 'complete' && uniqueNotes.length > 0) || hasAnyFragments || hasGuestVocals) && (
         <div className="notes-title">Performance Notes</div>
       )}
 

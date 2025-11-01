@@ -120,10 +120,20 @@ const Setlist: React.FC<SetlistProps> = ({
             }
         }
 
+
         // Get COMBINED musician note
         const musicianNote = generatePerformanceMusicianNote(perf.performanceMusicians);
         if (musicianNote) {
             const n = visibleNoteMap.get(musicianNote);
+            if (n) {
+                numbers.push(n);
+            }
+        }
+
+        // Check for solo Hunter flag
+        if (perf.isSoloHunter) {
+            const soloNote = "Hunter solo";
+            const n = visibleNoteMap.get(soloNote);
             if (n) {
                 numbers.push(n);
             }

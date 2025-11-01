@@ -24,6 +24,7 @@ export interface Performance {
         musician: { name: string };
         instrument: { displayName: string };
     }>;
+    isSoloHunter?: boolean;
 }
 
 export interface CollapsibleGroup {
@@ -281,6 +282,15 @@ export function buildVisibleNoteMap(
         if (musicianNote && !noteMap.has(musicianNote)) {
             noteMap.set(musicianNote, noteNum);
             noteNum = noteNum + 1;
+        }
+
+        // Auto-generate note for solo Hunter flag
+        if (perf.isSoloHunter) {
+            const soloNote = "Hunter solo";
+            if (!noteMap.has(soloNote)) {
+                noteMap.set(soloNote, noteNum);
+                noteNum = noteNum + 1;
+            }
         }
     });
 
