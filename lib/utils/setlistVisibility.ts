@@ -21,8 +21,13 @@ export interface Performance {
     publicNotes?: string | null;
     performanceMusicians?: Array<{
         id: string | number;
-        musician: { name: string };
+        musician: {
+            name: string;
+            firstName?: string | null;
+            lastName?: string | null;
+        };
         instrument: { displayName: string };
+        includesVocals?: boolean;
     }>;
     isSoloHunter?: boolean;
 }
@@ -401,10 +406,18 @@ export function generatePerformanceMusicianNote(
     }
 
     // Extract plain data first (avoid Prisma symbols)
-    const plainMusicians = performanceMusicians.map(pm => ({
-        musicianName: pm.musician?.name || '',
-        instrumentName: pm.instrument?.displayName || ''
-    }));
+    const plainMusicians = performanceMusicians.map(pm => {
+        const m = pm.musician;
+        const displayName = m?.firstName && m?.lastName
+            ? `${m.firstName} ${m.lastName}`
+            : m?.name || '';
+        const instrumentText = pm.instrument?.displayName || '';
+        const withVocals = pm.includesVocals ? `${instrumentText} and vocals` : instrumentText;
+        return {
+            musicianName: displayName,
+            instrumentName: withVocals
+        };
+    });
 
     // Sort by instrument priority, then alphabetically
     plainMusicians.sort((a, b) => {

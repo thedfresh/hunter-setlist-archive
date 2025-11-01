@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { getPerformerTextClass } from '@/lib/utils/performerStyles';
 import { formatEventDate } from '@/lib/formatters/dateFormatter';
 import { formatVenue } from '@/lib/formatters/venueFormatter';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 export const dynamic = 'force-dynamic';
 
@@ -43,7 +45,9 @@ export default async function VenueDetailPage({ params }: { params: { slug: stri
           {formatVenue({ city: venue.city, stateProvince: venue.stateProvince, country: venue.country })}
         </div>
         {venue.publicNotes && (
-          <div className="mb-4 text-sm text-gray-600 whitespace-pre-line">{venue.publicNotes}</div>
+          <div className="mb-4 text-sm text-gray-600">
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>{venue.publicNotes}</ReactMarkdown>
+          </div>
         )}
         <div className="flex gap-6 text-sm mb-2">
           <div>Total Shows: <strong>{totalShows}</strong></div>

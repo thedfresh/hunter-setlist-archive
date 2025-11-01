@@ -7,10 +7,15 @@ export async function PUT(req: Request, { params }: { params: { id: string; musi
         const performanceMusicianId = Number(params.musicianId);
         if (!performanceMusicianId) return NextResponse.json({ error: 'Invalid ID' }, { status: 400 });
         const body = await req.json();
-        const { instrumentId, publicNotes, privateNotes } = body;
+        const { instrumentId, publicNotes, privateNotes, includesVocals } = body;
         const updated = await prisma.performanceMusician.update({
             where: { id: performanceMusicianId },
-            data: { instrumentId, publicNotes, privateNotes }
+            data: {
+                instrumentId,
+                publicNotes,
+                privateNotes,
+                includesVocals: includesVocals || false
+            }
         });
         revalidatePath('/admin/events');
         return NextResponse.json(updated);

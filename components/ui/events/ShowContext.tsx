@@ -1,4 +1,6 @@
 import React from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 interface ShowContextProps {
     event: any;
@@ -37,7 +39,9 @@ const ShowContext: React.FC<ShowContextProps> = ({
             )}
             {/* Public notes */}
             {hasPublicNotes && (
-                <div className="notes-content">{event.publicNotes}</div>
+                <div className="notes-content">
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{event.publicNotes}</ReactMarkdown>
+                </div>
             )}
         </div>
     );

@@ -17,7 +17,11 @@ export default function PerformanceEditor({ eventId, setId, performanceId, onSuc
         const res = await fetch(`/api/admin/performances/${performanceId}/musicians`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ musicianId: selectedMusicianId, instrumentId: selectedInstrumentId })
+            body: JSON.stringify({
+                musicianId: selectedMusicianId,
+                instrumentId: selectedInstrumentId,
+                includesVocals: selectedIncludesVocals
+            })
         });
         if (res.ok) {
             const data = await fetch(`/api/admin/performances/${performanceId}/musicians`).then(r => r.json());
@@ -25,7 +29,40 @@ export default function PerformanceEditor({ eventId, setId, performanceId, onSuc
             setShowAddMusician(false);
             setSelectedMusicianId(null);
             setSelectedInstrumentId(null);
+            setSelectedIncludesVocals(false);
         }
+    };
+
+    const handleEditMusician = (pm: any) => {
+        setEditingMusicianId(pm.id);
+        setEditInstrumentId(pm.instrumentId);
+        setEditIncludesVocals(pm.includesVocals || false);
+    };
+
+    const handleSaveEdit = async () => {
+        if (!editingMusicianId) return;
+        const payload = {
+            instrumentId: editInstrumentId,
+            includesVocals: editIncludesVocals
+        };
+        const res = await fetch(`/api/admin/performances/${performanceId}/musicians/${editingMusicianId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        if (res.ok) {
+            const data = await fetch(`/api/admin/performances/${performanceId}/musicians`).then(r => r.json());
+            setPerformanceMusicians(data.performanceMusicians || []);
+            setEditingMusicianId(null);
+            setEditInstrumentId(null);
+            setEditIncludesVocals(false);
+        }
+    };
+
+    const handleCancelEdit = () => {
+        setEditingMusicianId(null);
+        setEditInstrumentId(null);
+        setEditIncludesVocals(false);
     };
 
     const handleDeleteMusician = async (id: number) => {
@@ -60,6 +97,10 @@ export default function PerformanceEditor({ eventId, setId, performanceId, onSuc
     const [selectedInstrumentId, setSelectedInstrumentId] = useState<number | null>(null);
     const [songModalOpen, setSongModalOpen] = useState(false);
     const songSelectRef = useRef<HTMLSelectElement>(null);
+    const [editingMusicianId, setEditingMusicianId] = useState<number | null>(null);
+    const [editInstrumentId, setEditInstrumentId] = useState<number | null>(null);
+    const [editIncludesVocals, setEditIncludesVocals] = useState(false);
+    const [selectedIncludesVocals, setSelectedIncludesVocals] = useState(false);
 
     useEffect(() => {
         if (performanceId) {
@@ -149,6 +190,15 @@ export default function PerformanceEditor({ eventId, setId, performanceId, onSuc
             setError("");
         }
     }, [performanceId, eventId, setId]);
+
+    useEffect(() => {
+        if (selectedMusicianId && !selectedInstrumentId) {
+            const musician = musicians.find(m => m.id === selectedMusicianId);
+            if (musician?.defaultInstrumentId) {
+                setSelectedInstrumentId(musician.defaultInstrumentId);
+            }
+        }
+    }, [selectedMusicianId, musicians]);
 
     async function refreshSongs() {
         try {
@@ -328,13 +378,50 @@ export default function PerformanceEditor({ eventId, setId, performanceId, onSuc
                         </button>
                     )}
                 </div>
-
                 {performanceMusicians.map(pm => (
-                    <div key={pm.id} className="flex items-center justify-between py-1 text-sm">
-                        <span>{pm.musician.name}{pm.instrument && `, ${pm.instrument.displayName}`}</span>
-                        <button type="button" className="btn btn-danger btn-small" onClick={() => handleDeleteMusician(pm.id)}>
-                            Delete
-                        </button>
+                    <div key={pm.id} className="flex items-center gap-2 py-1.5 text-sm">
+                        {editingMusicianId === pm.id ? (
+                            <>
+                                <span className="font-medium">{pm.musician.displayName || pm.musician.name}:</span>
+                                <select
+                                    className="select input-small flex-1"
+                                    value={editInstrumentId ?? ""}
+                                    onChange={e => setEditInstrumentId(Number(e.target.value) || null)}
+                                >
+                                    <option value="">No instrument</option>
+                                    {instruments.map(i => <option key={i.id} value={i.id}>{i.displayName}</option>)}
+                                </select>
+                                <label className="checkbox-label text-xs">
+                                    <input
+                                        type="checkbox"
+                                        className="checkbox-input"
+                                        checked={editIncludesVocals}
+                                        onChange={e => setEditIncludesVocals(e.target.checked)}
+                                    />
+                                    + vocals
+                                </label>
+                                <button type="button" className="btn btn-primary btn-small" onClick={handleSaveEdit}>
+                                    Save
+                                </button>
+                                <button type="button" className="btn btn-secondary btn-small" onClick={handleCancelEdit}>
+                                    Cancel
+                                </button>
+                            </>
+                        ) : (
+                            <>
+                                <span className="flex-1">
+                                    {pm.musician.displayName || pm.musician.name}
+                                    {pm.instrument && ` on ${pm.instrument.displayName}`}
+                                    {pm.includesVocals && ' and vocals'}
+                                </span>
+                                <button type="button" className="btn btn-secondary btn-small" onClick={() => handleEditMusician(pm)}>
+                                    Edit
+                                </button>
+                                <button type="button" className="btn btn-danger btn-small" onClick={() => handleDeleteMusician(pm.id)}>
+                                    Delete
+                                </button>
+                            </>
+                        )}
                     </div>
                 ))}
 
@@ -348,6 +435,15 @@ export default function PerformanceEditor({ eventId, setId, performanceId, onSuc
                             <option value="">Select instrument</option>
                             {instruments.map(i => <option key={i.id} value={i.id}>{i.displayName}</option>)}
                         </select>
+                        <label className="checkbox-label col-span-2">
+                            <input
+                                type="checkbox"
+                                className="checkbox-input"
+                                checked={selectedIncludesVocals}
+                                onChange={e => setSelectedIncludesVocals(e.target.checked)}
+                            />
+                            + vocals
+                        </label>
                         <div></div>
                         <div className="flex gap-2">
                             <button type="button" className="btn btn-secondary btn-small flex-1" onClick={() => setShowAddMusician(false)}>Cancel</button>

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { addDisplayName } from '@/lib/utils/musicianFormatter';
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 
@@ -11,7 +12,7 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
             include: { _count: { select: { eventMusicians: true, performanceMusicians: true, bandMusicians: true } } },
         });
         if (!musician) return NextResponse.json({ error: 'Not found' }, { status: 404 });
-        return NextResponse.json(musician);
+        return NextResponse.json(addDisplayName(musician));
     } catch (error: any) {
         return NextResponse.json({ error: error?.message || 'Failed to fetch musician' }, { status: 500 });
     }

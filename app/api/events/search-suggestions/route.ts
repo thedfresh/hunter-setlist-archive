@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getBrowsableEventsWhere } from '@/lib/utils/queryFilters';
 import { prisma } from '@/lib/prisma';
 import { Prisma } from '@prisma/client';
+import { addDisplayNames } from '@/lib/utils/musicianFormatter';
 export const dynamic = 'force-dynamic';
 
 // Helper: detect date patterns
@@ -163,9 +164,11 @@ export async function GET(req: NextRequest) {
         }
 
         for (const musician of musicians) {
-            const key = musician.name.toLowerCase();
-            if (!nameMap.has(key)) nameMap.set(key, { bands: [], musicians: [] });
-            nameMap.get(key)!.musicians.push(musician);
+            for (const musician of addDisplayNames(musicians)) {
+                const key = musician.name.toLowerCase();
+                if (!nameMap.has(key)) nameMap.set(key, { bands: [], musicians: [] });
+                nameMap.get(key)!.musicians.push(musician);
+            }
         }
 
         for (const [name, { bands, musicians }] of nameMap) {
