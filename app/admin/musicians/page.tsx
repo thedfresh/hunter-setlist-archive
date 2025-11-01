@@ -4,6 +4,7 @@ import Modal from '@/components/ui/Modal';
 import MusicianForm from '@/components/admin/MusicianForm';
 import { useToast } from '@/lib/hooks/useToast';
 import { Plus, Trash2 } from 'lucide-react';
+import { compareMusicianNames } from '@/lib/utils/musicianSort';
 
 export default function MusiciansPage() {
     const [musicians, setMusicians] = useState<any[]>([]);
@@ -64,17 +65,15 @@ export default function MusiciansPage() {
     }
 
     const sorted = [...musicians].sort((a, b) => {
-        let aVal, bVal;
         if (sortKey === 'appearances') {
-            aVal = (a._count?.eventMusicians ?? 0) + (a._count?.performanceMusicians ?? 0) + (a._count?.bandMusicians ?? 0);
-            bVal = (b._count?.eventMusicians ?? 0) + (b._count?.performanceMusicians ?? 0) + (b._count?.bandMusicians ?? 0);
+            const aVal = (a._count?.eventMusicians ?? 0) + (a._count?.performanceMusicians ?? 0) + (a._count?.bandMusicians ?? 0);
+            const bVal = (b._count?.eventMusicians ?? 0) + (b._count?.performanceMusicians ?? 0) + (b._count?.bandMusicians ?? 0);
+            if (aVal < bVal) return sortDir === 'asc' ? -1 : 1;
+            if (aVal > bVal) return sortDir === 'asc' ? 1 : -1;
+            return 0;
         } else {
-            aVal = a.name?.toLowerCase?.() ?? '';
-            bVal = b.name?.toLowerCase?.() ?? '';
+            return compareMusicianNames(a, b) * (sortDir === 'asc' ? 1 : -1);
         }
-        if (aVal < bVal) return sortDir === 'asc' ? -1 : 1;
-        if (aVal > bVal) return sortDir === 'asc' ? 1 : -1;
-        return 0;
     });
 
     return (

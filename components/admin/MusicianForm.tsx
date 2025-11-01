@@ -10,6 +10,10 @@ interface MusicianFormProps {
 
 export default function MusicianForm({ musicianId, onSuccess, onCancel }: MusicianFormProps) {
     const [name, setName] = useState('');
+    const [firstName, setFirstName] = useState('');
+    const [lastName, setLastName] = useState('');
+    const [defaultInstrumentId, setDefaultInstrumentId] = useState<number | null>(null);
+    const [instruments, setInstruments] = useState<any[]>([]);
     const [isUncertain, setIsUncertain] = useState(false);
     const [publicNotes, setPublicNotes] = useState('');
     const [privateNotes, setPrivateNotes] = useState('');
@@ -25,6 +29,9 @@ export default function MusicianForm({ musicianId, onSuccess, onCancel }: Musici
                 .then(res => res.json())
                 .then(data => {
                     setName(data.name || '');
+                    setFirstName(data.firstName || '');
+                    setLastName(data.lastName || '');
+                    setDefaultInstrumentId(data.defaultInstrumentId ?? null);
                     setIsUncertain(data.isUncertain ?? false);
                     setPublicNotes(data.publicNotes || '');
                     setPrivateNotes(data.privateNotes || '');
@@ -35,6 +42,9 @@ export default function MusicianForm({ musicianId, onSuccess, onCancel }: Musici
                 .finally(() => setLoading(false));
         } else {
             setName('');
+            setFirstName('');
+            setLastName('');
+            setDefaultInstrumentId(null);
             setIsUncertain(false);
             setPublicNotes('');
             setPrivateNotes('');
@@ -42,6 +52,10 @@ export default function MusicianForm({ musicianId, onSuccess, onCancel }: Musici
             setSlugManuallyEdited(false);
             setError('');
         }
+        // Fetch instruments
+        fetch('/api/instruments')
+            .then(res => res.json())
+            .then(data => setInstruments(data.instruments || []));
     }, [musicianId]);
 
     useEffect(() => {
@@ -66,6 +80,9 @@ export default function MusicianForm({ musicianId, onSuccess, onCancel }: Musici
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         name: name.trim(),
+                        firstName: firstName.trim() || null,
+                        lastName: lastName.trim() || null,
+                        defaultInstrumentId,
                         slug: slug.trim(),
                         isUncertain,
                         publicNotes: publicNotes.trim(),
@@ -100,6 +117,47 @@ export default function MusicianForm({ musicianId, onSuccess, onCancel }: Musici
                     required
                     autoFocus
                 />
+            </div>
+
+            <div className="form-group">
+                <label className="form-label">First Name</label>
+                <input
+                    type="text"
+                    className="input"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    placeholder="Leave blank for stage names"
+                    disabled={loading}
+                />
+                <div className="form-help">Optional - used for sorting only</div>
+            </div>
+
+            <div className="form-group">
+                <label className="form-label">Last Name</label>
+                <input
+                    type="text"
+                    className="input"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    placeholder="Leave blank for stage names"
+                    disabled={loading}
+                />
+            </div>
+
+            <div className="form-group">
+                <label className="form-label">Default Instrument</label>
+                <select
+                    className="select"
+                    value={defaultInstrumentId || ''}
+                    onChange={(e) => setDefaultInstrumentId(e.target.value ? parseInt(e.target.value) : null)}
+                    disabled={loading}
+                >
+                    <option value="">None</option>
+                    {instruments.map(inst => (
+                        <option key={inst.id} value={inst.id}>{inst.displayName}</option>
+                    ))}
+                </select>
+                <div className="form-help">Auto-fills when adding to performances</div>
             </div>
             <div className="form-group">
                 <label className="form-label" htmlFor="slug">Slug (URL-friendly identifier)</label>

@@ -24,6 +24,8 @@ jobs:
           export $(cat .env | xargs) && npx prisma migrate deploy
           export $(cat .env | xargs) && npx prisma generate
           export $(cat .env | xargs) && npm run build
+          # Run data migrations after schema migration and data restore
+          export $(cat .env | xargs) && npx tsx scripts/run-data-migrations.ts
           sleep 2
           export $(cat .env | xargs) && pm2 reload hunter-archive || (pm2 start npm --name "hunter-archive" -- start)
           pm2 save

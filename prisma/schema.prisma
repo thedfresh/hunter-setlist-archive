@@ -79,6 +79,8 @@ model Venue {
 model Musician {
   id                   Int                         @id @default(autoincrement())
   name                 String
+  firstName            String?                     @map("first_name")
+  lastName             String?                     @map("last_name")
   isUncertain          Boolean                     @default(false) @map("is_uncertain")
   createdAt            DateTime                    @default(now()) @map("created_at")
   privateNotes         String?                     @map("private_notes")
@@ -87,6 +89,8 @@ model Musician {
   bandMusicians        BandMusician[]
   eventMusicians       EventMusician[]
   defaultInstruments   MusicianDefaultInstrument[]
+  defaultInstrumentId  Int?        @map("default_instrument_id")
+  defaultInstrument    Instrument? @relation("MusicianDefaultInstrument", fields: [defaultInstrumentId], references: [id])
   performanceMusicians PerformanceMusician[]
   performanceVocals    Performance[]               @relation("PerformanceLeadVocals")
   songDefaultVocals    Song[]                      @relation("SongLeadVocals")
@@ -104,6 +108,8 @@ model Instrument {
   musicianDefaults     MusicianDefaultInstrument[]
   performanceMusicians PerformanceMusician[]
   setMusicians         SetMusician[]
+
+  defaultForMusicians  Musician[] @relation("MusicianDefaultInstrument")
 
   @@map("instruments")
 }
@@ -328,6 +334,7 @@ model PerformanceMusician {
   instrument    Instrument? @relation(fields: [instrumentId], references: [id])
   musician      Musician    @relation(fields: [musicianId], references: [id])
   performance   Performance @relation(fields: [performanceId], references: [id], onDelete: Cascade)
+  includesVocals  Boolean  @default(false) @map("includes_vocals")
 
   @@map("performance_musicians")
 }

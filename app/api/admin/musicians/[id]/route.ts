@@ -21,7 +21,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
     try {
         const id = Number(params.id);
         if (!id) return NextResponse.json({ error: 'Invalid ID' }, { status: 400 });
-        const { name, slug, isUncertain = false, publicNotes, privateNotes } = await req.json();
+        const { name, firstName, lastName, defaultInstrumentId, slug, isUncertain = false, publicNotes, privateNotes } = await req.json();
         if (!name || typeof name !== 'string' || name.trim() === '') {
             return NextResponse.json({ error: 'Name is required' }, { status: 400 });
         }
@@ -29,6 +29,9 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
             where: { id },
             data: {
                 name: name.trim(),
+                firstName: firstName?.trim() || null,
+                lastName: lastName?.trim() || null,
+                defaultInstrumentId: defaultInstrumentId || null,
                 slug: slug?.trim() || null,
                 isUncertain: typeof isUncertain === 'boolean' ? isUncertain : false,
                 publicNotes: publicNotes?.trim() || null,

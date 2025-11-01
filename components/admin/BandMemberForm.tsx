@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { compareMusicianNames } from '@/lib/utils/musicianSort';
 import { useToast } from "@/lib/hooks/useToast";
 
 interface BandMemberFormProps {
@@ -22,7 +23,10 @@ export default function BandMemberForm({ bandId, membershipId, onSuccess, onCanc
     useEffect(() => {
         fetch("/api/musicians")
             .then(res => res.json())
-            .then(data => setMusicians(data.musicians || []));
+            .then(data => {
+                const sorted = (data.musicians || []).sort(compareMusicianNames);
+                setMusicians(sorted);
+            });
         if (membershipId > 0) {
             setLoading(true);
             fetch(`/api/admin/band-musicians/${membershipId}`)

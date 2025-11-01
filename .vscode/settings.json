@@ -1,0 +1,12 @@
+{
+    "files.associations": {
+        "**/prisma/data-migrations/*.sql": "plaintext",
+        "**/.github/workflows/*.yml": "yaml"
+    },
+    "yaml.validate": false,
+    "yaml.schemas": {},
+    "yaml.schemaStore.enable": false,
+    "[yaml]": {
+        "editor.defaultFormatter": null
+    }
+}
