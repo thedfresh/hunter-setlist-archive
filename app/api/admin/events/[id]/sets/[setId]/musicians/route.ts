@@ -23,7 +23,7 @@ export async function POST(req: Request, { params }: { params: { id: string; set
     try {
         const setId = Number(params.setId);
         const body = await req.json();
-        const { musicianId, instrumentId, publicNotes, privateNotes } = body;
+        const { musicianId, instrumentId, publicNotes, privateNotes, includesVocals } = body;
         if (!musicianId) {
             return NextResponse.json({ error: "musicianId is required" }, { status: 400 });
         }
@@ -40,6 +40,7 @@ export async function POST(req: Request, { params }: { params: { id: string; set
                 instrumentId,
                 publicNotes,
                 privateNotes,
+                includesVocals,
             },
         });
         revalidatePath('/admin/events');

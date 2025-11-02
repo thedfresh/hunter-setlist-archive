@@ -33,7 +33,11 @@ const ShowContext: React.FC<ShowContextProps> = ({
                 <div className="text-xs text-gray-700 mb-2">
                     With {event.eventMusicians
                         .filter((em: any) => em.musician && em.instrument)
-                        .map((em: any) => `${em.musician.name} on ${em.instrument.name}`)
+                        .map((em: any) => {
+                            let str = `${em.musician.name} on ${em.instrument.name}`;
+                            if (em.includesVocals) str += ' and vocals';
+                            return str;
+                        })
                         .join(', ')}
                 </div>
             )}

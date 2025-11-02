@@ -101,7 +101,11 @@ export default function EventMusiciansSection({ eventId }: EventMusiciansSection
                             ) : (
                                 eventMusicians.map((em) => (
                                     <tr key={em.id}>
-                                        <td>{em.musician?.name || "—"}</td>
+                                        <td>
+                                            {em.musician?.name || "—"}
+                                            {em.instrument && ` on ${em.instrument.displayName}`}
+                                            {em.includesVocals && ' and vocals'}
+                                        </td>
                                         <td>{em.instrument?.displayName || "—"}</td>
                                         <td>
                                             <div className="flex gap-2 justify-end">

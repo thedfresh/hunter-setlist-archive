@@ -27,7 +27,7 @@ export async function PUT(req: Request, { params }: { params: { id: string; setI
         const setId = Number(params.setId);
         const musicianId = Number(params.musicianId);
         const body = await req.json();
-        const { instrumentId, publicNotes, privateNotes } = body;
+        const { instrumentId, publicNotes, privateNotes, includesVocals } = body;
         const setMusician = await prisma.setMusician.findFirst({
             where: { setId, musicianId },
         });
@@ -40,6 +40,7 @@ export async function PUT(req: Request, { params }: { params: { id: string; setI
                 instrumentId,
                 publicNotes,
                 privateNotes,
+                includesVocals,
             },
         });
         revalidatePath('/admin/events');

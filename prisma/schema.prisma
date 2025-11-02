@@ -162,6 +162,7 @@ model EventMusician {
   publicNotes  String?     @map("public_notes")
   createdAt    DateTime    @default(now()) @map("created_at")
   privateNotes String?     @map("private_notes")
+  includesVocals Boolean   @default(false) @map("includes_vocals")
   event        Event       @relation(fields: [eventId], references: [id], onDelete: Cascade)
   instrument   Instrument? @relation(fields: [instrumentId], references: [id])
   musician     Musician    @relation(fields: [musicianId], references: [id])
@@ -206,6 +207,7 @@ model SetMusician {
   instrumentId Int?        @map("instrument_id")
   publicNotes  String?     @map("public_notes")
   privateNotes String?     @map("private_notes")
+  includesVocals Boolean   @default(false) @map("includes_vocals")
   createdAt    DateTime    @default(now()) @map("created_at")
   instrument   Instrument? @relation(fields: [instrumentId], references: [id])
   musician     Musician    @relation(fields: [musicianId], references: [id])
@@ -473,4 +475,12 @@ model RssEntry {
   updatedAt   DateTime @default(now()) @updatedAt @map("updated_at")
 
   @@map("rss_entries")
+}
+
+model DataMigration {
+  id         Int      @id @default(autoincrement())
+  filename   String   @unique @db.VarChar(255)
+  appliedAt  DateTime @default(now()) @map("applied_at") @db.Timestamp(6)
+  
+  @@map("data_migrations")
 }

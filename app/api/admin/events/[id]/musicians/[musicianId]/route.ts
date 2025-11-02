@@ -12,13 +12,18 @@ export async function PUT(req: Request, { params }: { params: { id: string; musi
     } catch {
         return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
     }
-    const { instrumentId, publicNotes, privateNotes } = body;
+    const { instrumentId, publicNotes, privateNotes, includesVocals } = body;
     try {
         const existing = await prisma.eventMusician.findFirst({ where: { eventId, musicianId } });
         if (!existing) return NextResponse.json({ error: 'EventMusician not found' }, { status: 404 });
         const updated = await prisma.eventMusician.update({
             where: { id: existing.id },
-            data: { instrumentId, publicNotes, privateNotes },
+            data: {
+                instrumentId: instrumentId || null,  // Explicitly convert undefined to null
+                publicNotes,
+                privateNotes,
+                includesVocals
+            },
         });
         revalidatePath('/admin/events');
         return NextResponse.json(updated);

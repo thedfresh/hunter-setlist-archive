@@ -29,7 +29,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     } catch {
         return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
     }
-    const { musicianId, instrumentId, publicNotes, privateNotes } = body;
+    const { musicianId, instrumentId, publicNotes, privateNotes, includesVocals } = body;
     if (!musicianId || typeof musicianId !== 'number') {
         return NextResponse.json({ error: 'musicianId is required and must be a number' }, { status: 400 });
     }
@@ -41,6 +41,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
                 instrumentId,
                 publicNotes,
                 privateNotes,
+                includesVocals,
             },
         });
         revalidatePath('/admin/events');

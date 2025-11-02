@@ -13,6 +13,7 @@ export default function EventMusicianForm({ eventId, musicianId, onSuccess, onCa
     const { showToast } = useToast();
     const [selectedMusicianId, setSelectedMusicianId] = useState<number | string>("");
     const [instrumentId, setInstrumentId] = useState<number | string>("");
+    const [includesVocals, setIncludesVocals] = useState(false);
     const [publicNotes, setPublicNotes] = useState("");
     const [privateNotes, setPrivateNotes] = useState("");
     const [loading, setLoading] = useState(false);
@@ -54,6 +55,7 @@ export default function EventMusicianForm({ eventId, musicianId, onSuccess, onCa
                 setInstrumentId(found.instrumentId || "");
                 setPublicNotes(found.publicNotes || "");
                 setPrivateNotes(found.privateNotes || "");
+                setIncludesVocals(found.includesVocals || false);
             }
         } catch {
             showToast("Failed to load musician data", "error");
@@ -72,6 +74,7 @@ export default function EventMusicianForm({ eventId, musicianId, onSuccess, onCa
                 instrumentId: instrumentId ? Number(instrumentId) : null,
                 publicNotes,
                 privateNotes,
+                includesVocals,
             };
             let res;
             if (musicianId === null) {
@@ -130,6 +133,17 @@ export default function EventMusicianForm({ eventId, musicianId, onSuccess, onCa
                         ))}
                     </select>
                 </div>
+            </div>
+            <div className="form-group">
+                <label className="checkbox-label">
+                    <input
+                        type="checkbox"
+                        className="checkbox-input"
+                        checked={includesVocals}
+                        onChange={e => setIncludesVocals(e.target.checked)}
+                    />
+                    Includes vocals
+                </label>
             </div>
 
             <div className="grid grid-cols-2 gap-4 mb-4">

@@ -394,7 +394,11 @@ const Setlist: React.FC<SetlistProps> = ({
                                     <span className="text-gray-600 font-normal text-xs ml-2">
                                         (with {set.setMusicians
                                             .filter((sm: any) => sm.musician && sm.instrument)
-                                            .map((sm: any) => `${sm.musician.name} on ${sm.instrument.displayName}`)
+                                            .map((sm: any) => {
+                                                let str = `${sm.musician.name} on ${sm.instrument.displayName}`;
+                                                if (sm.includesVocals) str += ' and vocals';
+                                                return str;
+                                            })
                                             .join(', ')})
                                     </span>
                                 )}

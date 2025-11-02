@@ -13,6 +13,7 @@ export default function SetMusicianForm({ eventId, setId, musicianId, onSuccess,
     const [instruments, setInstruments] = useState<any[]>([]);
     const [selectedMusician, setSelectedMusician] = useState<number | "">(musicianId ?? "");
     const [selectedInstrument, setSelectedInstrument] = useState<number | "">("");
+    const [includesVocals, setIncludesVocals] = useState(false);
     const [publicNotes, setPublicNotes] = useState("");
     const [privateNotes, setPrivateNotes] = useState("");
     const [loading, setLoading] = useState(false);
@@ -44,6 +45,7 @@ export default function SetMusicianForm({ eventId, setId, musicianId, onSuccess,
                         setSelectedInstrument(data.instrumentId ?? "");
                         setPublicNotes(data.publicNotes ?? "");
                         setPrivateNotes(data.privateNotes ?? "");
+                        setIncludesVocals(data.includesVocals ?? false);
                     }
                 });
         }
@@ -58,11 +60,13 @@ export default function SetMusicianForm({ eventId, setId, musicianId, onSuccess,
                 setError("Musician is required");
                 setLoading(false);
                 return;
-            } const payload = {
+            }
+            const payload = {
                 musicianId: selectedMusician,
                 instrumentId: selectedInstrument || null,
                 publicNotes,
                 privateNotes,
+                includesVocals,
             };
             let response;
             if (musicianId) {
@@ -123,6 +127,17 @@ export default function SetMusicianForm({ eventId, setId, musicianId, onSuccess,
                             <option key={i.id} value={i.id}>{i.displayName}</option>
                         ))}
                     </select>
+                </div>
+                <div className="flex-1">
+                    <label className="checkbox-label">
+                        <input
+                            type="checkbox"
+                            className="checkbox-input"
+                            checked={includesVocals}
+                            onChange={e => setIncludesVocals(e.target.checked)}
+                        />
+                        Includes vocals
+                    </label>
                 </div>
             </div>
             <div className="flex gap-4">

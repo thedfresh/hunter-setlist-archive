@@ -415,7 +415,8 @@ function SetCard({
                                 <div key={sm.id} className="flex items-center justify-between text-sm py-1">
                                     <span>
                                         {sm.musician?.name}
-                                        {sm.instrument && <span className="text-gray-500">, {sm.instrument.displayName}</span>}
+                                        {sm.instrument && ` on ${sm.instrument.displayName}`}
+                                        {sm.includesVocals && ' and vocals'}
                                     </span>
                                     <div className="flex gap-2">
                                         <button
@@ -549,11 +550,16 @@ function SortablePerformance({
                     )}
                     {perf.performanceMusicians && perf.performanceMusicians.length > 0 && (
                         <div className="flex gap-1 flex-wrap">
-                            {perf.performanceMusicians.map((pm: any) => (
-                                <span key={pm.id} className="inline-block px-2 py-1 text-xs font-medium bg-green-50 text-green-700 rounded whitespace-nowrap">
-                                    {pm.musician?.name}, {pm.instrument?.displayName || 'vocals'}
-                                </span>
-                            ))}
+                            {perf.performanceMusicians.map((pm: any) => {
+                                let desc = `${pm.musician?.name}`;
+                                if (pm.instrument) desc += ` on ${pm.instrument.displayName}`;
+                                if (pm.includesVocals) desc += ' and vocals';
+                                return (
+                                    <span key={pm.id} className="inline-block px-2 py-1 text-xs font-medium bg-green-50 text-green-700 rounded whitespace-nowrap">
+                                        {desc}
+                                    </span>
+                                );
+                            })}
                         </div>
                     )}
                     {perf.song?.songTags && perf.song.songTags.length > 0 && (
