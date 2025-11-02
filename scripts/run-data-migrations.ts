@@ -39,16 +39,33 @@ async function main() {
         console.log(`→ Running ${file}...`);
         const sql = fs.readFileSync(path.join(migrationsDir, file), 'utf-8');
 
-        try {
-            await prisma.$executeRawUnsafe(sql);
+        // Split SQL file into statements by semicolon
+        const statements = sql
+            .split(';')
+            .map(s => s.trim())
+            .filter(s => s.length > 0 && !s.startsWith('--'));  // Skip comment-only lines
+
+        let allSucceeded = true;
+        for (let i = 0; i < statements.length; i++) {
+            const stmt = statements[i];
+            try {
+                await prisma.$executeRawUnsafe(stmt);
+            } catch (error) {
+                allSucceeded = false;
+                // Show partial statement and line number for debugging
+                const lines = stmt.split('\n');
+                const preview = lines.slice(0, 2).join(' ');
+                console.error(`✗ Failed statement ${i + 1} in ${file}:`, preview);
+                console.error(error);
+                throw error;
+            }
+        }
+        if (allSucceeded) {
             await prisma.$executeRawUnsafe(
                 `INSERT INTO data_migrations (filename) VALUES ($1)`,
                 file
             );
             console.log(`✓ Applied ${file}`);
-        } catch (error) {
-            console.error(`✗ Failed to apply ${file}:`, error);
-            throw error;
         }
     }
 
