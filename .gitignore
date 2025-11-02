@@ -49,3 +49,5 @@ CONTEXT.md
 local-data/
 backups/
 *.sql
+!prisma/migrations/**/*.sql
+!prisma/data-migrations/**/*.sql
