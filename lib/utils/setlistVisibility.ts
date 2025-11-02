@@ -25,6 +25,7 @@ export interface Performance {
             name: string;
             firstName?: string | null;
             lastName?: string | null;
+            slug?: string;
         };
         instrument: { displayName: string };
         includesVocals?: boolean;
@@ -411,10 +412,12 @@ export function generatePerformanceMusicianNote(
         const displayName = m?.firstName && m?.lastName
             ? `${m.firstName} ${m.lastName}`
             : m?.name || '';
+        const slug = m?.slug;
         const instrumentText = pm.instrument?.displayName || '';
         const withVocals = pm.includesVocals ? `${instrumentText} and vocals` : instrumentText;
         return {
             musicianName: displayName,
+            musicianSlug: slug,
             instrumentName: withVocals
         };
     });
@@ -429,10 +432,15 @@ export function generatePerformanceMusicianNote(
         return a.musicianName.localeCompare(b.musicianName);
     });
 
-    // Generate combined text
+    // Generate combined text with links if slug exists
     const parts = plainMusicians
         .filter(pm => pm.musicianName && pm.instrumentName)
-        .map(pm => `${pm.musicianName} on ${pm.instrumentName}`);
+        .map(pm => {
+            if (pm.musicianSlug) {
+                return `<a href="/musician/${pm.musicianSlug}" class="link-internal">${pm.musicianName}</a> on ${pm.instrumentName}`;
+            }
+            return `${pm.musicianName} on ${pm.instrumentName}`;
+        });
 
     return parts.length > 0 ? parts.join(', ') : null;
 }

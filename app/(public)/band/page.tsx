@@ -46,7 +46,13 @@ export default async function BandBrowsePage() {
                   <ul className="text-sm text-gray-700">
                     {band.bandMusicians.map((bm: any) => (
                       <li key={bm.id} className="mb-1">
-                        {bm.musician?.name}
+                        {bm.musician?.slug ? (
+                          <Link href={`/musician/${bm.musician.slug}`} className="link-internal">
+                            {bm.musician.displayName || bm.musician.name}
+                          </Link>
+                        ) : (
+                          bm.musician?.name
+                        )}
                         {bm.musician?.defaultInstruments && bm.musician.defaultInstruments.length > 0 && (
                           <span className="text-xs text-gray-500"> — {bm.musician.defaultInstruments.map((di: any) => di.instrument.displayName).join(', ')}</span>
                         )}

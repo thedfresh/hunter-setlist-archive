@@ -80,7 +80,12 @@ const PerformanceNotes: React.FC<PerformanceNotesProps> = ({
         <div className="mt-4">
           {uniqueNotes.map(({ note, num }) => (
             <div key={num} className="notes-content mb-2">
-              <span className="font-semibold inline-block w-4 text-center">[{num}]</span> {note}
+              <span className="font-semibold inline-block w-4 text-center">[{num}]</span>{' '}
+              <span
+                dangerouslySetInnerHTML={{
+                  __html: note.replace(/<a /g, '<a class="link-internal" ')
+                }}
+              />
             </div>
           ))}
         </div>

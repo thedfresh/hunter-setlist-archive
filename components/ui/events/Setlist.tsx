@@ -391,16 +391,21 @@ const Setlist: React.FC<SetlistProps> = ({
                                     </span>
                                 )}
                                 {set.setMusicians && set.setMusicians.length > 0 && (
-                                    <span className="text-gray-600 font-normal text-xs ml-2">
-                                        (with {set.setMusicians
+                                    <span className="text-gray-600 font-normal text-xs ml-2" dangerouslySetInnerHTML={{
+                                        __html: `(with ${set.setMusicians
                                             .filter((sm: any) => sm.musician && sm.instrument)
                                             .map((sm: any) => {
-                                                let str = `${sm.musician.name} on ${sm.instrument.displayName}`;
+                                                const name = sm.musician.displayName || sm.musician.name;
+                                                const slug = sm.musician.slug;
+                                                let str = slug
+                                                    ? `<a href="/musician/${slug}" class="link-internal">${name}</a>`
+                                                    : name;
+                                                str += ` on ${sm.instrument.displayName}`;
                                                 if (sm.includesVocals) str += ' and vocals';
                                                 return str;
                                             })
-                                            .join(', ')})
-                                    </span>
+                                            .join(', ')})`
+                                    }} />
                                 )}
                             </div>
                         )}

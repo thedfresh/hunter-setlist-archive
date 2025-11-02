@@ -30,16 +30,24 @@ const ShowContext: React.FC<ShowContextProps> = ({
             <div className="notes-title">Show Notes</div>
             {/* Event-level musicians */}
             {hasEventMusicians && (
-                <div className="text-xs text-gray-700 mb-2">
-                    With {event.eventMusicians
-                        .filter((em: any) => em.musician && em.instrument)
-                        .map((em: any) => {
-                            let str = `${em.musician.name} on ${em.instrument.name}`;
-                            if (em.includesVocals) str += ' and vocals';
-                            return str;
-                        })
-                        .join(', ')}
-                </div>
+                <div
+                    className="text-xs text-gray-700 mb-2"
+                    dangerouslySetInnerHTML={{
+                        __html: 'With ' + event.eventMusicians
+                            .filter((em: any) => em.musician && em.instrument)
+                            .map((em: any) => {
+                                const name = em.musician.displayName || em.musician.name;
+                                const slug = em.musician.slug;
+                                let str = slug
+                                    ? `<a href="/musician/${slug}" class="link-internal">${name}</a>`
+                                    : name;
+                                str += ` on ${em.instrument.name}`;
+                                if (em.includesVocals) str += ' and vocals';
+                                return str;
+                            })
+                            .join(', ')
+                    }}
+                />
             )}
             {/* Public notes */}
             {hasPublicNotes && (

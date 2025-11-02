@@ -4,17 +4,25 @@ export async function getBandBySlug(slug: string) {
     where: { slug },
     include: {
       bandMusicians: {
-        include: {
+        select: {
+          id: true,
+          joinedDate: true,
+          leftDate: true,
+          publicNotes: true,
           musician: {
             select: {
+              id: true,
               name: true,
+              firstName: true,
+              lastName: true,
+              slug: true,
               defaultInstruments: {
-                select: {
-                  instrument: { select: { displayName: true } }
+                include: {
+                  instrument: true
                 }
               }
             }
-          },
+          }
         },
         orderBy: [{ joinedDate: 'asc' }],
       },
@@ -29,7 +37,15 @@ export async function getBandBySlug(slug: string) {
           slug: true,
           verified: true,
           sortDate: true,
-          venue: { select: { name: true, city: true, stateProvince: true } },
+          venue: {
+            select: {
+              name: true,
+              city: true,
+              stateProvince: true,
+              context: true,
+              slug: true
+            }
+          }
         },
         orderBy: [
           { sortDate: 'asc' },
