@@ -34,33 +34,41 @@ export default async function MusicianDetailPage({ params }: { params: { slug: s
                         <h2 className="font-semibold text-lg mb-2">Statistics</h2>
                         <div className="text-sm text-gray-600 space-y-1">
                             <div>Total Appearances: <span className="font-medium">{appearanceCount}</span></div>
-                            {dateRange && <div>Date Range: <span className="font-medium">{dateRange}</span></div>}
                         </div>
                     </div>
                     {musician.defaultInstrument && (
                         <div className="mb-8">
-                            <h2 className="font-semibold text-lg mb-2">Default Instrument</h2>
+                            <h2 className="font-semibold text-lg mb-2">Instrument</h2>
                             <div className="text-sm text-gray-600">{musician.defaultInstrument.displayName}</div>
                         </div>
                     )}
                     {musician.bandMusicians && musician.bandMusicians.length > 0 && (
                         <div className="mb-8">
                             <h2 className="font-semibold text-lg mb-2">Band Memberships</h2>
-                            <ul className="list-disc ml-6">
+                            <div className="space-y-4">
                                 {musician.bandMusicians.map((bm: any) => (
-                                    <li key={bm.id} className="mb-1">
-                                        <Link href={`/band/${bm.band.slug}`} className="link-internal">
-                                            {bm.band.displayName || bm.band.name}
-                                        </Link>
-                                        {bm.joinedDate && (
-                                            <span className="ml-2 text-xs text-gray-600">Joined: {formatEventDate(bm.joinedDate)}</span>
-                                        )}
-                                        {bm.leftDate && (
-                                            <span className="ml-2 text-xs text-gray-600">Left: {formatEventDate(bm.leftDate)}</span>
-                                        )}
-                                    </li>
+                                    <div key={bm.id}>
+                                        <div>
+                                            <Link href={`/band/${bm.band.slug}`} className="link-internal">
+                                                {bm.band.displayName || bm.band.name}
+                                            </Link>
+                                        </div>
+                                        <div className="text-xs text-gray-600 mt-2">
+                                            {bm.joinedDate && (
+                                                <span>
+                                                    Joined: {new Date(bm.joinedDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short' })}
+                                                </span>
+                                            )}
+                                            {bm.joinedDate && bm.leftDate && <span className="mx-2">•</span>}
+                                            {bm.leftDate && (
+                                                <span>
+                                                    Left: {new Date(bm.leftDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short' })}
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
                                 ))}
-                            </ul>
+                            </div>
                         </div>
                     )}
                 </div>

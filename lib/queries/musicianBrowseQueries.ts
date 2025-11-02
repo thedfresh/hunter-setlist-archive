@@ -149,9 +149,18 @@ export async function getMusicianBySlug(slug: string) {
             publicNotes: true,
             defaultInstrument: true,
             bandMusicians: {
-                include: {
-                    band: true,
-                },
+                select: {
+                    id: true,
+                    joinedDate: true,
+                    leftDate: true,
+                    band: {
+                        select: {
+                            id: true,
+                            name: true,
+                            slug: true,
+                        }
+                    }
+                }
             },
         },
     });

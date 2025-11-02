@@ -53,7 +53,7 @@ export default async function BandDetailPage({ params }: { params: { slug: strin
               <div className="text-sm text-gray-600 space-y-1">
                 <div>Total Shows: <span className="font-medium">{totalShows}</span></div>
                 {firstShow && lastShow && (
-                  <div>Date Range: <span className="font-medium">{formatEventDate(firstShow)} – {formatEventDate(lastShow)}</span></div>
+                  <div>Date: <span className="font-medium">{formatEventDate(firstShow)} – {formatEventDate(lastShow)}</span></div>
                 )}
               </div>
             </div>
