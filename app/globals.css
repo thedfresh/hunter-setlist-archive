@@ -1380,6 +1380,14 @@
     @apply font-semibold text-gray-800 mt-3 mb-1;
   }
 
+  .prose-sm.stage-talk-markdown {
+    font-size: 13px;
+  }
+
+  .prose-sm.stage-talk-markdown p {
+    font-size: 13px;
+  }
+
   /* ============================================
     RECORDINGS DISPLAY
     ============================================ */
