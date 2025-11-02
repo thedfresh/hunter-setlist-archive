@@ -11,10 +11,15 @@ export async function getMusiciansBrowse() {
     const musicians = await prisma.musician.findMany({
         include: {
             defaultInstrument: { select: { displayName: true } },
+            bandMusicians: {
+                include: {
+                    band: { select: { id: true, name: true, slug: true } },
+                },
+            },
         },
     });
 
-    // Get all event IDs for each musician from all three sources
+    // Get all event IDs for each musician from all four sources
     const eventIdsByMusician: Record<number, Set<number>> = {};
     const eventMusicians = await prisma.eventMusician.findMany({
         where: { event: getCountableEventsWhere() },
@@ -29,7 +34,7 @@ export async function getMusiciansBrowse() {
         select: { musicianId: true, performance: { select: { set: { select: { eventId: true } } } } },
     });
 
-    // Aggregate event IDs
+    // Aggregate event IDs from explicit appearances
     for (const em of eventMusicians) {
         if (!eventIdsByMusician[em.musicianId]) eventIdsByMusician[em.musicianId] = new Set();
         eventIdsByMusician[em.musicianId].add(em.eventId);
@@ -43,8 +48,78 @@ export async function getMusiciansBrowse() {
         eventIdsByMusician[pm.musicianId].add(pm.performance.set.eventId);
     }
 
+    // Band membership appearances
+    const bandMusicians = await prisma.bandMusician.findMany({
+        select: {
+            musicianId: true,
+            bandId: true,
+            joinedDate: true,
+            leftDate: true,
+        },
+    });
+
+    // Get all bands involved
+    const bandIds = Array.from(new Set(bandMusicians.map(bm => bm.bandId)));
+    const bandEventsById: Record<number, Array<{ id: number, sortDate: Date }>> = {};
+    if (bandIds.length > 0) {
+        const allBandEvents = await prisma.event.findMany({
+            where: {
+                ...getCountableEventsWhere(),
+                primaryBandId: { in: bandIds },
+            },
+            select: { id: true, sortDate: true, primaryBandId: true },
+        });
+        for (const event of allBandEvents) {
+            if (!event.primaryBandId) continue;
+            if (!event.sortDate) continue;
+            if (!bandEventsById[event.primaryBandId]) bandEventsById[event.primaryBandId] = [];
+            bandEventsById[event.primaryBandId].push({ id: event.id, sortDate: event.sortDate });
+        }
+    }
+
+    for (const bm of bandMusicians) {
+        const { musicianId, bandId, joinedDate, leftDate } = bm;
+        if (!eventIdsByMusician[musicianId]) eventIdsByMusician[musicianId] = new Set();
+        const events = bandEventsById[bandId] || [];
+        for (const event of events) {
+            const sortDate = event.sortDate instanceof Date ? event.sortDate : new Date(event.sortDate);
+            let valid = true;
+            if (joinedDate && sortDate < joinedDate) valid = false;
+            if (leftDate && sortDate > leftDate) valid = false;
+            if (valid) {
+                eventIdsByMusician[musicianId].add(event.id);
+            }
+        }
+    }
+
     // Filter musicians with at least one appearance
     const filtered = musicians.filter(m => eventIdsByMusician[m.id]?.size > 0);
+
+    // Check vocals for each musician
+    const hasVocalsByMusician: Record<number, boolean> = {};
+    for (const m of filtered) {
+        let hasVocals = false;
+        // Check eventMusician
+        const eventVocals = await prisma.eventMusician.findFirst({
+            where: { musicianId: m.id, includesVocals: true },
+        });
+        if (eventVocals) hasVocals = true;
+        // Check setMusician
+        if (!hasVocals) {
+            const setVocals = await prisma.setMusician.findFirst({
+                where: { musicianId: m.id, includesVocals: true },
+            });
+            if (setVocals) hasVocals = true;
+        }
+        // Check performanceMusician
+        if (!hasVocals) {
+            const perfVocals = await prisma.performanceMusician.findFirst({
+                where: { musicianId: m.id, includesVocals: true },
+            });
+            if (perfVocals) hasVocals = true;
+        }
+        hasVocalsByMusician[m.id] = hasVocals;
+    }
 
     // Map results
     return filtered
@@ -52,8 +127,12 @@ export async function getMusiciansBrowse() {
             id: m.id,
             slug: m.slug,
             displayName: getDisplayName(m),
+            firstName: m.firstName,
+            lastName: m.lastName,
             defaultInstrument: m.defaultInstrument?.displayName || null,
             appearanceCount: eventIdsByMusician[m.id]?.size || 0,
+            bands: m.bandMusicians?.map(bm => bm.band) || [],
+            hasVocals: hasVocalsByMusician[m.id] || false,
         }))
         .sort((a, b) => a.displayName.localeCompare(b.displayName));
 }
@@ -155,6 +234,83 @@ export async function getMusicianBySlug(slug: string) {
             instrument: pm.instrument?.displayName || null,
             includesVocals: pm.includesVocals || false,
         });
+    }
+
+    // Band membership events
+    const bandMemberships = await prisma.bandMusician.findMany({
+        where: { musicianId: musician.id },
+        include: {
+            band: { select: { id: true } },
+        },
+    });
+    for (const bm of bandMemberships) {
+        const { band, joinedDate, leftDate } = bm;
+        // Get events for this band
+        const bandEvents = await prisma.event.findMany({
+            where: {
+                ...getBrowsableEventsWhere(),
+                primaryBandId: band.id,
+            },
+            select: {
+                id: true,
+                slug: true,
+                displayDate: true,
+                sortDate: true,
+                year: true,
+                month: true,
+                day: true,
+                venue: true,
+                primaryBand: true,
+            },
+        });
+        for (const event of bandEvents) {
+            if (!event.sortDate) continue;
+            const sortDate = event.sortDate instanceof Date ? event.sortDate : new Date(event.sortDate);
+            let valid = true;
+            if (joinedDate && sortDate < joinedDate) valid = false;
+            if (leftDate && sortDate > leftDate) valid = false;
+            if (valid && !eventDetails[event.id]) {
+                eventDetails[event.id] = {
+                    event,
+                    appearances: [{
+                        type: 'band-member',
+                        instrument: musician.defaultInstrument?.displayName || null,
+                        includesVocals: false,
+                    }],
+                };
+            }
+        }
+    }
+
+    // Band membership events
+    const bandMusicians = await prisma.bandMusician.findMany({
+        where: { musicianId: musician.id },
+        include: {
+            band: { select: { id: true } },
+        },
+    });
+    for (const bm of bandMusicians) {
+        const { band, joinedDate, leftDate } = bm;
+        // Get events for this band
+        const bandEvents = await prisma.event.findMany({
+            where: {
+                ...getBrowsableEventsWhere(),
+                primaryBandId: band.id,
+            },
+            select: { id: true, sortDate: true },
+        });
+        for (const event of bandEvents) {
+            if (!event.sortDate) continue;
+            const sortDate = event.sortDate instanceof Date ? event.sortDate : new Date(event.sortDate);
+            let valid = true;
+            if (joinedDate && sortDate < joinedDate) valid = false;
+            if (leftDate && sortDate > leftDate) valid = false;
+            if (valid) {
+                if (!eventDetails[event.id]) {
+                    eventDetails[event.id] = { event, appearances: [] };
+                }
+            }
+        }
     }
 
     // Sort events by sortDate DESC

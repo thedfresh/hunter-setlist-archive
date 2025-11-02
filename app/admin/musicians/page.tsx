@@ -66,10 +66,8 @@ export default function MusiciansPage() {
 
     const sorted = [...musicians].sort((a, b) => {
         if (sortKey === 'appearances') {
-            const aVal = (a._count?.eventMusicians ?? 0) + (a._count?.performanceMusicians ?? 0) + (a._count?.bandMusicians ?? 0);
-            const bVal = (b._count?.eventMusicians ?? 0) + (b._count?.performanceMusicians ?? 0) + (b._count?.bandMusicians ?? 0);
-            if (aVal < bVal) return sortDir === 'asc' ? -1 : 1;
-            if (aVal > bVal) return sortDir === 'asc' ? 1 : -1;
+            if (a.appearanceCount < b.appearanceCount) return sortDir === 'asc' ? -1 : 1;
+            if (a.appearanceCount > b.appearanceCount) return sortDir === 'asc' ? 1 : -1;
             return 0;
         } else {
             return compareMusicianNames(a, b) * (sortDir === 'asc' ? 1 : -1);
@@ -107,7 +105,6 @@ export default function MusiciansPage() {
                                 <th className="sortable" onClick={() => handleSort('name')}>
                                     Name {sortKey === 'name' && (sortDir === 'asc' ? '▲' : '▼')}
                                 </th>
-                                <th>Uncertain</th>
                                 <th className="sortable" onClick={() => handleSort('appearances')}>
                                     Appearances {sortKey === 'appearances' && (sortDir === 'asc' ? '▲' : '▼')}
                                 </th>
@@ -129,9 +126,8 @@ export default function MusiciansPage() {
                                             <Trash2 className="w-4 h-4" />
                                         </button>
                                     </td>
-                                    <td>{musician.name}</td>
-                                    <td>{musician.isUncertain ? '✔️' : '❌'}</td>
-                                    <td>{(musician._count?.eventMusicians ?? 0) + (musician._count?.performanceMusicians ?? 0) + (musician._count?.bandMusicians ?? 0)}</td>
+                                    <td>{musician.displayName}</td>
+                                    <td>{musician.appearanceCount}</td>
                                 </tr>
                             ))}
                         </tbody>
