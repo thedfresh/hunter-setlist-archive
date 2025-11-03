@@ -49,6 +49,7 @@ export default function SongAdminDetailPage({ params }: { params: { id: string }
     const [selectedTagId, setSelectedTagId] = useState(0);
     const [allTags, setAllTags] = useState<any[]>([]);
     const [tagError, setTagError] = useState('');
+    const [initialLoadComplete, setInitialLoadComplete] = useState(false);
 
     // Navigation state
     const [prevSong, setPrevSong] = useState<any>(null);
@@ -80,6 +81,7 @@ export default function SongAdminDetailPage({ params }: { params: { id: string }
                     privateNotes: data.song.privateNotes || "",
                 });
                 setPublicNotes(data.song.publicNotes || "");
+                setInitialLoadComplete(true);
                 setError("");
             })
             .catch(err => {
@@ -112,7 +114,7 @@ export default function SongAdminDetailPage({ params }: { params: { id: string }
     }, [songId]);
 
     useEffect(() => {
-        if (form.title) {
+        if (form.title && initialLoadComplete) {
             setForm(f => ({ ...f, slug: generateSlugFromName(form.title) }));
         }
     }, [form.title]);

@@ -27,6 +27,7 @@ export default function BandDetailPage({ params }: { params: { id: string } }) {
     });
     const { showToast } = useToast();
     const [saving, setSaving] = useState(false);
+    const [initialLoadComplete, setInitialLoadComplete] = useState(false);
 
     useEffect(() => {
         setLoading(true);
@@ -41,13 +42,14 @@ export default function BandDetailPage({ params }: { params: { id: string } }) {
                     publicNotes: bandData.publicNotes || "",
                     privateNotes: bandData.privateNotes || "",
                 });
+                setInitialLoadComplete(true);
             })
             .catch(() => setError("Failed to load band"))
             .finally(() => setLoading(false));
     }, [bandId]);
 
     useEffect(() => {
-        if (form.name) {
+        if (form.name && initialLoadComplete) {
             setForm(f => ({ ...f, slug: generateSlugFromName(f.name) }));
         }
     }, [form.name]);

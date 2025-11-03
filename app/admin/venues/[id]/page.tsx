@@ -25,6 +25,7 @@ export default function VenueAdminDetailPage({ params }: { params: { id: string 
     const { showToast } = useToast();
     const [saving, setSaving] = useState(false);
     const router = useRouter();
+    const [initialLoadComplete, setInitialLoadComplete] = useState(false);
 
     useEffect(() => {
         setLoading(true);
@@ -44,6 +45,7 @@ export default function VenueAdminDetailPage({ params }: { params: { id: string 
                     publicNotes: data.venue.publicNotes || "",
                     privateNotes: data.venue.privateNotes || "",
                 });
+                setInitialLoadComplete(true);
                 setError("");
             })
             .catch(err => {
@@ -53,7 +55,7 @@ export default function VenueAdminDetailPage({ params }: { params: { id: string 
     }, [venueId]);
 
     useEffect(() => {
-        if (form.name) {
+        if (form.name && initialLoadComplete) {
             setForm(f => ({ ...f, slug: generateVenueSlug(form.name, form.city, form.stateProvince) }));
         }
     }, [form.name, form.city, form.stateProvince]);

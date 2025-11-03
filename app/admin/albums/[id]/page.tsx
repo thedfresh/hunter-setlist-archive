@@ -22,6 +22,7 @@ export default function AlbumDetailPage({ params }: { params: { id: string } }) 
     const [newTrackSongId, setNewTrackSongId] = useState("");
     const [saving, setSaving] = useState(false);
     const { showSuccess, showError } = useToast();
+    const [initialLoadComplete, setInitialLoadComplete] = useState(false);
 
     useEffect(() => {
         async function fetchAlbum() {
@@ -30,6 +31,7 @@ export default function AlbumDetailPage({ params }: { params: { id: string } }) 
             const data = await res.json();
             setAlbum(data.album || data);
             setLoading(false);
+            setInitialLoadComplete(true);
         }
         async function fetchTracks() {
             const res = await fetch(`/api/admin/albums/${albumId}/tracks`);
@@ -52,7 +54,7 @@ export default function AlbumDetailPage({ params }: { params: { id: string } }) 
             ...album,
             [target.name]: target.type === 'checkbox' ? (target as HTMLInputElement).checked : target.value
         });
-        if (e.target.name === 'title') {
+        if (e.target.name === 'title' && initialLoadComplete) {
             setAlbum((prev: any) => ({ ...prev, slug: generateSlugFromName(e.target.value) }));
         }
     }
