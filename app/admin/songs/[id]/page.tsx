@@ -6,7 +6,7 @@ import { formatEventDate } from "@/lib/formatters/dateFormatter";
 import { generateSlugFromName } from "@/lib/utils/generateSlug";
 import { useRouter } from 'next/navigation';
 import { formatVenue } from '@/lib/formatters/venueFormatter';
-import ReactMarkdown from 'react-markdown';
+import Markdown from '@/components/ui/Markdown';
 import remarkGfm from 'remark-gfm';
 import { ExternalLink } from 'lucide-react';
 import { getDisplayName } from "next/dist/shared/lib/utils";
@@ -796,9 +796,9 @@ export default function SongAdminDetailPage({ params }: { params: { id: string }
                                     <label className="form-label mb-2 block">Preview</label>
                                     <div className="border border-gray-200 rounded p-4 bg-white min-h-[500px] prose prose-sm max-w-none overflow-auto">
                                         {publicNotes ? (
-                                            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                            <Markdown>
                                                 {publicNotes}
-                                            </ReactMarkdown>
+                                            </Markdown>
                                         ) : (
                                             <p className="text-gray-400 italic">Nothing to preview</p>
                                         )}

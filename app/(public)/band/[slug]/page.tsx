@@ -2,7 +2,7 @@ import { getBandBySlug } from '@/lib/queries/bandBrowseQueries';
 import { notFound } from 'next/navigation';
 import { PageContainer } from '@/components/ui/PageContainer';
 import Link from 'next/link';
-import ReactMarkdown from 'react-markdown';
+import Markdown from '@/components/ui/Markdown';
 import { formatVenue } from '@/lib/formatters/venueFormatter';
 import remarkGfm from 'remark-gfm';
 import { formatEventDate } from '@/lib/formatters/dateFormatter';
@@ -110,7 +110,7 @@ export default async function BandDetailPage({ params }: { params: { slug: strin
             <div className="mb-8">
               <h2 className="font-semibold text-lg mb-2">Notes</h2>
               <div className="text-sm text-gray-600 prose prose-sm max-w-none">
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>{band.publicNotes}</ReactMarkdown>
+                <Markdown>{band.publicNotes}</Markdown>
               </div>
             </div>
           )}

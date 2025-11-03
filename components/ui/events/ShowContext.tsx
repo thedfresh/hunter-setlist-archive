@@ -1,5 +1,5 @@
 import React from 'react';
-import ReactMarkdown from 'react-markdown';
+import Markdown from '@/components/ui/Markdown';
 import remarkGfm from 'remark-gfm';
 
 interface ShowContextProps {
@@ -52,7 +52,7 @@ const ShowContext: React.FC<ShowContextProps> = ({
             {/* Public notes */}
             {hasPublicNotes && (
                 <div className="notes-content prose prose-sm max-w-none">
-                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{event.publicNotes}</ReactMarkdown>
+                    <Markdown>{event.publicNotes}</Markdown>
                 </div>
             )}
         </div>

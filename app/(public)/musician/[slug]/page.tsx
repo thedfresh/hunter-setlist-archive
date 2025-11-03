@@ -1,7 +1,7 @@
 
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import ReactMarkdown from 'react-markdown';
+import Markdown from '@/components/ui/Markdown';
 import remarkGfm from 'remark-gfm';
 import { getMusicianBySlug } from "@/lib/queries/musicianBrowseQueries";
 import { formatEventDate } from "@/lib/formatters/dateFormatter";
@@ -78,9 +78,9 @@ export default async function MusicianDetailPage({ params }: { params: { slug: s
                         <section>
                             <div className="font-semibold text-lg mb-2">Notes</div>
                             <div className="prose prose-sm max-w-none">
-                                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                <Markdown>
                                     {musician.publicNotes}
-                                </ReactMarkdown>
+                                </Markdown>
                             </div>
                         </section>
                     )}

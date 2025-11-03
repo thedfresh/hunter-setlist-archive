@@ -1,4 +1,4 @@
-import ReactMarkdown from 'react-markdown';
+import Markdown from '@/components/ui/Markdown';
 import remarkGfm from 'remark-gfm';
 import React from 'react';
 
@@ -49,9 +49,9 @@ const StageTalk: React.FC<StageTalkProps> = ({ sets }) => {
             {entry.isBeforeSong ? `Before ${entry.songTitle}:` : `After ${entry.songTitle}:`}
           </div>
           <div className="prose prose-sm max-w-none">
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+            <Markdown>
               {entry.banterText}
-            </ReactMarkdown>
+            </Markdown>
           </div>
         </div>
       ))}

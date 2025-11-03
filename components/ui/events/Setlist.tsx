@@ -1,4 +1,4 @@
-import ReactMarkdown from 'react-markdown';
+import Markdown from '@/components/ui/Markdown';
 import remarkGfm from 'remark-gfm';
 import React, { useEffect } from 'react';
 import { HelpCircle } from 'lucide-react';
@@ -413,7 +413,7 @@ const Setlist: React.FC<SetlistProps> = ({
                         {/* Set notes */}
                         {set.publicNotes && (
                             <div className="set-note text-xs text-gray-600 italic mb-2 prose prose-sm max-w-none">
-                                <ReactMarkdown remarkPlugins={[remarkGfm]}>{set.publicNotes}</ReactMarkdown>
+                                <Markdown>{set.publicNotes}</Markdown>
                             </div>
                         )}
 

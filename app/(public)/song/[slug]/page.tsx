@@ -4,7 +4,7 @@ import { formatEventDate } from '@/lib/formatters/dateFormatter';
 import { getSongWithPerformances } from '@/lib/queries/songQueries';
 import { formatVenue } from '@/lib/formatters/venueFormatter';
 import ExternalLink from '@/components/ui/ExternalLink';
-import ReactMarkdown from 'react-markdown';
+import Markdown from '@/components/ui/Markdown';
 import remarkGfm from 'remark-gfm';
 import Link from 'next/link';
 
@@ -217,9 +217,9 @@ export default async function SongDetailPage({ params }: { params: { slug: strin
             <section>
               <div className="font-semibold text-lg mb-2">Notes</div>
               <div className="prose prose-sm max-w-none">
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                <Markdown>
                   {song.publicNotes}
-                </ReactMarkdown>
+                </Markdown>
               </div>
             </section>
           )}
