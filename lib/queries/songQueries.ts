@@ -20,6 +20,7 @@ export async function getSongWithPerformances(slug: string) {
                 select: {
                     id: true,
                     name: true,
+                    slug: true,
                 }
             },
             links: {

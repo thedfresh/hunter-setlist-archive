@@ -145,23 +145,53 @@
     LINKS
     ============================================ */
 
-  /* Internal links (database navigation) */
+  /* Internal links - default subtle underline */
   .link-internal {
     @apply text-inherit no-underline cursor-pointer transition-all;
+    border-bottom: 1px solid #d1d5db;
+    /* Gray-300 - more visible than e5e7eb */
   }
 
   .link-internal:hover {
-    @apply text-gray-700 underline;
+    color: #b8913d;
+    @apply underline;
+    border-bottom-color: #b8913d;
   }
 
-  /* External links (off-site resources) */
+  /* Remove underline in setlists where songs are already obviously links */
+  .setlist .link-internal,
+  .performance-list .link-internal {
+    border-bottom: none;
+  }
+
+  .setlist .link-internal:hover,
+  .performance-list .link-internal:hover {
+    @apply underline;
+  }
+
   .link-external {
-    @apply font-semibold no-underline transition-all;
-    color: #2563eb;
+    @apply font-semibold transition-all;
+    @apply inline-flex items-center gap-1;
+    color: #9a3412;
+    /* Orange-800 - copper */
+    text-decoration: none;
+  }
+
+  .link-external span {
+    text-decoration: underline;
+    text-decoration-color: #e5e7eb;
+    /* Gray-200 - subtle neutral */
+    text-decoration-thickness: 1px;
   }
 
   .link-external:hover {
-    @apply underline;
+    color: #7c2d12;
+    /* Orange-900 - darker copper */
+  }
+
+  .link-external:hover span {
+    text-decoration-color: #9a3412;
+    /* Orange-800 - matches text on hover */
   }
 
   /* ============================================

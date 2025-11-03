@@ -12,10 +12,10 @@ export default function ExternalLink({ href, children }: ExternalLinkProps) {
             href={href}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-blue-600 font-semibold hover:underline no-underline inline-flex items-center gap-1"
+            className="link-external"
         >
-            {children}
+            <span>{children}</span>
             <ExternalLinkIcon className="w-3 h-3" />
-        </a>
+        </a >
     );
 }

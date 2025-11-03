@@ -3,7 +3,7 @@ import { PageContainer } from '@/components/ui/PageContainer';
 import { formatEventDate } from '@/lib/formatters/dateFormatter';
 import { getSongWithPerformances } from '@/lib/queries/songQueries';
 import { formatVenue } from '@/lib/formatters/venueFormatter';
-import { ExternalLink } from 'lucide-react';
+import ExternalLink from '@/components/ui/ExternalLink';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import Link from 'next/link';
@@ -120,11 +120,25 @@ export default async function SongDetailPage({ params }: { params: { slug: strin
               {song.songBy && <div>Written by: {song.songBy}</div>}
               {!song.songBy && song.lyricsBy && <div>Lyrics by: {song.lyricsBy}</div>}
               {!song.songBy && song.musicBy && <div>Music by: {song.musicBy}</div>}
-              {song.leadVocals && song.leadVocals.name !== 'Robert Hunter' && (
-                <div>Lead vocals: {song.leadVocals.name}</div>
-              )}
             </div>
           </section>
+
+          {/* Lead Vocals Section */}
+          {song.leadVocals && song.leadVocals.name &&
+            !['hunter', 'robert hunter'].includes(song.leadVocals.name.trim().toLowerCase()) && (
+              <section>
+                <div className="font-semibold text-lg mb-2">Lead Vocals</div>
+                <div className="text-sm text-gray-700 space-y-1">
+                  {song.leadVocals.slug ? (
+                    <Link href={`/musician/${song.leadVocals.slug}`} className="link-internal">
+                      {song.leadVocals.name}
+                    </Link>
+                  ) : (
+                    song.leadVocals.name
+                  )}
+                </div>
+              </section>
+            )}
 
           {/* Variants Section */}
           {(song.parentSong || (song.variants && song.variants.length > 0)) && (
@@ -166,13 +180,12 @@ export default async function SongDetailPage({ params }: { params: { slug: strin
           {song.links && song.links.length > 0 && (
             <section>
               <div className="font-semibold text-lg mb-2">Links</div>
-              <ul className="space-y-1">
+              <ul className="space-y-1 text-sm">
                 {song.links.map((link: any) => (
                   <li key={link.id}>
-                    <a href={link.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 font-semibold text-sm flex items-center gap-1 hover:text-blue-800">
+                    <ExternalLink href={link.url}>
                       {link.title || link.url}
-                      <ExternalLink size={14} className="flex-shrink-0" />
-                    </a>
+                    </ExternalLink>
                     {/* {link.linkType && (
                       <span className="text-xs text-gray-500 ml-1">({link.linkType.name})</span>
                     )} */}
