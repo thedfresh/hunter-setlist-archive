@@ -96,7 +96,7 @@ export default function BandMemberForm({ bandId, membershipId, onSuccess, onCanc
                 >
                     <option value="">Select musician...</option>
                     {musicians.map(m => (
-                        <option key={m.id} value={m.id}>{m.name}</option>
+                        <option key={m.id} value={m.id}>{m.displayName || m.name}</option>
                     ))}
                 </select>
             </div>

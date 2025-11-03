@@ -111,7 +111,7 @@ export default function SetMusicianForm({ eventId, setId, musicianId, onSuccess,
                     >
                         <option value="">Select musician...</option>
                         {musicians.map(m => (
-                            <option key={m.id} value={m.id}>{m.name}</option>
+                            <option key={m.id} value={m.id}>{m.displayName || m.name}</option>
                         ))}
                     </select>
                 </div>

@@ -359,7 +359,7 @@ export default function PerformanceEditor({ eventId, setId, performanceId, onSuc
                 >
                     <option value="">Hunter (default)</option>
                     {musicians.map((m: any) => (
-                        <option key={m.id} value={m.id}>{m.name}</option>
+                        <option key={m.id} value={m.id}>{m.displayName || m.name}</option>
                     ))}
                 </select>
             </div>
@@ -429,7 +429,7 @@ export default function PerformanceEditor({ eventId, setId, performanceId, onSuc
                     <div className="grid grid-cols-2 gap-2 mt-2">
                         <select className="select" value={selectedMusicianId ?? ""} onChange={e => setSelectedMusicianId(Number(e.target.value))}>
                             <option value="">Select musician</option>
-                            {musicians.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
+                            {musicians.map(m => <option key={m.id} value={m.id}>{m.displayName || m.name}</option>)}
                         </select>
                         <select className="select" value={selectedInstrumentId ?? ""} onChange={e => setSelectedInstrumentId(Number(e.target.value))}>
                             <option value="">Select instrument</option>

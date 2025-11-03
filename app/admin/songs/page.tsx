@@ -76,7 +76,7 @@ export default function SongsAdminPage() {
 
     const filtered = songs.filter(song =>
         song.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (song.alternateTitle || '').toLowerCase().includes(searchTerm.toLowerCase())
+        (song.slug || '').toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     const sorted = [...filtered].sort((a, b) => {
@@ -87,6 +87,9 @@ export default function SongsAdminPage() {
         } else if (sortKey === 'performanceCount') {
             aVal = a.performanceCount ?? 0;
             bVal = b.performanceCount ?? 0;
+        } else if (["songBy", "writtenBy", "lyricsBy", "slug"].includes(sortKey)) {
+            aVal = a[sortKey]?.toLowerCase?.() || '';
+            bVal = b[sortKey]?.toLowerCase?.() || '';
         } else {
             aVal = a[sortKey] ?? '';
             bVal = b[sortKey] ?? '';
@@ -130,7 +133,18 @@ export default function SongsAdminPage() {
                                 <th className="sortable" onClick={() => handleSort('title')}>
                                     Title {sortKey === 'title' ? (sortOrder === 'asc' ? '▲' : '▼') : ''}
                                 </th>
-                                <th>Alternate Title</th>
+                                <th className="sortable" onClick={() => handleSort('slug')}>
+                                    Slug {sortKey === 'slug' ? (sortOrder === 'asc' ? '▲' : '▼') : ''}
+                                </th>
+                                <th className="sortable" onClick={() => handleSort('songBy')}>
+                                    SongBy {sortKey === 'songBy' ? (sortOrder === 'asc' ? '▲' : '▼') : ''}
+                                </th>
+                                <th className="sortable" onClick={() => handleSort('writtenBy')}>
+                                    WrittenBy {sortKey === 'writtenBy' ? (sortOrder === 'asc' ? '▲' : '▼') : ''}
+                                </th>
+                                <th className="sortable" onClick={() => handleSort('lyricsBy')}>
+                                    LyricsBy {sortKey === 'lyricsBy' ? (sortOrder === 'asc' ? '▲' : '▼') : ''}
+                                </th>
                                 <th className="sortable" onClick={() => handleSort('performanceCount')}>
                                     Performances {sortKey === 'performanceCount' ? (sortOrder === 'asc' ? '▲' : '▼') : ''}
                                 </th>
@@ -153,7 +167,10 @@ export default function SongsAdminPage() {
                                         </button>
                                     </td>
                                     <td>{song.title}</td>
-                                    <td>{song.alternateTitle || ''}</td>
+                                    <td>{song.slug}</td>
+                                    <td>{song.songBy}</td>
+                                    <td>{song.writtenBy}</td>
+                                    <td>{song.lyricsBy}</td>
                                     <td>{song.performanceCount ?? 0}</td>
                                 </tr>
                             ))}
