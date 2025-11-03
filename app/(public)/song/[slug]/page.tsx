@@ -103,6 +103,8 @@ export default async function SongDetailPage({ params }: { params: { slug: strin
             </div>
           </section>
 
+
+
           {/* Original Artist (if cover) */}
           {song.originalArtist && song.originalArtist.toLowerCase() !== 'hunter' && (
             <section>
@@ -160,6 +162,25 @@ export default async function SongDetailPage({ params }: { params: { slug: strin
               </div>
             </section>
           )}
+          {/* Links */}
+          {song.links && song.links.length > 0 && (
+            <section>
+              <div className="font-semibold text-lg mb-2">Links</div>
+              <ul className="space-y-1">
+                {song.links.map((link: any) => (
+                  <li key={link.id}>
+                    <a href={link.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 font-semibold text-sm flex items-center gap-1 hover:text-blue-800">
+                      {link.title || link.url}
+                      <ExternalLink size={14} className="flex-shrink-0" />
+                    </a>
+                    {/* {link.linkType && (
+                      <span className="text-xs text-gray-500 ml-1">({link.linkType.name})</span>
+                    )} */}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
 
           {/* Tags */}
           {song.songTags.length > 0 && (
@@ -190,25 +211,6 @@ export default async function SongDetailPage({ params }: { params: { slug: strin
             </section>
           )}
 
-          {/* Links */}
-          {song.links && song.links.length > 0 && (
-            <section>
-              <div className="font-semibold text-lg mb-2">Links</div>
-              <ul className="space-y-1">
-                {song.links.map((link: any) => (
-                  <li key={link.id}>
-                    <a href={link.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 font-semibold text-sm flex items-center gap-1 hover:text-blue-800">
-                      {link.title || link.url}
-                      <ExternalLink size={14} className="flex-shrink-0" />
-                    </a>
-                    {link.linkType && (
-                      <span className="text-xs text-gray-500 ml-1">({link.linkType.name})</span>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </section>
-          )}
         </div>
       </div>
 
