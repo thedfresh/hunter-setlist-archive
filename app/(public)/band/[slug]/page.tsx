@@ -31,7 +31,8 @@ export default async function BandDetailPage({ params }: { params: { slug: strin
   if (!band) return notFound();
 
   const events: any[] = band.events || [];
-  const totalShows = events.length;
+  const publicShowCount = events.length;
+  const totalShows = band._count?.events || 0;
   const sortedEvents = [...events].sort((a, b) => {
     const aDate = a.sortDate ? new Date(a.sortDate) : null;
     const bDate = b.sortDate ? new Date(b.sortDate) : null;
@@ -51,7 +52,8 @@ export default async function BandDetailPage({ params }: { params: { slug: strin
             <div>
               <h2 className="font-semibold text-lg mb-2">Statistics</h2>
               <div className="text-sm text-gray-600 space-y-1">
-                <div>Total Shows: <span className="font-medium">{totalShows}</span></div>
+                <div>Public Events: <span className="font-medium">{totalShows}</span></div>
+                <div>Total Events: <span className="font-medium">{publicShowCount}</span></div>
                 {firstShow && lastShow && (
                   <div>Date: <span className="font-medium">{formatEventDate(firstShow)} – {formatEventDate(lastShow)}</span></div>
                 )}
@@ -130,16 +132,33 @@ export default async function BandDetailPage({ params }: { params: { slug: strin
                 <tr key={event.id}>
                   <td>
                     <Link href={`/event/${event.slug}`} className="link-internal">
-                      {formatEventDate(event)}
+                      {formatEventDate({
+                        year: event.year,
+                        month: event.month,
+                        day: event.day,
+                        showTiming: event.showTiming || event.show_timing || null,
+                      })}
                     </Link>
                   </td>
                   <td>
                     {event.venue?.slug ? (
                       <Link href={`/venue/${event.venue.slug}`} className="link-internal">
-                        {formatVenue(event.venue)}
+                        {formatVenue({
+                          name: event.venue.name,
+                          context: event.venue.context,
+                          city: event.venue.city,
+                          stateProvince: event.venue.stateProvince,
+                          country: event.venue.country,
+                        })}
                       </Link>
                     ) : (
-                      event.venue && formatVenue(event.venue)
+                      event.venue && formatVenue({
+                        name: event.venue.name,
+                        context: event.venue.context,
+                        city: event.venue.city,
+                        stateProvince: event.venue.stateProvince,
+                        country: event.venue.country,
+                      })
                     )}
                   </td>
                 </tr>

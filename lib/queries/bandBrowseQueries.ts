@@ -1,4 +1,5 @@
-import { getCountableEventsWhere } from '@/lib/utils/queryFilters';
+import { getBrowsableEventsWhere, getCountableEventsWhere } from '@/lib/utils/queryFilters';
+
 export async function getBandBySlug(slug: string) {
   const band = await prisma.band.findFirst({
     where: { slug },
@@ -27,7 +28,7 @@ export async function getBandBySlug(slug: string) {
         orderBy: [{ joinedDate: 'asc' }],
       },
       events: {
-        where: getCountableEventsWhere(),
+        where: getBrowsableEventsWhere(),
         select: {
           id: true,
           year: true,
@@ -37,6 +38,7 @@ export async function getBandBySlug(slug: string) {
           slug: true,
           verified: true,
           sortDate: true,
+          showTiming: true,
           venue: {
             select: {
               name: true,
@@ -53,6 +55,14 @@ export async function getBandBySlug(slug: string) {
           { month: 'asc' },
           { day: 'asc' },
         ],
+      },
+      _count: {
+        select: {
+          events: {
+            where: getCountableEventsWhere()
+          },
+          bandMusicians: true,
+        },
       },
     },
   });
