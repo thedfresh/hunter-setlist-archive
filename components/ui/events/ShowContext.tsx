@@ -51,7 +51,7 @@ const ShowContext: React.FC<ShowContextProps> = ({
             )}
             {/* Public notes */}
             {hasPublicNotes && (
-                <div className="notes-content">
+                <div className="notes-content prose prose-sm max-w-none">
                     <ReactMarkdown remarkPlugins={[remarkGfm]}>{event.publicNotes}</ReactMarkdown>
                 </div>
             )}

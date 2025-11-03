@@ -45,7 +45,7 @@ export default async function VenueDetailPage({ params }: { params: { slug: stri
           {formatVenue({ city: venue.city, stateProvince: venue.stateProvince, country: venue.country })}
         </div>
         {venue.publicNotes && (
-          <div className="mb-4 text-sm text-gray-600">
+          <div className="mb-4 text-sm text-gray-600 prose prose-sm max-w-none">
             <ReactMarkdown remarkPlugins={[remarkGfm]}>{venue.publicNotes}</ReactMarkdown>
           </div>
         )}

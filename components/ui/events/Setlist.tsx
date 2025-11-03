@@ -412,7 +412,7 @@ const Setlist: React.FC<SetlistProps> = ({
 
                         {/* Set notes */}
                         {set.publicNotes && (
-                            <div className="set-note text-xs text-gray-600 italic mb-2">
+                            <div className="set-note text-xs text-gray-600 italic mb-2 prose prose-sm max-w-none">
                                 <ReactMarkdown remarkPlugins={[remarkGfm]}>{set.publicNotes}</ReactMarkdown>
                             </div>
                         )}

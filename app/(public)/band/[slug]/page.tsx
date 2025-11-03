@@ -107,7 +107,7 @@ export default async function BandDetailPage({ params }: { params: { slug: strin
           {band.publicNotes && (
             <div className="mb-8">
               <h2 className="font-semibold text-lg mb-2">Notes</h2>
-              <div className="text-sm text-gray-600">
+              <div className="text-sm text-gray-600 prose prose-sm max-w-none">
                 <ReactMarkdown remarkPlugins={[remarkGfm]}>{band.publicNotes}</ReactMarkdown>
               </div>
             </div>

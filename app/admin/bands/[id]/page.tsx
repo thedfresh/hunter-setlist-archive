@@ -69,7 +69,7 @@ export default function BandDetailPage({ params }: { params: { id: string } }) {
                 body: JSON.stringify({
                     name: form.name.trim(),
                     slug: form.slug.trim(),
-                    publicNotes: form.publicNotes.trim(),
+                    publicNotes: form.publicNotes,
                     privateNotes: form.privateNotes.trim(),
                 }),
             });
