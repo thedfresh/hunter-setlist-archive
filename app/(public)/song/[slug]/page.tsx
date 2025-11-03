@@ -109,7 +109,7 @@ export default async function SongDetailPage({ params }: { params: { slug: strin
           {song.originalArtist && song.originalArtist.toLowerCase() !== 'hunter' && (
             <section>
               <div className="font-semibold text-lg mb-2">Original Artist</div>
-              <div className="text-gray-700">{song.originalArtist}</div>
+              <div className="text-sm text-gray-700 space-y-1">{song.originalArtist}</div>
             </section>
           )}
 
