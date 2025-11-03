@@ -60,7 +60,7 @@ export default async function BandDetailPage({ params }: { params: { slug: strin
             {band.bandMusicians && band.bandMusicians.length > 0 && (
               <div>
                 <h2 className="font-semibold text-lg mb-2">Band Members</h2>
-                <div className="space-y-1">
+                <div>
                   {band.bandMusicians.map((bm: any) => (
                     <div key={bm.musician.slug || bm.musician.name} className="text-sm mb-3">
                       <div>
