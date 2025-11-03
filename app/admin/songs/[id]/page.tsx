@@ -9,6 +9,7 @@ import { formatVenue } from '@/lib/formatters/venueFormatter';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { ExternalLink } from 'lucide-react';
+import { getDisplayName } from "next/dist/shared/lib/utils";
 
 export default function SongAdminDetailPage({ params }: { params: { id: string } }) {
     const router = useRouter();
@@ -460,7 +461,7 @@ export default function SongAdminDetailPage({ params }: { params: { id: string }
                                 >
                                     <option value="0">Default (Hunter)</option>
                                     {musicians.map(m => (
-                                        <option key={m.id} value={m.id}>{m.name}</option>
+                                        <option key={m.id} value={m.id}>{getDisplayName(m)}</option>
                                     ))}
                                 </select>
                                 <p className="form-help">Override default</p>
