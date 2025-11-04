@@ -306,7 +306,7 @@ const SiteHeader = () => {
 
         {/* Mobile dropdown menu */}
         {mobileMenuOpen && (
-          <nav className="xl:hidden bg-[#ffffed] border-t border-gray-300 shadow-lg">
+          <nav className="xl:hidden bg-[#ffffed] border-t border-gray-300 shadow-lg md:ml-[180px]">
             <div className="flex flex-col py-2">
               <Link href="/event" className="px-4 py-3 hover:bg-gray-100 text-gray-700" onClick={() => setMobileMenuOpen(false)}>Shows</Link>
               <Link href="/song" className="px-4 py-3 hover:bg-gray-100 text-gray-700" onClick={() => setMobileMenuOpen(false)}>Songs</Link>
