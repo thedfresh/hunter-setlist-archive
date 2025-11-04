@@ -16,6 +16,8 @@ export default function BandMemberForm({ bandId, membershipId, onSuccess, onCanc
     const [publicNotes, setPublicNotes] = useState("");
     const [privateNotes, setPrivateNotes] = useState("");
     const [musicians, setMusicians] = useState<any[]>([]);
+    const [instruments, setInstruments] = useState<any[]>([]);
+    const [defaultInstrumentId, setDefaultInstrumentId] = useState<number>(0);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const { showToast } = useToast();
@@ -27,6 +29,11 @@ export default function BandMemberForm({ bandId, membershipId, onSuccess, onCanc
                 const sorted = (data.musicians || []).sort(compareMusicianNames);
                 setMusicians(sorted);
             });
+        fetch("/api/instruments")
+            .then(res => res.json())
+            .then(data => {
+                setInstruments(data.instruments || []);
+            });
         if (membershipId > 0) {
             setLoading(true);
             fetch(`/api/admin/band-musicians/${membershipId}`)
@@ -37,6 +44,7 @@ export default function BandMemberForm({ bandId, membershipId, onSuccess, onCanc
                     setLeftDate(data.leftDate ? data.leftDate.slice(0, 10) : "");
                     setPublicNotes(data.publicNotes || "");
                     setPrivateNotes(data.privateNotes || "");
+                    setDefaultInstrumentId(data.defaultInstrumentId || 0);
                 })
                 .catch(() => setError("Failed to load member details"))
                 .finally(() => setLoading(false));
@@ -55,6 +63,7 @@ export default function BandMemberForm({ bandId, membershipId, onSuccess, onCanc
                 leftDate: leftDate || null,
                 publicNotes,
                 privateNotes,
+                defaultInstrumentId: defaultInstrumentId || null,
             };
             let res, data;
             if (membershipId === 0) {
@@ -97,6 +106,19 @@ export default function BandMemberForm({ bandId, membershipId, onSuccess, onCanc
                     <option value="">Select musician...</option>
                     {musicians.map(m => (
                         <option key={m.id} value={m.id}>{m.displayName || m.name}</option>
+                    ))}
+                </select>
+            </div>
+            <div className="form-group">
+                <label className="form-label">Default Instrument</label>
+                <select
+                    className="select"
+                    value={defaultInstrumentId}
+                    onChange={e => setDefaultInstrumentId(Number(e.target.value))}
+                >
+                    <option value="">Select instrument...</option>
+                    {instruments.map(inst => (
+                        <option key={inst.id} value={inst.id}>{inst.displayName}</option>
                     ))}
                 </select>
             </div>
