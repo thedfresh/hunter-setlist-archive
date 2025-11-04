@@ -92,12 +92,9 @@ export async function getMusiciansBrowse() {
         }
     }
 
-    // Filter musicians with at least one appearance
-    const filtered = musicians.filter(m => eventIdsByMusician[m.id]?.size > 0);
-
     // Check vocals for each musician
     const hasVocalsByMusician: Record<number, boolean> = {};
-    for (const m of filtered) {
+    for (const m of musicians) {
         let hasVocals = false;
         // Check eventMusician
         const eventVocals = await prisma.eventMusician.findFirst({
@@ -122,7 +119,7 @@ export async function getMusiciansBrowse() {
     }
 
     // Map results
-    return filtered
+    return musicians
         .map(m => ({
             id: m.id,
             slug: m.slug,
