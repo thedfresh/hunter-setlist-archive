@@ -14,13 +14,13 @@ export async function calculateEventStatistics(event: EventType) {
     const onlyPerformances: Array<{ songId: number; songTitle: string; songSlug: string }> = [];
     const comebacks: Array<{ songId: number; songTitle: string; songSlug: string; gap: number }> = [];
 
-        // Flatten all performances in all sets
-        const performances = event.sets?.flatMap((set: { performances: any[] }) => set.performances) || [];
-        const filteredPerformances = performances.filter(
-            (perf: any) => perf.song.title !== 'Unknown Song'
-        );
+    // Flatten all performances in all sets
+    const performances = event.sets?.flatMap((set: { performances: any[] }) => set.performances) || [];
+    const filteredPerformances = performances.filter(
+        (perf: any) => perf.song.title !== 'Unknown Song'
+    );
 
-        for (const perf of filteredPerformances) {
+    for (const perf of filteredPerformances) {
         const songId = perf.song.id;
         const songTitle = perf.song.title;
         const songSlug = perf.song.slug;
