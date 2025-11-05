@@ -23,7 +23,7 @@ export default function Statistics({ stats }: StatisticsProps) {
 
     return (
         <section className="notes-section">
-            <div className="notes-title">Statistics</div>
+            <div className="notes-title">Statistics <span className="text-xs text-red-600">[Experimental!]</span></div>
             <div className="notes-content space-y-4">
                 {firstPerformances && firstPerformances.length > 0 && (
                     <div>
