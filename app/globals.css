@@ -1406,6 +1406,11 @@
     @apply text-xs leading-relaxed text-gray-600;
   }
 
+  .notes-label {
+    @apply font-semibold text-gray-600 mt-3 mb-1;
+  }
+
+
   .banter-label {
     @apply font-semibold text-gray-800 mt-3 mb-1;
   }

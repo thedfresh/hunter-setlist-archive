@@ -7,9 +7,15 @@ interface EventDetailClientProps {
   event: any;
   prevEvent: { slug: string } | null;
   nextEvent: { slug: string } | null;
+  stats?: {
+    firstPerformances: Array<{ songId: number; songTitle: string; songSlug: string }>;
+    lastPerformances: Array<{ songId: number; songTitle: string; songSlug: string }>;
+    onlyPerformances: Array<{ songId: number; songTitle: string; songSlug: string }>;
+    comebacks: Array<{ songId: number; songTitle: string; songSlug: string; gap: number }>;
+  };
 }
 
-export default function EventDetailClient({ event, prevEvent, nextEvent }: EventDetailClientProps) {
+export default function EventDetailClient({ event, prevEvent, nextEvent, stats }: EventDetailClientProps) {
   const [viewMode, setViewMode] = useState<'standard' | 'complete'>(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('setlist-view-mode');
@@ -52,6 +58,7 @@ export default function EventDetailClient({ event, prevEvent, nextEvent }: Event
       onViewModeChange={handleViewModeChange}
       prevEvent={prevEvent}
       nextEvent={nextEvent}
+      stats={stats}
     />
   );
 }

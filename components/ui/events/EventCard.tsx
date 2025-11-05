@@ -7,6 +7,7 @@ import { getBandConfig, getPerformerBorderClass, getPerformerHeaderBorderClass, 
 import { formatEventDate } from '@/lib/formatters/dateFormatter';
 import { formatVenue } from '@/lib/formatters/venueFormatter';
 import Setlist from './Setlist';
+import Statistics from './Statistics';
 import PerformanceNotes from './PerformanceNotes';
 import ShowContext from './ShowContext';
 import StageTalk from './StageTalk';
@@ -26,6 +27,12 @@ interface EventCardProps {
     onViewModeChange?: (mode: 'standard' | 'complete') => void;
     prevEvent?: { slug: string } | null;
     nextEvent?: { slug: string } | null;
+    stats?: {
+        firstPerformances: Array<{ songId: number; songTitle: string; songSlug: string }>;
+        lastPerformances: Array<{ songId: number; songTitle: string; songSlug: string }>;
+        onlyPerformances: Array<{ songId: number; songTitle: string; songSlug: string }>;
+        comebacks: Array<{ songId: number; songTitle: string; songSlug: string; gap: number }>;
+    };
 }
 
 const EventCard: React.FC<EventCardProps> = ({
@@ -40,6 +47,7 @@ const EventCard: React.FC<EventCardProps> = ({
     onViewModeChange,
     prevEvent,
     nextEvent,
+    stats,
 }) => {
     const [expandedGroups, setExpandedGroups] = React.useState<Set<string>>(new Set());
 
@@ -285,32 +293,44 @@ const EventCard: React.FC<EventCardProps> = ({
                         </div>
                     )}
 
-                    {/* Notes section - only show border if has sets AND notes content exists; allow notes without setlist */}
-                    {hasNotesContent && (
+                    {/* Notes + Statistics Section */}
+                    {(hasNotesContent || (stats && (stats.firstPerformances.length > 0 || stats.lastPerformances.length > 0 || stats.comebacks.length > 0))) && (
                         <div className={hasSets ? "mt-4 pt-4 border-t border-gray-200" : "mt-4"}>
-                            {/* Show Context (event musicians, set context) */}
-                            {hasShowContext && (
-                                <div className="mb-5">
-                                    <ShowContext
-                                        event={event}
-                                        showPublicNotes={true}
-                                        hasGuestLeadVocals={visibilityData.hasGuestLeadVocals}
-                                    />
-                                </div>
-                            )}
+                            <div className={
+                                hasNotesContent && stats && (stats.firstPerformances.length > 0 || stats.lastPerformances.length > 0 || stats.comebacks.length > 0)
+                                    ? "grid grid-cols-1 md:grid-cols-2 gap-6"
+                                    : ""
+                            }>
+                                {/* Left Column: Show Context + Performance Notes */}
+                                {hasNotesContent && (
+                                    <div>
+                                        {hasShowContext && (
+                                            <div className="mb-5">
+                                                <ShowContext
+                                                    event={event}
+                                                    showPublicNotes={true}
+                                                    hasGuestLeadVocals={visibilityData.hasGuestLeadVocals}
+                                                />
+                                            </div>
+                                        )}
+                                        {showPerformanceNotes && (
+                                            <PerformanceNotes
+                                                event={event}
+                                                viewMode={viewMode}
+                                                visibilityData={visibilityData}
+                                            />
+                                        )}
+                                    </div>
+                                )}
 
-                            {/* Performance Notes */}
-                            {showPerformanceNotes && (
-                                <PerformanceNotes
-                                    event={event}
-                                    viewMode={viewMode}
-                                    visibilityData={visibilityData}
-                                />
-                            )}
+                                {/* Right Column: Statistics */}
+                                <Statistics stats={stats} />
+                            </div>
                         </div>
                     )}
                 </div>
             </div>
+
 
             {/* Bottom Section - OUTSIDE main card, very light band-colored bg */}
             {hasBottomSection && (
