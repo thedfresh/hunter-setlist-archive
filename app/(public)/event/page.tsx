@@ -14,21 +14,14 @@ function EventBrowsePageContent() {
   const searchParamsHook = useSearchParams();
   const [results, setResults] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [showSetlists, setShowSetlists] = useState(true);
   const [viewMode, setViewMode] = useState<'standard' | 'complete'>('standard');
   const [eventViewModes, setEventViewModes] = useState<Record<number, 'standard' | 'complete'>>({});
   const [isHydrated, setIsHydrated] = useState(false);
   const [showHelp, setShowHelp] = useState(true);
 
-  // Initialize from localStorage after hydration
   useEffect(() => {
     setIsHydrated(true);
-    const savedSetlists = localStorage.getItem('hunterArchive_browseShowSetlists');
     const savedViewMode = localStorage.getItem('setlist-view-mode');
-
-    if (savedSetlists !== null) {
-      setShowSetlists(savedSetlists === 'true');
-    }
     if (savedViewMode === 'standard' || savedViewMode === 'complete') {
       setViewMode(savedViewMode);
     }
@@ -36,7 +29,7 @@ function EventBrowsePageContent() {
 
   const handleViewModeChange = (mode: 'standard' | 'complete') => {
     setViewMode(mode);
-    setEventViewModes({});  // Clear per-event overrides when page mode changes
+    setEventViewModes({});
     if (isHydrated) {
       localStorage.setItem('setlist-view-mode', mode);
     }
@@ -82,7 +75,7 @@ function EventBrowsePageContent() {
     );
   }
 
-  const { events, bandCounts, currentPage, totalPages, selectedTypes, search, searchType } = results;
+  const { events, bandCounts, selectedTypes, search, searchType } = results;
   const searchParamsObj = Object.fromEntries(searchParamsHook.entries());
   const typedEvents = events as import('@/lib/types').Event[];
   const hasActiveSearch = !!(search && searchType);
@@ -105,94 +98,86 @@ function EventBrowsePageContent() {
 
   return (
     <PageContainer>
-      <div className="flex gap-10">
-        <div className="hidden md:block fixed left-10 top-[160px] w-[160px]">
-          <BandFilterChips bandCounts={bandCounts} selectedKeys={selectedTypes} />
+      <div className="flex justify-between items-center mb-6 pb-4 border-b-2 border-gray-200">
+        <div className="page-title">
+          Browse Events <span className="text-gray-500 font-normal text-lg">({events.length})</span>
         </div>
-        <div className="flex-1">
-          {/* Page Header with Controls */}
-          <div className="flex justify-between items-center mb-6 pb-4 border-b-2 border-gray-200">
-            <div className="page-title">
-              Browse Events <span className="text-gray-500 font-normal text-lg">({events.length})</span>
+
+        <div className="flex gap-4 items-center">
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-600 font-medium">View:</span>
+            <div className="inline-flex bg-gray-100 rounded-md p-0.5">
+              <button
+                className={`px-3 py-1.5 text-xs font-medium rounded transition-all ${viewMode === 'standard'
+                  ? 'bg-white text-gray-900 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                onClick={() => handleViewModeChange('standard')}
+              >
+                Compact
+              </button>
+              <button
+                className={`px-3 py-1.5 text-xs font-medium rounded transition-all ${viewMode === 'complete'
+                  ? 'bg-white text-gray-900 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                onClick={() => handleViewModeChange('complete')}
+              >
+                Complete
+              </button>
             </div>
-
-            <div className="flex gap-4 items-center">
-              {/* View mode toggle */}
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-600 font-medium">View:</span>
-                <div className="inline-flex bg-gray-100 rounded-md p-0.5">
-                  <button
-                    className={`px-3 py-1.5 text-xs font-medium rounded transition-all ${viewMode === 'standard'
-                      ? 'bg-white text-gray-900 shadow-sm'
-                      : 'text-gray-600 hover:text-gray-900'
-                      }`}
-                    onClick={() => handleViewModeChange('standard')}
-                  >
-                    Compact
-                  </button>
-                  <button
-                    className={`px-3 py-1.5 text-xs font-medium rounded transition-all ${viewMode === 'complete'
-                      ? 'bg-white text-gray-900 shadow-sm'
-                      : 'text-gray-600 hover:text-gray-900'
-                      }`}
-                    onClick={() => handleViewModeChange('complete')}
-                  >
-                    Complete
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Help section */}
-          <div className={`mb-8 bg-gray-50 border border-gray-200 rounded-lg ${showHelp ? 'p-5' : 'p-3'}`}>
-            <div
-              onClick={() => setShowHelp(!showHelp)}
-              className="flex items-center justify-between cursor-pointer hover:opacity-80 transition-opacity"
-            >
-              <h3 className="text-lg font-semibold text-gray-900">How to use this page</h3>
-              <span className="text-gray-500 text-lg">{showHelp ? '▼' : '▶'}</span>
-            </div>
-
-            {showHelp && (
-              <ul className="text-sm text-gray-700 leading-relaxed space-y-2 list-disc pl-5 mt-3">
-                <li>Setlists between 1984-1993 are still being updated. Earlier and later setlists are mostly complete.</li>
-                <li>Use the search bar in the header to filter by date (YYYY-MM-DD, YYYY-MM or YYYY), band, guests or venue.</li>
-                <li>The default setlist view is Compact - fragmentary songs and notes hidden, medleys and suites collapsed. Toggle the Complete setting (for the whole page or a specific show) to see the full setlist with performance notes.</li>
-                <li>Click the event header to view all event info, including recordings, show notes, stage banter, etc. (Details are still being added and primarily exist from 1976-1983 at present.)</li>
-              </ul>
-            )}
-          </div>
-
-          {hasActiveSearch && (
-            <div className="mb-4 flex items-center gap-3 bg-blue-50 border border-blue-200 rounded px-4 py-2">
-              <span className="text-blue-700 font-medium">
-                Showing results for: <span className="font-bold">{getSearchLabel(searchType)}: {search}</span>
-              </span>
-              <Link href={getClearSearchUrl(searchParamsObj)} className="block transition-transform hover:-translate-y-1">
-                Clear
-              </Link>
-            </div>
-          )}
-
-          {/* Cards - Full width */}
-          <div className="flex flex-col gap-5">
-            {typedEvents.map(event => (
-              <EventCard
-                key={event.id}
-                event={event}
-                showPrevNext={false}
-                showViewToggle={true}
-                showPerformanceNotes={(eventViewModes[event.id] || viewMode) === 'complete'}
-                showStageTalk={false}
-                showRecordings={false}
-                showContributors={false}
-                viewMode={eventViewModes[event.id] || viewMode}
-                onViewModeChange={(mode) => handleEventViewModeChange(event.id, mode)}
-              />
-            ))}
           </div>
         </div>
+      </div>
+
+      <div className={`mb-8 bg-gray-50 border border-gray-200 rounded-lg ${showHelp ? 'p-5' : 'p-3'}`}>
+        <div
+          onClick={() => setShowHelp(!showHelp)}
+          className="flex items-center justify-between cursor-pointer hover:opacity-80 transition-opacity"
+        >
+          <h3 className="text-lg font-semibold text-gray-900">How to use this page</h3>
+          <span className="text-gray-500 text-lg">{showHelp ? '▼' : '▶'}</span>
+        </div>
+
+        {showHelp && (
+          <ul className="text-sm text-gray-700 leading-relaxed space-y-2 list-disc pl-5 mt-3">
+            <li>Use the search bar in the header to filter by date (YYYY-MM-DD, YYYY-MM or YYYY), band, guests or venue.</li>
+            <li>The default setlist view is Compact - fragmentary songs and notes hidden, medleys and suites collapsed. Toggle the Complete setting (for the whole page or a specific show) to see the full setlist with performance notes.</li>
+            <li>Click the event header to view all event info, including recordings, show notes, stage banter, etc. (Details are still being added and primarily exist from 1976-1983 at present.)</li>
+          </ul>
+        )}
+      </div>
+
+      {hasActiveSearch && (
+        <div className="mb-4 flex items-center gap-3 bg-blue-50 border border-blue-200 rounded px-4 py-2">
+          <span className="text-blue-700 font-medium">
+            Showing results for: <span className="font-bold">{getSearchLabel(searchType)}: {search}</span>
+          </span>
+          <Link href={getClearSearchUrl(searchParamsObj)} className="text-blue-700 hover:text-blue-900 font-medium">
+            Clear
+          </Link>
+        </div>
+      )}
+
+      <div className="mb-6">
+        <BandFilterChips bandCounts={bandCounts} selectedKeys={selectedTypes} />
+      </div>
+
+      <div className="flex flex-col gap-5">
+        {typedEvents.map(event => (
+          <EventCard
+            key={event.id}
+            event={event}
+            showPrevNext={false}
+            showViewToggle={true}
+            showPerformanceNotes={(eventViewModes[event.id] || viewMode) === 'complete'}
+            showStageTalk={false}
+            showRecordings={false}
+            showContributors={false}
+            viewMode={eventViewModes[event.id] || viewMode}
+            onViewModeChange={(mode) => handleEventViewModeChange(event.id, mode)}
+          />
+        ))}
       </div>
     </PageContainer>
   );
