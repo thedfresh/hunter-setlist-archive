@@ -104,28 +104,35 @@ export async function GET(req: NextRequest) {
 
 
         for (const v of venues) {
+            const browsableWhere = getBrowsableEventsWhere();
             const count = await prisma.event.count({
                 where: {
                     AND: [
-                        getBrowsableEventsWhere(),
+                        browsableWhere,
                         { venueId: v.id }
                     ]
                 }
             });
+
             if (count > 0) {
+                // Always add the venue itself (it matched)
                 suggestions.push({
                     type: 'venue',
                     value: v.name,
                     label: `${v.name}, ${v.city}${v.stateProvince ? ', ' + v.stateProvince : ''}`
                 });
-                if (v.city) {
+
+                // Only add city if it ALSO matches the query
+                if (v.city && v.city.toLowerCase().includes(query.toLowerCase())) {
                     suggestions.push({
                         type: 'city',
                         value: v.city,
                         label: `${v.city}${v.stateProvince ? ', ' + v.stateProvince : ''} (${count} shows)`
                     });
                 }
-                if (v.stateProvince) {
+
+                // Only add state if it ALSO matches the query
+                if (v.stateProvince && v.stateProvince.toLowerCase().includes(query.toLowerCase())) {
                     suggestions.push({
                         type: 'state',
                         value: v.stateProvince,
@@ -135,7 +142,6 @@ export async function GET(req: NextRequest) {
             }
 
             if (suggestions.length >= 20) break;
-
         }
 
         // 3. Band + Musician combined search
@@ -280,6 +286,38 @@ export async function GET(req: NextRequest) {
                         musicianIds
                     });
                 }
+            }
+        }
+
+        // 4. Song titles
+        const songs = await prisma.song.findMany({
+            where: {
+                title: {
+                    contains: query,
+                    mode: 'insensitive'
+                }
+            },
+            select: {
+                id: true,
+                title: true,
+                slug: true,
+                _count: {
+                    select: {
+                        performances: true
+                    }
+                }
+            },
+            take: 10
+        });
+
+        for (const song of songs) {
+            if (song._count.performances > 0) {
+                suggestions.push({
+                    type: 'song',
+                    value: song.title,
+                    label: `${song.title} (${song._count.performances} performances)`,
+                    slug: song.slug
+                });
             }
         }
     }

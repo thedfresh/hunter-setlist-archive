@@ -71,7 +71,7 @@ export default function HomePage() {
                 my newsletter. (This is a low-volume newsletter - I only send out an email when there is something significant to share. Use the RSS feed
                 to track smaller, more frequent updates.)
               </p>
-              <p className="text-sm text-gray-700 mb-4">
+              <div className="text-sm text-gray-700 mb-4">
                 <form
                   action="https://buttondown.com/api/emails/embed-subscribe/hunter-archives"
                   method="post"
@@ -92,7 +92,7 @@ export default function HomePage() {
                     Subscribe
                   </button>
                 </form>
-              </p>
+              </div>
             </div>
           </section>
 
