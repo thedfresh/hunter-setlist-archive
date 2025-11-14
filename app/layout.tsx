@@ -31,7 +31,7 @@ export const metadata: Metadata = {
     title: 'The Robert Hunter Performance Archive',
     description: 'Complete performance archive documenting Grateful Dead lyricist Robert Hunter\'s career as a performing musician (1961-2014). Search and explore over 600 shows including Hunter\'s work with Comfort, Roadhog, Dinosaurs and solo performances. Setlists, recordings, and research materials.',
     images: ['https://stillunsung.com/images/og-default.png'],
-    creator: '@sdfresh',
+    creator: '@dfresh',
   },
   robots: {
     index: true,
