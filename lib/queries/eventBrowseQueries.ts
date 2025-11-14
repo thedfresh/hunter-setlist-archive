@@ -119,40 +119,159 @@ export async function getEventsBrowse({ page, pageSize = 100, where = {} }: GetE
 
   const queryOptions: any = {
     where: finalWhere,
-    include: {
-      venue: true,
-      primaryBand: true,
-      eventType: true,
-      contentType: true,
-      eventMusicians: {
-        include: { musician: true, instrument: true }
+    select: {
+      id: true,
+      slug: true,
+      displayDate: true,
+      sortDate: true,
+      year: true,
+      month: true,
+      day: true,
+      showTiming: true,
+      verified: true,
+      isUncertain: true,
+      dateUncertain: true,
+      venueUncertain: true,
+      publicNotes: true,
+      billing: true,
+
+      venue: {
+        select: {
+          name: true,
+          city: true,
+          stateProvince: true,
+          slug: true,
+          isUncertain: true
+        }
       },
+
+      primaryBand: {
+        select: {
+          name: true,
+          slug: true
+        }
+      },
+
+      eventType: {
+        select: {
+          name: true,
+          includeInStats: true
+        }
+      },
+
+      contentType: {
+        select: {
+          name: true
+        }
+      },
+
+      eventMusicians: {
+        select: {
+          publicNotes: true,
+          musician: {
+            select: {
+              name: true,
+              slug: true
+            }
+          },
+          instrument: {
+            select: {
+              displayName: true
+            }
+          }
+        }
+      },
+
       sets: {
-        include: {
-          setType: true,
-          band: true,
-          setMusicians: { include: { musician: true, instrument: true } },
+        select: {
+          id: true,
+          position: true,
+          publicNotes: true,
+          isUncertain: true,
+
+          setType: {
+            select: {
+              displayName: true
+            }
+          },
+
+          band: {
+            select: {
+              name: true
+            }
+          },
+
+          setMusicians: {
+            select: {
+              musician: {
+                select: {
+                  name: true
+                }
+              },
+              instrument: {
+                select: {
+                  displayName: true
+                }
+              }
+            }
+          },
+
           performances: {
-            include: {
+            select: {
+              id: true,
+              performanceOrder: true,
+              seguesInto: true,
+              isMedley: true,
+              isLyricalFragment: true,
+              isMusicalFragment: true,
+              isPartial: true,
+              isUncertain: true,
+              isSoloHunter: true,
+              publicNotes: true,
+
               song: {
-                include: {
-                  songTags: {
-                    include: {
-                      tag: true
+                select: {
+                  id: true,
+                  title: true,
+                  slug: true
+                }
+              },
+
+              leadVocals: {
+                select: {
+                  id: true,
+                  name: true
+                }
+              },
+
+              performanceMusicians: {
+                select: {
+                  publicNotes: true,
+                  musician: {
+                    select: {
+                      name: true,
+                      slug: true
+                    }
+                  },
+                  instrument: {
+                    select: {
+                      displayName: true
                     }
                   }
                 }
-              },
-              performanceMusicians: { include: { musician: true, instrument: true } }
+              }
             },
             orderBy: { performanceOrder: 'asc' }
           }
         },
         orderBy: { position: 'asc' }
       },
-      recordings: { include: { recordingType: true, contributor: true } },
-      eventContributors: { include: { contributor: true } },
-      links: { include: { linkType: true } }
+
+      _count: {
+        select: {
+          recordings: true
+        }
+      }
     },
     orderBy: { sortDate: 'asc' }
   };
