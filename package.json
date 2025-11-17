@@ -14,7 +14,7 @@
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
     "@heroicons/react": "^2.2.0",
-    "@prisma/client": "^6.16.2",
+    "@prisma/client": "^6.19.0",
     "@tailwindcss/typography": "^0.5.19",
     "@types/node": "^22",
     "@types/react": "^19",
@@ -23,7 +23,6 @@
     "lucide-react": "^0.545.0",
     "next": "^14.2.18",
     "playwright": "^1.56.1",
-    "prisma": "^6.16.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-markdown": "^10.1.0",
@@ -41,6 +40,7 @@
     "js-yaml": "^4.1.0",
     "node-fetch": "^2.7.0",
     "postcss": "^8.5.6",
+    "prisma": "^6.19.0",
     "tsx": "^4.20.6"
   }
 }
