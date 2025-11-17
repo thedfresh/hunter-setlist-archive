@@ -53,7 +53,8 @@ model BandMusician {
   privateNotes String?   @map("private_notes")
   band         Band      @relation(fields: [bandId], references: [id])
   musician     Musician  @relation(fields: [musicianId], references: [id])
-
+  instruments  BandMusicianInstrument[]
+  
   @@unique([bandId, musicianId])
   @@map("band_musicians")
 }
@@ -95,6 +96,8 @@ model Musician {
   performanceVocals    Performance[]               @relation("PerformanceLeadVocals")
   songDefaultVocals    Song[]                      @relation("SongLeadVocals")
   setMusicians         SetMusician[]
+  performanceVocalists PerformanceVocalist[]
+  songVocalists        SongVocalist[]
 
   @@map("musicians")
 }
@@ -104,11 +107,14 @@ model Instrument {
   name                 String
   displayName          String                      @map("display_name")
   createdAt            DateTime                    @default(now()) @map("created_at")
+  bandMusicianInstruments        BandMusicianInstrument[]
+  eventMusicianInstruments       EventMusicianInstrument[]
+  setMusicianInstruments         SetMusicianInstrument[]
+  performanceMusicianInstruments PerformanceMusicianInstrument[]
   eventMusicians       EventMusician[]
   musicianDefaults     MusicianDefaultInstrument[]
   performanceMusicians PerformanceMusician[]
   setMusicians         SetMusician[]
-
   defaultForMusicians  Musician[] @relation("MusicianDefaultInstrument")
 
   @@map("instruments")
@@ -163,6 +169,7 @@ model EventMusician {
   createdAt    DateTime    @default(now()) @map("created_at")
   privateNotes String?     @map("private_notes")
   includesVocals Boolean   @default(false) @map("includes_vocals")
+  instruments  EventMusicianInstrument[]
   event        Event       @relation(fields: [eventId], references: [id], onDelete: Cascade)
   instrument   Instrument? @relation(fields: [instrumentId], references: [id])
   musician     Musician    @relation(fields: [musicianId], references: [id])
@@ -209,6 +216,7 @@ model SetMusician {
   privateNotes String?     @map("private_notes")
   includesVocals Boolean   @default(false) @map("includes_vocals")
   createdAt    DateTime    @default(now()) @map("created_at")
+  instruments  SetMusicianInstrument[]
   instrument   Instrument? @relation(fields: [instrumentId], references: [id])
   musician     Musician    @relation(fields: [musicianId], references: [id])
   set          Set         @relation(fields: [setId], references: [id], onDelete: Cascade)
@@ -259,6 +267,8 @@ model Song {
   alternateTitle String?       @map("alternate_title")
   privateNotes   String?       @map("private_notes")
   slug           String?       @unique
+  isInstrumental Boolean       @default(false) @map("is_instrumental")
+  vocalists      SongVocalist[]
   leadVocals     Musician?     @relation("SongLeadVocals", fields: [leadVocalsId], references: [id])
   parentSong     Song?         @relation("SongVariants", fields: [parentSongId], references: [id])
   variants       Song[]        @relation("SongVariants")
@@ -316,6 +326,8 @@ model Performance {
   privateNotes         String?               @map("private_notes")
   isAborted            Boolean               @default(false) @map("is_aborted")
   lyricalVariation     String?               @map("lyrical_variation")
+  isInstrumental       Boolean               @default(false) @map("is_instrumental")
+  vocalists            PerformanceVocalist[]
   leadVocals           Musician?             @relation("PerformanceLeadVocals", fields: [leadVocalsId], references: [id])
   set                  Set                   @relation(fields: [setId], references: [id], onDelete: Cascade)
   song                 Song                  @relation(fields: [songId], references: [id])
@@ -333,10 +345,11 @@ model PerformanceMusician {
   publicNotes   String?     @map("public_notes")
   createdAt     DateTime    @default(now()) @map("created_at")
   privateNotes  String?     @map("private_notes")
+  includesVocals  Boolean  @default(false) @map("includes_vocals")
+  instruments   PerformanceMusicianInstrument[]
   instrument    Instrument? @relation(fields: [instrumentId], references: [id])
   musician      Musician    @relation(fields: [musicianId], references: [id])
   performance   Performance @relation(fields: [performanceId], references: [id], onDelete: Cascade)
-  includesVocals  Boolean  @default(false) @map("includes_vocals")
 
   @@map("performance_musicians")
 }
@@ -483,4 +496,108 @@ model DataMigration {
   appliedAt  DateTime @default(now()) @map("applied_at") @db.Timestamp(6)
   
   @@map("data_migrations")
+}
+
+// ============================================
+// BAND MUSICIAN INSTRUMENTS
+// ============================================
+
+model BandMusicianInstrument {
+  id             Int @id @default(autoincrement())
+  bandMusicianId Int @map("band_musician_id")
+  instrumentId   Int @map("instrument_id")
+  createdAt      DateTime @default(now()) @map("created_at")
+  
+  bandMusician BandMusician @relation(fields: [bandMusicianId], references: [id], onDelete: Cascade)
+  instrument   Instrument @relation(fields: [instrumentId], references: [id])
+  
+  @@unique([bandMusicianId, instrumentId])
+  @@map("band_musician_instruments")
+}
+
+// ============================================
+// EVENT MUSICIAN INSTRUMENTS
+// ============================================
+
+model EventMusicianInstrument {
+  id              Int @id @default(autoincrement())
+  eventMusicianId Int @map("event_musician_id")
+  instrumentId    Int @map("instrument_id")
+  createdAt       DateTime @default(now()) @map("created_at")
+  
+  eventMusician EventMusician @relation(fields: [eventMusicianId], references: [id], onDelete: Cascade)
+  instrument    Instrument @relation(fields: [instrumentId], references: [id])
+  
+  @@unique([eventMusicianId, instrumentId])
+  @@map("event_musician_instruments")
+}
+
+// ============================================
+// SET MUSICIAN INSTRUMENTS
+// ============================================
+
+model SetMusicianInstrument {
+  id            Int @id @default(autoincrement())
+  setMusicianId Int @map("set_musician_id")
+  instrumentId  Int @map("instrument_id")
+  createdAt     DateTime @default(now()) @map("created_at")
+  
+  setMusician SetMusician @relation(fields: [setMusicianId], references: [id], onDelete: Cascade)
+  instrument  Instrument @relation(fields: [instrumentId], references: [id])
+  
+  @@unique([setMusicianId, instrumentId])
+  @@map("set_musician_instruments")
+}
+
+// ============================================
+// PERFORMANCE MUSICIAN INSTRUMENTS
+// ============================================
+
+model PerformanceMusicianInstrument {
+  id                    Int @id @default(autoincrement())
+  performanceMusicianId Int @map("performance_musician_id")
+  instrumentId          Int @map("instrument_id")
+  createdAt             DateTime @default(now()) @map("created_at")
+  
+  performanceMusician PerformanceMusician @relation(fields: [performanceMusicianId], references: [id], onDelete: Cascade)
+  instrument          Instrument @relation(fields: [instrumentId], references: [id])
+  
+  @@unique([performanceMusicianId, instrumentId])
+  @@map("performance_musician_instruments")
+}
+
+// ============================================
+// PERFORMANCE VOCALISTS
+// ============================================
+
+model PerformanceVocalist {
+  id            Int @id @default(autoincrement())
+  performanceId Int @map("performance_id")
+  musicianId    Int? @map("musician_id")
+  vocalRole     String? @map("vocal_role")
+  createdAt     DateTime @default(now()) @map("created_at")
+  
+  performance Performance @relation(fields: [performanceId], references: [id], onDelete: Cascade)
+  musician    Musician? @relation(fields: [musicianId], references: [id])
+  
+  @@unique([performanceId, musicianId])
+  @@map("performance_vocalists")
+}
+
+// ============================================
+// SONG VOCALISTS
+// ============================================
+
+model SongVocalist {
+  id         Int @id @default(autoincrement())
+  songId     Int @map("song_id")
+  musicianId Int? @map("musician_id")
+  vocalRole  String? @map("vocal_role")
+  createdAt  DateTime @default(now()) @map("created_at")
+  
+  song     Song @relation(fields: [songId], references: [id], onDelete: Cascade)
+  musician Musician? @relation(fields: [musicianId], references: [id])
+  
+  @@unique([songId, musicianId])
+  @@map("song_vocalists")
 }
