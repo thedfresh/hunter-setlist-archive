@@ -20,15 +20,15 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 
   if (!event) {
     return {
-      title: 'Event Not Found | Hunter Archive',
+      title: 'Event Not Found | StillUnsung.com',
     };
   }
 
   const performer = event.primaryBand?.name || 'Robert Hunter';
   const venue = event.venue;
   const title = venue
-    ? `${formatEventDate(event)} - ${performer} at ${formatVenue(venue)} | Hunter Archive`
-    : `${formatEventDate(event)} - ${performer} | Hunter Archive`;
+    ? `${formatEventDate(event)} - ${performer} at ${formatVenue(venue)} | StillUnsung.com`
+    : `${formatEventDate(event)} - ${performer} | StillUnsung.com`;
 
   return {
     title,

@@ -2,7 +2,7 @@ import { PageContainer } from '@/components/ui/PageContainer';
 import ExternalLink from '@/components/ui/ExternalLink';
 
 export const metadata = {
-    title: 'Credits & Acknowledgments | Hunter Archive',
+    title: 'Credits & Acknowledgments | StillUnsung.com',
     description: "Credits and acknowledgments for contributors to the Robert Hunter Performance Archive.",
 };
 

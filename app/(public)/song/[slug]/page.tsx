@@ -12,7 +12,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 
   if (!song) {
     return {
-      title: 'Song Not Found | Hunter Archive',
+      title: 'Song Not Found | StillUnsung.com',
     };
   }
 
@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   ).length;
 
   return {
-    title: `${song.title} (${performanceCount} performances) | Hunter Archive`,
+    title: `${song.title} (${performanceCount} performances) | StillUnsung.com`,
     description: `Performance history and recordings of "${song.title}".`,
   };
 }
@@ -204,10 +204,6 @@ export default async function SongDetailPage({ params }: { params: { slug: strin
 
         {/* Full Width: Performances Table */}
         <section className="detail-layout-full">
-          <h2>All Performances</h2>
-          <p className="text-sm text-gray-600 mb-4">
-            "Gap" is the count of shows with known setlists between performances, excluding studio sessions and guest appearances.
-          </p>
           <SongPerformancesTable performances={sortedByDate} />
         </section>
       </PageContainer>

@@ -10,7 +10,7 @@ export default function Footer() {
                     <span className="text-gray-300">|</span>
                     <a href="/rss.xml" className="hover:text-hunter-gold">RSS Feed</a>
                     <span className="text-gray-300">|</span>
-                    <a href="mailto:contact@stillunsung.com" className="hover:text-hunter-gold">Contact</a>
+                    <a href="mailto:dfresh@gmail.com" className="hover:text-hunter-gold">Contact</a>
                 </nav>
 
                 {/* Row 2: Newsletter - Single Line */}

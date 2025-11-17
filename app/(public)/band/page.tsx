@@ -9,7 +9,7 @@ function getBandCardClassFromName(bandName: string): string {
 }
 
 export const metadata = {
-  title: 'Bands | Hunter Archive',
+  title: 'Bands | StillUnsung.com',
   description: "Robert Hunter's bands and guest appearances - Comfort, Roadhog, Dinosaurs, and more",
 };
 

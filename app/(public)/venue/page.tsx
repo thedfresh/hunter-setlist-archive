@@ -4,7 +4,7 @@ import { PageContainer } from '@/components/ui/PageContainer';
 import VenueTableClient from './VenueTableClient';
 
 export const metadata = {
-  title: 'Venues | Hunter Archive',
+  title: 'Venues | StillUnsung.com',
   description: 'All venues where Robert Hunter performed throughout his career',
 };
 

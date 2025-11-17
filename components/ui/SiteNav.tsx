@@ -62,8 +62,8 @@ export default function SiteNav({ isAdmin, onLinkClick }: SiteNavProps) {
                         <Link href="/venue" className="nav-dropdown-item" onClick={handleClick}>
                             Venues
                         </Link>
-                        <Link href="/album" className="nav-dropdown-item" onClick={handleClick}>
-                            Albums
+                        <Link href="/published-works" className="nav-dropdown-item" onClick={handleClick}>
+                            Published Works
                         </Link>
                     </div>
                 )}

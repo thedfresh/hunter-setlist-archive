@@ -39,6 +39,7 @@ export default function SongPerformancesTable({ performances }: { performances: 
 
     return (
         <div className="overflow-x-auto">
+            <h2>All Performances</h2>
             <p className="text-sm text-gray-600 mb-4">
                 "Gap" is the count of shows with known setlists between performances, excluding studio sessions and guest appearances.
             </p>

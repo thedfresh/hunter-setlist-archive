@@ -280,7 +280,7 @@ const SiteHeader = () => {
             <div className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wide">Browse</div>
             <Link href="/band" className="px-6 py-2 hover:bg-gray-50 text-gray-700 text-sm" onClick={() => setMobileMenuOpen(false)}>Bands & Musicians</Link>
             <Link href="/venue" className="px-6 py-2 hover:bg-gray-50 text-gray-700 text-sm" onClick={() => setMobileMenuOpen(false)}>Venues</Link>
-            <Link href="/album" className="px-6 py-2 hover:bg-gray-50 text-gray-700 text-sm" onClick={() => setMobileMenuOpen(false)}>Albums</Link>
+            <Link href="/published-works" className="px-6 py-2 hover:bg-gray-50 text-gray-700 text-sm" onClick={() => setMobileMenuOpen(false)}>Published Works</Link>
             <div className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wide mt-2">Guides</div>
             <Link href="/guides/getting-started" className="px-6 py-2 hover:bg-gray-50 text-gray-700 text-sm" onClick={() => setMobileMenuOpen(false)}>Getting Started</Link>
             <Link href="/guides/deep-dives" className="px-6 py-2 hover:bg-gray-50 text-gray-700 text-sm" onClick={() => setMobileMenuOpen(false)}>Deep Dives</Link>

@@ -114,10 +114,12 @@ export default function SongAdminDetailPage({ params }: { params: { id: string }
     }, [songId]);
 
     useEffect(() => {
-        if (form.title && initialLoadComplete) {
+        if (songId > 0 && form.title && form.title !== song?.title) {
+            setForm(f => ({ ...f, slug: generateSlugFromName(form.title) }));
+        } else if (songId === 0 && form.title) {
             setForm(f => ({ ...f, slug: generateSlugFromName(form.title) }));
         }
-    }, [form.title]);
+    }, [form.title, songId, song?.title]);
 
     useEffect(() => {
         if (songId) {

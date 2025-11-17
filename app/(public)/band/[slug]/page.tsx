@@ -13,14 +13,14 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 
   if (!band) {
     return {
-      title: 'Band Not Found | Hunter Archive',
+      title: 'Band Not Found | StillUnsung.com',
     };
   }
 
   const showCount = band.events?.length || 0;
 
   return {
-    title: `${band.name} (${showCount} shows) | Hunter Archive`,
+    title: `${band.name} (${showCount} shows) | StillUnsung.com`,
     description: `Performance history and setlists from ${band.name} featuring Robert Hunter`,
   };
 }
