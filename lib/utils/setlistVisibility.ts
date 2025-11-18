@@ -27,8 +27,11 @@ export interface Performance {
             lastName?: string | null;
             slug?: string;
         };
-        instrument: { displayName: string };
-        includesVocals?: boolean;
+        instruments?: Array<{
+            instrument: {
+                displayName: string;
+            }
+        }>;
     }>;
     isSoloHunter?: boolean;
 }
@@ -406,33 +409,32 @@ export function generatePerformanceMusicianNote(
         return null;
     }
 
-    // Extract plain data first (avoid Prisma symbols)
     const plainMusicians = performanceMusicians.map(pm => {
         const m = pm.musician;
         const displayName = m?.firstName && m?.lastName
             ? `${m.firstName} ${m.lastName}`
             : m?.name || '';
         const slug = m?.slug;
-        const instrumentText = pm.instrument?.displayName || '';
-        const withVocals = pm.includesVocals ? `${instrumentText} and vocals` : instrumentText;
+        const instruments = (pm as any).instruments?.map((i: any) => i.instrument.displayName).filter(Boolean) || [];
+        const instrumentText = instruments.join(', ');
+
         return {
             musicianName: displayName,
             musicianSlug: slug,
-            instrumentName: withVocals
+            instrumentName: instrumentText,
+            firstInstrument: instruments[0] || ''
         };
     });
 
-    // Sort by instrument priority, then alphabetically
     plainMusicians.sort((a, b) => {
-        const orderA = getInstrumentSortKey(a.instrumentName);
-        const orderB = getInstrumentSortKey(b.instrumentName);
+        const orderA = getInstrumentSortKey(a.firstInstrument);
+        const orderB = getInstrumentSortKey(b.firstInstrument);
 
         if (orderA !== orderB) return orderA - orderB;
 
         return a.musicianName.localeCompare(b.musicianName);
     });
 
-    // Generate combined text with links if slug exists
     const parts = plainMusicians
         .filter(pm => pm.musicianName && pm.instrumentName)
         .map(pm => {

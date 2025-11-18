@@ -375,7 +375,11 @@ export async function getEventBySlugWithNavigation(slug: string) {
             eventMusicians: {
                 include: {
                     musician: true,
-                    instrument: true,
+                    instruments: {
+                        include: {
+                            instrument: true
+                        }
+                    }
                 },
             },
             sets: {
@@ -385,7 +389,11 @@ export async function getEventBySlugWithNavigation(slug: string) {
                     setMusicians: {
                         include: {
                             musician: true,
-                            instrument: true,
+                            instruments: {
+                                include: {
+                                    instrument: true
+                                }
+                            }
                         },
                     },
                     performances: {
@@ -422,7 +430,11 @@ export async function getEventBySlugWithNavigation(slug: string) {
                             performanceMusicians: {
                                 include: {
                                     musician: true,
-                                    instrument: true,
+                                    instruments: {
+                                        include: {
+                                            instrument: true
+                                        }
+                                    }
                                 },
                             },
                             showBanter: true,
@@ -451,7 +463,6 @@ export async function getEventBySlugWithNavigation(slug: string) {
         },
     });
 
-    // Return null if event is private
     if (!event || !event.isPublic) {
         return { event: null, prevEvent: null, nextEvent: null };
     }

@@ -28,26 +28,28 @@ const ShowContext: React.FC<ShowContextProps> = ({
     return (
         <div className="notes-section">
             <div className="notes-title">Show Notes</div>
-            {/* Event-level musicians */}
             {hasEventMusicians && (
-                <div
-                    className="text-xs text-gray-700 mb-2"
-                    dangerouslySetInnerHTML={{
-                        __html: 'With ' + event.eventMusicians
-                            .filter((em: any) => em.musician && em.instrument)
-                            .map((em: any) => {
-                                const name = em.musician.displayName || em.musician.name;
-                                const slug = em.musician.slug;
-                                let str = slug
-                                    ? `<a href="/musician/${slug}" class="link-internal">${name}</a>`
-                                    : name;
-                                str += ` on ${em.instrument.name}`;
-                                if (em.includesVocals) str += ' and vocals';
-                                return str;
-                            })
-                            .join(', ')
-                    }}
-                />
+                <div className="text-xs text-gray-700 mb-2">
+                    With {event.eventMusicians
+                        .filter((em: any) => em.musician)
+                        .map((em: any, idx: number) => {
+                            const name = em.musician.displayName || em.musician.name;
+                            const slug = em.musician.slug;
+                            const instruments = em.instruments?.map((i: any) => i.instrument.displayName).filter(Boolean) || [];
+
+                            return (
+                                <React.Fragment key={em.id}>
+                                    {slug ? (
+                                        <a href={`/musician/${slug}`} className="link-internal">{name}</a>
+                                    ) : (
+                                        name
+                                    )}
+                                    {instruments.length > 0 && ` on ${instruments.join(', ')}`}
+                                    {idx < event.eventMusicians.length - 1 && ', '}
+                                </React.Fragment>
+                            );
+                        })}
+                </div>
             )}
             {/* Public notes */}
             {hasPublicNotes && (

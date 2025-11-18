@@ -391,21 +391,28 @@ const Setlist: React.FC<SetlistProps> = ({
                                     </span>
                                 )}
                                 {set.setMusicians && set.setMusicians.length > 0 && (
-                                    <span className="text-gray-600 font-normal text-xs ml-2" dangerouslySetInnerHTML={{
-                                        __html: `(with ${set.setMusicians
-                                            .filter((sm: any) => sm.musician && sm.instrument)
-                                            .map((sm: any) => {
+                                    <span className="text-gray-600 font-normal text-xs ml-2">
+                                        (with {set.setMusicians
+                                            .filter((sm: any) => sm.musician)
+                                            .map((sm: any, idx: number, arr: any[]) => {
                                                 const name = sm.musician.displayName || sm.musician.name;
                                                 const slug = sm.musician.slug;
-                                                let str = slug
-                                                    ? `<a href="/musician/${slug}" class="link-internal">${name}</a>`
-                                                    : name;
-                                                str += ` on ${sm.instrument.displayName}`;
-                                                if (sm.includesVocals) str += ' and vocals';
-                                                return str;
-                                            })
-                                            .join(', ')})`
-                                    }} />
+                                                const instruments = sm.instruments?.map((i: any) => i.instrument.displayName).filter(Boolean) || [];
+                                                const isLast = idx === arr.length - 1;
+
+                                                return (
+                                                    <span key={sm.id}>
+                                                        {slug ? (
+                                                            <a href={`/musician/${slug}`} className="link-internal">{name}</a>
+                                                        ) : (
+                                                            name
+                                                        )}
+                                                        {instruments.length > 0 && ` on ${instruments.join(', ')}`}
+                                                        {!isLast && ', '}
+                                                    </span>
+                                                );
+                                            })})
+                                    </span>
                                 )}
                             </div>
                         )}

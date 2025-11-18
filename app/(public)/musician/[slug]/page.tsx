@@ -36,10 +36,12 @@ export default async function MusicianDetailPage({ params }: { params: { slug: s
                             <div>Total Appearances: <span className="font-medium">{appearanceCount}</span></div>
                         </div>
                     </div>
-                    {musician.defaultInstrument && (
+                    {musician.defaultInstruments && musician.defaultInstruments.length > 0 && (
                         <div className="mb-8">
-                            <h2 className="font-semibold text-lg mb-2">Instrument</h2>
-                            <div className="text-sm text-gray-600">{musician.defaultInstrument.displayName}</div>
+                            <h2 className="font-semibold text-lg mb-2">Instruments</h2>
+                            <div className="text-sm text-gray-600">
+                                {musician.defaultInstruments.map((di: any) => di.instrument.displayName).join(', ')}
+                            </div>
                         </div>
                     )}
                     {musician.bandMusicians && musician.bandMusicians.length > 0 && (
@@ -53,6 +55,11 @@ export default async function MusicianDetailPage({ params }: { params: { slug: s
                                                 {bm.band.displayName || bm.band.name}
                                             </Link>
                                         </div>
+                                        {bm.instruments && bm.instruments.length > 0 && (
+                                            <div className="text-sm text-gray-700 mt-1">
+                                                {bm.instruments.map((bi: any) => bi.instrument.displayName).join(', ')}
+                                            </div>
+                                        )}
                                         <div className="text-xs text-gray-600 mt-2">
                                             {bm.joinedDate && (
                                                 <span>
@@ -105,15 +112,7 @@ export default async function MusicianDetailPage({ params }: { params: { slug: s
                                     <tr key={ev.event.id}>
                                         <td>
                                             <Link href={`/event/${ev.event.slug}`} className="link-internal">
-                                                {ev.event.displayDate
-                                                    ? formatEventDate(ev.event.displayDate)
-                                                    : ev.event.year
-                                                        ? formatEventDate({
-                                                            year: ev.event.year,
-                                                            month: ev.event.month || 1,
-                                                            day: ev.event.day || 1
-                                                        })
-                                                        : 'Date Unknown'}
+                                                {formatEventDate(ev.event)}
                                             </Link>
                                         </td>
                                         <td>{ev.event.venue?.name}</td>
@@ -123,11 +122,11 @@ export default async function MusicianDetailPage({ params }: { params: { slug: s
                                                 {ev.appearances.map((app: any, idx: number) => (
                                                     <li key={idx} className="text-sm">
                                                         {app.type === "performance" && app.song ? (
-                                                            <span><strong>{app.song}:</strong> {app.instrument}{app.includesVocals && " and vocals"}</span>
+                                                            <span><strong>{app.song}:</strong> {app.instruments?.length > 0 ? app.instruments.join(', ') : '—'}</span>
                                                         ) : app.type === "set" ? (
-                                                            <span>Full set: {app.instrument}{app.includesVocals && " and vocals"}</span>
+                                                            <span>Full set: {app.instruments?.length > 0 ? app.instruments.join(', ') : '—'}</span>
                                                         ) : (
-                                                            <span>Full show: {app.instrument}{app.includesVocals && " and vocals"}</span>
+                                                            <span>Full show: {app.instruments?.length > 0 ? app.instruments.join(', ') : '—'}</span>
                                                         )}
                                                     </li>
                                                 ))}

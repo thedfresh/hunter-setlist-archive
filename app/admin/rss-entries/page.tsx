@@ -4,7 +4,6 @@ import { Plus, Trash2 } from 'lucide-react';
 import RssEntryForm from '@/components/admin/RssEntryForm';
 import Modal from '@/components/ui/Modal';
 import { useToastContext } from '@/components/ui/ToastProvider';
-import { formatEventDate } from '@/lib/formatters/dateFormatter';
 
 interface RssEntry {
     id: number;
