@@ -30,6 +30,7 @@ export default function SongAdminDetailPage({ params }: { params: { id: string }
         parentSongId: 0,
         isUncertain: false,
         inBoxOfRain: false,
+        isInstrumental: false,
         privateNotes: "",
     });
     const [publicNotes, setPublicNotes] = useState("");
@@ -78,6 +79,7 @@ export default function SongAdminDetailPage({ params }: { params: { id: string }
                     parentSongId: data.song.parentSongId || 0,
                     isUncertain: !!data.song.isUncertain,
                     inBoxOfRain: !!data.song.inBoxOfRain,
+                    isInstrumental: !!data.song.isInstrumental,
                     privateNotes: data.song.privateNotes || "",
                 });
                 setPublicNotes(data.song.publicNotes || "");
@@ -216,6 +218,7 @@ export default function SongAdminDetailPage({ params }: { params: { id: string }
                     parentSongId: form.parentSongId === 0 ? null : form.parentSongId,
                     isUncertain: form.isUncertain,
                     inBoxOfRain: form.inBoxOfRain,
+                    isInstrumental: form.isInstrumental,
                     privateNotes: form.privateNotes.trim(),
                     publicNotes: publicNotes.trim(), // ADD THIS
                 })
@@ -253,6 +256,7 @@ export default function SongAdminDetailPage({ params }: { params: { id: string }
                     leadVocalsId: form.leadVocalsId === 0 ? null : form.leadVocalsId,
                     isUncertain: form.isUncertain,
                     inBoxOfRain: form.inBoxOfRain,
+                    isInstrumental: form.isInstrumental,
                     privateNotes: form.privateNotes.trim(),
                     publicNotes: publicNotes.trim(), // Same data
                 })
@@ -286,6 +290,7 @@ export default function SongAdminDetailPage({ params }: { params: { id: string }
                     parentSongId: data.song.parentSongId || 0,
                     isUncertain: !!data.song.isUncertain,
                     inBoxOfRain: !!data.song.inBoxOfRain,
+                    isInstrumental: !!data.song.isInstrumental,
                     privateNotes: data.song.privateNotes || "",
                 });
                 setPublicNotes(data.song.publicNotes || "");
@@ -571,11 +576,11 @@ export default function SongAdminDetailPage({ params }: { params: { id: string }
                                         <input
                                             type="checkbox"
                                             className="checkbox-input"
-                                            checked={form.inBoxOfRain}
-                                            onChange={e => setForm(f => ({ ...f, inBoxOfRain: e.target.checked }))}
+                                            checked={form.isInstrumental}
+                                            onChange={e => setForm(f => ({ ...f, isInstrumental: e.target.checked }))}
                                             disabled={saving}
                                         />
-                                        Box of Rain
+                                        Instrumental
                                     </label>
                                 </div>
                             </div>

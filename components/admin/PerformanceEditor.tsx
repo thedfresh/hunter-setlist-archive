@@ -101,6 +101,7 @@ export default function PerformanceEditor({ eventId, setId, performanceId, onSuc
     const [editInstrumentId, setEditInstrumentId] = useState<number | null>(null);
     const [editIncludesVocals, setEditIncludesVocals] = useState(false);
     const [selectedIncludesVocals, setSelectedIncludesVocals] = useState(false);
+    const [isInstrumental, setIsInstrumental] = useState(false);
 
     useEffect(() => {
         if (performanceId) {
@@ -161,6 +162,7 @@ export default function PerformanceEditor({ eventId, setId, performanceId, onSuc
                         setIsMusicalFragment(!!perf.isMusicalFragment);
                         setIsSoloHunter(!!perf.isSoloHunter);
                         setIsUncertain(!!perf.isUncertain);
+                        setIsInstrumental(!!perf.isInstrumental);
                         setLeadVocalsId(perf.leadVocals?.id ?? null);
                         setPublicNotes(perf.publicNotes ?? "");
                         setPrivateNotes(perf.privateNotes ?? "");
@@ -184,6 +186,7 @@ export default function PerformanceEditor({ eventId, setId, performanceId, onSuc
             setIsMusicalFragment(false);
             setIsSoloHunter(false);
             setIsUncertain(false);
+            setIsInstrumental(false);
             setLeadVocalsId(null);
             setPublicNotes("");
             setPrivateNotes("");
@@ -243,6 +246,7 @@ export default function PerformanceEditor({ eventId, setId, performanceId, onSuc
                 isMusicalFragment,
                 isSoloHunter,
                 isUncertain,
+                isInstrumental,
                 leadVocalsId: leadVocalsId || null,
                 publicNotes,
                 privateNotes
@@ -346,6 +350,10 @@ export default function PerformanceEditor({ eventId, setId, performanceId, onSuc
                     <label className="checkbox-label">
                         <input type="checkbox" className="checkbox-input" checked={isUncertain} onChange={e => setIsUncertain(e.target.checked)} disabled={loading} />
                         Uncertain
+                    </label>
+                    <label className="checkbox-label">
+                        <input type="checkbox" className="checkbox-input" checked={isInstrumental} onChange={e => setIsInstrumental(e.target.checked)} disabled={loading} />
+                        Instrumental
                     </label>
                 </div>
             </div>

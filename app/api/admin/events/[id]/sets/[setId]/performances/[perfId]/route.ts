@@ -38,6 +38,7 @@ export async function PUT(req: Request, { params }: { params: { id: string; setI
                 isMusicalFragment,
                 isSoloHunter,
                 isUncertain,
+                isInstrumental: body.isInstrumental ?? false,
                 leadVocalsId,
                 publicNotes,
                 privateNotes

@@ -35,7 +35,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
         if (!id) return NextResponse.json({ error: 'Invalid ID' }, { status: 400 });
 
         const body = await req.json();
-        const { title, slug, alternateTitle, originalArtist, songBy, lyricsBy, musicBy, leadVocalsId, arrangement, parentSongId, isUncertain, inBoxOfRain, publicNotes, privateNotes } = body;
+        const { title, slug, alternateTitle, originalArtist, songBy, lyricsBy, musicBy, leadVocalsId, arrangement, parentSongId, isUncertain, inBoxOfRain, isInstrumental, publicNotes, privateNotes } = body;
 
         if (!title || typeof title !== "string" || title.trim() === "") {
             return NextResponse.json({ error: "Title is required" }, { status: 400 });
@@ -60,6 +60,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
                     parentSongId: parentSongId === 0 || parentSongId === null ? null : Number(parentSongId),
                     isUncertain: !!isUncertain,
                     inBoxOfRain: !!inBoxOfRain,
+                    isInstrumental: isInstrumental ?? false,
                     publicNotes: publicNotes?.trim() || null,
                     privateNotes: privateNotes?.trim() || null,
                 },
@@ -82,6 +83,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
                         parentSongId: parentSongId === 0 || parentSongId === null ? null : Number(parentSongId),
                         isUncertain: !!isUncertain,
                         inBoxOfRain: !!inBoxOfRain,
+                        isInstrumental: isInstrumental ?? false,
                         publicNotes: publicNotes?.trim() || null,
                         privateNotes: privateNotes?.trim() || null,
                     },

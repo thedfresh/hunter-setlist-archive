@@ -83,6 +83,7 @@ export async function POST(req: Request, { params }: { params: { id: string; set
                 isMusicalFragment,
                 isSoloHunter,
                 isUncertain,
+                isInstrumental: body.isInstrumental ?? false,
                 leadVocalsId,
                 publicNotes,
                 privateNotes
