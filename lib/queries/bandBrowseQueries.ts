@@ -10,6 +10,11 @@ export async function getBandBySlug(slug: string) {
           joinedDate: true,
           leftDate: true,
           publicNotes: true,
+          instruments: {
+            include: {
+              instrument: true
+            }
+          },
           musician: {
             select: {
               id: true,

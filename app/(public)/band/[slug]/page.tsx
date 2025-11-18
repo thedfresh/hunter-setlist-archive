@@ -75,12 +75,15 @@ export default async function BandDetailPage({ params }: { params: { slug: strin
                         ) : (
                           bm.musician.name
                         )}
-                        {bm.musician.defaultInstruments && bm.musician.defaultInstruments.length > 0 && (
+                        {((bm.instruments?.length > 0) || (bm.musician.defaultInstruments?.length > 0)) && (
                           <span className="ml-2 text-gray-700">(
-                            {bm.musician.defaultInstruments.map((di: any, idx: number) => (
-                              <span key={di.instrument.displayName}>
-                                {di.instrument.displayName}
-                                {idx < bm.musician.defaultInstruments.length - 1 ? ", " : ""}
+                            {(bm.instruments?.length > 0
+                              ? bm.instruments
+                              : bm.musician.defaultInstruments
+                            ).map((item: any, idx: number, arr: any[]) => (
+                              <span key={item.instrument.displayName}>
+                                {item.instrument.displayName}
+                                {idx < arr.length - 1 ? ", " : ""}
                               </span>
                             ))}
                             )</span>
