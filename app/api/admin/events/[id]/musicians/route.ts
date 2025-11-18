@@ -60,8 +60,6 @@ export async function POST(req: Request, { params }: { params: { id: string } })
             }
         });
 
-        console.log('Created EventMusician:', eventMusician);
-
         revalidatePath('/admin/events');
         revalidatePath(`/admin/events/${eventId}`);
         revalidatePath('/event', 'page');

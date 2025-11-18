@@ -74,7 +74,6 @@ export default function CreateEventForm({ onSuccess, onCancel }: Props) {
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
         setError("");
-        console.log('Form values:', { year, month, day, venueId });
         if (!year || !month || !day || !venueId) {
             setError("Year, month, day, and venue are required");
             return;

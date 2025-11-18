@@ -47,24 +47,11 @@ export async function POST(req: Request, { params }: { params: { id: string } })
 
     const { performanceId, banterText, isBeforeSong, isVerbatim, publicNotes, privateNotes } = body;
 
-    // LOG THE INCOMING DATA
-    console.log('=== BANTER CREATE REQUEST ===');
-    console.log('Event ID:', eventId);
-    console.log('Body received:', JSON.stringify(body, null, 2));
-    console.log('Has id field?', 'id' in body);
-
     if (!performanceId || !banterText) {
         return NextResponse.json({ error: 'performanceId and banterText are required' }, { status: 400 });
     }
 
     try {
-        // LOG BEFORE CREATE
-        console.log('Attempting to create with data:', {
-            performanceId,
-            banterText: banterText.substring(0, 50) + '...',
-            isBeforeSong,
-            isVerbatim,
-        });
 
         const showBanter = await prisma.showBanter.create({
             data: {
@@ -76,9 +63,6 @@ export async function POST(req: Request, { params }: { params: { id: string } })
                 privateNotes,
             },
         });
-
-        // LOG SUCCESS
-        console.log('Created successfully with ID:', showBanter.id);
 
         revalidatePath('/admin/events');
         return NextResponse.json(showBanter, { status: 201 });
