@@ -31,6 +31,10 @@ export async function POST(req: Request, { params }: { params: { id: string } })
             }
         });
         revalidatePath("/admin/musicians");
+        revalidatePath('/musician');
+        if (musician?.slug) {
+            revalidatePath(`/musician/${musician.slug}`);
+        }
         return NextResponse.json({ musician });
     } catch (err: any) {
         return NextResponse.json({ error: err?.message || "Failed to update default instruments" }, { status: 500 });

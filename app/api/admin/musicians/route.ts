@@ -18,6 +18,10 @@ export async function POST(req: Request) {
             },
         });
         revalidatePath('/admin/musicians');
+        revalidatePath('/musician');
+        if (musician.slug) {
+            revalidatePath(`/musician/${musician.slug}`);
+        }
         return NextResponse.json(musician, { status: 201 });
     } catch (error: any) {
         if (error?.code === 'P2002' && error?.meta?.target?.includes('slug')) {

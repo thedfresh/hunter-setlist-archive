@@ -58,6 +58,10 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
             },
         });
         revalidatePath("/admin/bands");
+        if (bandMusicianWithInstruments?.band?.slug) {
+            revalidatePath(`/band/${bandMusicianWithInstruments.band.slug}`);
+        }
+        revalidatePath('/band');
         return NextResponse.json(bandMusicianWithInstruments);
     } catch (err: any) {
         return NextResponse.json({ error: err?.message || "Failed to update band member" }, { status: 500 });
@@ -70,6 +74,15 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
     try {
         await prisma.bandMusician.delete({ where: { id } });
         revalidatePath("/admin/bands");
+        // Fetch band slug for public revalidation
+        const bandMusician = await prisma.bandMusician.findUnique({
+            where: { id },
+            include: { band: true },
+        });
+        if (bandMusician?.band?.slug) {
+            revalidatePath(`/band/${bandMusician.band.slug}`);
+        }
+        revalidatePath('/band');
         return NextResponse.json({ success: true });
     } catch (err: any) {
         return NextResponse.json({ error: err?.message || "Failed to delete band member" }, { status: 500 });

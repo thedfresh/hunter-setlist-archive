@@ -47,6 +47,10 @@ export async function POST(req: Request) {
                 },
             });
             revalidatePath("/admin/bands");
+            if (bandMusicianWithInstruments?.band?.slug) {
+                revalidatePath(`/band/${bandMusicianWithInstruments.band.slug}`);
+            }
+            revalidatePath('/band');
             return NextResponse.json(bandMusicianWithInstruments, { status: 201 });
         } catch (err: any) {
             if (err.code === "P2002") {

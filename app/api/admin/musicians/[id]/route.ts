@@ -47,6 +47,10 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
             },
         });
         revalidatePath('/admin/musicians');
+        revalidatePath('/musician');
+        if (updated.slug) {
+            revalidatePath(`/musician/${updated.slug}`);
+        }
         return NextResponse.json(updated);
     } catch (error: any) {
         if (error?.code === 'P2002' && error?.meta?.target?.includes('slug')) {
@@ -71,6 +75,10 @@ export async function DELETE(_req: Request, { params }: { params: { id: string }
         }
         await prisma.musician.delete({ where: { id } });
         revalidatePath('/admin/musicians');
+        revalidatePath('/musician');
+        if (musician.slug) {
+            revalidatePath(`/musician/${musician.slug}`);
+        }
         return NextResponse.json({ success: true });
     } catch (error: any) {
         return NextResponse.json({ error: error?.message || 'Failed to delete musician' }, { status: 500 });

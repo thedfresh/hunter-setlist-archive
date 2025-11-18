@@ -52,7 +52,7 @@ export default function BandDetailPage({ params }: { params: { id: string } }) {
         if (form.name && initialLoadComplete) {
             setForm(f => ({ ...f, slug: generateSlugFromName(f.name) }));
         }
-    }, [form.name]);
+    }, [form.name, initialLoadComplete]);
 
     async function handleMetaSave(e: React.FormEvent) {
         e.preventDefault();
