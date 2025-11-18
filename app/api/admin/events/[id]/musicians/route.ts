@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { revalidatePath } from 'next/cache';
+import { revalidateAll } from '@/lib/utils/revalidation';
 
 export async function GET(_req: Request, { params }: { params: { id: string } }) {
     const eventId = Number(params.id);
@@ -60,9 +60,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
             }
         });
 
-        revalidatePath('/admin/events');
-        revalidatePath(`/admin/events/${eventId}`);
-        revalidatePath('/event', 'page');
+        revalidateAll();
         return NextResponse.json(eventMusician, { status: 201 });
     } catch (error: any) {
         console.error('EventMusician error:', error);

@@ -1,7 +1,7 @@
 // app/api/admin/bands/[id]/route.ts
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { revalidatePath } from 'next/cache';
+import { revalidateAll } from '@/lib/utils/revalidation';
 import { generateSlugFromName, resolveSlugCollision } from '@/lib/utils/generateSlug';
 
 export async function GET(_req: Request, { params }: { params: { id: string } }) {
@@ -52,7 +52,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
             }
         }
 
-        revalidatePath('/admin/bands');
+        revalidateAll();
         return NextResponse.json(band);
     } catch (error: any) {
         console.error('PUT /api/admin/bands/[id] error:', error);
@@ -73,7 +73,7 @@ export async function DELETE(_req: Request, { params }: { params: { id: string }
             return NextResponse.json({ error: `Cannot delete - has ${band._count.events} shows in archive` }, { status: 400 });
         }
         await prisma.band.delete({ where: { id } });
-        revalidatePath('/admin/bands');
+        revalidateAll();
         return NextResponse.json({ success: true });
     } catch (error: any) {
         return NextResponse.json({ error: error?.message || 'Failed to delete band' }, { status: 500 });

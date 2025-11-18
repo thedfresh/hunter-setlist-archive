@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { revalidatePath } from 'next/cache';
+import { revalidateAll } from '@/lib/utils/revalidation';
 
 export async function PUT(req: Request, { params }: { params: { id: string; contributorId: string } }) {
     const eventContributorId = Number(params.contributorId); // This is actually the EventContributor.id
@@ -20,7 +20,7 @@ export async function PUT(req: Request, { params }: { params: { id: string; cont
             where: { id: eventContributorId }, // Use the ID directly
             data: { description, publicNotes, privateNotes },
         });
-        revalidatePath('/admin/events');
+        revalidateAll();
         return NextResponse.json(updated);
     } catch (error: any) {
         return NextResponse.json({ error: error?.message || 'Failed to update' }, { status: 500 });
@@ -34,7 +34,7 @@ export async function DELETE(_req: Request, { params }: { params: { id: string; 
         await prisma.eventContributor.delete({
             where: { id: eventContributorId }
         });
-        revalidatePath('/admin/events');
+        revalidateAll();
         return NextResponse.json({ success: true });
     } catch (error: any) {
         return NextResponse.json({ error: error?.message || 'Failed to delete event contributor' }, { status: 500 });

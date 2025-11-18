@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
-import { revalidatePath } from "next/cache";
+import { revalidateAll } from '@/lib/utils/revalidation';
 
 export async function PUT(req: Request, { params }: { params: { id: string } }) {
     try {
@@ -17,7 +17,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
             })
         );
         await prisma.$transaction(updatePromises);
-        revalidatePath('/admin/events');
+        revalidateAll();
         return NextResponse.json({ success: true });
     } catch (err: any) {
         return NextResponse.json({ error: err?.message || "Failed to reorder sets" }, { status: 500 });

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from '@/lib/prisma';
-import { revalidatePath } from 'next/cache';
+import { revalidateAll } from '@/lib/utils/revalidation';
 
 
 export async function POST(req: Request, { params }: { params: Promise<{ setId: string }> }) {
@@ -54,7 +54,6 @@ export async function POST(req: Request, { params }: { params: Promise<{ setId: 
       },
     }),
   ]);
-  revalidatePath('/api/events');
-  revalidatePath('/event');
+  revalidateAll();
   return NextResponse.json({ performance: perf }, { status: 201 });
 }

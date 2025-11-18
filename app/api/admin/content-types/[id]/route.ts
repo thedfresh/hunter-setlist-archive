@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { revalidatePath } from 'next/cache';
+import { revalidateAll } from '@/lib/utils/revalidation';
 
 export async function GET(_request: Request, { params }: { params: { id: string } }) {
     const id = Number(params.id);
@@ -26,7 +26,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
             where: { id },
             data: { name }
         });
-        revalidatePath('/admin/content-types');
+        revalidateAll();
         return NextResponse.json(contentType);
     } catch (error) {
         return NextResponse.json({ error: 'Failed to update content type.' }, { status: 500 });
@@ -46,7 +46,7 @@ export async function DELETE(_request: Request, { params }: { params: { id: stri
             return NextResponse.json({ error: `Cannot delete - used by ${contentType._count.events} events.` }, { status: 400 });
         }
         await prisma.contentType.delete({ where: { id } });
-        revalidatePath('/admin/content-types');
+        revalidateAll();
         return NextResponse.json({ success: true });
     } catch (error) {
         return NextResponse.json({ error: 'Failed to delete content type.' }, { status: 500 });

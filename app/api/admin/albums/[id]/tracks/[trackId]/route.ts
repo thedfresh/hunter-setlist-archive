@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { revalidatePath } from 'next/cache';
+import { revalidateAll } from '@/lib/utils/revalidation';
 
 export async function PUT(req: Request, { params }: { params: { id: string; trackId: string } }) {
     try {
@@ -13,7 +13,7 @@ export async function PUT(req: Request, { params }: { params: { id: string; trac
             where: { id: trackId },
             data: { trackNumber }
         });
-        revalidatePath('/admin/albums');
+        revalidateAll();
         return NextResponse.json(updated);
     } catch (err: any) {
         return NextResponse.json({ error: err?.message || 'Failed to update track' }, { status: 500 });
@@ -39,7 +39,7 @@ export async function DELETE(_req: Request, { params }: { params: { id: string; 
                 trackNumber: { decrement: 1 }
             }
         });
-        revalidatePath('/admin/albums');
+        revalidateAll();
         return NextResponse.json({ success: true });
     } catch (err: any) {
         return NextResponse.json({ error: err?.message || 'Failed to delete track' }, { status: 500 });

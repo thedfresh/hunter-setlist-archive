@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { revalidatePath } from 'next/cache';
+import { revalidateAll } from '@/lib/utils/revalidation';
 
 const ALLOWED_FIELDS = [
     'seguesInto',
@@ -38,7 +38,7 @@ export async function PATCH(
             data: { [field]: value }
         });
 
-        revalidatePath('/admin/events');
+        revalidateAll();
         return NextResponse.json(updated);
     } catch (error) {
         console.error('Quick update error:', error);

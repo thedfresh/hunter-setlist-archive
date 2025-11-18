@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { revalidatePath } from 'next/cache';
+import { revalidateAll } from '@/lib/utils/revalidation';
 
 export async function POST(request: Request) {
     try {
@@ -13,7 +13,7 @@ export async function POST(request: Request) {
         const eventType = await prisma.eventType.create({
             data: { name, includeInStats }
         });
-        revalidatePath('/admin/event-types');
+        revalidateAll();
         return NextResponse.json(eventType, { status: 201 });
     } catch (error) {
         return NextResponse.json({ error: 'Failed to create event type.' }, { status: 500 });

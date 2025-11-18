@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
-import { revalidatePath } from "next/cache";
+import { revalidateAll } from '@/lib/utils/revalidation';
 
 export async function PUT(req: Request, { params }: { params: { id: string; setId: string } }) {
     try {
@@ -40,7 +40,7 @@ export async function PUT(req: Request, { params }: { params: { id: string; setI
                 data: { setId: targetSetId, performanceOrder: targetPosition }
             })
         ]);
-        revalidatePath('/admin/events');
+        revalidateAll();
         return NextResponse.json({ success: true });
     } catch (err: any) {
         return NextResponse.json({ error: err?.message || "Failed to move performance" }, { status: 500 });

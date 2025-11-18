@@ -1,7 +1,7 @@
 // app/api/admin/bands/route.ts
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { revalidatePath } from 'next/cache';
+import { revalidateAll } from '@/lib/utils/revalidation';
 import { generateSlugFromName, resolveSlugCollision } from '@/lib/utils/generateSlug';
 
 export async function POST(request: Request) {
@@ -32,7 +32,7 @@ export async function POST(request: Request) {
             }
         }
 
-        revalidatePath('/admin/bands');
+        revalidateAll();
         return NextResponse.json(band, { status: 201 });
     } catch (error: any) {
         console.error('POST /api/admin/bands error:', error);

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { revalidatePath } from 'next/cache';
+import { revalidateAll } from '@/lib/utils/revalidation';
 
 export async function GET(_req: Request, { params }: { params: { id: string } }) {
     const performanceId = Number(params.id);
@@ -65,9 +65,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
         });
 
         if (performance?.set?.event) {
-            revalidatePath('/admin/events');
-            revalidatePath(`/admin/events/${performance.set.event.id}`);
-            revalidatePath('/event', 'page');
+            revalidateAll();
         }
 
         return NextResponse.json(performanceMusician, { status: 201 });

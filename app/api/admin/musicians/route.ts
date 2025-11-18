@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { revalidatePath } from "next/cache";
+import { revalidateAll } from '@/lib/utils/revalidation';
 
 export async function POST(req: Request) {
     try {
@@ -17,11 +17,7 @@ export async function POST(req: Request) {
                 privateNotes: privateNotes?.trim() || null,
             },
         });
-        revalidatePath('/admin/musicians');
-        revalidatePath('/musician');
-        if (musician.slug) {
-            revalidatePath(`/musician/${musician.slug}`);
-        }
+        revalidateAll();
         return NextResponse.json(musician, { status: 201 });
     } catch (error: any) {
         if (error?.code === 'P2002' && error?.meta?.target?.includes('slug')) {

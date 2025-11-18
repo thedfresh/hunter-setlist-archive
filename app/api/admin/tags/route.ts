@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { revalidatePath } from "next/cache";
+import { revalidateAll } from '@/lib/utils/revalidation';
 
 export async function POST(req: Request) {
     try {
@@ -12,7 +12,7 @@ export async function POST(req: Request) {
             const tag = await prisma.tag.create({
                 data: { name: name.trim(), description: description?.trim() || null },
             });
-            revalidatePath('/admin/tags');
+            revalidateAll();
             return NextResponse.json(tag, { status: 201 });
         } catch (err: any) {
             if (err?.code === 'P2002') {

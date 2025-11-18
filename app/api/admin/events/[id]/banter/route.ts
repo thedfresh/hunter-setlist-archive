@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { revalidatePath } from 'next/cache';
+import { revalidateAll } from '@/lib/utils/revalidation';
 
 export async function GET(_req: Request, { params }: { params: { id: string } }) {
     const eventId = Number(params.id);
@@ -64,7 +64,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
             },
         });
 
-        revalidatePath('/admin/events');
+        revalidateAll();
         return NextResponse.json(showBanter, { status: 201 });
     } catch (error: any) {
         // LOG THE FULL ERROR

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { revalidatePath } from "next/cache";
+import { revalidateAll } from '@/lib/utils/revalidation';
 import { generateVenueSlug, resolveSlugCollision } from "@/lib/utils/generateSlug";
 
 
@@ -49,7 +49,7 @@ export async function POST(req: Request) {
             }
         }
 
-        revalidatePath('/admin/venues');
+        revalidateAll();
         return NextResponse.json(venue, { status: 201 });
     } catch (error: any) {
         console.error('POST /api/admin/venues error:', error);

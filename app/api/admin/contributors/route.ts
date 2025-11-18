@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { revalidatePath } from "next/cache";
+import { revalidateAll } from '@/lib/utils/revalidation';
 
 export async function POST(req: Request) {
     try {
@@ -16,7 +16,7 @@ export async function POST(req: Request) {
                 privateNotes: privateNotes?.trim() || null,
             },
         });
-        revalidatePath('/admin/contributors');
+        revalidateAll();
         return NextResponse.json(contributor, { status: 201 });
     } catch (error: any) {
         return NextResponse.json({ error: error?.message || 'Failed to create contributor' }, { status: 500 });

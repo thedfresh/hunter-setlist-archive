@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma';
-import { revalidatePath } from 'next/cache';
+import { revalidateAll } from '@/lib/utils/revalidation';
 
 export async function GET(request: Request, { params }: { params: { id: string } }) {
     try {
@@ -32,8 +32,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
                 isPublished: isPublished ?? false,
             },
         });
-        revalidatePath('/admin/rss-entries');
-        revalidatePath('/rss.xml')
+        revalidateAll();
         return Response.json(entry);
     } catch (error) {
         if (
@@ -53,8 +52,7 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
         const entry = await prisma.rssEntry.delete({
             where: { id: parseInt(params.id, 10) },
         });
-        revalidatePath('/admin/rss-entries');
-        revalidatePath('/rss.xml')
+        revalidateAll();
         return Response.json(entry);
     } catch (error) {
         if (

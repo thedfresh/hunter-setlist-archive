@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { revalidatePath } from "next/cache";
+import { revalidateAll } from '@/lib/utils/revalidation';
 import { NextResponse } from "next/server";
 import { generateSlug } from "@/lib/utils/eventSlug";
 import { resolveSlugCollision } from "@/lib/utils/generateSlug";
@@ -101,8 +101,7 @@ export async function POST(req: Request) {
         }
     }
 
-    revalidatePath("/admin/events");
-    revalidatePath("/event");
+    revalidateAll();
 
     return NextResponse.json({ event }, { status: 201 });
 }

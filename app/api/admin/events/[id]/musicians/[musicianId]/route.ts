@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { revalidatePath } from 'next/cache';
+import { revalidateAll } from '@/lib/utils/revalidation';
 
 export async function PUT(req: Request, { params }: { params: { id: string; musicianId: string } }) {
     const eventId = Number(params.id);
@@ -40,9 +40,7 @@ export async function PUT(req: Request, { params }: { params: { id: string; musi
                 }
             }
         });
-        revalidatePath('/admin/events');
-        revalidatePath(`/admin/events/${eventId}`);
-        revalidatePath('/event', 'page');
+        revalidateAll();
         return NextResponse.json(updated);
     } catch (error: any) {
         return NextResponse.json({ error: error?.message || 'Failed to update event musician' }, { status: 500 });
@@ -57,9 +55,7 @@ export async function DELETE(_req: Request, { params }: { params: { id: string; 
         const existing = await prisma.eventMusician.findFirst({ where: { eventId, musicianId } });
         if (!existing) return NextResponse.json({ error: 'EventMusician not found' }, { status: 404 });
         await prisma.eventMusician.delete({ where: { id: existing.id } });
-        revalidatePath('/admin/events');
-        revalidatePath(`/admin/events/${eventId}`);
-        revalidatePath('/event', 'page');
+        revalidateAll();
         return NextResponse.json({ success: true });
     } catch (error: any) {
         return NextResponse.json({ error: error?.message || 'Failed to delete event musician' }, { status: 500 });

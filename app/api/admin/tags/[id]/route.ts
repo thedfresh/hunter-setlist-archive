@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { revalidatePath } from "next/cache";
+import { revalidateAll } from '@/lib/utils/revalidation';
 
 export async function GET(_req: Request, { params }: { params: { id: string } }) {
     try {
@@ -30,7 +30,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
                 where: { id },
                 data: { name: name.trim(), description: description?.trim() || null },
             });
-            revalidatePath('/admin/tags');
+            revalidateAll();
             return NextResponse.json(updated);
         } catch (err: any) {
             if (err?.code === 'P2002') {
@@ -56,7 +56,7 @@ export async function DELETE(_req: Request, { params }: { params: { id: string }
             return NextResponse.json({ error: `Cannot delete - used by ${tag._count.songTags} songs` }, { status: 400 });
         }
         await prisma.tag.delete({ where: { id } });
-        revalidatePath('/admin/tags');
+        revalidateAll();
         return NextResponse.json({ success: true });
     } catch (error: any) {
         return NextResponse.json({ error: error?.message || 'Failed to delete tag' }, { status: 500 });

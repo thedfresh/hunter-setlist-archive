@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { revalidatePath } from 'next/cache';
+import { revalidateAll } from '@/lib/utils/revalidation';
 
 export async function DELETE(
     req: Request,
@@ -14,7 +14,7 @@ export async function DELETE(
 
         await prisma.songTag.delete({ where: { id } });
 
-        revalidatePath('/admin/songs');
+        revalidateAll();
         return NextResponse.json({ success: true });
     } catch (error) {
         return NextResponse.json({ error: 'Failed to delete tag' }, { status: 500 });

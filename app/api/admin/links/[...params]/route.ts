@@ -1,5 +1,5 @@
 import type { NextRequest } from "next/server";
-import { revalidatePath } from 'next/cache';
+import { revalidateAll } from '@/lib/utils/revalidation';
 
 export async function DELETE(req: NextRequest, { params }: { params: { params: string[] } }) {
   const [, id] = params.params || [];
@@ -7,7 +7,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { params: s
   if (!linkId) return NextResponse.json({ error: "Missing link id" }, { status: 400 });
   try {
     await prisma.link.delete({ where: { id: linkId } });
-    revalidatePath('/event');
+    revalidateAll();
     return NextResponse.json({ success: true });
   } catch (error) {
     return NextResponse.json({ error: "Failed to delete link" }, { status: 500 });
@@ -33,7 +33,7 @@ export async function PUT(req: NextRequest, context: { params: { params: string[
         isActive: data.isActive,
       },
     });
-    revalidatePath('/event');
+    revalidateAll();
     return NextResponse.json(updated);
   } catch (error) {
     return NextResponse.json({ error: "Failed to update link" }, { status: 500 });

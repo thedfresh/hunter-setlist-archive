@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { revalidatePath } from 'next/cache';
+import { revalidateAll } from '@/lib/utils/revalidation';
 
 export async function POST(request: Request) {
     try {
@@ -14,7 +14,7 @@ export async function POST(request: Request) {
         const setType = await prisma.setType.create({
             data: { name, displayName, includeInStats }
         });
-        revalidatePath('/admin/set-types');
+        revalidateAll();
         return NextResponse.json(setType, { status: 201 });
     } catch (error) {
         return NextResponse.json({ error: 'Failed to create set type.' }, { status: 500 });

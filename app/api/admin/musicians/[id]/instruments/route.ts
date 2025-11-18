@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { revalidatePath } from "next/cache";
+import { revalidateAll } from '@/lib/utils/revalidation';
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request, { params }: { params: { id: string } }) {
@@ -30,11 +30,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
                 }
             }
         });
-        revalidatePath("/admin/musicians");
-        revalidatePath('/musician');
-        if (musician?.slug) {
-            revalidatePath(`/musician/${musician.slug}`);
-        }
+        revalidateAll();
         return NextResponse.json({ musician });
     } catch (err: any) {
         return NextResponse.json({ error: err?.message || "Failed to update default instruments" }, { status: 500 });

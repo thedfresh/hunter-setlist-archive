@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { revalidatePath } from 'next/cache';
+import { revalidateAll } from '@/lib/utils/revalidation';
 
 export async function GET(_req: Request, { params }: { params: { id: string; recordingId: string } }) {
     const recordingId = Number(params.recordingId);
@@ -44,7 +44,7 @@ export async function PUT(req: Request, { params }: { params: { id: string; reco
                 privateNotes,
             },
         });
-        revalidatePath('/admin/events');
+        revalidateAll();
         return NextResponse.json(recording);
     } catch (error: any) {
         return NextResponse.json({ error: error?.message || 'Failed to update recording' }, { status: 500 });
@@ -58,7 +58,7 @@ export async function DELETE(_req: Request, { params }: { params: { id: string; 
         await prisma.recording.delete({
             where: { id: recordingId },
         });
-        revalidatePath('/admin/events');
+        revalidateAll();
         return NextResponse.json({ success: true });
     } catch (error: any) {
         return NextResponse.json({ error: error?.message || 'Failed to delete recording' }, { status: 500 });

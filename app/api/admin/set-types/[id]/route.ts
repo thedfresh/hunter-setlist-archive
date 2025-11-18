@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { revalidatePath } from 'next/cache';
+import { revalidateAll } from '@/lib/utils/revalidation';
 
 export async function GET(_request: Request, { params }: { params: { id: string } }) {
     const id = Number(params.id);
@@ -28,7 +28,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
             where: { id },
             data: { name, displayName, includeInStats }
         });
-        revalidatePath('/admin/set-types');
+        revalidateAll();
         return NextResponse.json(setType);
     } catch (error) {
         return NextResponse.json({ error: 'Failed to update set type.' }, { status: 500 });
@@ -48,7 +48,7 @@ export async function DELETE(_request: Request, { params }: { params: { id: stri
             return NextResponse.json({ error: `Cannot delete - used by ${setType._count.sets} sets.` }, { status: 400 });
         }
         await prisma.setType.delete({ where: { id } });
-        revalidatePath('/admin/set-types');
+        revalidateAll();
         return NextResponse.json({ success: true });
     } catch (error) {
         return NextResponse.json({ error: 'Failed to delete set type.' }, { status: 500 });

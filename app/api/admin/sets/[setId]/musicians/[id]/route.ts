@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { revalidatePath } from 'next/cache';
+import { revalidateAll } from '@/lib/utils/revalidation';
 
 export async function GET(_req: Request, { params }: { params: { setId: string; id: string } }) {
   const musicianId = Number(params.id);
@@ -64,8 +64,7 @@ export async function PUT(req: Request, { params }: { params: { setId: string; i
         }
       },
     });
-    revalidatePath('/admin/events');
-    revalidatePath('/event', 'page');
+    revalidateAll();
     return NextResponse.json({ musician: updated });
   } catch (error) {
     console.error('SetMusician update error:', error);
@@ -86,8 +85,7 @@ export async function DELETE(req: Request, { params }: { params: { setId: string
     }
 
     await prisma.setMusician.delete({ where: { id: existing.id } });
-    revalidatePath('/admin/events');
-    revalidatePath('/event', 'page');
+    revalidateAll();
     return NextResponse.json({ success: true });
   } catch (error) {
     return NextResponse.json({ error: "Failed to delete set musician." }, { status: 500 });

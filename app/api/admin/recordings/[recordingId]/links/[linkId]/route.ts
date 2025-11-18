@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { revalidatePath } from 'next/cache';
+import { revalidateAll } from '@/lib/utils/revalidation';
 
 export async function PUT(
   req: Request,
@@ -37,7 +37,7 @@ export async function PUT(
         },
         include: { linkType: true },
       });
-      revalidatePath('/event');
+      revalidateAll();
       return NextResponse.json({
         link: {
           id: updatedLink.id,

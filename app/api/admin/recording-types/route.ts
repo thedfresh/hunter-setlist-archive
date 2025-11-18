@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { revalidatePath } from 'next/cache';
+import { revalidateAll } from '@/lib/utils/revalidation';
 
 export async function POST(req: Request) {
     try {
@@ -11,7 +11,7 @@ export async function POST(req: Request) {
         const recordingType = await prisma.recordingType.create({
             data: { name: name.trim(), description: description?.trim() || null },
         });
-        revalidatePath('/admin/recording-types');
+        revalidateAll();
         return NextResponse.json(recordingType, { status: 201 });
     } catch (error: any) {
         return NextResponse.json({ error: error?.message || 'Failed to create recording type' }, { status: 500 });

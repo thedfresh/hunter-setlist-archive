@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { revalidatePath } from "next/cache";
+import { revalidateAll } from '@/lib/utils/revalidation';
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
@@ -46,11 +46,7 @@ export async function POST(req: Request) {
                     instruments: { include: { instrument: true } },
                 },
             });
-            revalidatePath("/admin/bands");
-            if (bandMusicianWithInstruments?.band?.slug) {
-                revalidatePath(`/band/${bandMusicianWithInstruments.band.slug}`);
-            }
-            revalidatePath('/band');
+            revalidateAll();
             return NextResponse.json(bandMusicianWithInstruments, { status: 201 });
         } catch (err: any) {
             if (err.code === "P2002") {

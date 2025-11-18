@@ -1,6 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
-import { revalidatePath } from 'next/cache';
+import { revalidateAll } from '@/lib/utils/revalidation';
 
 export async function DELETE(
     request: Request,
@@ -12,7 +12,7 @@ export async function DELETE(
     }
     try {
         await prisma.instrument.delete({ where: { id } });
-        revalidatePath('/api/musicians')
+        revalidateAll();
         return NextResponse.json({ success: true });
     } catch (error) {
         return NextResponse.json({ error: 'Failed to delete instrument' }, { status: 500 });

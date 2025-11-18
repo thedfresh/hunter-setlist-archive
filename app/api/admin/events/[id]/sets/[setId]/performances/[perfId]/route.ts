@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
-import { revalidatePath } from "next/cache";
+import { revalidateAll } from '@/lib/utils/revalidation';
 
 export async function PUT(req: Request, { params }: { params: { id: string; setId: string; perfId: string } }) {
     try {
@@ -61,7 +61,7 @@ export async function PUT(req: Request, { params }: { params: { id: string; setI
             }
         }
 
-        revalidatePath('/admin/events');
+        revalidateAll();
         return NextResponse.json(updatedPerformance);
     } catch (err: any) {
         return NextResponse.json({ error: err?.message || "Failed to update performance" }, { status: 500 });
@@ -81,7 +81,7 @@ export async function DELETE(_req: Request, { params }: { params: { id: string; 
             where: { setId, performanceOrder: { gt: deleted.performanceOrder } },
             data: { performanceOrder: { decrement: 1 } }
         });
-        revalidatePath('/admin/events');
+        revalidateAll();
         return NextResponse.json({ success: true });
     } catch (err: any) {
         return NextResponse.json({ error: err?.message || "Failed to delete performance" }, { status: 500 });

@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
-import { revalidatePath } from "next/cache";
+import { revalidateAll } from '@/lib/utils/revalidation';
 
 export async function GET(_req: Request, { params }: { params: { id: string } }) {
     try {
@@ -85,7 +85,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
                 isUncertain
             }
         });
-        revalidatePath('/admin/events');
+        revalidateAll();
         return NextResponse.json(createdSet, { status: 201 });
     } catch (err: any) {
         return NextResponse.json({ error: err?.message || "Failed to create set" }, { status: 500 });

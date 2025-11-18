@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
-import { revalidatePath } from "next/cache";
+import { revalidateAll } from '@/lib/utils/revalidation';
 
 export async function GET(_req: Request, { params }: { params: { id: string; setId: string } }) {
     try {
@@ -69,7 +69,7 @@ export async function PUT(req: Request, { params }: { params: { id: string; setI
                 isUncertain
             }
         });
-        revalidatePath('/admin/events');
+        revalidateAll();
         return NextResponse.json(updatedSet);
     } catch (err: any) {
         return NextResponse.json({ error: err?.message || "Failed to update set" }, { status: 500 });
@@ -80,7 +80,7 @@ export async function DELETE(_req: Request, { params }: { params: { id: string; 
     try {
         const setId = Number(params.setId);
         await prisma.set.delete({ where: { id: setId } });
-        revalidatePath('/admin/events');
+        revalidateAll();
         return NextResponse.json({ success: true });
     } catch (err: any) {
         return NextResponse.json({ error: err?.message || "Failed to delete set" }, { status: 500 });

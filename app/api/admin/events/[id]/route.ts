@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { revalidatePath } from "next/cache";
+import { revalidateAll } from '@/lib/utils/revalidation';
 import { NextResponse } from "next/server";
 import { generateSlug } from "@/lib/utils/eventSlug";
 
@@ -147,8 +147,7 @@ export async function PUT(request: Request, context: { params: Promise<{ id: str
         }
     }
 
-    revalidatePath("/admin/events");
-    revalidatePath("/event");
+    revalidateAll();
 
     return NextResponse.json({ event });
 }
@@ -211,8 +210,7 @@ export async function DELETE(request: Request, context: { params: Promise<{ id: 
         // Delete event
         await prisma.event.delete({ where: { id: eventId } });
 
-        revalidatePath("/admin/events");
-        revalidatePath("/event");
+        revalidateAll();
 
         return NextResponse.json({ success: true });
 

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from '@/lib/prisma';
-import { revalidatePath } from 'next/cache';
+import { revalidateAll } from '@/lib/utils/revalidation';
 
 export async function PUT(req: Request, { params }: { params: { setId: string; performanceId: string } }) {
   const awaitedParams = await params;
@@ -67,8 +67,7 @@ export async function PUT(req: Request, { params }: { params: { setId: string; p
       include: { song: true, performanceMusicians: { include: { musician: true, instrument: true } } },
     }),
   ]);
-  revalidatePath('/api/events');
-  revalidatePath('/event');
+  revalidateAll();
   return NextResponse.json({ performance: perf });
 }
 
@@ -76,7 +75,6 @@ export async function DELETE(req: Request, { params }: { params: { setId: string
   const performanceId = Number(params.performanceId);
   await prisma.performanceMusician.deleteMany({ where: { performanceId } });
   await prisma.performance.delete({ where: { id: performanceId } });
-  revalidatePath('/api/events');
-  revalidatePath('/event');
+  revalidateAll();
   return NextResponse.json({ success: true });
 }

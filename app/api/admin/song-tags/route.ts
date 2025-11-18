@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { revalidatePath } from 'next/cache';
+import { revalidateAll } from '@/lib/utils/revalidation';
 
 export async function POST(req: Request) {
     try {
@@ -14,7 +14,7 @@ export async function POST(req: Request) {
             data: { songId, tagId }
         });
 
-        revalidatePath('/admin/songs');
+        revalidateAll();
         return NextResponse.json(songTag, { status: 201 });
     } catch (error: any) {
         if (error.code === 'P2002') {

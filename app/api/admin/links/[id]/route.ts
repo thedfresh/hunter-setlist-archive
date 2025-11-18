@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { revalidatePath } from 'next/cache';
+import { revalidateAll } from '@/lib/utils/revalidation';
 import { prisma } from '@/lib/prisma';
 
 export async function PUT(
@@ -29,7 +29,7 @@ export async function PUT(
             },
         });
 
-        revalidatePath('/admin/songs');
+        revalidateAll();
         return NextResponse.json(updated);
     } catch (error) {
         console.error('Error updating link:', error);
@@ -69,7 +69,7 @@ export async function DELETE(
         });
 
         // Revalidate the songs admin page (songs context)
-        revalidatePath('/admin/songs');
+        revalidateAll();
 
         return NextResponse.json({ success: true });
     } catch (error) {

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { revalidatePath } from 'next/cache';
+import { revalidateAll } from '@/lib/utils/revalidation';
 
 export async function PUT(req: Request, { params }: { params: { id: string; banterId: string } }) {
     const eventId = Number(params.id);
@@ -28,7 +28,7 @@ export async function PUT(req: Request, { params }: { params: { id: string; bant
                 privateNotes,
             },
         });
-        revalidatePath('/admin/events');
+        revalidateAll();
         return NextResponse.json(showBanter);
     } catch (error: any) {
         return NextResponse.json({ error: error?.message || 'Failed to update show banter' }, { status: 500 });
@@ -43,7 +43,7 @@ export async function DELETE(_req: Request, { params }: { params: { id: string; 
         await prisma.showBanter.delete({
             where: { id: banterId },
         });
-        revalidatePath('/admin/events');
+        revalidateAll();
         return NextResponse.json({ success: true });
     } catch (error: any) {
         return NextResponse.json({ error: error?.message || 'Failed to delete show banter' }, { status: 500 });

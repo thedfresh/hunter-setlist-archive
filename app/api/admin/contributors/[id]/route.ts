@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { revalidatePath } from "next/cache";
+import { revalidateAll } from '@/lib/utils/revalidation';
 
 export async function GET(_req: Request, { params }: { params: { id: string } }) {
     try {
@@ -34,7 +34,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
                 privateNotes: privateNotes?.trim() || null,
             },
         });
-        revalidatePath('/admin/contributors');
+        revalidateAll();
         return NextResponse.json(updated);
     } catch (error: any) {
         return NextResponse.json({ error: error?.message || 'Failed to update contributor' }, { status: 500 });
@@ -55,7 +55,7 @@ export async function DELETE(_req: Request, { params }: { params: { id: string }
             return NextResponse.json({ error: `Cannot delete - has ${totalContributions} contributions` }, { status: 400 });
         }
         await prisma.contributor.delete({ where: { id } });
-        revalidatePath('/admin/contributors');
+        revalidateAll();
         return NextResponse.json({ success: true });
     } catch (error: any) {
         return NextResponse.json({ error: error?.message || 'Failed to delete contributor' }, { status: 500 });

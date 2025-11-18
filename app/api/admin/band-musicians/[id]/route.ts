@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { revalidatePath } from "next/cache";
+import { revalidateAll } from '@/lib/utils/revalidation';
 import { NextResponse } from "next/server";
 
 export async function GET(req: Request, { params }: { params: { id: string } }) {
@@ -57,11 +57,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
                 instruments: { include: { instrument: true } },
             },
         });
-        revalidatePath("/admin/bands");
-        if (bandMusicianWithInstruments?.band?.slug) {
-            revalidatePath(`/band/${bandMusicianWithInstruments.band.slug}`);
-        }
-        revalidatePath('/band');
+        revalidateAll();
         return NextResponse.json(bandMusicianWithInstruments);
     } catch (err: any) {
         return NextResponse.json({ error: err?.message || "Failed to update band member" }, { status: 500 });
@@ -73,16 +69,7 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
     if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
     try {
         await prisma.bandMusician.delete({ where: { id } });
-        revalidatePath("/admin/bands");
-        // Fetch band slug for public revalidation
-        const bandMusician = await prisma.bandMusician.findUnique({
-            where: { id },
-            include: { band: true },
-        });
-        if (bandMusician?.band?.slug) {
-            revalidatePath(`/band/${bandMusician.band.slug}`);
-        }
-        revalidatePath('/band');
+        revalidateAll();
         return NextResponse.json({ success: true });
     } catch (err: any) {
         return NextResponse.json({ error: err?.message || "Failed to delete band member" }, { status: 500 });

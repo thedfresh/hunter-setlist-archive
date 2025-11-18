@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { resolveSlugCollision } from '@/lib/utils/generateSlug';
-import { revalidatePath } from "next/cache";
+import { revalidateAll } from '@/lib/utils/revalidation';
 import { generateSlugFromName } from "@/lib/utils/generateSlug";
 
 export async function POST(req: Request) {
@@ -35,6 +35,6 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: err?.message || 'Failed to create song' }, { status: 500 });
         }
     }
-    revalidatePath('/admin/songs');
+    revalidateAll();
     return NextResponse.json({ song }, { status: 201 });
 }

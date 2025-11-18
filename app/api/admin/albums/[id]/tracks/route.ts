@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { revalidatePath } from 'next/cache';
+import { revalidateAll } from '@/lib/utils/revalidation';
 
 export async function GET(_req: Request, { params }: { params: { id: string } }) {
     try {
@@ -49,7 +49,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
         const created = await prisma.songAlbum.create({
             data: { albumId, songId, trackNumber }
         });
-        revalidatePath('/admin/albums');
+        revalidateAll();
         return NextResponse.json(created, { status: 201 });
     } catch (err: any) {
         return NextResponse.json({ error: err?.message || 'Failed to add track' }, { status: 500 });

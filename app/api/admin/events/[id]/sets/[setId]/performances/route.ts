@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
-import { revalidatePath } from "next/cache";
+import { revalidateAll } from '@/lib/utils/revalidation';
 
 export async function GET(_req: Request, { params }: { params: { id: string; setId: string } }) {
     try {
@@ -103,7 +103,7 @@ export async function POST(req: Request, { params }: { params: { id: string; set
             }
         }
 
-        revalidatePath('/admin/events');
+        revalidateAll();
         return NextResponse.json(createdPerformance, { status: 201 });
     } catch (err: any) {
         return NextResponse.json({ error: err?.message || "Failed to create performance" }, { status: 500 });

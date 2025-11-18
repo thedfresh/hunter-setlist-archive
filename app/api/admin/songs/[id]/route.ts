@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { revalidatePath } from "next/cache";
+import { revalidateAll } from '@/lib/utils/revalidation';
 import { generateSlugFromName } from "@/lib/utils/generateSlug";
 import { resolveSlugCollision } from '@/lib/utils/generateSlug';
 
@@ -93,7 +93,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
             }
         }
 
-        revalidatePath('/admin/songs');
+        revalidateAll();
         return NextResponse.json(updated);
 
     } catch (error: any) {
@@ -124,7 +124,7 @@ export async function DELETE(_req: Request, { params }: { params: { id: string }
             return NextResponse.json({ error: `Cannot delete - has ${totalUsage} usages` }, { status: 400 });
         }
         await prisma.song.delete({ where: { id } });
-        revalidatePath('/admin/songs');
+        revalidateAll();
         return NextResponse.json({ success: true });
     } catch (error: any) {
         return NextResponse.json({ error: error?.message || 'Failed to delete song' }, { status: 500 });

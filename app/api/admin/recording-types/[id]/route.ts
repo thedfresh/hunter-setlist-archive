@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { revalidatePath } from 'next/cache';
+import { revalidateAll } from '@/lib/utils/revalidation';
 
 export async function GET(_req: Request, { params }: { params: { id: string } }) {
     try {
@@ -29,7 +29,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
             where: { id },
             data: { name: name.trim(), description: description?.trim() || null },
         });
-        revalidatePath('/admin/recording-types');
+        revalidateAll();
         return NextResponse.json(updated);
     } catch (error: any) {
         return NextResponse.json({ error: error?.message || 'Failed to update recording type' }, { status: 500 });
@@ -49,7 +49,7 @@ export async function DELETE(_req: Request, { params }: { params: { id: string }
             return NextResponse.json({ error: `Cannot delete - used by ${recordingType._count.recordings} recordings` }, { status: 400 });
         }
         await prisma.recordingType.delete({ where: { id } });
-        revalidatePath('/admin/recording-types');
+        revalidateAll();
         return NextResponse.json({ success: true });
     } catch (error: any) {
         return NextResponse.json({ error: error?.message || 'Failed to delete recording type' }, { status: 500 });

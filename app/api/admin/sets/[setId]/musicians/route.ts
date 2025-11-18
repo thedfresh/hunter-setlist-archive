@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { revalidatePath } from 'next/cache';
+import { revalidateAll } from '@/lib/utils/revalidation';
 
 export async function POST(req: Request, { params }: { params: { setId: string } }) {
   const setId = Number(params.setId);
@@ -30,8 +30,7 @@ export async function POST(req: Request, { params }: { params: { setId: string }
         }
       },
     });
-    revalidatePath('/admin/events');
-    revalidatePath('/event', 'page');
+    revalidateAll();
     return NextResponse.json({ musician: setMusician }, { status: 201 });
   } catch (error) {
     console.error('SetMusician create error:', error);

@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma';
-import { revalidatePath } from 'next/cache';
+import { revalidateAll } from '@/lib/utils/revalidation';
 
 export async function GET() {
     try {
@@ -28,8 +28,7 @@ export async function POST(request: Request) {
                 isPublished: isPublished ?? false,
             },
         });
-        revalidatePath('/admin/rss-entries');
-        revalidatePath('/rss.xml')
+        revalidateAll();
         return Response.json(entry, { status: 201 });
     } catch (error) {
         return Response.json({ error: 'Server error' }, { status: 500 });
