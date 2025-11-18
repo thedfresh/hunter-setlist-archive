@@ -1065,7 +1065,7 @@
 
   .modal {
     @apply bg-white rounded-xl shadow-2xl;
-    @apply max-w-lg w-full mx-5;
+    @apply max-w-6xl w-full mx-5;
     @apply animate-[slideUp_0.2s_ease];
   }
 

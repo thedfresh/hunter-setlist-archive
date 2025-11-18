@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Plus } from "lucide-react";
+import VocalistChipSelector from "@/components/admin/VocalistChipSelector";
+import InstrumentChipSelector from "@/components/admin/InstrumentChipSelector";
 import Modal from "@/components/ui/Modal";
 import SongForm from "@/components/admin/SongForm";
 
@@ -12,66 +14,7 @@ interface PerformanceEditorProps {
 }
 
 export default function PerformanceEditor({ eventId, setId, performanceId, onSuccess, onCancel }: PerformanceEditorProps) {
-    const handleSaveMusician = async () => {
-        if (!selectedMusicianId) return;
-        const res = await fetch(`/api/admin/performances/${performanceId}/musicians`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                musicianId: selectedMusicianId,
-                instrumentId: selectedInstrumentId,
-                includesVocals: selectedIncludesVocals
-            })
-        });
-        if (res.ok) {
-            const data = await fetch(`/api/admin/performances/${performanceId}/musicians`).then(r => r.json());
-            setPerformanceMusicians(data.performanceMusicians || []);
-            setShowAddMusician(false);
-            setSelectedMusicianId(null);
-            setSelectedInstrumentId(null);
-            setSelectedIncludesVocals(false);
-        }
-    };
-
-    const handleEditMusician = (pm: any) => {
-        setEditingMusicianId(pm.id);
-        setEditInstrumentId(pm.instrumentId);
-        setEditIncludesVocals(pm.includesVocals || false);
-    };
-
-    const handleSaveEdit = async () => {
-        if (!editingMusicianId) return;
-        const payload = {
-            instrumentId: editInstrumentId,
-            includesVocals: editIncludesVocals
-        };
-        const res = await fetch(`/api/admin/performances/${performanceId}/musicians/${editingMusicianId}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
-        if (res.ok) {
-            const data = await fetch(`/api/admin/performances/${performanceId}/musicians`).then(r => r.json());
-            setPerformanceMusicians(data.performanceMusicians || []);
-            setEditingMusicianId(null);
-            setEditInstrumentId(null);
-            setEditIncludesVocals(false);
-        }
-    };
-
-    const handleCancelEdit = () => {
-        setEditingMusicianId(null);
-        setEditInstrumentId(null);
-        setEditIncludesVocals(false);
-    };
-
-    const handleDeleteMusician = async (id: number) => {
-        if (!confirm('Delete this musician?')) return;
-        await fetch(`/api/admin/performances/${performanceId}/musicians/${id}`, { method: 'DELETE' });
-        const data = await fetch(`/api/admin/performances/${performanceId}/musicians`).then(r => r.json());
-        setPerformanceMusicians(data.performanceMusicians || []);
-        onSuccess();
-    };
+    // Core performance fields
     const [songId, setSongId] = useState<number | null>(null);
     const [seguesInto, setSeguesInto] = useState(false);
     const [isTruncatedStart, setIsTruncatedStart] = useState(false);
@@ -83,26 +26,33 @@ export default function PerformanceEditor({ eventId, setId, performanceId, onSuc
     const [isMusicalFragment, setIsMusicalFragment] = useState(false);
     const [isSoloHunter, setIsSoloHunter] = useState(false);
     const [isUncertain, setIsUncertain] = useState(false);
-    const [leadVocalsId, setLeadVocalsId] = useState<number | null>(null);
+    const [isInstrumental, setIsInstrumental] = useState(false);
     const [publicNotes, setPublicNotes] = useState("");
     const [privateNotes, setPrivateNotes] = useState("");
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState("");
-    const [songs, setSongs] = useState<any[]>([]);
-    const [musicians, setMusicians] = useState<any[]>([]);
-    const [instruments, setInstruments] = useState<any[]>([]);
+
+    // Vocalists
+    const [selectedVocalists, setSelectedVocalists] = useState<any[]>([]);
+
+    // Performance Musicians
     const [performanceMusicians, setPerformanceMusicians] = useState<any[]>([]);
     const [showAddMusician, setShowAddMusician] = useState(false);
     const [selectedMusicianId, setSelectedMusicianId] = useState<number | null>(null);
-    const [selectedInstrumentId, setSelectedInstrumentId] = useState<number | null>(null);
+    const [selectedInstruments, setSelectedInstruments] = useState<any[]>([]);
+    const [editingMusicianId, setEditingMusicianId] = useState<number | null>(null);
+    const [editingInstruments, setEditingInstruments] = useState<any[]>([]);
+
+    // Dropdowns
+    const [songs, setSongs] = useState<any[]>([]);
+    const [musicians, setMusicians] = useState<any[]>([]);
+    const [instruments, setInstruments] = useState<any[]>([]);
+
+    // UI state
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
     const [songModalOpen, setSongModalOpen] = useState(false);
     const songSelectRef = useRef<HTMLSelectElement>(null);
-    const [editingMusicianId, setEditingMusicianId] = useState<number | null>(null);
-    const [editInstrumentId, setEditInstrumentId] = useState<number | null>(null);
-    const [editIncludesVocals, setEditIncludesVocals] = useState(false);
-    const [selectedIncludesVocals, setSelectedIncludesVocals] = useState(false);
-    const [isInstrumental, setIsInstrumental] = useState(false);
 
+    // Load performance musicians
     useEffect(() => {
         if (performanceId) {
             fetch(`/api/admin/performances/${performanceId}/musicians`)
@@ -111,6 +61,7 @@ export default function PerformanceEditor({ eventId, setId, performanceId, onSuc
         }
     }, [performanceId]);
 
+    // Focus song select on new performance
     useEffect(() => {
         if (!performanceId && songs.length > 0 && songSelectRef.current) {
             setTimeout(() => {
@@ -119,6 +70,7 @@ export default function PerformanceEditor({ eventId, setId, performanceId, onSuc
         }
     }, [songs, performanceId]);
 
+    // Load dropdowns
     useEffect(() => {
         async function fetchDropdowns() {
             try {
@@ -141,6 +93,7 @@ export default function PerformanceEditor({ eventId, setId, performanceId, onSuc
         fetchDropdowns();
     }, []);
 
+    // Load performance data
     useEffect(() => {
         if (performanceId) {
             setLoading(true);
@@ -163,9 +116,24 @@ export default function PerformanceEditor({ eventId, setId, performanceId, onSuc
                         setIsSoloHunter(!!perf.isSoloHunter);
                         setIsUncertain(!!perf.isUncertain);
                         setIsInstrumental(!!perf.isInstrumental);
-                        setLeadVocalsId(perf.leadVocals?.id ?? null);
                         setPublicNotes(perf.publicNotes ?? "");
                         setPrivateNotes(perf.privateNotes ?? "");
+                    }
+
+                    // Fetch vocalists
+                    const vocalRes = await fetch(`/api/admin/performances/${performanceId}/vocalists`);
+                    if (vocalRes.ok) {
+                        const vocalData = await vocalRes.json();
+                        const vocalists = (vocalData.vocalists || []).map((v: any) => ({
+                            musicianId: v.musicianId,
+                            musician: v.musician ? {
+                                name: v.musician.firstName && v.musician.lastName
+                                    ? `${v.musician.firstName} ${v.musician.lastName}`
+                                    : v.musician.name
+                            } : null,
+                            vocalRole: v.vocalRole
+                        }));
+                        setSelectedVocalists(vocalists);
                     }
                 } catch {
                     setError("Failed to load performance data");
@@ -175,6 +143,7 @@ export default function PerformanceEditor({ eventId, setId, performanceId, onSuc
             }
             fetchPerformance();
         } else {
+            // Reset for new performance
             setSongId(null);
             setSeguesInto(false);
             setIsTruncatedStart(false);
@@ -187,18 +156,23 @@ export default function PerformanceEditor({ eventId, setId, performanceId, onSuc
             setIsSoloHunter(false);
             setIsUncertain(false);
             setIsInstrumental(false);
-            setLeadVocalsId(null);
             setPublicNotes("");
             setPrivateNotes("");
             setError("");
+            setSelectedVocalists([]);
         }
     }, [performanceId, eventId, setId]);
 
+    // Auto-populate instrument from musician defaults when adding
     useEffect(() => {
-        if (selectedMusicianId && !selectedInstrumentId) {
+        if (selectedMusicianId && selectedInstruments.length === 0) {
             const musician = musicians.find(m => m.id === selectedMusicianId);
-            if (musician?.defaultInstrumentId) {
-                setSelectedInstrumentId(musician.defaultInstrumentId);
+            if (musician?.defaultInstruments && musician.defaultInstruments.length > 0) {
+                const mapped = musician.defaultInstruments.map((di: any) => ({
+                    id: di.instrument.id,
+                    displayName: di.instrument.displayName
+                }));
+                setSelectedInstruments(mapped);
             }
         }
     }, [selectedMusicianId, musicians]);
@@ -224,6 +198,66 @@ export default function PerformanceEditor({ eventId, setId, performanceId, onSuc
         }, 100);
     }
 
+    // Performance Musicians handlers
+    const handleSaveMusician = async () => {
+        if (!selectedMusicianId) return;
+        const res = await fetch(`/api/admin/performances/${performanceId}/musicians`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                musicianId: selectedMusicianId,
+                instrumentIds: selectedInstruments.map(i => i.id)
+            })
+        });
+        if (res.ok) {
+            const data = await fetch(`/api/admin/performances/${performanceId}/musicians`).then(r => r.json());
+            setPerformanceMusicians(data.performanceMusicians || []);
+            setShowAddMusician(false);
+            setSelectedMusicianId(null);
+            setSelectedInstruments([]);
+        }
+    };
+
+    const handleEditMusician = (pm: any) => {
+        setEditingMusicianId(pm.id);
+        const mapped = (pm.instruments || []).map((pi: any) => ({
+            id: pi.instrument.id,
+            displayName: pi.instrument.displayName
+        }));
+        setEditingInstruments(mapped);
+    };
+
+    const handleSaveEdit = async () => {
+        if (!editingMusicianId) return;
+        const payload = {
+            instrumentIds: editingInstruments.map(i => i.id)
+        };
+        const res = await fetch(`/api/admin/performances/${performanceId}/musicians/${editingMusicianId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        if (res.ok) {
+            const data = await fetch(`/api/admin/performances/${performanceId}/musicians`).then(r => r.json());
+            setPerformanceMusicians(data.performanceMusicians || []);
+            setEditingMusicianId(null);
+            setEditingInstruments([]);
+        }
+    };
+
+    const handleCancelEdit = () => {
+        setEditingMusicianId(null);
+        setEditingInstruments([]);
+    };
+
+    const handleDeleteMusician = async (id: number) => {
+        if (!confirm('Delete this musician?')) return;
+        await fetch(`/api/admin/performances/${performanceId}/musicians/${id}`, { method: 'DELETE' });
+        const data = await fetch(`/api/admin/performances/${performanceId}/musicians`).then(r => r.json());
+        setPerformanceMusicians(data.performanceMusicians || []);
+        onSuccess();
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
@@ -247,7 +281,7 @@ export default function PerformanceEditor({ eventId, setId, performanceId, onSuc
                 isSoloHunter,
                 isUncertain,
                 isInstrumental,
-                leadVocalsId: leadVocalsId || null,
+                vocalistData: selectedVocalists.map(v => ({ musicianId: v.musicianId, vocalRole: v.vocalRole })),
                 publicNotes,
                 privateNotes
             };
@@ -305,6 +339,7 @@ export default function PerformanceEditor({ eventId, setId, performanceId, onSuc
                     </button>
                 </div>
             </div>
+
             <div className="grid grid-cols-3 gap-x-6 gap-y-2 mb-4">
                 <div className="flex flex-col gap-2">
                     <label className="checkbox-label">
@@ -357,19 +392,15 @@ export default function PerformanceEditor({ eventId, setId, performanceId, onSuc
                     </label>
                 </div>
             </div>
+
             <div>
-                <label className="form-label">Lead Vocals</label>
-                <select
-                    className="select"
-                    value={leadVocalsId ?? ""}
-                    onChange={e => setLeadVocalsId(e.target.value ? Number(e.target.value) : null)}
+                <label className="form-label">Vocalists</label>
+                <VocalistChipSelector
+                    selectedVocalists={selectedVocalists}
+                    onChange={setSelectedVocalists}
                     disabled={loading}
-                >
-                    <option value="">Hunter (default)</option>
-                    {musicians.map((m: any) => (
-                        <option key={m.id} value={m.id}>{m.displayName || m.name}</option>
-                    ))}
-                </select>
+                    allowUnknown={true}
+                />
             </div>
 
             {/* Performance Musicians Section */}
@@ -386,80 +417,99 @@ export default function PerformanceEditor({ eventId, setId, performanceId, onSuc
                         </button>
                     )}
                 </div>
+
                 {performanceMusicians.map(pm => (
-                    <div key={pm.id} className="flex items-center gap-2 py-1.5 text-sm">
+                    <div key={pm.id} className="mb-3 pb-3 border-b border-gray-200 last:border-0">
                         {editingMusicianId === pm.id ? (
-                            <>
-                                <span className="font-medium">{pm.musician.displayName || pm.musician.name}:</span>
-                                <select
-                                    className="select input-small flex-1"
-                                    value={editInstrumentId ?? ""}
-                                    onChange={e => setEditInstrumentId(Number(e.target.value) || null)}
-                                >
-                                    <option value="">No instrument</option>
-                                    {instruments.map(i => <option key={i.id} value={i.id}>{i.displayName}</option>)}
-                                </select>
-                                <label className="checkbox-label text-xs">
-                                    <input
-                                        type="checkbox"
-                                        className="checkbox-input"
-                                        checked={editIncludesVocals}
-                                        onChange={e => setEditIncludesVocals(e.target.checked)}
-                                    />
-                                    + vocals
-                                </label>
-                                <button type="button" className="btn btn-primary btn-small" onClick={handleSaveEdit}>
-                                    Save
-                                </button>
-                                <button type="button" className="btn btn-secondary btn-small" onClick={handleCancelEdit}>
-                                    Cancel
-                                </button>
-                            </>
+                            <div className="space-y-2">
+                                <div className="font-medium text-sm">{pm.musician?.name}</div>
+                                <InstrumentChipSelector
+                                    selectedInstruments={editingInstruments}
+                                    onChange={setEditingInstruments}
+                                    disabled={false}
+                                />
+                                <div className="flex gap-2">
+                                    <button type="button" className="btn btn-primary btn-small" onClick={handleSaveEdit}>
+                                        Save
+                                    </button>
+                                    <button type="button" className="btn btn-secondary btn-small" onClick={handleCancelEdit}>
+                                        Cancel
+                                    </button>
+                                </div>
+                            </div>
                         ) : (
-                            <>
-                                <span className="flex-1">
-                                    {pm.musician.displayName || pm.musician.name}
-                                    {pm.instrument && ` on ${pm.instrument.displayName}`}
-                                    {pm.includesVocals && ' and vocals'}
-                                </span>
-                                <button type="button" className="btn btn-secondary btn-small" onClick={() => handleEditMusician(pm)}>
-                                    Edit
-                                </button>
-                                <button type="button" className="btn btn-danger btn-small" onClick={() => handleDeleteMusician(pm.id)}>
-                                    Delete
-                                </button>
-                            </>
+                            <div className="flex items-center justify-between">
+                                <div className="text-sm">
+                                    <span className="font-medium">{pm.musician?.name}</span>
+                                    {pm.instruments && pm.instruments.length > 0 && (
+                                        <span className="text-gray-600">
+                                            {': '}
+                                            {pm.instruments.map((pi: any) => pi.instrument?.displayName).filter(Boolean).join(', ')}
+                                        </span>
+                                    )}
+                                </div>
+                                <div className="flex gap-2">
+                                    <button type="button" className="btn btn-secondary btn-small" onClick={() => handleEditMusician(pm)}>
+                                        Edit
+                                    </button>
+                                    <button type="button" className="btn btn-danger btn-small" onClick={() => handleDeleteMusician(pm.id)}>
+                                        Delete
+                                    </button>
+                                </div>
+                            </div>
                         )}
                     </div>
                 ))}
 
                 {showAddMusician && (
-                    <div className="grid grid-cols-2 gap-2 mt-2">
-                        <select className="select" value={selectedMusicianId ?? ""} onChange={e => setSelectedMusicianId(Number(e.target.value))}>
+                    <div className="mt-3 space-y-3 pt-3 border-t border-gray-300">
+                        <select
+                            className="select"
+                            value={selectedMusicianId ?? ""}
+                            onChange={e => setSelectedMusicianId(Number(e.target.value))}
+                        >
                             <option value="">Select musician</option>
-                            {musicians.map(m => <option key={m.id} value={m.id}>{m.displayName || m.name}</option>)}
+                            {musicians.map(m => (
+                                <option key={m.id} value={m.id}>{m.displayName || m.name}</option>
+                            ))}
                         </select>
-                        <select className="select" value={selectedInstrumentId ?? ""} onChange={e => setSelectedInstrumentId(Number(e.target.value))}>
-                            <option value="">Select instrument</option>
-                            {instruments.map(i => <option key={i.id} value={i.id}>{i.displayName}</option>)}
-                        </select>
-                        <label className="checkbox-label col-span-2">
-                            <input
-                                type="checkbox"
-                                className="checkbox-input"
-                                checked={selectedIncludesVocals}
-                                onChange={e => setSelectedIncludesVocals(e.target.checked)}
-                            />
-                            + vocals
-                        </label>
-                        <div></div>
+
+                        {selectedMusicianId && (
+                            <div>
+                                <label className="form-label text-sm mb-1">Instruments</label>
+                                <InstrumentChipSelector
+                                    selectedInstruments={selectedInstruments}
+                                    onChange={setSelectedInstruments}
+                                    disabled={false}
+                                />
+                            </div>
+                        )}
+
                         <div className="flex gap-2">
-                            <button type="button" className="btn btn-secondary btn-small flex-1" onClick={() => setShowAddMusician(false)}>Cancel</button>
-                            <button type="button" className="btn btn-primary btn-small flex-1" onClick={handleSaveMusician}>Save</button>
+                            <button
+                                type="button"
+                                className="btn btn-secondary btn-small flex-1"
+                                onClick={() => {
+                                    setShowAddMusician(false);
+                                    setSelectedMusicianId(null);
+                                    setSelectedInstruments([]);
+                                }}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="button"
+                                className="btn btn-primary btn-small flex-1"
+                                onClick={handleSaveMusician}
+                                disabled={!selectedMusicianId}
+                            >
+                                Save
+                            </button>
                         </div>
                     </div>
                 )}
             </div>
+
             <div className="grid grid-cols-2 gap-4 mb-4">
                 <div>
                     <label className="form-label">Public Notes</label>
@@ -482,7 +532,9 @@ export default function PerformanceEditor({ eventId, setId, performanceId, onSuc
                     />
                 </div>
             </div>
+
             {error && <div className="form-error mb-4">{error}</div>}
+
             <div className="flex gap-3 justify-end mt-6">
                 <button type="button" className="btn btn-secondary btn-medium" onClick={onCancel} disabled={loading}>
                     Cancel
@@ -491,6 +543,7 @@ export default function PerformanceEditor({ eventId, setId, performanceId, onSuc
                     Save
                 </button>
             </div>
+
             <Modal
                 isOpen={songModalOpen}
                 onClose={() => setSongModalOpen(false)}
@@ -504,6 +557,5 @@ export default function PerformanceEditor({ eventId, setId, performanceId, onSuc
                 />
             </Modal>
         </form>
-
     );
 }

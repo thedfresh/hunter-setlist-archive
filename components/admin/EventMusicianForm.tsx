@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useToast } from "@/lib/hooks/useToast";
+import InstrumentChipSelector from "@/components/admin/InstrumentChipSelector";
 
 interface EventMusicianFormProps {
     eventId: number;
@@ -12,35 +13,40 @@ interface EventMusicianFormProps {
 export default function EventMusicianForm({ eventId, musicianId, onSuccess, onCancel }: EventMusicianFormProps) {
     const { showToast } = useToast();
     const [selectedMusicianId, setSelectedMusicianId] = useState<number | string>("");
-    const [instrumentId, setInstrumentId] = useState<number | string>("");
-    const [includesVocals, setIncludesVocals] = useState(false);
+    const [selectedInstruments, setSelectedInstruments] = useState<any[]>([]);
     const [publicNotes, setPublicNotes] = useState("");
     const [privateNotes, setPrivateNotes] = useState("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [musicians, setMusicians] = useState<any[]>([]);
-    const [instruments, setInstruments] = useState<any[]>([]);
 
     useEffect(() => {
         fetchDropdowns();
         if (musicianId !== null) {
             fetchExisting();
         }
-        // eslint-disable-next-line
     }, [musicianId]);
+
+    useEffect(() => {
+        if (selectedMusicianId && selectedInstruments.length === 0) {
+            const musician = musicians.find(m => m.id === Number(selectedMusicianId));
+            if (musician?.defaultInstruments && musician.defaultInstruments.length > 0) {
+                const mapped = musician.defaultInstruments.map((di: any) => ({
+                    id: di.instrument.id,
+                    displayName: di.instrument.displayName
+                }));
+                setSelectedInstruments(mapped);
+            }
+        }
+    }, [selectedMusicianId, musicians, selectedInstruments.length]);
 
     async function fetchDropdowns() {
         try {
-            const [musiciansRes, instrumentsRes] = await Promise.all([
-                fetch("/api/musicians"),
-                fetch("/api/instruments")
-            ]);
+            const musiciansRes = await fetch("/api/musicians");
             const musiciansData = await musiciansRes.json();
-            const instrumentsData = await instrumentsRes.json();
             setMusicians(musiciansData.musicians || []);
-            setInstruments(instrumentsData.instruments || []);
         } catch {
-            showToast("Failed to load dropdowns", "error");
+            showToast("Failed to load musicians", "error");
         }
     }
 
@@ -52,10 +58,16 @@ export default function EventMusicianForm({ eventId, musicianId, onSuccess, onCa
             const found = (data.eventMusicians || []).find((em: any) => em.musicianId === musicianId);
             if (found) {
                 setSelectedMusicianId(found.musicianId);
-                setInstrumentId(found.instrumentId || "");
                 setPublicNotes(found.publicNotes || "");
                 setPrivateNotes(found.privateNotes || "");
-                setIncludesVocals(found.includesVocals || false);
+
+                if (found.instruments && found.instruments.length > 0) {
+                    const mapped = found.instruments.map((ei: any) => ({
+                        id: ei.instrument.id,
+                        displayName: ei.instrument.displayName
+                    }));
+                    setSelectedInstruments(mapped);
+                }
             }
         } catch {
             showToast("Failed to load musician data", "error");
@@ -71,10 +83,9 @@ export default function EventMusicianForm({ eventId, musicianId, onSuccess, onCa
         try {
             const body = {
                 musicianId: Number(selectedMusicianId),
-                instrumentId: instrumentId ? Number(instrumentId) : null,
+                instrumentIds: selectedInstruments.map(i => i.id),
                 publicNotes,
                 privateNotes,
-                includesVocals,
             };
             let res;
             if (musicianId === null) {
@@ -103,47 +114,31 @@ export default function EventMusicianForm({ eventId, musicianId, onSuccess, onCa
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
             {error && <div className="form-error mb-4">{error}</div>}
-            <div className="grid grid-cols-2 gap-4 mb-4">
-                <div className="form-group">
-                    <label className="form-label form-label-required">Musician</label>
-                    <select
-                        className="select"
-                        value={selectedMusicianId}
-                        onChange={e => setSelectedMusicianId(e.target.value)}
-                        required
-                        disabled={musicianId !== null}
-                        autoFocus
-                    >
-                        <option value="">Select musician...</option>
-                        {musicians.map(m => (
-                            <option key={m.id} value={m.id}>{m.displayName || m.name}</option>
-                        ))}
-                    </select>
-                </div>
-                <div className="form-group">
-                    <label className="form-label">Instrument</label>
-                    <select
-                        className="select"
-                        value={instrumentId}
-                        onChange={e => setInstrumentId(e.target.value)}
-                    >
-                        <option value="">No instrument</option>
-                        {instruments.map(i => (
-                            <option key={i.id} value={i.id}>{i.displayName}</option>
-                        ))}
-                    </select>
-                </div>
-            </div>
+
             <div className="form-group">
-                <label className="checkbox-label">
-                    <input
-                        type="checkbox"
-                        className="checkbox-input"
-                        checked={includesVocals}
-                        onChange={e => setIncludesVocals(e.target.checked)}
-                    />
-                    Includes vocals
-                </label>
+                <label className="form-label form-label-required">Musician</label>
+                <select
+                    className="select"
+                    value={selectedMusicianId}
+                    onChange={e => setSelectedMusicianId(e.target.value)}
+                    required
+                    disabled={musicianId !== null}
+                    autoFocus
+                >
+                    <option value="">Select musician...</option>
+                    {musicians.map(m => (
+                        <option key={m.id} value={m.id}>{m.displayName || m.name}</option>
+                    ))}
+                </select>
+            </div>
+
+            <div className="form-group">
+                <label className="form-label">Instruments</label>
+                <InstrumentChipSelector
+                    selectedInstruments={selectedInstruments}
+                    onChange={setSelectedInstruments}
+                    disabled={loading}
+                />
             </div>
 
             <div className="grid grid-cols-2 gap-4 mb-4">
@@ -166,13 +161,13 @@ export default function EventMusicianForm({ eventId, musicianId, onSuccess, onCa
                     />
                 </div>
             </div>
+
             <div className="flex gap-3 justify-end mt-6">
                 <button type="button" className="btn btn-secondary btn-medium" onClick={onCancel} disabled={loading}>Cancel</button>
                 <button type="submit" className="btn btn-primary btn-medium" disabled={loading}>
                     {loading ? "Saving..." : "Save"}
                 </button>
             </div>
-
         </form>
     );
 }

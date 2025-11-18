@@ -32,7 +32,11 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
                         performanceMusicians: {
                             include: {
                                 musician: { select: { id: true, name: true } },
-                                instrument: { select: { id: true, displayName: true } }
+                                instruments: {
+                                    include: {
+                                        instrument: { select: { id: true, displayName: true } }
+                                    }
+                                }
                             }
                         },
                         leadVocals: {

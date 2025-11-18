@@ -10,6 +10,7 @@ import Markdown from '@/components/ui/Markdown';
 import remarkGfm from 'remark-gfm';
 import { ExternalLink } from 'lucide-react';
 import { getDisplayName } from "next/dist/shared/lib/utils";
+import VocalistChipSelector from '@/components/admin/VocalistChipSelector';
 
 export default function SongAdminDetailPage({ params }: { params: { id: string } }) {
     const router = useRouter();
@@ -51,6 +52,8 @@ export default function SongAdminDetailPage({ params }: { params: { id: string }
     const [allTags, setAllTags] = useState<any[]>([]);
     const [tagError, setTagError] = useState('');
     const [initialLoadComplete, setInitialLoadComplete] = useState(false);
+    const [selectedVocalists, setSelectedVocalists] = useState<any[]>([]);
+    const [savingVocalists, setSavingVocalists] = useState(false);
 
     // Navigation state
     const [prevSong, setPrevSong] = useState<any>(null);
@@ -113,6 +116,20 @@ export default function SongAdminDetailPage({ params }: { params: { id: string }
             .then(res => res.json())
             .then(data => setAllSongs(data.songs || []))
             .catch(err => console.error('Failed to fetch songs:', err));
+        fetch(`/api/admin/songs/${songId}/vocalists`)
+            .then(res => res.json())
+            .then(data => {
+                const vocalists = (data.vocalists || []).map((v: any) => ({
+                    musicianId: v.musicianId,
+                    musician: v.musician ? {
+                        name: v.musician.firstName && v.musician.lastName
+                            ? `${v.musician.firstName} ${v.musician.lastName}`
+                            : v.musician.name
+                    } : null,
+                    vocalRole: v.vocalRole
+                }));
+                setSelectedVocalists(vocalists);
+            });
     }, [songId]);
 
     useEffect(() => {
@@ -762,7 +779,40 @@ export default function SongAdminDetailPage({ params }: { params: { id: string }
                             </div>
                         )}
                     </section>
-
+                    <section className="mb-8 max-w-2xl">
+                        <div className="flex items-center gap-3 mb-2">
+                            <label className="form-label">Vocalists ({selectedVocalists.length})</label>
+                            {savingVocalists && <span className="spinner"></span>}
+                        </div>
+                        <VocalistChipSelector
+                            selectedVocalists={selectedVocalists}
+                            onChange={async (vocalists) => {
+                                setSavingVocalists(true);
+                                try {
+                                    const res = await fetch(`/api/admin/songs/${songId}/vocalists`, {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({
+                                            vocalistData: vocalists.map(v => ({
+                                                musicianId: v.musicianId,
+                                                vocalRole: v.vocalRole
+                                            }))
+                                        })
+                                    });
+                                    if (!res.ok) throw new Error();
+                                    setSelectedVocalists(vocalists);
+                                    showToast('Vocalists updated', 'success');
+                                } catch {
+                                    showToast('Failed to save vocalists', 'error');
+                                } finally {
+                                    setSavingVocalists(false);
+                                }
+                            }}
+                            disabled={savingVocalists}
+                            allowUnknown={false}
+                            roleOptions={['lead', 'harmony', 'default']}
+                        />
+                    </section>
 
                     <hr className="my-8" />
 

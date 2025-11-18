@@ -1,9 +1,6 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import { revalidatePath } from 'next/cache';
-
-const prisma = new PrismaClient();
-
 
 export async function POST(req: Request, { params }: { params: { setId: string } }) {
   const setId = Number(params.setId);
@@ -16,19 +13,28 @@ export async function POST(req: Request, { params }: { params: { setId: string }
       data: {
         setId,
         musicianId: Number(data.musicianId),
-        instrumentId: data.instrumentId ? Number(data.instrumentId) : null,
         publicNotes: data.publicNotes || null,
         privateNotes: data.privateNotes || null,
+        instruments: {
+          create: (data.instrumentIds || []).map((instId: number) => ({
+            instrumentId: instId
+          }))
+        }
       },
       include: {
         musician: true,
-        instrument: true,
+        instruments: {
+          include: {
+            instrument: true
+          }
+        }
       },
     });
-    revalidatePath('/api/events');
-    revalidatePath('/event');
+    revalidatePath('/admin/events');
+    revalidatePath('/event', 'page');
     return NextResponse.json({ musician: setMusician }, { status: 201 });
   } catch (error) {
+    console.error('SetMusician create error:', error);
     return NextResponse.json({ error: "Failed to create set musician." }, { status: 500 });
   }
 }

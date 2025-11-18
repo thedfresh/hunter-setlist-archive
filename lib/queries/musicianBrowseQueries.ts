@@ -10,7 +10,11 @@ export async function getMusiciansBrowse() {
     // Find musicians with appearances in countable events
     const musicians = await prisma.musician.findMany({
         include: {
-            defaultInstrument: { select: { displayName: true } },
+            defaultInstruments: {
+                include: {
+                    instrument: { select: { id: true, displayName: true } }
+                }
+            },
             bandMusicians: {
                 include: {
                     band: { select: { id: true, name: true, slug: true } },
@@ -126,7 +130,7 @@ export async function getMusiciansBrowse() {
             displayName: getDisplayName(m),
             firstName: m.firstName,
             lastName: m.lastName,
-            defaultInstrument: m.defaultInstrument?.displayName || null,
+            defaultInstruments: m.defaultInstruments || [],
             appearanceCount: eventIdsByMusician[m.id]?.size || 0,
             bands: m.bandMusicians?.map(bm => bm.band) || [],
             hasVocals: hasVocalsByMusician[m.id] || false,

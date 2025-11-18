@@ -44,6 +44,23 @@ export async function PUT(req: Request, { params }: { params: { id: string; setI
                 privateNotes
             }
         });
+
+        // Handle vocalistData if provided
+        if ('vocalistData' in body) {
+            await prisma.performanceVocalist.deleteMany({ where: { performanceId: perfId } });
+            if (Array.isArray(body.vocalistData) && body.vocalistData.length > 0) {
+                for (const v of body.vocalistData) {
+                    await prisma.performanceVocalist.create({
+                        data: {
+                            performanceId: perfId,
+                            musicianId: v.musicianId,
+                            vocalRole: v.vocalRole
+                        }
+                    });
+                }
+            }
+        }
+
         revalidatePath('/admin/events');
         return NextResponse.json(updatedPerformance);
     } catch (err: any) {

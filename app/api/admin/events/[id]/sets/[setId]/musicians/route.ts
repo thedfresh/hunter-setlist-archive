@@ -9,7 +9,11 @@ export async function GET(_req: Request, { params }: { params: { id: string; set
             where: { setId },
             include: {
                 musician: { select: { id: true, name: true } },
-                instrument: { select: { id: true, displayName: true } },
+                instruments: {
+                    include: {
+                        instrument: { select: { id: true, displayName: true } }
+                    }
+                }
             },
             orderBy: { musician: { name: "asc" } },
         });
@@ -23,7 +27,7 @@ export async function POST(req: Request, { params }: { params: { id: string; set
     try {
         const setId = Number(params.setId);
         const body = await req.json();
-        const { musicianId, instrumentId, publicNotes, privateNotes, includesVocals } = body;
+        const { musicianId, instrumentIds, publicNotes, privateNotes } = body;
         if (!musicianId) {
             return NextResponse.json({ error: "musicianId is required" }, { status: 400 });
         }
@@ -37,13 +41,24 @@ export async function POST(req: Request, { params }: { params: { id: string; set
             data: {
                 setId,
                 musicianId,
-                instrumentId,
                 publicNotes,
                 privateNotes,
-                includesVocals,
+                instruments: {
+                    create: (instrumentIds || []).map((instId: number) => ({
+                        instrumentId: instId
+                    }))
+                }
             },
+            include: {
+                instruments: {
+                    include: {
+                        instrument: true
+                    }
+                }
+            }
         });
         revalidatePath('/admin/events');
+        revalidatePath('/event', 'page');
         return NextResponse.json(setMusician, { status: 201 });
     } catch (err: any) {
         return NextResponse.json({ error: err.message }, { status: 500 });

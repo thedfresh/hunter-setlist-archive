@@ -10,7 +10,11 @@ export async function GET(_req: Request, { params }: { params: { id: string; set
             where: { setId, musicianId },
             include: {
                 musician: true,
-                instrument: true,
+                instruments: {
+                    include: {
+                        instrument: { select: { id: true, displayName: true } }
+                    }
+                }
             },
         });
         if (!setMusician) {
@@ -27,23 +31,40 @@ export async function PUT(req: Request, { params }: { params: { id: string; setI
         const setId = Number(params.setId);
         const musicianId = Number(params.musicianId);
         const body = await req.json();
-        const { instrumentId, publicNotes, privateNotes, includesVocals } = body;
+        const { instrumentIds, publicNotes, privateNotes } = body;
+
         const setMusician = await prisma.setMusician.findFirst({
             where: { setId, musicianId },
         });
         if (!setMusician) {
             return NextResponse.json({ error: "Set musician not found" }, { status: 404 });
         }
+
+        await prisma.setMusicianInstrument.deleteMany({
+            where: { setMusicianId: setMusician.id }
+        });
+
         const updated = await prisma.setMusician.update({
             where: { id: setMusician.id },
             data: {
-                instrumentId,
                 publicNotes,
                 privateNotes,
-                includesVocals,
+                instruments: {
+                    create: (instrumentIds || []).map((instId: number) => ({
+                        instrumentId: instId
+                    }))
+                }
             },
+            include: {
+                instruments: {
+                    include: {
+                        instrument: true
+                    }
+                }
+            }
         });
         revalidatePath('/admin/events');
+        revalidatePath('/event', 'page');
         return NextResponse.json(updated);
     } catch (err: any) {
         return NextResponse.json({ error: err.message }, { status: 500 });
@@ -62,6 +83,7 @@ export async function DELETE(_req: Request, { params }: { params: { id: string; 
         }
         await prisma.setMusician.delete({ where: { id: setMusician.id } });
         revalidatePath('/admin/events');
+        revalidatePath('/event', 'page');
         return NextResponse.json({ success: true });
     } catch (err: any) {
         return NextResponse.json({ error: err.message }, { status: 500 });

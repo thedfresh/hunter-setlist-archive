@@ -1,39 +1,93 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import { revalidatePath } from 'next/cache';
-const prisma = new PrismaClient();
+
+export async function GET(_req: Request, { params }: { params: { setId: string; id: string } }) {
+  const musicianId = Number(params.id);
+  const setId = Number(params.setId);
+  try {
+    const setMusician = await prisma.setMusician.findFirst({
+      where: { setId, musicianId },
+      include: {
+        musician: true,
+        instruments: {
+          include: {
+            instrument: { select: { id: true, displayName: true } }
+          }
+        }
+      }
+    });
+    if (!setMusician) {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
+    return NextResponse.json(setMusician);
+  } catch (error) {
+    return NextResponse.json({ error: "Failed to fetch set musician." }, { status: 500 });
+  }
+}
 
 export async function PUT(req: Request, { params }: { params: { setId: string; id: string } }) {
-  const setMusicianId = Number(params.id);
+  const musicianId = Number(params.id);
+  const setId = Number(params.setId);
   try {
     const data = await req.json();
+
+    const existing = await prisma.setMusician.findFirst({
+      where: { setId, musicianId }
+    });
+
+    if (!existing) {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
+
+    await prisma.setMusicianInstrument.deleteMany({
+      where: { setMusicianId: existing.id }
+    });
+
     const updated = await prisma.setMusician.update({
-      where: { id: setMusicianId },
+      where: { id: existing.id },
       data: {
-        musicianId: data.musicianId ? Number(data.musicianId) : undefined,
-        instrumentId: data.instrumentId ? Number(data.instrumentId) : null,
         publicNotes: data.publicNotes ?? null,
         privateNotes: data.privateNotes ?? null,
+        instruments: {
+          create: (data.instrumentIds || []).map((instId: number) => ({
+            instrumentId: instId
+          }))
+        }
       },
       include: {
         musician: true,
-        instrument: true,
+        instruments: {
+          include: {
+            instrument: true
+          }
+        }
       },
     });
-    revalidatePath('/api/events');
-    revalidatePath('/event');
+    revalidatePath('/admin/events');
+    revalidatePath('/event', 'page');
     return NextResponse.json({ musician: updated });
   } catch (error) {
+    console.error('SetMusician update error:', error);
     return NextResponse.json({ error: "Failed to update set musician." }, { status: 500 });
   }
 }
 
 export async function DELETE(req: Request, { params }: { params: { setId: string; id: string } }) {
-  const setMusicianId = Number(params.id);
+  const musicianId = Number(params.id);
+  const setId = Number(params.setId);
   try {
-    await prisma.setMusician.delete({ where: { id: setMusicianId } });
-    revalidatePath('/api/events');
-    revalidatePath('/event');
+    const existing = await prisma.setMusician.findFirst({
+      where: { setId, musicianId }
+    });
+
+    if (!existing) {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
+
+    await prisma.setMusician.delete({ where: { id: existing.id } });
+    revalidatePath('/admin/events');
+    revalidatePath('/event', 'page');
     return NextResponse.json({ success: true });
   } catch (error) {
     return NextResponse.json({ error: "Failed to delete set musician." }, { status: 500 });

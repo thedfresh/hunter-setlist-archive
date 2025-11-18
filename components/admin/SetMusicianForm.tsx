@@ -1,4 +1,5 @@
 import { useState, useEffect, FormEvent } from "react";
+import InstrumentChipSelector from "@/components/admin/InstrumentChipSelector";
 
 interface SetMusicianFormProps {
     eventId: number;
@@ -10,42 +11,52 @@ interface SetMusicianFormProps {
 
 export default function SetMusicianForm({ eventId, setId, musicianId, onSuccess, onCancel }: SetMusicianFormProps) {
     const [musicians, setMusicians] = useState<any[]>([]);
-    const [instruments, setInstruments] = useState<any[]>([]);
     const [selectedMusician, setSelectedMusician] = useState<number | "">(musicianId ?? "");
-    const [selectedInstrument, setSelectedInstrument] = useState<number | "">("");
-    const [includesVocals, setIncludesVocals] = useState(false);
+    const [selectedInstruments, setSelectedInstruments] = useState<any[]>([]);
     const [publicNotes, setPublicNotes] = useState("");
     const [privateNotes, setPrivateNotes] = useState("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        // Fetch all musicians and instruments
         async function fetchData() {
-            const [musRes, instRes] = await Promise.all([
-                fetch("/api/musicians"),
-                fetch("/api/instruments"),
-            ]);
+            const musRes = await fetch("/api/musicians");
             const musData = await musRes.json();
-            const instData = await instRes.json();
             setMusicians(musData.musicians || []);
-            setInstruments(instData.instruments || []);
         }
         fetchData();
     }, []);
 
     useEffect(() => {
-        // If editing, fetch existing set musician
+        if (selectedMusician && selectedInstruments.length === 0) {
+            const musician = musicians.find(m => m.id === Number(selectedMusician));
+            if (musician?.defaultInstruments && musician.defaultInstruments.length > 0) {
+                const mapped = musician.defaultInstruments.map((di: any) => ({
+                    id: di.instrument.id,
+                    displayName: di.instrument.displayName
+                }));
+                setSelectedInstruments(mapped);
+            }
+        }
+    }, [selectedMusician, musicians, selectedInstruments.length]);
+
+    useEffect(() => {
         if (musicianId) {
             fetch(`/api/admin/events/${eventId}/sets/${setId}/musicians/${musicianId}`)
                 .then(res => res.json())
                 .then(data => {
                     if (data && !data.error) {
                         setSelectedMusician(data.musicianId);
-                        setSelectedInstrument(data.instrumentId ?? "");
                         setPublicNotes(data.publicNotes ?? "");
                         setPrivateNotes(data.privateNotes ?? "");
-                        setIncludesVocals(data.includesVocals ?? false);
+
+                        if (data.instruments && data.instruments.length > 0) {
+                            const mapped = data.instruments.map((si: any) => ({
+                                id: si.instrument.id,
+                                displayName: si.instrument.displayName
+                            }));
+                            setSelectedInstruments(mapped);
+                        }
                     }
                 });
         }
@@ -63,10 +74,9 @@ export default function SetMusicianForm({ eventId, setId, musicianId, onSuccess,
             }
             const payload = {
                 musicianId: selectedMusician,
-                instrumentId: selectedInstrument || null,
+                instrumentIds: selectedInstruments.map(i => i.id),
                 publicNotes,
                 privateNotes,
-                includesVocals,
             };
             let response;
             if (musicianId) {
@@ -98,50 +108,34 @@ export default function SetMusicianForm({ eventId, setId, musicianId, onSuccess,
 
     return (
         <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="flex gap-4">
-                <div className="flex-1">
-                    <label className="form-label">Musician</label>
-                    <select
-                        className="select"
-                        value={selectedMusician}
-                        onChange={e => setSelectedMusician(Number(e.target.value))}
-                        required
-                        autoFocus
-                        disabled={!!musicianId}
-                    >
-                        <option value="">Select musician...</option>
-                        {musicians.map(m => (
-                            <option key={m.id} value={m.id}>{m.displayName || m.name}</option>
-                        ))}
-                    </select>
-                </div>
-                <div className="flex-1">
-                    <label className="form-label">Instrument</label>
-                    <select
-                        className="select"
-                        value={selectedInstrument}
-                        onChange={e => setSelectedInstrument(Number(e.target.value))}
-                    >
-                        <option value="">None</option>
-                        {instruments.map(i => (
-                            <option key={i.id} value={i.id}>{i.displayName}</option>
-                        ))}
-                    </select>
-                </div>
-                <div className="flex-1">
-                    <label className="checkbox-label">
-                        <input
-                            type="checkbox"
-                            className="checkbox-input"
-                            checked={includesVocals}
-                            onChange={e => setIncludesVocals(e.target.checked)}
-                        />
-                        Includes vocals
-                    </label>
-                </div>
+            <div className="form-group">
+                <label className="form-label form-label-required">Musician</label>
+                <select
+                    className="select"
+                    value={selectedMusician}
+                    onChange={e => setSelectedMusician(Number(e.target.value))}
+                    required
+                    autoFocus
+                    disabled={!!musicianId}
+                >
+                    <option value="">Select musician...</option>
+                    {musicians.map(m => (
+                        <option key={m.id} value={m.id}>{m.displayName || m.name}</option>
+                    ))}
+                </select>
             </div>
-            <div className="flex gap-4">
-                <div className="flex-1">
+
+            <div className="form-group">
+                <label className="form-label">Instruments</label>
+                <InstrumentChipSelector
+                    selectedInstruments={selectedInstruments}
+                    onChange={setSelectedInstruments}
+                    disabled={loading}
+                />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+                <div>
                     <label className="form-label">Public Notes</label>
                     <textarea
                         className="textarea"
@@ -150,7 +144,7 @@ export default function SetMusicianForm({ eventId, setId, musicianId, onSuccess,
                         rows={2}
                     />
                 </div>
-                <div className="flex-1">
+                <div>
                     <label className="form-label">Private Notes</label>
                     <textarea
                         className="textarea"
@@ -160,7 +154,9 @@ export default function SetMusicianForm({ eventId, setId, musicianId, onSuccess,
                     />
                 </div>
             </div>
+
             {error && <div className="form-error mb-2">{error}</div>}
+
             <div className="flex gap-2 justify-end">
                 <button type="button" className="btn btn-secondary btn-medium" onClick={onCancel} disabled={loading}>
                     Cancel

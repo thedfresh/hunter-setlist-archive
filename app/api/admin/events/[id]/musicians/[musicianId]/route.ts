@@ -12,20 +12,37 @@ export async function PUT(req: Request, { params }: { params: { id: string; musi
     } catch {
         return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
     }
-    const { instrumentId, publicNotes, privateNotes, includesVocals } = body;
+    const { instrumentIds, publicNotes, privateNotes } = body;
     try {
         const existing = await prisma.eventMusician.findFirst({ where: { eventId, musicianId } });
         if (!existing) return NextResponse.json({ error: 'EventMusician not found' }, { status: 404 });
+
+        await prisma.eventMusicianInstrument.deleteMany({
+            where: { eventMusicianId: existing.id }
+        });
+
         const updated = await prisma.eventMusician.update({
             where: { id: existing.id },
             data: {
-                instrumentId: instrumentId || null,  // Explicitly convert undefined to null
                 publicNotes,
                 privateNotes,
-                includesVocals
+                instruments: {
+                    create: (instrumentIds || []).map((instId: number) => ({
+                        instrumentId: instId
+                    }))
+                }
             },
+            include: {
+                instruments: {
+                    include: {
+                        instrument: true
+                    }
+                }
+            }
         });
         revalidatePath('/admin/events');
+        revalidatePath(`/admin/events/${eventId}`);
+        revalidatePath('/event', 'page');
         return NextResponse.json(updated);
     } catch (error: any) {
         return NextResponse.json({ error: error?.message || 'Failed to update event musician' }, { status: 500 });
@@ -41,6 +58,8 @@ export async function DELETE(_req: Request, { params }: { params: { id: string; 
         if (!existing) return NextResponse.json({ error: 'EventMusician not found' }, { status: 404 });
         await prisma.eventMusician.delete({ where: { id: existing.id } });
         revalidatePath('/admin/events');
+        revalidatePath(`/admin/events/${eventId}`);
+        revalidatePath('/event', 'page');
         return NextResponse.json({ success: true });
     } catch (error: any) {
         return NextResponse.json({ error: error?.message || 'Failed to delete event musician' }, { status: 500 });

@@ -10,7 +10,11 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
             where: { eventId },
             include: {
                 musician: { select: { name: true } },
-                instrument: { select: { displayName: true } },
+                instruments: {
+                    include: {
+                        instrument: { select: { id: true, displayName: true } }
+                    }
+                }
             },
             orderBy: [{ musician: { name: 'asc' } }],
         });
@@ -29,7 +33,8 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     } catch {
         return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
     }
-    const { musicianId, instrumentId, publicNotes, privateNotes, includesVocals } = body;
+    const { musicianId, instrumentIds, publicNotes, privateNotes } = body;
+
     if (!musicianId || typeof musicianId !== 'number') {
         return NextResponse.json({ error: 'musicianId is required and must be a number' }, { status: 400 });
     }
@@ -38,15 +43,31 @@ export async function POST(req: Request, { params }: { params: { id: string } })
             data: {
                 eventId,
                 musicianId,
-                instrumentId,
                 publicNotes,
                 privateNotes,
-                includesVocals,
+                instruments: {
+                    create: (instrumentIds || []).map((instId: number) => ({
+                        instrumentId: instId
+                    }))
+                }
             },
+            include: {
+                instruments: {
+                    include: {
+                        instrument: true
+                    }
+                }
+            }
         });
+
+        console.log('Created EventMusician:', eventMusician);
+
         revalidatePath('/admin/events');
+        revalidatePath(`/admin/events/${eventId}`);
+        revalidatePath('/event', 'page');
         return NextResponse.json(eventMusician, { status: 201 });
     } catch (error: any) {
+        console.error('EventMusician error:', error);
         return NextResponse.json({ error: error?.message || 'Failed to create event musician' }, { status: 500 });
     }
 }

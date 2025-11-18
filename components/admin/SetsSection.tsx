@@ -415,8 +415,9 @@ function SetCard({
                                 <div key={sm.id} className="flex items-center justify-between text-sm py-1">
                                     <span>
                                         {sm.musician?.name}
-                                        {sm.instrument && ` on ${sm.instrument.displayName}`}
-                                        {sm.includesVocals && ' and vocals'}
+                                        {sm.instruments && sm.instruments.length > 0 &&
+                                            ` on ${sm.instruments.map((i: any) => i.instrument?.displayName).filter(Boolean).join(', ')}`
+                                        }
                                     </span>
                                     <div className="flex gap-2">
                                         <button
@@ -552,8 +553,9 @@ function SortablePerformance({
                         <div className="flex gap-1 flex-wrap">
                             {perf.performanceMusicians.map((pm: any) => {
                                 let desc = `${pm.musician?.name}`;
-                                if (pm.instrument) desc += ` on ${pm.instrument.displayName}`;
-                                if (pm.includesVocals) desc += ' and vocals';
+                                if (pm.instruments && pm.instruments.length > 0) {
+                                    desc += ` on ${pm.instruments.map((i: any) => i.instrument?.displayName).filter(Boolean).join(', ')}`;
+                                }
                                 return (
                                     <span key={pm.id} className="inline-block px-2 py-1 text-xs font-medium bg-green-50 text-green-700 rounded whitespace-nowrap">
                                         {desc}

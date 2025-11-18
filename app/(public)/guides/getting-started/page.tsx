@@ -17,16 +17,8 @@ export default function GettingStartedPage() {
                     Coming soon - an overview of Hunter's career as a musician, published author and lyricist.
                 </p>
                 <p className="mb-4">
-                    For now, check out these resources for more information on Hunter's career:
+                    For now, the best introduction to Hunter's career is the Good Ol' Grateful Deadcast <ExternalLink href="https://www.dead.net/deadcast/bonus-keys-rain-celebrating-robert-hunters-80th">episode on Hunter</ExternalLink>, which offers a full hour on Hunter's career with and without the Dead.
                 </p>
-                <ul className="list-disc list-inside mb-4">
-                    <li>
-                        <ExternalLink href="https://en.wikipedia.org/wiki/Robert_Hunter_(lyricist)">Robert Hunter's Wikipedia article</ExternalLink>
-                    </li>
-                    <li>
-                        <ExternalLink href="https://www.dead.net/band/robert-hunter">Robert Hunter's page at Dead.net</ExternalLink>
-                    </li>
-                </ul>
                 <p className="mb-4">
                     Hunter's early career with the Liberty Hill Aristocrats, who later became Roadhog, is well documented on Corry Arnold's <ExternalLink href="https://lostlivedead.blogspot.com/2010/11/robert-hunter-and-roadhog-performance.html">Lost Live Dead Roadhog</ExternalLink> blog entry.  Additional material from this era, including fantastic interviews with some of the participants, can be found on the <ExternalLink href="https://www.dead.net/deadcast/bonus-tales-great-rum-runners-50">Rum Runners 50</ExternalLink> episode of the Deadcast.  The Deadcast also covered <ExternalLink href="https://www.dead.net/deadcast/bonus-tiger-rose-50">the recording of Tiger Rose</ExternalLink> - both episodes are essential listnening for those curious about Hunter's solo work.
                 </p>

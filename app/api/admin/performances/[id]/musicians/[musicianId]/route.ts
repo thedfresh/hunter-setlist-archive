@@ -7,14 +7,43 @@ export async function PUT(req: Request, { params }: { params: { id: string; musi
         const performanceMusicianId = Number(params.musicianId);
         if (!performanceMusicianId) return NextResponse.json({ error: 'Invalid ID' }, { status: 400 });
         const body = await req.json();
-        const { instrumentId, publicNotes, privateNotes, includesVocals } = body;
-        const updated = await prisma.performanceMusician.update({
+        const { instrumentIds, publicNotes, privateNotes } = body;
+        if (!Array.isArray(instrumentIds) || instrumentIds.length === 0) {
+            return NextResponse.json({ error: 'instrumentIds required' }, { status: 400 });
+        }
+        // Update PerformanceMusician
+        await prisma.performanceMusician.update({
             where: { id: performanceMusicianId },
             data: {
-                instrumentId,
                 publicNotes,
                 privateNotes,
-                includesVocals: includesVocals || false
+            }
+        });
+        // Delete existing instrument links
+        await prisma.performanceMusicianInstrument.deleteMany({ where: { performanceMusicianId } });
+        // Create new instrument links
+        for (const instrumentId of instrumentIds) {
+            await prisma.performanceMusicianInstrument.create({
+                data: {
+                    performanceMusicianId,
+                    instrumentId,
+                }
+            });
+        }
+        // Fetch updated record with instruments included
+        const updated = await prisma.performanceMusician.findUnique({
+            where: { id: performanceMusicianId },
+            include: {
+                instruments: {
+                    include: {
+                        instrument: {
+                            select: {
+                                id: true,
+                                displayName: true,
+                            }
+                        }
+                    }
+                }
             }
         });
         revalidatePath('/admin/events');

@@ -18,7 +18,6 @@ export default function EventMusiciansSection({ eventId }: EventMusiciansSection
 
     useEffect(() => {
         refreshMusicians();
-        // eslint-disable-next-line
     }, [eventId]);
 
     async function refreshMusicians() {
@@ -82,8 +81,6 @@ export default function EventMusiciansSection({ eventId }: EventMusiciansSection
                     </div>
                 </summary>
 
-
-
                 <div className="table-container">
                     <table className="table">
                         <thead>
@@ -101,12 +98,13 @@ export default function EventMusiciansSection({ eventId }: EventMusiciansSection
                             ) : (
                                 eventMusicians.map((em) => (
                                     <tr key={em.id}>
+                                        <td>{em.musician?.name || "—"}</td>
                                         <td>
-                                            {em.musician?.name || "—"}
-                                            {em.instrument && ` on ${em.instrument.displayName}`}
-                                            {em.includesVocals && ' and vocals'}
+                                            {em.instruments && em.instruments.length > 0
+                                                ? em.instruments.map((i: any) => i.instrument?.displayName).filter(Boolean).join(', ')
+                                                : "—"
+                                            }
                                         </td>
-                                        <td>{em.instrument?.displayName || "—"}</td>
                                         <td>
                                             <div className="flex gap-2 justify-end">
                                                 <button className="btn btn-secondary btn-small" onClick={() => handleEdit(em.musicianId)}>Edit</button>
