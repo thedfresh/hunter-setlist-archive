@@ -1,7 +1,6 @@
 "use client";
 import { useState, useEffect } from 'react';
-import Modal from '@/components/ui/Modal';
-import MusicianForm from '@/components/admin/MusicianForm';
+import { useRouter } from 'next/navigation';
 import { useToast } from '@/lib/hooks/useToast';
 import { Plus, Trash2 } from 'lucide-react';
 import { compareMusicianNames } from '@/lib/utils/musicianSort';
@@ -11,8 +10,7 @@ export default function MusiciansPage() {
     const [loading, setLoading] = useState(true);
     const [sortKey, setSortKey] = useState<'name' | 'appearances'>('name');
     const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
-    const [modalOpen, setModalOpen] = useState(false);
-    const [editingId, setEditingId] = useState<number | null>(null);
+    const router = useRouter();
     const { showSuccess, showError } = useToast();
 
     useEffect(() => {
@@ -42,13 +40,8 @@ export default function MusiciansPage() {
         }
     }
 
-    function openAddModal() {
-        setEditingId(0);
-        setModalOpen(true);
-    }
-    function openEditModal(id: number) {
-        setEditingId(id);
-        setModalOpen(true);
+    function handleAdd() {
+        router.push('/admin/musicians/0');
     }
 
     async function handleDelete(id: number) {
@@ -80,7 +73,7 @@ export default function MusiciansPage() {
                 <h1 className="page-title">Musicians</h1>
                 <button
                     className="btn btn-secondary btn-small !bg-green-50 !text-green-700 hover:!bg-green-100"
-                    onClick={openAddModal}
+                    onClick={handleAdd}
                 >
                     <Plus className="w-3 h-3" />
                 </button>
@@ -114,13 +107,13 @@ export default function MusiciansPage() {
                             {sorted.map((musician) => (
                                 <tr
                                     key={musician.id}
-                                    onClick={() => openEditModal(musician.id)}
+                                    onClick={() => router.push(`/admin/musicians/${musician.id}`)}
                                     className="cursor-pointer hover:bg-gray-50"
                                 >
                                     <td className="w-12" onClick={(e) => e.stopPropagation()}>
                                         <button
                                             className="btn btn-secondary btn-small !bg-red-50 !text-red-600 hover:!bg-red-100"
-                                            onClick={() => handleDelete(musician.id)}
+                                            onClick={(e) => { e.stopPropagation(); handleDelete(musician.id); }}
                                             title="Delete musician"
                                         >
                                             <Trash2 className="w-4 h-4" />
@@ -138,21 +131,6 @@ export default function MusiciansPage() {
                     <div className="empty-title">No musicians found</div>
                 </div>
             )}
-            <Modal
-                isOpen={modalOpen}
-                onClose={() => setModalOpen(false)}
-                title={editingId === 0 ? 'Add Musician' : 'Edit Musician'}
-            >
-                <MusicianForm
-                    musicianId={editingId || 0}
-                    onSuccess={async () => {
-                        setModalOpen(false);
-                        showSuccess(editingId === 0 ? 'Musician added' : 'Musician updated');
-                        await refreshMusicians();
-                    }}
-                    onCancel={() => setModalOpen(false)}
-                />
-            </Modal>
         </div>
     );
 }

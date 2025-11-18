@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { compareMusicianNames } from '@/lib/utils/musicianSort';
 import { useToast } from "@/lib/hooks/useToast";
+import InstrumentChipSelector from "@/components/admin/InstrumentChipSelector";
 
 interface BandMemberFormProps {
     bandId: number;
@@ -17,10 +18,25 @@ export default function BandMemberForm({ bandId, membershipId, onSuccess, onCanc
     const [privateNotes, setPrivateNotes] = useState("");
     const [musicians, setMusicians] = useState<any[]>([]);
     const [instruments, setInstruments] = useState<any[]>([]);
-    const [defaultInstrumentId, setDefaultInstrumentId] = useState<number>(0);
+    const [selectedInstruments, setSelectedInstruments] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const { showToast } = useToast();
+    // Pre-populate instruments with musician's defaults when adding new member
+    useEffect(() => {
+        if (membershipId === 0 && musicianId) {
+            fetch(`/api/admin/musicians/${musicianId}`)
+                .then(res => res.json())
+                .then(data => {
+                    const defaults = Array.isArray(data.defaultInstruments)
+                        ? data.defaultInstruments.map((ji: any) => ji.instrument ? { id: ji.instrument.id, displayName: ji.instrument.displayName } : null).filter(Boolean)
+                        : [];
+                    setSelectedInstruments(defaults);
+                })
+                .catch(() => { });
+        }
+        // Do nothing if editing existing member
+    }, [musicianId, membershipId]);
 
     useEffect(() => {
         fetch("/api/musicians")
@@ -38,13 +54,31 @@ export default function BandMemberForm({ bandId, membershipId, onSuccess, onCanc
             setLoading(true);
             fetch(`/api/admin/band-musicians/${membershipId}`)
                 .then(res => res.json())
-                .then(data => {
+                .then(async data => {
                     setMusicianId(data.musicianId);
                     setJoinedDate(data.joinedDate ? data.joinedDate.slice(0, 10) : "");
                     setLeftDate(data.leftDate ? data.leftDate.slice(0, 10) : "");
                     setPublicNotes(data.publicNotes || "");
                     setPrivateNotes(data.privateNotes || "");
-                    setDefaultInstrumentId(data.defaultInstrumentId || 0);
+                    if (Array.isArray(data.instruments) && data.instruments.length > 0) {
+                        setSelectedInstruments(
+                            data.instruments.map((ji: any) => ji.instrument ? { id: ji.instrument.id, displayName: ji.instrument.displayName } : null).filter(Boolean)
+                        );
+                    } else if (data.musicianId) {
+                        // Fallback to musician's defaultInstruments if no instruments set
+                        try {
+                            const res = await fetch(`/api/admin/musicians/${data.musicianId}`);
+                            const musician = await res.json();
+                            const defaults = Array.isArray(musician.defaultInstruments)
+                                ? musician.defaultInstruments.map((ji: any) => ji.instrument ? { id: ji.instrument.id, displayName: ji.instrument.displayName } : null).filter(Boolean)
+                                : [];
+                            setSelectedInstruments(defaults);
+                        } catch {
+                            setSelectedInstruments([]);
+                        }
+                    } else {
+                        setSelectedInstruments([]);
+                    }
                 })
                 .catch(() => setError("Failed to load member details"))
                 .finally(() => setLoading(false));
@@ -63,7 +97,7 @@ export default function BandMemberForm({ bandId, membershipId, onSuccess, onCanc
                 leftDate: leftDate || null,
                 publicNotes,
                 privateNotes,
-                defaultInstrumentId: defaultInstrumentId || null,
+                instrumentIds: selectedInstruments.map(i => i.id),
             };
             let res, data;
             if (membershipId === 0) {
@@ -110,17 +144,12 @@ export default function BandMemberForm({ bandId, membershipId, onSuccess, onCanc
                 </select>
             </div>
             <div className="form-group">
-                <label className="form-label">Default Instrument</label>
-                <select
-                    className="select"
-                    value={defaultInstrumentId}
-                    onChange={e => setDefaultInstrumentId(Number(e.target.value))}
-                >
-                    <option value="">Select instrument...</option>
-                    {instruments.map(inst => (
-                        <option key={inst.id} value={inst.id}>{inst.displayName}</option>
-                    ))}
-                </select>
+                <label className="form-label">Instruments</label>
+                <InstrumentChipSelector
+                    selectedInstruments={selectedInstruments}
+                    onChange={setSelectedInstruments}
+                    disabled={loading}
+                />
             </div>
             <div className="form-group">
                 <label className="form-label">Joined Date</label>

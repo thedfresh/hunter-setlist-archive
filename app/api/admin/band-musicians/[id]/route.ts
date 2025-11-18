@@ -8,7 +8,11 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
     try {
         const bandMusician = await prisma.bandMusician.findUnique({
             where: { id },
-            include: { musician: true, band: true },
+            include: {
+                musician: true,
+                band: true,
+                instruments: { include: { instrument: true } },
+            },
         });
         if (!bandMusician) {
             return NextResponse.json({ error: "Not found" }, { status: 404 });
@@ -24,7 +28,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
     if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
     try {
         const body = await req.json();
-        const { joinedDate, leftDate, publicNotes, privateNotes } = body;
+        const { joinedDate, leftDate, publicNotes, privateNotes, instrumentIds } = body;
         const data: any = {
             joinedDate: joinedDate ? new Date(joinedDate) : null,
             leftDate: leftDate ? new Date(leftDate) : null,
@@ -35,8 +39,26 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
             where: { id },
             data,
         });
+        // Update instruments if provided
+        if (Array.isArray(instrumentIds)) {
+            await prisma.bandMusicianInstrument.deleteMany({ where: { bandMusicianId: id } });
+            for (const instrumentId of instrumentIds) {
+                await prisma.bandMusicianInstrument.create({
+                    data: { bandMusicianId: id, instrumentId },
+                });
+            }
+        }
+        // Fetch updated record with instruments included
+        const bandMusicianWithInstruments = await prisma.bandMusician.findUnique({
+            where: { id },
+            include: {
+                musician: true,
+                band: true,
+                instruments: { include: { instrument: true } },
+            },
+        });
         revalidatePath("/admin/bands");
-        return NextResponse.json(bandMusician);
+        return NextResponse.json(bandMusicianWithInstruments);
     } catch (err: any) {
         return NextResponse.json({ error: err?.message || "Failed to update band member" }, { status: 500 });
     }

@@ -9,7 +9,14 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
         if (!id) return NextResponse.json({ error: 'Invalid ID' }, { status: 400 });
         const musician = await prisma.musician.findUnique({
             where: { id },
-            include: { _count: { select: { eventMusicians: true, performanceMusicians: true, bandMusicians: true } } },
+            include: {
+                _count: { select: { eventMusicians: true, performanceMusicians: true, bandMusicians: true } },
+                defaultInstruments: {
+                    include: {
+                        instrument: true
+                    }
+                }
+            },
         });
         if (!musician) return NextResponse.json({ error: 'Not found' }, { status: 404 });
         return NextResponse.json(addDisplayName(musician));
