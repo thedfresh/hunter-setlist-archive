@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
-const prisma = new PrismaClient();
 
 export async function PUT(req: Request, { params }: { params: { setId: string; performanceId: string } }) {
   const awaitedParams = await params;

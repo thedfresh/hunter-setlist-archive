@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 export const dynamic = 'force-dynamic';
-
-const prisma = new PrismaClient();
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -20,7 +18,6 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
       contributorId: ec.contributorId,
       contributorName: ec.contributor?.name || '',
       description: ec.description,
-      notes: ec.notes,
     })));
   } catch (err) {
     return NextResponse.json({ error: 'Failed to fetch event contributors', details: String(err) }, { status: 500 });
